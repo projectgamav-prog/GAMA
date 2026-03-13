@@ -1,0 +1,200 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+:root {
+    --sparkle-strength: 0.8;
+    --sparkle-speed: 18s;
+}
+
+html,
+body {
+    margin: 0;
+    min-height: 100%;
+}
+
+body {
+    font-family: Georgia, "Times New Roman", serif;
+    line-height: 1.4;
+    position: relative;
+    isolation: isolate;
+    overflow-x: hidden;
+}
+
+.ambient-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+body::before,
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+body::before {
+    background:
+        radial-gradient(circle at 16% 18%, rgba(255, 247, 220, 0.6) 0 1.2px, transparent 2.3px),
+        radial-gradient(circle at 76% 22%, rgba(255, 236, 188, 0.62) 0 1.3px, transparent 2.4px),
+        radial-gradient(circle at 32% 58%, rgba(255, 245, 218, 0.68) 0 1px, transparent 2.1px),
+        radial-gradient(circle at 84% 68%, rgba(255, 231, 173, 0.55) 0 1.2px, transparent 2.5px),
+        radial-gradient(circle at 12% 84%, rgba(255, 247, 220, 0.56) 0 1.1px, transparent 2.4px);
+    background-size: 240px 240px, 260px 260px, 220px 220px, 280px 280px, 230px 230px;
+    opacity: calc(var(--sparkle-strength) * 0.72);
+    animation: global-sparkle-drift var(--sparkle-speed) linear infinite;
+}
+
+body::after {
+    background:
+        radial-gradient(circle, rgba(255, 244, 212, 0.6) 0 1.5px, transparent 2.8px) 10% 16%/280px 280px,
+        radial-gradient(circle, rgba(255, 228, 170, 0.5) 0 1.2px, transparent 2.5px) 62% 34%/300px 300px,
+        radial-gradient(circle, rgba(255, 250, 234, 0.65) 0 1.1px, transparent 2.3px) 34% 76%/260px 260px;
+    opacity: calc(var(--sparkle-strength) * 0.6);
+    animation: global-sparkle-twinkle 4.8s ease-in-out infinite alternate;
+}
+
+body > :not(.ambient-canvas) {
+    position: relative;
+    z-index: 1;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+p,
+h1,
+h2 {
+    margin: 0;
+}
+
+.page-shell {
+    inline-size: min(100% - 2rem, 52rem);
+    margin: 0 auto;
+    padding: 0 0 36px;
+}
+
+.topbar,
+.brand,
+.topbar-actions,
+.topbar nav,
+.chapter-grid,
+.footer-links {
+    display: flex;
+    align-items: center;
+}
+
+.topbar {
+    justify-content: space-between;
+}
+
+.brand {
+    gap: 10px;
+}
+
+.topbar nav {
+    gap: 30px;
+}
+
+.topbar-actions {
+    gap: 16px;
+}
+
+.hero,
+.content-block,
+.journey,
+.site-footer {
+    text-align: center;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+}
+
+.section-title::before,
+.section-title::after {
+    content: "";
+    width: min(30vw, 150px);
+    height: 2px;
+}
+
+.verse-card,
+.chapter-card {
+    position: relative;
+}
+
+.chapter-grid {
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    font-weight: 700;
+}
+
+.btn::after,
+.chapter-link::after {
+    content: "\2192";
+    margin-left: 8px;
+}
+
+@keyframes global-sparkle-drift {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+    50% {
+        transform: translate3d(0, -16px, 0);
+    }
+    100% {
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes global-sparkle-twinkle {
+    0% {
+        opacity: calc(var(--sparkle-strength) * 0.35);
+    }
+    100% {
+        opacity: calc(var(--sparkle-strength) * 0.85);
+    }
+}
+
+@media (max-width: 660px) {
+    .page-shell {
+        inline-size: min(100% - 1rem, 52rem);
+        padding: 0 0 28px;
+    }
+
+    .chapter-grid {
+        flex-direction: column;
+    }
+
+    .chapter-card {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body::before,
+    body::after {
+        animation: none;
+    }
+}

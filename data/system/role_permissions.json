@@ -1,0 +1,98 @@
+[
+  {
+    "role_id": "guest",
+    "permission_key": "books.view"
+  },
+  {
+    "role_id": "member",
+    "permission_key": "books.view"
+  },
+  {
+    "role_id": "editor",
+    "permission_key": "books.view"
+  },
+  {
+    "role_id": "editor",
+    "permission_key": "books.edit"
+  },
+  {
+    "role_id": "editor",
+    "permission_key": "chapters.edit"
+  },
+  {
+    "role_id": "editor",
+    "permission_key": "verses.edit"
+  },
+  {
+    "role_id": "editor",
+    "permission_key": "content.create"
+  },
+  {
+    "role_id": "editor",
+    "permission_key": "content.delete"
+  },
+  {
+    "role_id": "editor",
+    "permission_key": "content.publish"
+  },
+  {
+    "role_id": "editor",
+    "permission_key": "media.upload"
+  },
+  {
+    "role_id": "admin",
+    "permission_key": "books.view"
+  },
+  {
+    "role_id": "admin",
+    "permission_key": "books.edit"
+  },
+  {
+    "role_id": "admin",
+    "permission_key": "chapters.edit"
+  },
+  {
+    "role_id": "admin",
+    "permission_key": "verses.edit"
+  },
+  {
+    "role_id": "admin",
+    "permission_key": "places.edit"
+  },
+  {
+    "role_id": "admin",
+    "permission_key": "characters.edit"
+  },
+  {
+    "role_id": "admin",
+    "permission_key": "topics.edit"
+  },
+  {
+    "role_id": "admin",
+    "permission_key": "content.create"
+  },
+  {
+    "role_id": "admin",
+    "permission_key": "content.delete"
+  },
+  {
+    "role_id": "admin",
+    "permission_key": "content.publish"
+  },
+  {
+    "role_id": "admin",
+    "permission_key": "media.upload"
+  },
+  {
+    "role_id": "admin",
+    "permission_key": "users.manage"
+  },
+  {
+    "role_id": "admin",
+    "permission_key": "permissions.manage"
+  },
+  {
+    "role_id": "admin",
+    "permission_key": "settings.manage"
+  }
+]

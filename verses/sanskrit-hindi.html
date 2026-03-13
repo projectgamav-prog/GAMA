@@ -1,0 +1,41 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/src/core/styles/base.css">
+    <link rel="stylesheet" href="/src/core/styles/theme.css">
+    <title>Bhagavad Gita | Sanskrit - Hindi Verse</title>
+</head>
+<body class="verse-page" data-verse-mode="sanskrit-hindi" data-nav-section="education" data-education-item="books-gita" data-footer-variant="verse" data-header-search="true">
+    <div class="page-shell verse-shell">
+        <div data-shared-header></div>
+
+        <main class="verse-main">
+            <p class="verse-breadcrumb">Bhagavad Gita &#8250; Chapter &#8250; Verse</p>
+            <div class="verse-context">
+                <span class="lotus-large verse-lotus" aria-hidden="true"></span>
+                <p class="verse-chapter-label">Chapter</p>
+                <p class="verse-chapter-name">Loading chapter...</p>
+            </div>
+
+            <div class="verse-mode-bar">
+                <label class="verse-mode-label" for="verseModeSelect">Verse Display</label>
+                <select id="verseModeSelect" class="verse-mode-select" aria-label="Verse display mode">
+                    <option value="" data-route="verses.index">Sanskrit - English</option>
+                    <option value="" data-route="verses.sanskritHindi">Sanskrit - Hindi</option>
+                    <option value="" data-route="verses.englishOnly">English Only</option>
+                    <option value="" data-route="verses.hindiOnly">Hindi Only</option>
+                </select>
+            </div>
+
+            <section class="verse-section"></section>
+            <div class="verse-divider" aria-hidden="true"></div>
+        </main>
+
+        <div data-shared-footer></div>
+    </div>
+    <script type="module" src="/src/core/browser/public-shell.js"></script>
+    <script type="module" src="/src/pages/verses/verse-mode-switcher.js"></script>
+</body>
+</html>

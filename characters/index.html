@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/src/core/styles/base.css">
+    <link rel="stylesheet" href="/src/core/styles/theme.css">
+    <title>Bhagavad Gita | All Characters</title>
+</head>
+<body class="character-page collection-page" data-nav-section="education" data-education-item="characters-all" data-footer-variant="characters">
+    <div class="page-shell character-shell">
+        <div data-shared-header></div>
+
+        <main class="character-main">
+            <section class="character-hero">
+                <span class="lotus-large" aria-hidden="true"></span>
+                <h1>All Characters</h1>
+                <p class="subtitle">Browse teachers, seekers, saints, philosophers, and symbolic figures through one scalable character collection.</p>
+            </section>
+
+            <section class="character-discovery">
+                <div class="character-toolbar">
+                    <div class="character-search-block">
+                        <label class="character-control-label" for="characterSearch">Search Characters</label>
+                        <input id="characterSearch" class="character-search-input" type="search" placeholder="Search by name, role, tradition, or collection">
+                    </div>
+
+                    <div class="character-filter-grid">
+                        <div class="character-filter-item">
+                            <label class="character-control-label" for="characterTradition">Tradition</label>
+                            <select id="characterTradition" class="character-filter-select">
+                                <option value="">All Traditions</option>
+                            </select>
+                        </div>
+                        <div class="character-filter-item">
+                            <label class="character-control-label" for="characterRole">Role</label>
+                            <select id="characterRole" class="character-filter-select">
+                                <option value="">All Roles</option>
+                            </select>
+                        </div>
+                        <div class="character-filter-item">
+                            <label class="character-control-label" for="characterEra">Era</label>
+                            <select id="characterEra" class="character-filter-select">
+                                <option value="">All Eras</option>
+                            </select>
+                        </div>
+                        <div class="character-filter-item">
+                            <label class="character-control-label" for="characterCollection">Collection</label>
+                            <select id="characterCollection" class="character-filter-select">
+                                <option value="">All Collections</option>
+                            </select>
+                        </div>
+                        <div class="character-filter-item">
+                            <label class="character-control-label" for="characterSort">Sort</label>
+                            <select id="characterSort" class="character-filter-select">
+                                <option value="a-z">A-Z</option>
+                                <option value="z-a">Z-A</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="character-toolbar-meta">
+                        <p class="character-results-count" id="characterResultsCount">Showing 0 of 0 characters</p>
+                        <button class="character-clear-btn" id="characterClearFilters" type="button">Clear filters</button>
+                    </div>
+                </div>
+
+                <div class="character-grid" id="characterGrid" role="list"></div>
+                <div class="character-empty" id="characterEmpty" hidden>
+                    <h2>No Characters Found</h2>
+                    <p>Try a different search term or clear one of the active filters.</p>
+                </div>
+            </section>
+        </main>
+
+        <div data-shared-footer></div>
+    </div>
+    <script type="module" src="/src/core/browser/public-shell.js"></script>
+    <script type="module" src="/src/pages/characters/character-collection-page.js"></script>
+</body>
+</html>
+
+
+

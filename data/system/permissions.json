@@ -1,0 +1,72 @@
+[
+  {
+    "key": "books.view",
+    "label": "Books View",
+    "description": "View book-level content controls and protected book resources."
+  },
+  {
+    "key": "books.edit",
+    "label": "Books Edit",
+    "description": "Edit books and book sections."
+  },
+  {
+    "key": "chapters.edit",
+    "label": "Chapters Edit",
+    "description": "Edit chapters and chapter sections."
+  },
+  {
+    "key": "verses.edit",
+    "label": "Verses Edit",
+    "description": "Edit verse content."
+  },
+  {
+    "key": "places.edit",
+    "label": "Places Edit",
+    "description": "Edit place content when a place model is connected."
+  },
+  {
+    "key": "characters.edit",
+    "label": "Characters Edit",
+    "description": "Edit character content when a character model is connected."
+  },
+  {
+    "key": "topics.edit",
+    "label": "Topics Edit",
+    "description": "Edit topic content when a topic model is connected."
+  },
+  {
+    "key": "content.create",
+    "label": "Content Create",
+    "description": "Create new content records."
+  },
+  {
+    "key": "content.delete",
+    "label": "Content Delete",
+    "description": "Delete content records."
+  },
+  {
+    "key": "content.publish",
+    "label": "Content Publish",
+    "description": "Publish or unpublish content."
+  },
+  {
+    "key": "media.upload",
+    "label": "Media Upload",
+    "description": "Upload or manage media assets."
+  },
+  {
+    "key": "users.manage",
+    "label": "Users Manage",
+    "description": "Assign and manage user roles."
+  },
+  {
+    "key": "permissions.manage",
+    "label": "Permissions Manage",
+    "description": "Manage role permissions and per-user overrides."
+  },
+  {
+    "key": "settings.manage",
+    "label": "Settings Manage",
+    "description": "Manage global admin settings."
+  }
+]

@@ -1,0 +1,16 @@
+[
+  {
+    "id": "user-ca8b217e-ad03-4822-b30b-ee5f6d10205e",
+    "fullName": "Bhagavad Gita Admin",
+    "username": "admin",
+    "email": "admin@bhagavadgita.local",
+    "interests": [
+      "Books",
+      "Characters",
+      "Topics",
+      "Places"
+    ],
+    "passwordHash": "6128e9a249a911bf98015e2a83182b50:25dd6168d4633ba7b64bce0b01a4e893a2a1984dacbbb2daef64164790fecad9932198b2845022ea48b1a7ae705b9f76abed2c1a2d1118bf8bfc460703a50cb4",
+    "createdAt": "2026-03-13T12:24:41.284Z"
+  }
+]

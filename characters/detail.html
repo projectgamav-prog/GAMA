@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/src/core/styles/base.css">
+    <link rel="stylesheet" href="/src/core/styles/theme.css">
+    <title>Bhagavad Gita | Character</title>
+</head>
+<body class="character-detail-page" data-nav-section="education" data-footer-variant="characters">
+    <div class="page-shell character-shell">
+        <div data-shared-header></div>
+
+        <main class="character-detail-main">
+            <nav class="character-breadcrumb" aria-label="Breadcrumb">
+                <a href="#" data-route="home">Home</a>
+                <span>&gt;</span>
+                <a href="#" data-route="characters.index">All Characters</a>
+                <span>&gt;</span>
+                <span id="characterBreadcrumbCurrent">Character</span>
+            </nav>
+
+            <section class="character-profile-card">
+                <div class="character-profile-media">
+                    <img id="characterImage" src="/assets/images/image.png" alt="Character portrait">
+                </div>
+                <div class="character-profile-content">
+                    <h1 id="characterName">Character</h1>
+                    <p class="character-profile-summary" id="characterSummary">Character summary will appear here.</p>
+                    <div class="character-chip-list" id="characterChips"></div>
+                </div>
+            </section>
+
+            <section class="character-detail-grid">
+                <article class="character-detail-panel">
+                    <h2>Overview</h2>
+                    <p id="characterOverview">Character overview will appear here.</p>
+                </article>
+                <article class="character-detail-panel">
+                    <h2>Teaching Focus</h2>
+                    <p id="characterFocus">Primary teaching focus will appear here.</p>
+                </article>
+                <article class="character-detail-panel">
+                    <h2>Availability Note</h2>
+                    <p id="characterAvailabilityNote">Availability note will appear here.</p>
+                </article>
+            </section>
+        </main>
+
+        <div data-shared-footer></div>
+    </div>
+    <script type="module" src="/src/core/browser/public-shell.js"></script>
+    <script type="module" src="/src/pages/characters/character-detail-page.js"></script>
+</body>
+</html>
+
+
+

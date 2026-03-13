@@ -1,0 +1,14 @@
+{
+  "name": "website-01-local-admin-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server/index.js",
+    "init:content-data": "node server/scripts/generateContentJson.mjs",
+    "verify:api": "node server/scripts/verifyApi.mjs"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
