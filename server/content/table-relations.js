@@ -35,7 +35,13 @@ export async function assertDeleteAllowed(tableName, id) {
 
   for (const constraint of constraints) {
     const rows = await readTable(constraint.table);
-    const dependencyCount = rows.filter((row) => row[constraint.field] === id).length;
+    const dependencyCount = rows.filter((row) => {
+      if (row[constraint.field] !== id) {
+        return false;
+      }
+
+      return Object.entries(constraint.where || {}).every(([fieldName, value]) => row[fieldName] === value);
+    }).length;
 
     if (dependencyCount > 0) {
       throw new Error(`Cannot delete this record because ${dependencyCount} ${constraint.label} still reference it.`);

@@ -91,6 +91,8 @@ server.on("listening", async () => {
     bookSectionId: null,
     chapterSectionId: null,
     verseId: null,
+    explanationDocumentId: null,
+    explanationBlockId: null,
   };
 
   try {
@@ -218,6 +220,57 @@ server.on("listening", async () => {
     createdIds.verseId = createVersePayload.data.id;
     await assertTableContains("verses", (row) => row.id === createdIds.verseId, "Verse was not written to verses.json.");
 
+    const tempExplanationDocument = {
+      target_type: "verse",
+      target_id: createdIds.verseId,
+      status: "published",
+    };
+
+    const { response: createExplanationDocumentResponse, payload: createExplanationDocumentPayload } = await requestJson(
+      baseUrl,
+      "/api/explanation-documents",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(tempExplanationDocument),
+      }
+    );
+    assert(createExplanationDocumentResponse.status === 201, "Temporary explanation document was not created.");
+    createdIds.explanationDocumentId = createExplanationDocumentPayload.data.id;
+    await assertTableContains(
+      "explanation_documents",
+      (row) => row.id === createdIds.explanationDocumentId,
+      "Explanation document was not written to explanation_documents.json."
+    );
+
+    const tempExplanationBlock = {
+      explanation_id: createdIds.explanationDocumentId,
+      type: "text_section",
+      sort_order: 1,
+      data_json: {
+        title: "Verification Block",
+        body: "Temporary explanation block.",
+      },
+      is_visible: true,
+    };
+
+    const { response: createExplanationBlockResponse, payload: createExplanationBlockPayload } = await requestJson(
+      baseUrl,
+      "/api/explanation-blocks",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(tempExplanationBlock),
+      }
+    );
+    assert(createExplanationBlockResponse.status === 201, "Temporary explanation block was not created.");
+    createdIds.explanationBlockId = createExplanationBlockPayload.data.id;
+    await assertTableContains(
+      "explanation_blocks",
+      (row) => row.id === createdIds.explanationBlockId,
+      "Explanation block was not written to explanation_blocks.json."
+    );
+
     const { response: filteredChaptersResponse, payload: filteredChaptersPayload } = await requestJson(
       baseUrl,
       `/api/chapters?source_book_id=${createdIds.sourceBookId}`
@@ -231,6 +284,26 @@ server.on("listening", async () => {
     );
     assert(filteredVersesResponse.ok, "Filtered verses endpoint did not return 200.");
     assert(filteredVersesPayload.data.some((row) => row.id === createdIds.verseId), "Filtered verses endpoint did not return the created verse.");
+
+    const { response: filteredExplanationDocumentsResponse, payload: filteredExplanationDocumentsPayload } = await requestJson(
+      baseUrl,
+      `/api/explanation-documents?target_type=verse&target_id=${createdIds.verseId}`
+    );
+    assert(filteredExplanationDocumentsResponse.ok, "Filtered explanation documents endpoint did not return 200.");
+    assert(
+      filteredExplanationDocumentsPayload.data.some((row) => row.id === createdIds.explanationDocumentId),
+      "Filtered explanation documents endpoint did not return the created explanation document."
+    );
+
+    const { response: filteredExplanationBlocksResponse, payload: filteredExplanationBlocksPayload } = await requestJson(
+      baseUrl,
+      `/api/explanation-blocks?explanation_id=${createdIds.explanationDocumentId}`
+    );
+    assert(filteredExplanationBlocksResponse.ok, "Filtered explanation blocks endpoint did not return 200.");
+    assert(
+      filteredExplanationBlocksPayload.data.some((row) => row.id === createdIds.explanationBlockId),
+      "Filtered explanation blocks endpoint did not return the created explanation block."
+    );
 
     const { response: updateBookResponse, payload: updateBookPayload } = await requestJson(
       baseUrl,
@@ -293,6 +366,40 @@ server.on("listening", async () => {
     assert(updateVersePayload.data.english_text === "Updated verse text.", "Verse update did not persist.");
     assert(updateVersePayload.data.is_featured === true, "Verse featured flag did not persist.");
 
+    const { response: updateExplanationDocumentResponse, payload: updateExplanationDocumentPayload } = await requestJson(
+      baseUrl,
+      `/api/explanation-documents/${createdIds.explanationDocumentId}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "draft" }),
+      }
+    );
+    assert(updateExplanationDocumentResponse.ok, "Explanation document update failed.");
+    assert(updateExplanationDocumentPayload.data.status === "draft", "Explanation document update did not persist.");
+
+    const { response: updateExplanationBlockResponse, payload: updateExplanationBlockPayload } = await requestJson(
+      baseUrl,
+      `/api/explanation-blocks/${createdIds.explanationBlockId}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          data_json: {
+            title: "Verification Block Updated",
+            body: "Updated explanation block body.",
+          },
+          is_visible: false,
+        }),
+      }
+    );
+    assert(updateExplanationBlockResponse.ok, "Explanation block update failed.");
+    assert(updateExplanationBlockPayload.data.is_visible === false, "Explanation block visibility update did not persist.");
+    assert(
+      updateExplanationBlockPayload.data.data_json.body === "Updated explanation block body.",
+      "Explanation block data update did not persist."
+    );
+
     const { response: duplicateBookResponse, payload: duplicateBookPayload } = await requestJson(baseUrl, "/api/books", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -321,6 +428,13 @@ server.on("listening", async () => {
       body: JSON.stringify({ ...tempVerse, english_text: "Duplicate verse text.", slug: `duplicate-verse-${suffix}` }),
     });
     assert(duplicateVerseResponse.status === 400, "Duplicate verse number should fail with 400.");
+
+    const { response: duplicateExplanationDocumentResponse } = await requestJson(baseUrl, "/api/explanation-documents", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...tempExplanationDocument, status: "draft" }),
+    });
+    assert(duplicateExplanationDocumentResponse.status === 400, "Duplicate explanation target should fail with 400.");
 
     const { response: invalidBookSectionResponse } = await requestJson(baseUrl, "/api/book-sections", {
       method: "POST",
@@ -381,7 +495,28 @@ server.on("listening", async () => {
     assert(blockedChapterDeleteResponse.status === 409, "Delete protection for chapters did not return 409.");
     assert(blockedChapterDeletePayload.success === false, "Delete protection for chapters did not return an error payload.");
 
+    const { response: blockedVerseDeleteResponse, payload: blockedVerseDeletePayload } = await requestJson(
+      baseUrl,
+      `/api/verses/${createdIds.verseId}`,
+      { method: "DELETE" }
+    );
+    assert(blockedVerseDeleteResponse.status === 409, "Delete protection for verses did not return 409 when explanation documents exist.");
+    assert(blockedVerseDeletePayload.success === false, "Delete protection for verses did not return an error payload.");
+
+    const { response: blockedExplanationDocumentDeleteResponse, payload: blockedExplanationDocumentDeletePayload } = await requestJson(
+      baseUrl,
+      `/api/explanation-documents/${createdIds.explanationDocumentId}`,
+      { method: "DELETE" }
+    );
+    assert(blockedExplanationDocumentDeleteResponse.status === 409, "Delete protection for explanation documents did not return 409.");
+    assert(
+      blockedExplanationDocumentDeletePayload.success === false,
+      "Delete protection for explanation documents did not return an error payload."
+    );
+
     const cleanupSteps = [
+      ["/api/explanation-blocks", createdIds.explanationBlockId, "explanation_blocks", (row) => row.id === createdIds.explanationBlockId],
+      ["/api/explanation-documents", createdIds.explanationDocumentId, "explanation_documents", (row) => row.id === createdIds.explanationDocumentId],
       ["/api/verses", createdIds.verseId, "verses", (row) => row.id === createdIds.verseId],
       ["/api/chapter-sections", createdIds.chapterSectionId, "chapter_sections", (row) => row.id === createdIds.chapterSectionId],
       ["/api/book-sections", createdIds.bookSectionId, "book_sections", (row) => row.id === createdIds.bookSectionId],
@@ -402,6 +537,8 @@ server.on("listening", async () => {
     process.exitCode = 1;
   } finally {
     const cleanupSteps = [
+      ["/api/explanation-blocks", createdIds.explanationBlockId],
+      ["/api/explanation-documents", createdIds.explanationDocumentId],
       ["/api/verses", createdIds.verseId],
       ["/api/chapter-sections", createdIds.chapterSectionId],
       ["/api/book-sections", createdIds.bookSectionId],

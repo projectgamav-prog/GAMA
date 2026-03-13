@@ -262,10 +262,6 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
                 "english_text",
                 "hindi_text",
                 "audio_url",
-                "is_featured",
-                "insight_title",
-                "insight_media",
-                "insight_caption",
             ]),
         }),
         getRecordLabel(record) {

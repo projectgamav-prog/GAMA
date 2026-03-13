@@ -1,4 +1,16 @@
-import { CONTENT_FIELD_CONFIGS } from "../../src/content/books/schema.js";
+import { CONTENT_FIELD_CONFIGS as BOOK_CONTENT_FIELD_CONFIGS } from "../../src/content/books/schema.js";
+import {
+  EXPLANATION_BLOCK_TYPES,
+  EXPLANATION_DOCUMENT_STATUSES,
+  EXPLANATION_TARGET_TYPES,
+  EXPLANATION_FIELD_CONFIGS,
+  normalizeExplanationBlockData,
+} from "../../src/content/explanations/schema.js";
+
+const CONTENT_FIELD_CONFIGS = Object.freeze({
+  ...BOOK_CONTENT_FIELD_CONFIGS,
+  ...EXPLANATION_FIELD_CONFIGS,
+});
 
 function normalizeIdPart(value) {
   return String(value ?? "")
@@ -19,6 +31,56 @@ function normalizeSlug(value) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+function normalizeLowerText(value) {
+  return String(value ?? "").trim().toLowerCase();
+}
+
+function createTimestamp() {
+  return new Date().toISOString();
+}
+
+function normalizeTimestamp(value, fieldName) {
+  const normalized = String(value ?? "").trim();
+  if (!normalized) {
+    return createTimestamp();
+  }
+
+  const parsed = new Date(normalized);
+  if (Number.isNaN(parsed.getTime())) {
+    throw new Error(`"${fieldName}" must be a valid timestamp.`);
+  }
+
+  return parsed.toISOString();
+}
+
+function assertSupportedValue(value, allowedValues, fieldName) {
+  if (!allowedValues.includes(value)) {
+    throw new Error(`"${fieldName}" must use a supported value.`);
+  }
+}
+
+function assertExplanationTargetExists(targetType, targetId, relatedTables = {}) {
+  switch (targetType) {
+    case "book":
+      assertForeignKey(relatedTables.books || [], "target_id", targetId, "books");
+      return;
+    case "book_section":
+      assertForeignKey(relatedTables.book_sections || [], "target_id", targetId, "book_sections");
+      return;
+    case "chapter":
+      assertForeignKey(relatedTables.chapters || [], "target_id", targetId, "chapters");
+      return;
+    case "chapter_section":
+      assertForeignKey(relatedTables.chapter_sections || [], "target_id", targetId, "chapter_sections");
+      return;
+    case "verse":
+      assertForeignKey(relatedTables.verses || [], "target_id", targetId, "verses");
+      return;
+    default:
+      throw new Error(`Unsupported explanation target_type "${targetType}".`);
+  }
 }
 
 function asPositiveInteger(value, fieldName) {
@@ -123,6 +185,12 @@ export function generateId(tableName, record, relatedTables = {}) {
     case "verses": {
       const verseNumber = asPositiveInteger(record.verse_number, "verse_number");
       return `verse-${normalizeIdPart(record.chapter_id)}-${padNumber(verseNumber, 3)}`;
+    }
+    case "explanation_documents":
+      return `explanation-${normalizeSlug(record.target_type)}-${normalizeSlug(record.target_id)}`;
+    case "explanation_blocks": {
+      const order = asPositiveInteger(record.sort_order ?? 1, "sort_order");
+      return `explanation-block-${normalizeSlug(record.explanation_id)}-${padNumber(order)}`;
     }
     default:
       throw new Error(`No ID generator configured for "${tableName}".`);
@@ -270,6 +338,43 @@ export function validateRecord(tableName, record, rows, relatedTables = {}, curr
       if (normalized.is_featured != null) {
         normalized.is_featured = Boolean(normalized.is_featured);
       }
+      break;
+    }
+    case "explanation_documents": {
+      const createdAt = normalizeTimestamp(normalized.created_at, "created_at");
+      normalized.target_type = normalizeLowerText(assertRequiredString(normalized, "target_type"));
+      normalized.target_id = assertRequiredString(normalized, "target_id");
+      normalized.status = normalizeLowerText(normalized.status || "draft");
+      normalized.created_at = currentId ? normalizeTimestamp(normalized.created_at || createdAt, "created_at") : createdAt;
+      normalized.updated_at = createTimestamp();
+      assertSupportedValue(normalized.target_type, EXPLANATION_TARGET_TYPES, "target_type");
+      assertSupportedValue(normalized.status, EXPLANATION_DOCUMENT_STATUSES, "status");
+      assertExplanationTargetExists(normalized.target_type, normalized.target_id, relatedTables);
+      assertUnique(
+        rows,
+        (row) => row.target_type === normalized.target_type && row.target_id === normalized.target_id,
+        `An explanation document already exists for ${normalized.target_type} "${normalized.target_id}".`,
+        currentId
+      );
+      break;
+    }
+    case "explanation_blocks": {
+      const createdAt = normalizeTimestamp(normalized.created_at, "created_at");
+      normalized.explanation_id = assertRequiredString(normalized, "explanation_id");
+      normalized.type = normalizeLowerText(assertRequiredString(normalized, "type"));
+      normalized.sort_order = asPositiveInteger(normalized.sort_order, "sort_order");
+      normalized.data_json = normalizeExplanationBlockData(normalized.type, normalized.data_json, "Explanation block");
+      normalized.is_visible = normalized.is_visible == null ? true : Boolean(normalized.is_visible);
+      normalized.created_at = currentId ? normalizeTimestamp(normalized.created_at || createdAt, "created_at") : createdAt;
+      normalized.updated_at = createTimestamp();
+      assertSupportedValue(normalized.type, EXPLANATION_BLOCK_TYPES, "type");
+      assertForeignKey(relatedTables.explanation_documents || [], "explanation_id", normalized.explanation_id, "explanation_documents");
+      assertUnique(
+        rows,
+        (row) => row.explanation_id === normalized.explanation_id && Number(row.sort_order) === normalized.sort_order,
+        "This sort_order is already used inside the selected explanation document.",
+        currentId
+      );
       break;
     }
     default:

@@ -2666,7 +2666,7 @@ html[data-theme="dark"] .verse-page .verse-detail-card {
 
 .verse-page .verse-section .section-title,
 .explanation-page .verse-section .section-title,
-.explanation-page .key-insight-section .section-title,
+.explanation-page .meaning-section .section-title,
 .explanation-page .explanation-section .section-title {
     margin-top: 4px;
 }
@@ -2679,7 +2679,8 @@ html[data-theme="dark"] .verse-page .verse-detail-card {
 }
 
 .explanation-page .verse-detail-card,
-.explanation-page .video-player-card {
+.explanation-page .video-player-card,
+.explanation-page .explanation-meaning-card {
     inline-size: min(100%, var(--content-width));
     margin: 0 auto;
     padding: clamp(1rem, 3vw, 1.5rem);
@@ -2829,6 +2830,39 @@ html[data-theme="dark"] .verse-page .verse-detail-card {
     padding: 0 16px;
 }
 
+.explanation-page .meaning-section {
+    display: grid;
+    gap: 1rem;
+    padding: 0 16px;
+    text-align: center;
+}
+
+.explanation-page .meaning-entry {
+    display: grid;
+    gap: 0.35rem;
+    text-align: left;
+}
+
+.explanation-page .meaning-entry + .meaning-entry {
+    padding-top: 1rem;
+    border-top: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 70%, transparent);
+}
+
+.explanation-page .meaning-label {
+    margin: 0;
+    color: var(--md-sys-color-primary);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.explanation-page .meaning-copy,
+.explanation-page .explanation-empty-state,
+.explanation-page .explanation-verse-transliteration {
+    margin: 0;
+}
+
 .explanation-page .video-player {
     position: relative;
     overflow: hidden;
@@ -2880,6 +2914,23 @@ html[data-theme="dark"] .verse-page .verse-detail-card {
     border-left: 18px solid var(--md-sys-color-on-primary);
 }
 
+.explanation-page .explanation-video-frame {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: var(--md-sys-shape-corner-md);
+    background: color-mix(in srgb, var(--md-sys-color-surface-container-high) 90%, black 10%);
+}
+
+.explanation-page .explanation-video-frame iframe {
+    inline-size: 100%;
+    block-size: 100%;
+    border: 0;
+}
+
+.explanation-page .explanation-video-link {
+    justify-self: start;
+}
+
 .explanation-page .explanation-text {
     inline-size: min(100%, calc(var(--content-width) - 3rem));
     margin: 0 auto;
@@ -2912,6 +2963,18 @@ html[data-theme="dark"] .verse-page .verse-detail-card {
     font-weight: 600;
     line-height: 1.3;
     color: var(--md-sys-color-on-surface);
+}
+
+.explanation-page .explanation-divider {
+    inline-size: min(100%, calc(var(--content-width) - 4rem));
+    block-size: 1px;
+    margin: 0 auto;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        color-mix(in srgb, var(--md-sys-color-outline) 75%, var(--md-sys-color-primary) 25%),
+        transparent
+    );
 }
 
 .explanation-page .verse-navigation {

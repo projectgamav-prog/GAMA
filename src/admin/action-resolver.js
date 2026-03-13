@@ -238,8 +238,8 @@ function getExplanationsPageState(context, permissionContext, openEditor) {
     return {
         title: currentVerse ? `Explanation for ${getRecordLabel("verses", currentVerse)}` : "Explanation authoring",
         status: currentVerse
-            ? "This route stays derived from verse data, so inline editing writes directly to the current verse record."
-            : "Open an explanation route with a real verse context to edit verse explanation fields.",
+            ? "Verse and Meaning stay canonical here. Editorial explanation blocks now load from a dedicated explanation document for this verse, and block editing will layer on next."
+            : "Open an explanation route with a real verse context to edit canonical verse fields while explanation documents and blocks stay route-driven.",
         tone: "muted",
         actions,
     };

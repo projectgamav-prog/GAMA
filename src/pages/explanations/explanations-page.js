@@ -2,49 +2,92 @@ import {
     DEFAULT_BOOK_SLUG,
     resolveExplanationsPageContext,
 } from "../../content/books/page-context.js";
+import {
+    getVerseExplanationContent,
+} from "../../content/explanations/queries.js";
+import { renderExplanationBlocks } from "../../content/explanations/block-renderer.js";
 import { createSharedPageDefinition } from "../shared-page.js";
-
-const FALLBACK_IMAGE = "/assets/images/arjun.png";
 
 function getCurrentContext() {
     return resolveExplanationsPageContext();
 }
 
-function buildExplanationBlocks(book, chapter, verse) {
-    return [
-        {
-            title: "Context",
-            text: `${book.title} presents this teaching within Chapter ${chapter.chapter_number}, where ${chapter.title} clarifies how understanding must shape action and attention.`,
-        },
-        {
-            title: "Reading the Verse",
-            text: verse.english_text || verse.hindi_text || verse.sanskrit_text || "This verse is available, but its translation copy has not been added yet.",
-        },
-        {
-            title: "Why It Matters",
-            text: verse.insight_caption
-                || "This explanation route is intentionally lightweight for now: it keeps the shared route alive while the deeper study experience is still being modeled.",
-        },
-    ];
-}
-
 function setLink(target, routeKey, params, routeResolver) {
-    if (!(target instanceof HTMLAnchorElement) || typeof routeResolver !== "function") return;
+    if (!(target instanceof HTMLAnchorElement) || typeof routeResolver !== "function") {
+        return;
+    }
+
     const route = routeResolver(routeKey);
-    if (!route) return;
+    if (!route) {
+        return;
+    }
 
     const url = new URL(route, window.location.origin);
     Object.entries(params || {}).forEach(([key, value]) => {
-        if (value == null || value === "") return;
+        if (value == null || value === "") {
+            return;
+        }
+
         url.searchParams.set(key, value);
     });
     target.href = `${url.pathname}${url.search}`;
 }
 
-function initializeExplanationsPage({ routeResolver }) {
+function applyVerseAdminTarget(element, { book, chapter, verse }) {
+    if (!(element instanceof HTMLElement)) {
+        return;
+    }
+
+    element.dataset.adminEntity = "verses";
+    element.dataset.adminId = verse.id;
+    element.dataset.adminParentEntity = "chapters";
+    element.dataset.adminParentId = chapter.id;
+    element.dataset.adminBookId = book.id;
+}
+
+function appendMeaningEntry(container, label, value) {
+    if (!(container instanceof HTMLElement) || !value) {
+        return;
+    }
+
+    const group = document.createElement("div");
+    group.className = "meaning-entry";
+
+    const eyebrow = document.createElement("p");
+    eyebrow.className = "meaning-label";
+    eyebrow.textContent = label;
+
+    const text = document.createElement("p");
+    text.className = "verse-detail-translation meaning-copy";
+    text.textContent = value;
+
+    group.append(eyebrow, text);
+    container.appendChild(group);
+}
+
+function renderMeaningCard(container, verse) {
+    if (!(container instanceof HTMLElement)) {
+        return;
+    }
+
+    container.replaceChildren();
+    appendMeaningEntry(container, "English", verse.english_text);
+    appendMeaningEntry(container, "Hindi", verse.hindi_text);
+
+    if (!container.children.length) {
+        const fallback = document.createElement("p");
+        fallback.className = "verse-detail-translation meaning-copy";
+        fallback.textContent = "Meaning coming soon.";
+        container.appendChild(fallback);
+    }
+}
+
+function initializeExplanationsPage({ mode, routeResolver }) {
     const context = getCurrentContext();
     const body = document.body;
-    if (!context || !body) return;
+    if (!context || !body) {
+        return;
+    }
 
     const { book, chapter, verse, verses } = context;
     const title = document.getElementById("explanationHeroTitle");
@@ -53,66 +96,76 @@ function initializeExplanationsPage({ routeResolver }) {
     const breadcrumbVerses = document.getElementById("explanationBreadcrumbVerses");
     const breadcrumbVerse = document.getElementById("explanationBreadcrumbVerse");
     const sanskrit = document.getElementById("explanationVerseSanskrit");
-    const translation = document.getElementById("explanationVerseTranslation");
-    const keyInsightTitle = document.getElementById("explanationInsightTitle");
-    const keyInsightImage = document.getElementById("explanationInsightImage");
-    const keyInsightCaption = document.getElementById("explanationInsightCaption");
+    const transliteration = document.getElementById("explanationVerseTransliteration");
+    const meaningCard = document.getElementById("explanationMeaningCard");
     const blocks = document.getElementById("explanationBlocks");
     const prevLink = document.getElementById("explanationPrevVerse");
     const nextLink = document.getElementById("explanationNextVerse");
-    const verseDetailCard = document.querySelector(".explanation-main .verse-detail-card");
+    const verseDetailCard = document.getElementById("explanationVerseCard");
 
-    document.title = `Bhagavad Gita | Explanation | ${chapter.title} | Verse ${verse.verse_number}`;
+    document.title = `${book.title} | Chapter ${chapter.chapter_number} | Verse ${verse.verse_number} Explanation`;
     body.dataset.educationItem = book.slug === DEFAULT_BOOK_SLUG ? "books-gita" : "books-all";
     window.sharedLayout?.syncEducationNavigation?.();
 
-    if (title) title.textContent = `Chapter ${chapter.chapter_number} \u2022 ${chapter.title}`;
-    if (subtitle) subtitle.textContent = `Verse ${verse.verse_number}`;
-    if (breadcrumbChapter) breadcrumbChapter.textContent = `Chapter ${chapter.chapter_number}`;
-    if (breadcrumbVerse) breadcrumbVerse.textContent = `Verse ${verse.verse_number}`;
-    setLink(breadcrumbChapter, "chapters.index", { book: book.slug }, routeResolver);
-    setLink(breadcrumbVerses, "verses.index", {
-        book: book.slug,
-        chapter: chapter.slug,
-        verse: verse.verse_number,
-    }, routeResolver);
-    if (sanskrit) sanskrit.textContent = verse.sanskrit_text || verse.transliteration_text || `Verse ${verse.verse_number}`;
-    if (translation) translation.textContent = verse.english_text || verse.hindi_text || "Translation coming soon.";
-    if (verseDetailCard instanceof HTMLElement) {
-        verseDetailCard.dataset.adminEntity = "verses";
-        verseDetailCard.dataset.adminId = verse.id;
-        verseDetailCard.dataset.adminParentEntity = "chapters";
-        verseDetailCard.dataset.adminParentId = chapter.id;
-        verseDetailCard.dataset.adminBookId = book.id;
+    if (title) {
+        title.textContent = `Chapter ${chapter.chapter_number} \u2022 ${chapter.title}`;
     }
-    if (keyInsightTitle) keyInsightTitle.textContent = verse.insight_title || `${chapter.title} Insight`;
-    if (keyInsightImage) {
-        keyInsightImage.src = verse.insight_media || FALLBACK_IMAGE;
-        keyInsightImage.alt = `${chapter.title} explanation thumbnail`;
-        keyInsightImage.onerror = () => {
-            keyInsightImage.src = FALLBACK_IMAGE;
-        };
+    if (subtitle) {
+        subtitle.textContent = `Verse ${verse.verse_number}`;
     }
-    if (keyInsightCaption) {
-        keyInsightCaption.textContent = verse.insight_caption
-            || "Deeper commentary will stay aligned with the verse route and shared rendering system as the content model expands.";
+    if (breadcrumbChapter) {
+        breadcrumbChapter.textContent = `Chapter ${chapter.chapter_number}`;
+    }
+    if (breadcrumbVerse) {
+        breadcrumbVerse.textContent = `Verse ${verse.verse_number}`;
     }
 
+    setLink(breadcrumbChapter, "chapters.index", { book: book.slug }, routeResolver);
+    setLink(
+        breadcrumbVerses,
+        "verses.index",
+        {
+            book: book.slug,
+            chapter: chapter.slug,
+            verse: verse.verse_number,
+        },
+        routeResolver
+    );
+
+    if (sanskrit) {
+        sanskrit.textContent = verse.sanskrit_text || verse.transliteration_text || `Verse ${verse.verse_number}`;
+    }
+
+    if (transliteration) {
+        const value = verse.transliteration_text && verse.transliteration_text !== verse.sanskrit_text
+            ? verse.transliteration_text
+            : "";
+        transliteration.textContent = value;
+        transliteration.hidden = !value;
+    }
+
+    applyVerseAdminTarget(verseDetailCard, { book, chapter, verse });
+    applyVerseAdminTarget(meaningCard, { book, chapter, verse });
+    renderMeaningCard(meaningCard, verse);
+
     if (blocks) {
-        blocks.innerHTML = "";
-        buildExplanationBlocks(book, chapter, verse).forEach((block) => {
-            const article = document.createElement("article");
-            article.className = "explanation-block";
-            article.innerHTML = `
-                <h3 class="explanation-block-title">${block.title}</h3>
-                <div class="explanation-image-card">
-                    <img src="${FALLBACK_IMAGE}" alt="${block.title} illustration">
-                </div>
-                <div class="explanation-text">
-                    <p>${block.text}</p>
-                </div>
-            `;
-            blocks.appendChild(article);
+        const explanationContent = getVerseExplanationContent(verse.id, {
+            includeDraft: mode === "admin",
+            includeHidden: mode === "admin",
+        });
+
+        if (explanationContent.document) {
+            blocks.dataset.explanationDocumentId = explanationContent.document.id;
+        } else {
+            delete blocks.dataset.explanationDocumentId;
+        }
+
+        renderExplanationBlocks({
+            container: blocks,
+            blocks: explanationContent.blocks,
+            emptyMessage: mode === "admin"
+                ? "No editorial explanation blocks exist for this verse yet. The new document and block model is live, and inline block editing can layer on next."
+                : "Editorial explanation for this verse is still being prepared.",
         });
     }
 
@@ -120,26 +173,40 @@ function initializeExplanationsPage({ routeResolver }) {
     const previousVerse = currentIndex > 0 ? verses[currentIndex - 1] : null;
     const nextVerse = currentIndex >= 0 && currentIndex < verses.length - 1 ? verses[currentIndex + 1] : null;
 
-    setLink(prevLink, "explanations.index", {
-        book: book.slug,
-        chapter: chapter.slug,
-        verse: previousVerse?.verse_number || "",
-    }, routeResolver);
+    setLink(
+        prevLink,
+        "explanations.index",
+        {
+            book: book.slug,
+            chapter: chapter.slug,
+            verse: previousVerse?.verse_number || "",
+        },
+        routeResolver
+    );
     if (prevLink) {
         prevLink.textContent = previousVerse ? `\u2190 Previous Verse (${previousVerse.verse_number})` : "\u2190 Previous Verse";
         prevLink.setAttribute("aria-disabled", previousVerse ? "false" : "true");
-        if (!previousVerse) prevLink.href = "#";
+        if (!previousVerse) {
+            prevLink.href = "#";
+        }
     }
 
-    setLink(nextLink, "explanations.index", {
-        book: book.slug,
-        chapter: chapter.slug,
-        verse: nextVerse?.verse_number || "",
-    }, routeResolver);
+    setLink(
+        nextLink,
+        "explanations.index",
+        {
+            book: book.slug,
+            chapter: chapter.slug,
+            verse: nextVerse?.verse_number || "",
+        },
+        routeResolver
+    );
     if (nextLink) {
         nextLink.textContent = nextVerse ? `Next Verse (${nextVerse.verse_number}) \u2192` : "Next Verse \u2192";
         nextLink.setAttribute("aria-disabled", nextVerse ? "false" : "true");
-        if (!nextVerse) nextLink.href = "#";
+        if (!nextVerse) {
+            nextLink.href = "#";
+        }
     }
 }
 
@@ -168,22 +235,15 @@ export const EXPLANATIONS_PAGE_DEFINITION = createSharedPageDefinition({
                     <h1 class="section-title" id="explanationHeroTitle">Chapter &#8226; Explanation</h1>
                     <p class="subtitle" id="explanationHeroSubtitle">Verse</p>
 
-                    <div class="verse-detail-card">
+                    <div class="verse-detail-card" id="explanationVerseCard">
                         <p class="verse-detail-sanskrit" id="explanationVerseSanskrit">Verse text</p>
-                        <p class="verse-detail-translation" id="explanationVerseTranslation">Translation</p>
+                        <p class="verse-detail-translation explanation-verse-transliteration" id="explanationVerseTransliteration" hidden>Transliteration</p>
                     </div>
                 </section>
 
-                <section class="key-insight-section">
-                    <h2 class="section-title">Key Insight</h2>
-                    <div class="video-player-card">
-                        <div class="video-player">
-                            <img id="explanationInsightImage" src="/assets/images/image.png" alt="Key insight video thumbnail">
-                            <button class="play-button" aria-label="Play video"></button>
-                        </div>
-                        <h3 class="section-title" id="explanationInsightTitle">Insight</h3>
-                        <p class="video-caption" id="explanationInsightCaption">Insight caption</p>
-                    </div>
+                <section class="meaning-section">
+                    <h2 class="section-title">Meaning</h2>
+                    <div class="verse-detail-card explanation-meaning-card" id="explanationMeaningCard"></div>
                 </section>
 
                 <section class="explanation-section">

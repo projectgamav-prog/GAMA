@@ -37,7 +37,7 @@ function getPanelTitle(state) {
 
 function getPanelSubtitle(state) {
     if (state.fieldScope === "explanations") {
-        return "This explanation view writes back to the current verse record without creating a separate explanations table.";
+        return "This explanation view currently edits the canonical verse and meaning fields. Editorial explanation blocks now live in a separate explanation document and will get their own block editor next.";
     }
 
     if (state.mode === "create") {

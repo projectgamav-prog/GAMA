@@ -1,4 +1,5 @@
 import { createBooksDatabase } from "../../src/content/books/schema.js";
+import { createExplanationsDatabase } from "../../src/content/explanations/schema.js";
 import { tableConfigs } from "./table-config.js";
 import { readTable } from "./table-store.js";
 
@@ -16,7 +17,8 @@ export async function assertPublicDataBuildable(mutatedTableName, nextRows) {
   rawTables[mutatedTableName] = nextRows;
 
   try {
-    createBooksDatabase(rawTables);
+    const booksDatabase = createBooksDatabase(rawTables);
+    createExplanationsDatabase(rawTables, booksDatabase);
   } catch (error) {
     throw new Error(`This change would break the public content database: ${error.message}`);
   }

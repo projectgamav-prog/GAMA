@@ -16,7 +16,9 @@ export const tableFileMap = Object.freeze({
   book_sections: "book_sections.json",
   chapters: "chapters.json",
   chapter_sections: "chapter_sections.json",
-  verses: "verses.json"
+  verses: "verses.json",
+  explanation_documents: "explanation_documents.json",
+  explanation_blocks: "explanation_blocks.json"
 });
 
 export function getTablePath(tableName) {

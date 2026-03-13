@@ -11,6 +11,7 @@ import accessRouter from "./routes/access-routes.js";
 import authRouter from "./routes/auth-routes.js";
 import booksRouter from "./routes/books-routes.js";
 import chaptersRouter from "./routes/chapters-routes.js";
+import explanationsRouter from "./routes/explanations-routes.js";
 import versesRouter from "./routes/verses-routes.js";
 import sectionsRouter from "./routes/sections-routes.js";
 
@@ -87,6 +88,7 @@ export function createApp() {
   app.use("/api/chapters", chaptersRouter);
   app.use("/api/verses", versesRouter);
   app.use("/api", sectionsRouter);
+  app.use("/api", explanationsRouter);
 
   app.use("/api/*rest", (_req, res) => {
     res.status(404).json({

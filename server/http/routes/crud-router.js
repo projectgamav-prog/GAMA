@@ -6,11 +6,13 @@ import { assertDeleteAllowed, filterRows, getTableConfig, readRelatedTables } fr
 import { validateRecord } from "../../content/record-validator.js";
 
 const WRITE_PERMISSION_CONFIG = Object.freeze({
-  books: { edit: "books.edit", publishField: "is_published" },
+  books: { edit: "books.edit", publishField: "is_published", publishValue: true },
   book_sections: { edit: "books.edit" },
   chapters: { edit: "chapters.edit" },
   chapter_sections: { edit: "chapters.edit" },
   verses: { edit: "verses.edit" },
+  explanation_documents: { edit: "verses.edit", publishField: "status", publishValue: "published" },
+  explanation_blocks: { edit: "verses.edit" },
 });
 
 function ok(res, data, statusCode = 200) {
@@ -67,9 +69,10 @@ function ensureUserCanWrite(req, res, { tableName, mode, nextRecord = null, curr
   if (config.publishField) {
     const previousValue = currentRecord?.[config.publishField];
     const nextValue = nextRecord?.[config.publishField];
+    const publishValue = Object.prototype.hasOwnProperty.call(config, "publishValue") ? config.publishValue : true;
     const publishChanged = mode === "create"
-      ? nextValue === true
-      : nextValue !== undefined && nextValue !== previousValue;
+      ? nextValue === publishValue
+      : nextValue !== undefined && nextValue !== previousValue && (nextValue === publishValue || previousValue === publishValue);
 
     if (publishChanged && !hasPermission(req.auth.permissionContext, "content.publish")) {
       failWithStatus(res, 'Missing required permission "content.publish".', 403);
