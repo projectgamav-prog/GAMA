@@ -1,39 +1,13 @@
 import {
-    getBookBySlug,
-    getChapterBySlug,
-    getFirstChapterForBook,
-    getVerseByChapterAndNumber,
-    listVersesForChapter,
-} from "../../content/books/queries.js";
+    DEFAULT_BOOK_SLUG,
+    resolveExplanationsPageContext,
+} from "../../content/books/page-context.js";
 import { createSharedPageDefinition } from "../shared-page.js";
 
-const DEFAULT_BOOK_SLUG = "bhagavad-gita";
 const FALLBACK_IMAGE = "/assets/images/arjun.png";
 
 function getCurrentContext() {
-    const params = new URLSearchParams(window.location.search);
-    const requestedBookSlug = params.get("book") || DEFAULT_BOOK_SLUG;
-    const book = getBookBySlug(requestedBookSlug) || getBookBySlug(DEFAULT_BOOK_SLUG);
-    if (!book) return null;
-
-    const requestedChapterSlug = params.get("chapter");
-    const chapter = (requestedChapterSlug ? getChapterBySlug(book.slug, requestedChapterSlug) : null)
-        || getFirstChapterForBook(book.id);
-    if (!chapter) return null;
-
-    const requestedVerseNumber = Number.parseInt(params.get("verse") || "", 10);
-    const verses = listVersesForChapter(chapter.id);
-    const verse = Number.isInteger(requestedVerseNumber)
-        ? getVerseByChapterAndNumber(chapter.id, requestedVerseNumber) || verses[0] || null
-        : verses[0] || null;
-    if (!verse) return null;
-
-    return {
-        book,
-        chapter,
-        verse,
-        verses,
-    };
+    return resolveExplanationsPageContext();
 }
 
 function buildExplanationBlocks(book, chapter, verse) {
@@ -86,6 +60,7 @@ function initializeExplanationsPage({ routeResolver }) {
     const blocks = document.getElementById("explanationBlocks");
     const prevLink = document.getElementById("explanationPrevVerse");
     const nextLink = document.getElementById("explanationNextVerse");
+    const verseDetailCard = document.querySelector(".explanation-main .verse-detail-card");
 
     document.title = `Bhagavad Gita | Explanation | ${chapter.title} | Verse ${verse.verse_number}`;
     body.dataset.educationItem = book.slug === DEFAULT_BOOK_SLUG ? "books-gita" : "books-all";
@@ -103,6 +78,13 @@ function initializeExplanationsPage({ routeResolver }) {
     }, routeResolver);
     if (sanskrit) sanskrit.textContent = verse.sanskrit_text || verse.transliteration_text || `Verse ${verse.verse_number}`;
     if (translation) translation.textContent = verse.english_text || verse.hindi_text || "Translation coming soon.";
+    if (verseDetailCard instanceof HTMLElement) {
+        verseDetailCard.dataset.adminEntity = "verses";
+        verseDetailCard.dataset.adminId = verse.id;
+        verseDetailCard.dataset.adminParentEntity = "chapters";
+        verseDetailCard.dataset.adminParentId = chapter.id;
+        verseDetailCard.dataset.adminBookId = book.id;
+    }
     if (keyInsightTitle) keyInsightTitle.textContent = verse.insight_title || `${chapter.title} Insight`;
     if (keyInsightImage) {
         keyInsightImage.src = verse.insight_media || FALLBACK_IMAGE;

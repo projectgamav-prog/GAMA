@@ -2,7 +2,7 @@ import { BOOKS_QUERY_API } from "../../content/books/queries.js";
 import { renderBooksCollection } from "../../content/renderers/books-renderer.js";
 import { createSharedPageDefinition } from "../shared-page.js";
 
-function initializeBooksPage({ routeResolver }) {
+function initializeBooksPage({ mode, routeResolver }) {
     const grid = document.getElementById("bookGrid");
     if (!grid) return;
 
@@ -10,6 +10,7 @@ function initializeBooksPage({ routeResolver }) {
         container: grid,
         queryApi: BOOKS_QUERY_API,
         routeResolver,
+        books: mode === "admin" ? BOOKS_QUERY_API.listBooks() : null,
     });
 }
 

@@ -1,9 +1,14 @@
 import { canAccessAdmin, hasPermission } from "../permissions/access.js";
+import { resolveAdminAuthoringState } from "./action-resolver.js";
+import { createAdminEditorPanel } from "./editor-panel.js";
+import { resolveAdminPageContext } from "./page-context-resolver.js";
 
 const state = {
     permissionContext: null,
     customActions: [],
     statusOverride: null,
+    selection: null,
+    pageContext: null,
 };
 
 const ui = {};
@@ -17,17 +22,25 @@ async function initializeAdminController() {
     state.permissionContext = window.authStorage?.getPermissionContext?.() || null;
 
     document.body.classList.add("admin-mode-page");
-    mountInlineAdminBar();
+    mountInlineAdminChrome();
+    initializeEditorPanel();
     exposeAdminChromeHooks();
+    bindSelectionModel();
+    refreshSelectionTargets();
     renderInlineAdminBar();
 
     window.addEventListener(window.authStorage?.AUTH_STATE_EVENT || "auth:statechange", () => {
         state.permissionContext = window.authStorage?.getPermissionContext?.() || null;
+        if (!canAccessAdmin(state.permissionContext)) {
+            ui.editor?.close();
+        } else {
+            ui.editor?.rerender();
+        }
         renderInlineAdminBar();
     });
 }
 
-function mountInlineAdminBar() {
+function mountInlineAdminChrome() {
     const header = document.querySelector(".topbar");
     const shell = document.querySelector(".page-shell");
     if (!(shell instanceof HTMLElement)) {
@@ -51,9 +64,18 @@ function mountInlineAdminBar() {
         `;
     }
 
+    let panelHost = document.querySelector("[data-admin-editor-host]");
+    if (!(panelHost instanceof HTMLElement)) {
+        panelHost = document.createElement("section");
+        panelHost.className = "admin-editor-host";
+        panelHost.setAttribute("data-admin-editor-host", "");
+    }
+
     if (header instanceof HTMLElement) {
         header.insertAdjacentElement("afterend", bar);
+        bar.insertAdjacentElement("afterend", panelHost);
     } else {
+        shell.prepend(panelHost);
         shell.prepend(bar);
     }
 
@@ -61,6 +83,27 @@ function mountInlineAdminBar() {
     ui.title = bar.querySelector("#adminInlineBarTitle");
     ui.status = bar.querySelector("#adminInlineBarStatus");
     ui.actions = bar.querySelector("#adminInlineBarActions");
+    ui.panelHost = panelHost;
+}
+
+function initializeEditorPanel() {
+    if (!(ui.panelHost instanceof HTMLElement)) {
+        return;
+    }
+
+    ui.editor = createAdminEditorPanel({
+        host: ui.panelHost,
+        getPermissionContext() {
+            return state.permissionContext;
+        },
+        getPageContext() {
+            return state.pageContext;
+        },
+        onStatusChange(message, tone = "muted") {
+            state.statusOverride = message ? { message: String(message), tone } : null;
+            renderInlineAdminBar();
+        },
+    });
 }
 
 function exposeAdminChromeHooks() {
@@ -83,13 +126,94 @@ function exposeAdminChromeHooks() {
             state.statusOverride = null;
             renderInlineAdminBar();
         },
+        openEditor(options = {}) {
+            ui.editor?.open(options);
+        },
+        closeEditor() {
+            ui.editor?.close();
+        },
+        clearSelection() {
+            state.selection = null;
+            syncSelectedTargetClass();
+            renderInlineAdminBar();
+        },
         refresh() {
+            refreshSelectionTargets();
             renderInlineAdminBar();
         },
         getElement() {
             return ui.bar || null;
         },
+        getPageContext() {
+            return state.pageContext;
+        },
     };
+}
+
+function bindSelectionModel() {
+    document.addEventListener("click", handleSelectableInteraction, true);
+    document.addEventListener("focusin", handleSelectableInteraction);
+}
+
+function handleSelectableInteraction(event) {
+    const target = event.target;
+    if (!(target instanceof Element)) {
+        return;
+    }
+
+    if (target.closest("[data-admin-inline-bar]") || target.closest("[data-admin-editor-panel]")) {
+        return;
+    }
+
+    const selectable = target.closest("[data-admin-entity][data-admin-id]");
+    if (!(selectable instanceof HTMLElement)) {
+        return;
+    }
+
+    const nextSelection = {
+        entity: String(selectable.dataset.adminEntity || "").trim(),
+        id: String(selectable.dataset.adminId || "").trim(),
+        element: selectable,
+    };
+
+    if (!nextSelection.entity || !nextSelection.id) {
+        return;
+    }
+
+    if (state.selection?.entity === nextSelection.entity && state.selection?.id === nextSelection.id) {
+        return;
+    }
+
+    state.selection = nextSelection;
+    state.statusOverride = null;
+    syncSelectedTargetClass();
+    renderInlineAdminBar();
+}
+
+function refreshSelectionTargets() {
+    document.querySelectorAll("[data-admin-entity][data-admin-id]").forEach((element) => {
+        element.classList.add("admin-content-target");
+    });
+    syncSelectedTargetClass();
+}
+
+function syncSelectedTargetClass() {
+    document.querySelectorAll(".admin-content-target.is-admin-selected").forEach((element) => {
+        element.classList.remove("is-admin-selected");
+    });
+
+    if (state.selection?.element instanceof HTMLElement && document.contains(state.selection.element)) {
+        state.selection.element.classList.add("is-admin-selected");
+        return;
+    }
+
+    if (state.selection?.entity && state.selection?.id) {
+        const element = document.querySelector(`[data-admin-entity="${state.selection.entity}"][data-admin-id="${state.selection.id}"]`);
+        if (element instanceof HTMLElement) {
+            state.selection.element = element;
+            element.classList.add("is-admin-selected");
+        }
+    }
 }
 
 function normalizeActions(actions = []) {
@@ -133,45 +257,55 @@ function renderInlineAdminBar() {
 function getInlineBarState() {
     const currentUser = window.authStorage?.getCurrentUser?.() || null;
     const statusOverride = state.statusOverride;
-    const actions = [
-        ...getBuiltInActions(),
-        ...state.customActions,
-    ];
 
     if (!currentUser) {
         return {
-            title: "Shared page is running in admin mode.",
+            title: "Inline authoring is available on this shared page.",
             status: statusOverride?.message || "Sign in from the shared header to unlock admin tools.",
             tone: statusOverride?.tone || "muted",
-            actions,
+            actions: getBuiltInActions(),
         };
     }
 
-    const displayName = currentUser.fullName || currentUser.username || currentUser.email || "this account";
-
     if (!canAccessAdmin(state.permissionContext)) {
+        ui.editor?.close();
         return {
-            title: `Signed in as ${displayName}.`,
+            title: "Inline authoring is locked for this account.",
             status: statusOverride?.message || "This account can view the route but does not currently have admin access.",
             tone: statusOverride?.tone || "muted",
-            actions,
+            actions: getBuiltInActions(),
         };
     }
 
     if (isPermissionsRoute()) {
+        ui.editor?.close();
         return {
-            title: `Signed in as ${displayName}.`,
+            title: "Permissions management",
             status: statusOverride?.message || "Permissions management stays separate from the shared content pages.",
             tone: statusOverride?.tone || "muted",
-            actions,
+            actions: getBuiltInActions(),
         };
     }
 
+    state.pageContext = resolveAdminPageContext({ selection: state.selection });
+
+    const authoringState = resolveAdminAuthoringState({
+        context: state.pageContext,
+        permissionContext: state.permissionContext,
+        openEditor(options) {
+            ui.editor?.open(options);
+        },
+        customActions: state.customActions,
+    });
+
     return {
-        title: `Signed in as ${displayName}.`,
-        status: statusOverride?.message || "The shared public UI is live here in admin mode. Page-specific actions can be attached later.",
-        tone: statusOverride?.tone || "muted",
-        actions,
+        title: authoringState.title,
+        status: statusOverride?.message || authoringState.status,
+        tone: statusOverride?.tone || authoringState.tone,
+        actions: [
+            ...authoringState.actions,
+            ...getBuiltInActions(),
+        ],
     };
 }
 

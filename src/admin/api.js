@@ -26,6 +26,27 @@ async function apiRequest(path, options = {}) {
 export function createAdminApi() {
     return {
         request: apiRequest,
+        async listRecords(entity, filters = {}) {
+            const config = getContentEntityConfig(entity);
+            if (!config) throw new Error(`Unsupported admin entity "${entity}".`);
+
+            const params = new URLSearchParams();
+            Object.entries(filters || {}).forEach(([key, value]) => {
+                if (value == null || value === "") {
+                    return;
+                }
+
+                params.set(key, String(value));
+            });
+
+            const query = params.toString();
+            return apiRequest(query ? `${config.endpoint}?${query}` : config.endpoint);
+        },
+        async getRecord(entity, recordId) {
+            const config = getContentEntityConfig(entity);
+            if (!config) throw new Error(`Unsupported admin entity "${entity}".`);
+            return apiRequest(`${config.endpoint}/${encodeURIComponent(recordId)}`);
+        },
         async createRecord(entity, payload) {
             const config = getContentEntityConfig(entity);
             if (!config) throw new Error(`Unsupported admin entity "${entity}".`);

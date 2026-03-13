@@ -1,31 +1,15 @@
 import {
-    getBookBySlug,
-    getChapterBySlug,
-    getFirstChapterForBook,
-} from "../../content/books/queries.js";
+    DEFAULT_BOOK_SLUG,
+    resolveVersesPageContext,
+} from "../../content/books/page-context.js";
 import { BOOKS_QUERY_API } from "../../content/books/queries.js";
 import { renderChapterVersesPreview } from "../../content/renderers/verses-renderer.js";
 import { normalizeVerseMode } from "../../core/config/route-registry.js";
 import { createSharedPageDefinition } from "../shared-page.js";
 import { initializeVerseModeSwitcher } from "./verse-mode-switcher.js";
 
-const DEFAULT_BOOK_SLUG = "bhagavad-gita";
-
 function getCurrentContext() {
-    const params = new URLSearchParams(window.location.search);
-    const requestedBookSlug = params.get("book") || DEFAULT_BOOK_SLUG;
-    const book = getBookBySlug(requestedBookSlug) || getBookBySlug(DEFAULT_BOOK_SLUG);
-    if (!book) return null;
-
-    const requestedChapterSlug = params.get("chapter");
-    let chapter = requestedChapterSlug ? getChapterBySlug(book.slug, requestedChapterSlug) : null;
-    if (!chapter) {
-        chapter = getFirstChapterForBook(book.id);
-    }
-
-    if (!chapter) return null;
-
-    return { book, chapter, params };
+    return resolveVersesPageContext();
 }
 
 function getDisplayMode() {
@@ -38,8 +22,7 @@ function initializeVersesPage({ routeResolver, routes }) {
     const main = document.querySelector(".verse-main");
     if (!context || !main) return;
 
-    const { book, chapter, params } = context;
-    const highlightedVerseNumber = Number.parseInt(params.get("verse") || "", 10);
+    const { book, chapter, highlightedVerseNumber } = context;
     const mode = getDisplayMode();
     document.body.dataset.verseMode = mode;
     document.body.dataset.educationItem = book.slug === DEFAULT_BOOK_SLUG ? "books-gita" : "books-all";

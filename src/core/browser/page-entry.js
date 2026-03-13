@@ -16,6 +16,7 @@ async function initializeSharedPage() {
     }
 
     const pageContext = createPageContext(route);
+    window.APP_PAGE_CONTEXT = pageContext;
     applyPageDocumentState(page, route.mode);
     document.body.innerHTML = page.render(pageContext);
     document.title = page.title;

@@ -1,16 +1,13 @@
 import {
-    getBookBySlug,
-} from "../../content/books/queries.js";
+    DEFAULT_BOOK_SLUG,
+    resolveChaptersPageContext,
+} from "../../content/books/page-context.js";
 import { BOOKS_QUERY_API } from "../../content/books/queries.js";
 import { renderBookChaptersPreview } from "../../content/renderers/chapters-renderer.js";
 import { createSharedPageDefinition } from "../shared-page.js";
 
-const DEFAULT_BOOK_SLUG = "bhagavad-gita";
-
 function getCurrentBook() {
-    const params = new URLSearchParams(window.location.search);
-    const requestedBookSlug = params.get("book");
-    return getBookBySlug(requestedBookSlug || DEFAULT_BOOK_SLUG) || getBookBySlug(DEFAULT_BOOK_SLUG);
+    return resolveChaptersPageContext()?.book || null;
 }
 
 function formatBookTitle(book) {
