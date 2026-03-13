@@ -1,4 +1,5 @@
 import express from "express";
+import { isDevAdminModeEnabled } from "../../../src/auth/dev-admin-mode.js";
 import { canAccessAdmin } from "../../../src/permissions/access.js";
 import { authenticateUser, registerUser } from "../../auth/store.js";
 import { clearSessionCookie, setSessionCookie } from "../../auth/session.js";
@@ -23,6 +24,14 @@ router.get("/session", (req, res) => {
 });
 
 router.post("/register", async (req, res) => {
+    if (isDevAdminModeEnabled()) {
+        res.status(201).json({
+            success: true,
+            data: serializeAuthState(req.auth),
+        });
+        return;
+    }
+
     try {
         await registerUser(req.body || {});
         const authState = await authenticateUser(req.body || {});
@@ -40,6 +49,14 @@ router.post("/register", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
+    if (isDevAdminModeEnabled()) {
+        res.json({
+            success: true,
+            data: serializeAuthState(req.auth),
+        });
+        return;
+    }
+
     try {
         const authState = await authenticateUser(req.body || {});
         setSessionCookie(res, authState.session?.id || "");
@@ -56,6 +73,14 @@ router.post("/login", async (req, res) => {
 });
 
 router.post("/logout", async (req, res, next) => {
+    if (isDevAdminModeEnabled()) {
+        res.json({
+            success: true,
+            data: serializeAuthState(req.auth),
+        });
+        return;
+    }
+
     try {
         await clearSessionCookie(req, res);
         res.json({

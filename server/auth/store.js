@@ -6,6 +6,7 @@ import {
     createDefaultRolePermissionRecords,
     createDefaultRoleRecords,
 } from "../../src/permissions/defaults.js";
+import { createDevAdminAuthState, isDevAdminModeEnabled } from "../../src/auth/dev-admin-mode.js";
 import { createPermissionContext, resolvePermissionKeys } from "../../src/permissions/access.js";
 import { DEFAULT_ADMIN_ACCOUNT, PERMISSION_KEYS, ROLE_DEFINITIONS } from "../../src/permissions/keys.js";
 
@@ -228,7 +229,26 @@ function buildUserContext(user, session, authState) {
     };
 }
 
+export function buildDevAdminContext() {
+    const devAuthState = createDevAdminAuthState();
+    return {
+        user: devAuthState.user,
+        session: devAuthState.session,
+        roleIds: [...devAuthState.roleIds],
+        permissionKeys: [...devAuthState.permissionKeys],
+        permissionContext: createPermissionContext({
+            user: devAuthState.user,
+            roleIds: devAuthState.roleIds,
+            permissionKeys: devAuthState.permissionKeys,
+        }),
+    };
+}
+
 export async function buildGuestContext() {
+    if (isDevAdminModeEnabled()) {
+        return buildDevAdminContext();
+    }
+
     const authState = await readAuthState();
     const roleIds = ["guest"];
     const permissionKeys = resolvePermissionKeys({
@@ -251,6 +271,10 @@ export async function buildGuestContext() {
 }
 
 export async function getSessionContext(sessionId) {
+    if (isDevAdminModeEnabled()) {
+        return buildDevAdminContext();
+    }
+
     if (!sessionId) {
         return buildGuestContext();
     }

@@ -1,4 +1,5 @@
 import { destroySession, getSessionContext } from "./store.js";
+import { isDevAdminModeEnabled } from "../../src/auth/dev-admin-mode.js";
 
 export const AUTH_COOKIE_NAME = "bg_session";
 
@@ -30,6 +31,12 @@ function serializeCookie(name, value, { maxAgeSeconds = null, expires = null } =
 
 export async function attachSessionContext(req, _res, next) {
     try {
+        if (isDevAdminModeEnabled()) {
+            req.auth = await getSessionContext("");
+            next();
+            return;
+        }
+
         const cookies = parseCookies(req.headers.cookie || "");
         req.auth = await getSessionContext(cookies[AUTH_COOKIE_NAME] || "");
         next();

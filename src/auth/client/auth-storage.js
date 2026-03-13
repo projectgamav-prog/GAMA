@@ -1,4 +1,5 @@
 import { canAccessAdmin, createPermissionContext, hasPermission } from "../../permissions/access.js";
+import { createDevAdminAuthState, isDevAdminModeEnabled } from "../dev-admin-mode.js";
 
 const AUTH_STATE_EVENT = "auth:statechange";
 
@@ -71,6 +72,12 @@ async function apiRequest(path, options = {}) {
 }
 
 async function refreshSession() {
+    if (isDevAdminModeEnabled()) {
+        const devAdminState = createDevAdminAuthState();
+        applyAuthState(devAdminState);
+        return devAdminState;
+    }
+
     try {
         const nextState = await apiRequest("/api/auth/session");
         applyAuthState(nextState);
@@ -84,6 +91,12 @@ async function refreshSession() {
 const ready = refreshSession();
 
 async function login(credentials) {
+    if (isDevAdminModeEnabled()) {
+        const devAdminState = createDevAdminAuthState();
+        applyAuthState(devAdminState);
+        return devAdminState;
+    }
+
     const authState = await apiRequest("/api/auth/login", {
         method: "POST",
         body: JSON.stringify(credentials),
@@ -93,6 +106,12 @@ async function login(credentials) {
 }
 
 async function register(registration) {
+    if (isDevAdminModeEnabled()) {
+        const devAdminState = createDevAdminAuthState();
+        applyAuthState(devAdminState);
+        return devAdminState;
+    }
+
     const authState = await apiRequest("/api/auth/register", {
         method: "POST",
         body: JSON.stringify(registration),
@@ -102,6 +121,12 @@ async function register(registration) {
 }
 
 async function logout() {
+    if (isDevAdminModeEnabled()) {
+        const devAdminState = createDevAdminAuthState();
+        applyAuthState(devAdminState);
+        return devAdminState;
+    }
+
     const authState = await apiRequest("/api/auth/logout", {
         method: "POST",
     });

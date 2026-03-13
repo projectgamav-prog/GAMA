@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { isDevAdminModeEnabled } from "../../src/auth/dev-admin-mode.js";
 import { createApp } from "../http/app.js";
 import { DEFAULT_ADMIN_ACCOUNT } from "../../src/permissions/keys.js";
 
@@ -50,6 +51,7 @@ async function assertTableOmits(tableName, predicate, message) {
 
 const app = createApp();
 const server = app.listen(0);
+const devAdminModeEnabled = isDevAdminModeEnabled();
 
 server.on("listening", async () => {
   const { port } = server.address();
@@ -104,24 +106,31 @@ server.on("listening", async () => {
     assert(booksResponse.ok, "Books endpoint did not return 200.");
     assert(Array.isArray(booksPayload.data), "Books endpoint did not return an array.");
 
-    const { response: blockedAnonymousWriteResponse, payload: blockedAnonymousWritePayload } = await requestJson(baseUrl, "/api/books", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(tempSourceBook),
-    });
-    assert(blockedAnonymousWriteResponse.status === 401, "Unauthenticated content creation should return 401.");
-    assert(blockedAnonymousWritePayload.success === false, "Unauthenticated content creation should return an error payload.");
+    if (devAdminModeEnabled) {
+      const { response: sessionResponse, payload: sessionPayload } = await requestJson(baseUrl, "/api/auth/session");
+      assert(sessionResponse.ok, "Dev admin session endpoint did not return 200.");
+      assert(sessionPayload.data.user?.username === "dev-admin", "Dev admin session did not expose the synthetic admin user.");
+      assert(sessionPayload.data.canAccessAdmin === true, "Dev admin session did not expose admin access.");
+    } else {
+      const { response: blockedAnonymousWriteResponse, payload: blockedAnonymousWritePayload } = await requestJson(baseUrl, "/api/books", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(tempSourceBook),
+      });
+      assert(blockedAnonymousWriteResponse.status === 401, "Unauthenticated content creation should return 401.");
+      assert(blockedAnonymousWritePayload.success === false, "Unauthenticated content creation should return an error payload.");
 
-    const { response: loginResponse, payload: loginPayload } = await requestJson(baseUrl, "/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: DEFAULT_ADMIN_ACCOUNT.email,
-        password: DEFAULT_ADMIN_ACCOUNT.password,
-      }),
-    });
-    assert(loginResponse.ok, "Admin login failed for API verification.");
-    assert(loginPayload.data.canAccessAdmin === true, "Admin login did not return admin access.");
+      const { response: loginResponse, payload: loginPayload } = await requestJson(baseUrl, "/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: DEFAULT_ADMIN_ACCOUNT.email,
+          password: DEFAULT_ADMIN_ACCOUNT.password,
+        }),
+      });
+      assert(loginResponse.ok, "Admin login failed for API verification.");
+      assert(loginPayload.data.canAccessAdmin === true, "Admin login did not return admin access.");
+    }
 
     const { response: createSourceResponse, payload: createSourcePayload } = await requestJson(baseUrl, "/api/books", {
       method: "POST",

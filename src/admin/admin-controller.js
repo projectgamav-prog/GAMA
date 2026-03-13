@@ -1,4 +1,5 @@
 import { canAccessAdmin, hasPermission } from "../permissions/access.js";
+import { isDevAdminModeEnabled } from "../auth/dev-admin-mode.js";
 import { resolveAdminAuthoringState } from "./action-resolver.js";
 import { createAdminEditorPanel } from "./editor-panel.js";
 import { resolveAdminPageContext } from "./page-context-resolver.js";
@@ -55,7 +56,7 @@ function mountInlineAdminChrome() {
         bar.innerHTML = `
             <div class="admin-inline-bar-inner">
                 <div class="admin-inline-bar-copy">
-                    <p class="admin-inline-bar-label">Admin Mode</p>
+                    <p class="admin-inline-bar-label" id="adminInlineBarLabel">Admin Mode</p>
                     <p class="admin-inline-bar-title" id="adminInlineBarTitle"></p>
                     <p class="admin-inline-bar-status is-muted" id="adminInlineBarStatus"></p>
                 </div>
@@ -80,6 +81,7 @@ function mountInlineAdminChrome() {
     }
 
     ui.bar = bar;
+    ui.label = bar.querySelector("#adminInlineBarLabel");
     ui.title = bar.querySelector("#adminInlineBarTitle");
     ui.status = bar.querySelector("#adminInlineBarStatus");
     ui.actions = bar.querySelector("#adminInlineBarActions");
@@ -243,11 +245,18 @@ function normalizeAction(action) {
 }
 
 function renderInlineAdminBar() {
-    if (!(ui.bar instanceof HTMLElement) || !(ui.title instanceof HTMLElement) || !(ui.status instanceof HTMLElement)) {
+    if (
+        !(ui.bar instanceof HTMLElement)
+        || !(ui.title instanceof HTMLElement)
+        || !(ui.status instanceof HTMLElement)
+    ) {
         return;
     }
 
     const barState = getInlineBarState();
+    if (ui.label instanceof HTMLElement) {
+        ui.label.textContent = isDevAdminModeEnabled() ? "DEV ADMIN MODE ACTIVE" : "Admin Mode";
+    }
     ui.title.textContent = barState.title;
     ui.status.textContent = barState.status;
     ui.status.className = `admin-inline-bar-status is-${barState.tone}`;
