@@ -3,6 +3,7 @@ import path from "node:path";
 import { adminDirectory, contentDirectory, projectRoot } from "../core/paths.js";
 import { attachSessionContext } from "../auth/session.js";
 import {
+  LEGACY_ADMIN_REDIRECTS,
   LEGACY_PUBLIC_REDIRECTS,
   buildPathWithQuery,
 } from "../../src/core/config/route-registry.js";
@@ -12,6 +13,19 @@ import booksRouter from "./routes/books-routes.js";
 import chaptersRouter from "./routes/chapters-routes.js";
 import versesRouter from "./routes/verses-routes.js";
 import sectionsRouter from "./routes/sections-routes.js";
+
+function registerRedirects(app, redirects) {
+  redirects.forEach((entry) => {
+    app.get(entry.from, (req, res) => {
+      const query = {
+        ...req.query,
+        ...(entry.query || {}),
+      };
+
+      res.redirect(302, buildPathWithQuery(entry.to, query));
+    });
+  });
+}
 
 export function createApp() {
   const app = express();
@@ -42,16 +56,17 @@ export function createApp() {
     res.sendFile(path.join(projectRoot, "index.html"));
   });
 
-  LEGACY_PUBLIC_REDIRECTS.forEach((entry) => {
-    app.get(entry.from, (req, res) => {
-      const query = {
-        ...req.query,
-        ...(entry.query || {}),
-      };
-
-      res.redirect(302, buildPathWithQuery(entry.to, query));
-    });
+  // Shared public/admin pages now have real entry files, so only explicit legacy aliases redirect here.
+  app.get(/^\/admin$/, (req, res) => {
+    res.redirect(302, buildPathWithQuery("/admin/", req.query));
   });
+
+  app.get(["/admin/home", "/admin/home/", "/admin/home/index.html"], (req, res) => {
+    res.redirect(302, buildPathWithQuery("/admin/", req.query));
+  });
+
+  registerRedirects(app, LEGACY_PUBLIC_REDIRECTS);
+  registerRedirects(app, LEGACY_ADMIN_REDIRECTS);
 
   app.use("/assets", express.static(path.join(projectRoot, "assets")));
   app.use("/content", express.static(contentDirectory));
@@ -65,15 +80,6 @@ export function createApp() {
   app.use("/profile", express.static(path.join(projectRoot, "profile")));
   app.use("/explanations", express.static(path.join(projectRoot, "explanations")));
   app.use("/admin", express.static(adminDirectory));
-
-  app.get("/admin/*rest", (req, res, next) => {
-    if (req.path.startsWith("/admin/permissions")) {
-      next();
-      return;
-    }
-
-    res.sendFile(path.join(adminDirectory, "index.html"));
-  });
 
   app.get("/api/health", (_req, res) => {
     res.json({ success: true, data: { status: "ok" } });

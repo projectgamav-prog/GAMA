@@ -1,4 +1,5 @@
 import {
+    CANONICAL_ADMIN_PATHS,
     CANONICAL_PUBLIC_PATHS,
     buildPathWithQuery,
     normalizeVerseMode,
@@ -51,7 +52,16 @@ import {
             index: withBase(CANONICAL_PUBLIC_PATHS.profile),
         },
         admin: {
-            permissions: mode === "admin" ? withBase("/permissions/index.html") : "/admin/permissions/index.html",
+            home: CANONICAL_ADMIN_PATHS.home,
+            books: CANONICAL_ADMIN_PATHS.books,
+            chapters: CANONICAL_ADMIN_PATHS.chapters,
+            verses: CANONICAL_ADMIN_PATHS.verses,
+            explanations: CANONICAL_ADMIN_PATHS.explanations,
+            characters: CANONICAL_ADMIN_PATHS.characters,
+            topics: CANONICAL_ADMIN_PATHS.topics,
+            places: CANONICAL_ADMIN_PATHS.places,
+            profile: CANONICAL_ADMIN_PATHS.profile,
+            permissions: CANONICAL_ADMIN_PATHS.permissions,
         },
     };
 

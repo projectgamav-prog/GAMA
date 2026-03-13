@@ -1,54 +1,64 @@
-# Public Route Map
+# Shared Route Map
 
-## Shared page runtime
+## Runtime model
 
-All normal content routes now boot the same shared page runtime from `/src/core/browser/page-entry.js`.
-Public HTML files are thin entry shells only.
-Admin shared routes are served by `admin/index.html`, which only sets admin mode and forwards into that same runtime.
+All normal content pages boot the shared page runtime from `/src/core/browser/page-entry.js`.
 
-## Canonical public routes
+- Public routes use real thin HTML wrappers at the repo root.
+- Admin shared routes use real thin HTML wrappers under `admin/*/index.html`.
+- Admin wrappers only set admin mode and then boot the same shared runtime.
+- `admin/permissions/index.html` remains an admin-only page and does not use the shared page registry.
 
-| Route | HTML entry | Shared page id |
+Normal shared admin routes no longer depend on a server catch-all rewrite to `admin/index.html`.
+
+## Public shared routes
+
+| Browser route | HTML entry | Shared page id |
 | --- | --- | --- |
-| `/` | `/index.html` | `home` |
-| `/books` | `/books/index.html` | `books` |
-| `/chapters` | `/chapters/index.html` | `chapters` |
-| `/verses` | `/verses/index.html` | `verses` |
-| `/explanations` | `/explanations/index.html` | `explanations` |
-| `/characters` | `/characters/index.html` | `characters` |
-| `/topics` | `/topics/index.html` | `topics` |
-| `/places` | `/places/index.html` | `places` |
-| `/profile` | `/profile/index.html` | `profile` |
+| `/` and `/index.html` | `/index.html` | `home` |
+| `/books/` and `/books/index.html` | `/books/index.html` | `books` |
+| `/chapters/` and `/chapters/index.html` | `/chapters/index.html` | `chapters` |
+| `/verses/` and `/verses/index.html` | `/verses/index.html` | `verses` |
+| `/explanations/` and `/explanations/index.html` | `/explanations/index.html` | `explanations` |
+| `/characters/` and `/characters/index.html` | `/characters/index.html` | `characters` |
+| `/topics/` and `/topics/index.html` | `/topics/index.html` | `topics` |
+| `/places/` and `/places/index.html` | `/places/index.html` | `places` |
+| `/profile/` and `/profile/index.html` | `/profile/index.html` | `profile` |
 
-## Canonical admin shared routes
+## Admin shared routes
 
-These routes use the same shared page definitions and renderers as public mode.
-The only admin-specific HTML entry for shared content is `admin/index.html`.
-
-| Public route | Admin route | Shared page id |
+| Browser route | HTML entry | Shared page id |
 | --- | --- | --- |
-| `/index.html` | `/admin/index.html` | `home` |
-| `/books/index.html` | `/admin/books/index.html` | `books` |
-| `/chapters/index.html` | `/admin/chapters/index.html` | `chapters` |
-| `/verses/index.html` | `/admin/verses/index.html` | `verses` |
-| `/explanations/index.html` | `/admin/explanations/index.html` | `explanations` |
-| `/characters/index.html` | `/admin/characters/index.html` | `characters` |
-| `/topics/index.html` | `/admin/topics/index.html` | `topics` |
-| `/places/index.html` | `/admin/places/index.html` | `places` |
-| `/profile/index.html` | `/admin/profile/index.html` | `profile` |
+| `/admin/` and `/admin/index.html` | `/admin/index.html` | `home` |
+| `/admin/books/` and `/admin/books/index.html` | `/admin/books/index.html` | `books` |
+| `/admin/chapters/` and `/admin/chapters/index.html` | `/admin/chapters/index.html` | `chapters` |
+| `/admin/verses/` and `/admin/verses/index.html` | `/admin/verses/index.html` | `verses` |
+| `/admin/explanations/` and `/admin/explanations/index.html` | `/admin/explanations/index.html` | `explanations` |
+| `/admin/characters/` and `/admin/characters/index.html` | `/admin/characters/index.html` | `characters` |
+| `/admin/topics/` and `/admin/topics/index.html` | `/admin/topics/index.html` | `topics` |
+| `/admin/places/` and `/admin/places/index.html` | `/admin/places/index.html` | `places` |
+| `/admin/profile/` and `/admin/profile/index.html` | `/admin/profile/index.html` | `profile` |
 
 ## Admin-only routes
 
-| Route | Notes |
-| --- | --- |
-| `/admin/permissions/index.html` | Management-only page for roles and permissions |
+| Browser route | HTML entry | Notes |
+| --- | --- | --- |
+| `/admin/permissions/` and `/admin/permissions/index.html` | `/admin/permissions/index.html` | Management-only page for roles and permissions |
 
-## Legacy route aliases redirected to canonical shells
+## Explicit legacy redirects
 
-| Legacy path | Canonical destination |
+These redirects exist so old URLs and half-supported aliases resolve cleanly without bringing back the old admin catch-all behavior.
+
+| Legacy path | Destination |
 | --- | --- |
 | `/verses/sanskrit-english.html` | `/verses/index.html` |
 | `/verses/sanskrit-hindi.html` | `/verses/index.html?mode=sanskrit-hindi` |
 | `/verses/english-only.html` | `/verses/index.html?mode=english-only` |
 | `/verses/hindi-only.html` | `/verses/index.html?mode=hindi-only` |
 | `/characters/detail.html?slug=...` | `/characters/index.html?slug=...` |
+| `/admin/home`, `/admin/home/`, `/admin/home/index.html` | `/admin/` |
+| `/admin/verses/sanskrit-english.html` | `/admin/verses/index.html` |
+| `/admin/verses/sanskrit-hindi.html` | `/admin/verses/index.html?mode=sanskrit-hindi` |
+| `/admin/verses/english-only.html` | `/admin/verses/index.html?mode=english-only` |
+| `/admin/verses/hindi-only.html` | `/admin/verses/index.html?mode=hindi-only` |
+| `/admin/characters/detail.html?slug=...` | `/admin/characters/index.html?slug=...` |

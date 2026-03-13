@@ -10,6 +10,28 @@ const DEFAULT_COVER_IMAGE = "/assets/images/lotus_background_4k.png";
 const FLASH_KEY = "admin:flash-message";
 
 const api = createAdminApi();
+const EDITABLE_PAGE_CONFIG = Object.freeze({
+    books: Object.freeze({
+        editableEntities: Object.freeze(["books"]),
+        createActions: Object.freeze([
+            Object.freeze({ selector: ".book-list-section", entity: "books", label: "Create Book" }),
+        ]),
+    }),
+    chapters: Object.freeze({
+        editableEntities: Object.freeze(["books", "chapters"]),
+        createActions: Object.freeze([
+            Object.freeze({ selector: ".chapter-list-section", entity: "book_sections", label: "Create Book Section" }),
+            Object.freeze({ selector: ".chapter-list-section", entity: "chapters", label: "Create Chapter" }),
+        ]),
+    }),
+    verses: Object.freeze({
+        editableEntities: Object.freeze(["chapters", "verses"]),
+        createActions: Object.freeze([
+            Object.freeze({ selector: ".verse-context", entity: "chapter_sections", label: "Create Chapter Section" }),
+            Object.freeze({ selector: ".verse-context", entity: "verses", label: "Create Verse" }),
+        ]),
+    }),
+});
 
 const state = {
     queryApi: BOOKS_QUERY_API,
@@ -64,6 +86,11 @@ function renderDockNav() {
         <a href="${routes.places.index}">Places</a>
         <a href="${routes.profile.index}">Profile</a>
     `;
+}
+
+function canManagePermissionsUi() {
+    return hasPermission(state.permissionContext, "permissions.manage")
+        || hasPermission(state.permissionContext, "users.manage");
 }
 
 function getCurrentBook() {
@@ -121,25 +148,63 @@ function getPageContext() {
 }
 
 function isEditablePage() {
-    return state.pageKind === "books" || state.pageKind === "chapters" || state.pageKind === "verses";
+    return Boolean(EDITABLE_PAGE_CONFIG[state.pageKind]);
 }
 
 function hasEditableSurface() {
-    if (!isEditablePage()) return false;
+    const editableEntities = EDITABLE_PAGE_CONFIG[state.pageKind]?.editableEntities || [];
+    return editableEntities.some((entity) => canEditEntity(state.permissionContext, entity));
+}
 
-    if (state.pageKind === "books") {
-        return canEditEntity(state.permissionContext, "books");
+function getDockState() {
+    const currentUser = window.authStorage?.getCurrentUser?.();
+
+    if (!currentUser) {
+        return {
+            copy: "This admin route is the same public page, but you need to sign in before any authoring tools can attach to it.",
+            status: "Sign in from the shared header to unlock admin controls.",
+            statusTone: "muted",
+            editToggleDisabled: true,
+        };
     }
 
-    if (state.pageKind === "chapters") {
-        return canEditEntity(state.permissionContext, "books") || canEditEntity(state.permissionContext, "chapters");
+    if (!canAccessAdmin(state.permissionContext)) {
+        return {
+            copy: "Your session can view this shared page in admin mode, but no authoring permissions are assigned to this account yet.",
+            status: "Read-only admin view for this account.",
+            statusTone: "muted",
+            editToggleDisabled: true,
+        };
     }
 
-    if (state.pageKind === "verses") {
-        return canEditEntity(state.permissionContext, "chapters") || canEditEntity(state.permissionContext, "verses");
+    if (!isEditablePage()) {
+        return {
+            copy: "This shared route already runs in admin mode, but its content model is still read-only in v1. The public UI remains the source of truth.",
+            status: "Read-only shared page.",
+            statusTone: "muted",
+            editToggleDisabled: true,
+        };
     }
 
-    return false;
+    if (!hasEditableSurface()) {
+        return {
+            copy: "You can access admin, but this page does not expose any editable entities for your current permission set.",
+            status: "No editable controls available on this page for your role.",
+            statusTone: "muted",
+            editToggleDisabled: true,
+        };
+    }
+
+    return {
+        copy: state.editMode
+            ? "Edit Mode is on. The page stays visually identical to public while contextual admin controls attach to the rendered content."
+            : "Edit Mode is off. You are viewing the exact public page with only this floating admin dock added.",
+        status: ui.status?.textContent.trim()
+            ? ""
+            : "Shared page is live. Turn on Edit Mode to attach authoring controls.",
+        statusTone: "muted",
+        editToggleDisabled: false,
+    };
 }
 
 function createDockAndDrawer() {
@@ -151,8 +216,8 @@ function createDockAndDrawer() {
             <h2 class="admin-dock-title">Shared Public UI + Authoring Layer</h2>
             <div class="admin-dock-nav">
                 ${renderDockNav()}
-                ${hasPermission(state.permissionContext, "permissions.manage") || hasPermission(state.permissionContext, "users.manage")
-                    ? '<a href="/admin/permissions/index.html">Permissions</a>'
+                ${canManagePermissionsUi()
+                    ? `<a href="${window.APP_ROUTES?.admin?.permissions || "/admin/permissions/index.html"}">Permissions</a>`
                     : ""}
             </div>
             <p class="admin-dock-copy" id="adminDockCopy"></p>
@@ -215,44 +280,13 @@ function consumeFlashMessage() {
 }
 
 function renderDock() {
-    const currentUser = window.authStorage?.getCurrentUser?.();
+    const dockState = getDockState();
     ui.editToggle.checked = state.editMode;
+    ui.editToggle.disabled = dockState.editToggleDisabled;
+    ui.copy.textContent = dockState.copy;
 
-    if (!currentUser) {
-        ui.copy.textContent = "This admin route is the same public page, but you need to sign in before any authoring tools can attach to it.";
-        setDockStatus("Sign in from the shared header to unlock admin controls.", "muted");
-        ui.editToggle.disabled = true;
-        return;
-    }
-
-    if (!canAccessAdmin(state.permissionContext)) {
-        ui.copy.textContent = "Your session can view this shared page in admin mode, but no authoring permissions are assigned to this account yet.";
-        setDockStatus("Read-only admin view for this account.", "muted");
-        ui.editToggle.disabled = true;
-        return;
-    }
-
-    if (!isEditablePage()) {
-        ui.copy.textContent = "This shared route already runs in admin mode, but its content model is still read-only in v1. The public UI remains the source of truth.";
-        setDockStatus("Read-only shared page.", "muted");
-        ui.editToggle.disabled = true;
-        return;
-    }
-
-    if (!hasEditableSurface()) {
-        ui.copy.textContent = "You can access admin, but this page does not expose any editable entities for your current permission set.";
-        setDockStatus("No editable controls available on this page for your role.", "muted");
-        ui.editToggle.disabled = true;
-        return;
-    }
-
-    ui.editToggle.disabled = false;
-    ui.copy.textContent = state.editMode
-        ? "Edit Mode is on. The page stays visually identical to public while contextual admin controls attach to the rendered content."
-        : "Edit Mode is off. You are viewing the exact public page with only this floating admin dock added.";
-
-    if (!ui.status.textContent.trim()) {
-        setDockStatus("Shared page is live. Turn on Edit Mode to attach authoring controls.", "muted");
+    if (dockState.status) {
+        setDockStatus(dockState.status, dockState.statusTone);
     }
 }
 
@@ -351,21 +385,7 @@ function canCreateEntity(entity) {
 }
 
 function attachCreateActions() {
-    const actionsByPage = {
-        books: [
-            { selector: ".book-list-section", entity: "books", label: "Create Book" },
-        ],
-        chapters: [
-            { selector: ".chapter-list-section", entity: "book_sections", label: "Create Book Section" },
-            { selector: ".chapter-list-section", entity: "chapters", label: "Create Chapter" },
-        ],
-        verses: [
-            { selector: ".verse-context", entity: "chapter_sections", label: "Create Chapter Section" },
-            { selector: ".verse-context", entity: "verses", label: "Create Verse" },
-        ],
-    };
-
-    (actionsByPage[state.pageKind] || []).forEach((action) => {
+    (EDITABLE_PAGE_CONFIG[state.pageKind]?.createActions || []).forEach((action) => {
         if (!canCreateEntity(action.entity)) return;
         const target = document.querySelector(action.selector);
         if (!(target instanceof HTMLElement)) return;

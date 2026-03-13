@@ -307,13 +307,13 @@
 
         if (action === "open-admin") {
             setAccountMenuOpen(false);
-            window.location.href = "/admin/index.html";
+            window.location.href = routes.admin?.home || "/admin/index.html";
             return;
         }
 
         if (action === "open-permissions") {
             setAccountMenuOpen(false);
-            window.location.href = "/admin/permissions/index.html";
+            window.location.href = routes.admin?.permissions || "/admin/permissions/index.html";
             return;
         }
 
