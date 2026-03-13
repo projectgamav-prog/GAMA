@@ -1,5 +1,10 @@
 import { getContentEntityConfig } from "./content-config.js";
 
+const EXPLANATION_ENDPOINTS = Object.freeze({
+    documents: "/api/explanation-documents",
+    blocks: "/api/explanation-blocks",
+});
+
 async function apiRequest(path, options = {}) {
     const response = await fetch(path, {
         method: options.method || "GET",
@@ -23,24 +28,27 @@ async function apiRequest(path, options = {}) {
     return payload.data;
 }
 
+function buildQueryString(filters = {}) {
+    const params = new URLSearchParams();
+    Object.entries(filters || {}).forEach(([key, value]) => {
+        if (value == null || value === "") {
+            return;
+        }
+
+        params.set(key, String(value));
+    });
+
+    const query = params.toString();
+    return query ? `?${query}` : "";
+}
+
 export function createAdminApi() {
     return {
         request: apiRequest,
         async listRecords(entity, filters = {}) {
             const config = getContentEntityConfig(entity);
             if (!config) throw new Error(`Unsupported admin entity "${entity}".`);
-
-            const params = new URLSearchParams();
-            Object.entries(filters || {}).forEach(([key, value]) => {
-                if (value == null || value === "") {
-                    return;
-                }
-
-                params.set(key, String(value));
-            });
-
-            const query = params.toString();
-            return apiRequest(query ? `${config.endpoint}?${query}` : config.endpoint);
+            return apiRequest(`${config.endpoint}${buildQueryString(filters)}`);
         },
         async getRecord(entity, recordId) {
             const config = getContentEntityConfig(entity);
@@ -67,6 +75,73 @@ export function createAdminApi() {
             const config = getContentEntityConfig(entity);
             if (!config) throw new Error(`Unsupported admin entity "${entity}".`);
             return apiRequest(`${config.endpoint}/${recordId}`, {
+                method: "DELETE",
+            });
+        },
+        async listExplanationDocuments(filters = {}) {
+            return apiRequest(`${EXPLANATION_ENDPOINTS.documents}${buildQueryString(filters)}`);
+        },
+        async getExplanationDocument(documentId) {
+            return apiRequest(`${EXPLANATION_ENDPOINTS.documents}/${encodeURIComponent(documentId)}`);
+        },
+        async getExplanationDocumentForTarget(targetType, targetId) {
+            const records = await apiRequest(
+                `${EXPLANATION_ENDPOINTS.documents}${buildQueryString({
+                    target_type: targetType,
+                    target_id: targetId,
+                })}`
+            );
+
+            return Array.isArray(records) ? records[0] || null : null;
+        },
+        async createExplanationDocument(targetType, targetId, payload = {}) {
+            return apiRequest(EXPLANATION_ENDPOINTS.documents, {
+                method: "POST",
+                body: JSON.stringify({
+                    target_type: targetType,
+                    target_id: targetId,
+                    status: payload.status || "draft",
+                }),
+            });
+        },
+        async updateExplanationDocument(documentId, payload) {
+            return apiRequest(`${EXPLANATION_ENDPOINTS.documents}/${encodeURIComponent(documentId)}`, {
+                method: "PUT",
+                body: JSON.stringify(payload),
+            });
+        },
+        async listExplanationBlocks(explanationId) {
+            const records = await apiRequest(
+                `${EXPLANATION_ENDPOINTS.blocks}${buildQueryString({
+                    explanation_id: explanationId,
+                })}`
+            );
+
+            return Array.isArray(records) ? records : [];
+        },
+        async createExplanationBlock(explanationId, payload) {
+            return apiRequest(EXPLANATION_ENDPOINTS.blocks, {
+                method: "POST",
+                body: JSON.stringify({
+                    explanation_id: explanationId,
+                    ...payload,
+                }),
+            });
+        },
+        async updateExplanationBlock(blockId, payload) {
+            return apiRequest(`${EXPLANATION_ENDPOINTS.blocks}/${encodeURIComponent(blockId)}`, {
+                method: "PUT",
+                body: JSON.stringify(payload),
+            });
+        },
+        async toggleExplanationBlockVisibility(blockId, isVisible) {
+            return apiRequest(`${EXPLANATION_ENDPOINTS.blocks}/${encodeURIComponent(blockId)}`, {
+                method: "PUT",
+                body: JSON.stringify({ is_visible: Boolean(isVisible) }),
+            });
+        },
+        async deleteExplanationBlock(blockId) {
+            return apiRequest(`${EXPLANATION_ENDPOINTS.blocks}/${encodeURIComponent(blockId)}`, {
                 method: "DELETE",
             });
         },

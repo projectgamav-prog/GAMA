@@ -32,7 +32,7 @@ function createAction(label, onClick, variant = "secondary") {
     };
 }
 
-function createEditAction({ entity, record, openEditor, fieldScope = "default", label = "" }) {
+function createEditAction({ entity, record, openEditor, fieldScope = "default", allowDelete = true, label = "" }) {
     if (!record) {
         return null;
     }
@@ -49,7 +49,7 @@ function createEditAction({ entity, record, openEditor, fieldScope = "default", 
             mode: "edit",
             recordId: record.id,
             fieldScope,
-            allowDelete: fieldScope !== "explanations",
+            allowDelete,
         })
     );
 }
@@ -223,23 +223,39 @@ function getVersesPageState(context, permissionContext, openEditor) {
 
 function getExplanationsPageState(context, permissionContext, openEditor) {
     const currentVerse = context.currentVerse;
+    const currentDocument = context.currentExplanationDocument;
+    const blockCount = Array.isArray(context.currentExplanationBlocks) ? context.currentExplanationBlocks.length : 0;
     const actions = [];
+
+    if (currentVerse && hasPermission(permissionContext, "verses.edit")) {
+        actions.push(createAction(
+            currentDocument ? "Manage Explanation" : "Create Explanation",
+            () => openEditor({
+                workflow: "explanations",
+            }),
+            "primary"
+        ));
+    }
 
     if (currentVerse && canUpdateEntity(permissionContext, "verses")) {
         actions.push(createEditAction({
             entity: "verses",
             record: currentVerse,
             openEditor,
-            fieldScope: "explanations",
-            label: "Edit Current Verse",
+            allowDelete: false,
+            label: "Edit Verse",
         }));
     }
 
     return {
         title: currentVerse ? `Explanation for ${getRecordLabel("verses", currentVerse)}` : "Explanation authoring",
         status: currentVerse
-            ? "Verse and Meaning stay canonical here. Editorial explanation blocks now load from a dedicated explanation document for this verse, and block editing will layer on next."
-            : "Open an explanation route with a real verse context to edit canonical verse fields while explanation documents and blocks stay route-driven.",
+            ? (
+                currentDocument
+                    ? `${getRecordLabel("verses", currentVerse)} has a ${currentDocument.status} explanation document with ${blockCount} block${blockCount === 1 ? "" : "s"}.`
+                    : `No explanation document exists yet for ${getRecordLabel("verses", currentVerse)}. Create one to start managing ordered explanation blocks.`
+            )
+            : "Open an explanation route with a real verse context to manage the current verse explanation document and blocks.",
         tone: "muted",
         actions,
     };

@@ -1,5 +1,6 @@
 import { hasPermission } from "../permissions/access.js";
 import { createAdminApi } from "./api.js";
+import { createExplanationEditorPanel } from "./explanation-editor.js";
 import {
     getContentEntityConfig,
     getContentEntityFields,
@@ -36,10 +37,6 @@ function getPanelTitle(state) {
 }
 
 function getPanelSubtitle(state) {
-    if (state.fieldScope === "explanations") {
-        return "This explanation view currently edits the canonical verse and meaning fields. Editorial explanation blocks now live in a separate explanation document and will get their own block editor next.";
-    }
-
     if (state.mode === "create") {
         return "Create a new record inline, save through the existing CRUD API, and refresh the current shared page.";
     }
@@ -213,7 +210,7 @@ function createFieldElement(field, values, context, permissionContext, loading) 
     return wrapper;
 }
 
-export function createAdminEditorPanel({
+function createContentRecordEditorPanel({
     host,
     getPermissionContext,
     getPageContext,
@@ -528,6 +525,56 @@ export function createAdminEditorPanel({
         },
         getElement() {
             return panel;
+        },
+    };
+}
+
+export function createAdminEditorPanel({
+    host,
+    getPermissionContext,
+    getPageContext,
+    onStatusChange,
+}) {
+    const recordEditor = createContentRecordEditorPanel({
+        host,
+        getPermissionContext,
+        getPageContext,
+        onStatusChange,
+    });
+
+    const explanationEditor = createExplanationEditorPanel({
+        host,
+        getPermissionContext,
+        getPageContext,
+        onStatusChange,
+    });
+
+    function close() {
+        recordEditor.close();
+        explanationEditor.close();
+    }
+
+    return {
+        async open(options = {}) {
+            if (options?.workflow === "explanations") {
+                recordEditor.close();
+                await explanationEditor.open(options);
+                return;
+            }
+
+            explanationEditor.close();
+            await recordEditor.open(options);
+        },
+        close,
+        rerender() {
+            recordEditor.rerender();
+            explanationEditor.rerender();
+        },
+        isOpen() {
+            return recordEditor.isOpen() || explanationEditor.isOpen();
+        },
+        getElement() {
+            return explanationEditor.isOpen() ? explanationEditor.getElement() : recordEditor.getElement();
         },
     };
 }

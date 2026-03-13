@@ -5,6 +5,9 @@ import {
 import {
     getVerseExplanationContent,
 } from "../../content/explanations/queries.js";
+import {
+    setExplanationPageBridge,
+} from "../../content/explanations/page-bridge.js";
 import { renderExplanationBlocks } from "../../content/explanations/block-renderer.js";
 import { createSharedPageDefinition } from "../shared-page.js";
 
@@ -82,6 +85,12 @@ function renderMeaningCard(container, verse) {
     }
 }
 
+function getAdminEmptyMessage(mode) {
+    return mode === "admin"
+        ? "No editorial explanation blocks exist for this verse yet. Use the inline explanation editor to create the document and add ordered blocks."
+        : "Editorial explanation for this verse is still being prepared.";
+}
+
 function initializeExplanationsPage({ mode, routeResolver }) {
     const context = getCurrentContext();
     const body = document.body;
@@ -102,6 +111,33 @@ function initializeExplanationsPage({ mode, routeResolver }) {
     const prevLink = document.getElementById("explanationPrevVerse");
     const nextLink = document.getElementById("explanationNextVerse");
     const verseDetailCard = document.getElementById("explanationVerseCard");
+    const pageState = {
+        targetType: "verse",
+        targetId: verse.id,
+        document: null,
+        blocks: [],
+    };
+
+    function applyExplanationContent({ document = null, blocks: nextBlocks = [] } = {}) {
+        pageState.document = document || null;
+        pageState.blocks = Array.isArray(nextBlocks) ? [...nextBlocks] : [];
+
+        if (!(blocks instanceof HTMLElement)) {
+            return;
+        }
+
+        if (pageState.document) {
+            blocks.dataset.explanationDocumentId = pageState.document.id;
+        } else {
+            delete blocks.dataset.explanationDocumentId;
+        }
+
+        renderExplanationBlocks({
+            container: blocks,
+            blocks: pageState.blocks,
+            emptyMessage: getAdminEmptyMessage(mode),
+        });
+    }
 
     document.title = `${book.title} | Chapter ${chapter.chapter_number} | Verse ${verse.verse_number} Explanation`;
     body.dataset.educationItem = book.slug === DEFAULT_BOOK_SLUG ? "books-gita" : "books-all";
@@ -148,26 +184,29 @@ function initializeExplanationsPage({ mode, routeResolver }) {
     applyVerseAdminTarget(meaningCard, { book, chapter, verse });
     renderMeaningCard(meaningCard, verse);
 
-    if (blocks) {
-        const explanationContent = getVerseExplanationContent(verse.id, {
+    applyExplanationContent(
+        getVerseExplanationContent(verse.id, {
             includeDraft: mode === "admin",
             includeHidden: mode === "admin",
-        });
+        })
+    );
 
-        if (explanationContent.document) {
-            blocks.dataset.explanationDocumentId = explanationContent.document.id;
-        } else {
-            delete blocks.dataset.explanationDocumentId;
-        }
-
-        renderExplanationBlocks({
-            container: blocks,
-            blocks: explanationContent.blocks,
-            emptyMessage: mode === "admin"
-                ? "No editorial explanation blocks exist for this verse yet. The new document and block model is live, and inline block editing can layer on next."
-                : "Editorial explanation for this verse is still being prepared.",
-        });
-    }
+    setExplanationPageBridge({
+        getState() {
+            return Object.freeze({
+                targetType: pageState.targetType,
+                targetId: pageState.targetId,
+                document: pageState.document,
+                blocks: Object.freeze([...pageState.blocks]),
+            });
+        },
+        setExplanationContent(nextState = {}) {
+            applyExplanationContent(nextState);
+        },
+        clearExplanationContent() {
+            applyExplanationContent({ document: null, blocks: [] });
+        },
+    });
 
     const currentIndex = verses.findIndex((record) => record.id === verse.id);
     const previousVerse = currentIndex > 0 ? verses[currentIndex - 1] : null;

@@ -255,15 +255,6 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
         fields: VERSE_FIELDS,
         permissionKey: getEntityEditPermissionKey("verses"),
         sortable: false,
-        fieldScopes: Object.freeze({
-            explanations: Object.freeze([
-                "sanskrit_text",
-                "transliteration_text",
-                "english_text",
-                "hindi_text",
-                "audio_url",
-            ]),
-        }),
         getRecordLabel(record) {
             return record?.verse_number ? `Verse ${record.verse_number}` : "Verse";
         },

@@ -264,6 +264,130 @@ body.admin-mode-page {
     box-shadow: 0 12px 24px rgba(141, 42, 30, 0.1);
 }
 
+.admin-explanation-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.admin-explanation-summary-card,
+.admin-explanation-document-card,
+.admin-explanation-empty-state,
+.admin-explanation-block-card,
+.admin-explanation-form-card {
+    border: 1px solid rgba(96, 72, 38, 0.14);
+    border-radius: 24px;
+    background: rgba(255, 252, 247, 0.94);
+    box-shadow: 0 18px 40px rgba(37, 24, 10, 0.06);
+}
+
+.admin-explanation-summary-card {
+    padding: 16px 18px;
+}
+
+.admin-explanation-summary-value,
+.admin-explanation-block-title,
+.admin-explanation-section-title {
+    margin: 0;
+    color: #2d2418;
+}
+
+.admin-explanation-summary-value {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.admin-explanation-document-card,
+.admin-explanation-empty-state,
+.admin-explanation-form-card {
+    display: grid;
+    gap: 16px;
+    padding: 20px 22px;
+}
+
+.admin-explanation-document-actions {
+    justify-content: flex-start;
+}
+
+.admin-explanation-section-header {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.admin-explanation-section-copy {
+    display: grid;
+    gap: 8px;
+}
+
+.admin-explanation-section-detail {
+    margin: 0;
+}
+
+.admin-explanation-pills,
+.admin-explanation-block-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.admin-explanation-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(143, 95, 39, 0.1);
+    color: #5b3b16;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.admin-explanation-pill.is-published,
+.admin-explanation-pill.is-visible {
+    background: rgba(47, 109, 61, 0.12);
+    color: var(--admin-success);
+}
+
+.admin-explanation-pill.is-draft,
+.admin-explanation-pill.is-hidden {
+    background: rgba(141, 42, 30, 0.1);
+    color: var(--admin-danger);
+}
+
+.admin-explanation-block-list {
+    display: grid;
+    gap: 18px;
+}
+
+.admin-explanation-block-cards {
+    display: grid;
+    gap: 14px;
+}
+
+.admin-explanation-block-card {
+    display: grid;
+    gap: 14px;
+    padding: 18px 20px;
+}
+
+.admin-explanation-block-card.is-hidden {
+    border-style: dashed;
+    opacity: 0.82;
+}
+
+.admin-explanation-block-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.admin-explanation-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .permissions-page-title {
     margin: 0;
     color: #2d2418;
@@ -494,6 +618,7 @@ body.admin-mode-page {
 
 @media (max-width: 960px) {
     .admin-inline-bar-inner,
+    .admin-explanation-summary-grid,
     .permissions-overview,
     .permissions-role-grid,
     .permissions-checkbox-grid {
@@ -534,6 +659,13 @@ body.admin-mode-page {
 
     .admin-editor-header {
         display: grid;
+    }
+
+    .admin-explanation-document-card,
+    .admin-explanation-empty-state,
+    .admin-explanation-form-card,
+    .admin-explanation-block-card {
+        padding: 18px;
     }
 
     .permissions-override-row {
