@@ -1,4 +1,5 @@
 import { createSharedPageDefinition } from "../shared-page.js";
+import { initializeContentInteractions } from "../../content/ui/content-interactions.js";
 
 const PLACES = Object.freeze([
     Object.freeze({
@@ -70,6 +71,8 @@ function initializePlacesPage() {
     PLACES.forEach((place, index) => {
         grid.appendChild(createPlaceCard(place, index + 1));
     });
+
+    initializeContentInteractions(grid);
 }
 
 export const PLACES_PAGE_DEFINITION = createSharedPageDefinition({

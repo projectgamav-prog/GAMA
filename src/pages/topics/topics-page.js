@@ -1,4 +1,5 @@
 import { createSharedPageDefinition } from "../shared-page.js";
+import { initializeContentInteractions } from "../../content/ui/content-interactions.js";
 
 const TOPICS = Object.freeze([
     Object.freeze({
@@ -70,6 +71,8 @@ function initializeTopicsPage() {
     TOPICS.forEach((topic, index) => {
         grid.appendChild(createTopicCard(topic, index + 1));
     });
+
+    initializeContentInteractions(grid);
 }
 
 export const TOPICS_PAGE_DEFINITION = createSharedPageDefinition({
