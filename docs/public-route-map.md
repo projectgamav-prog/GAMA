@@ -8,42 +8,43 @@ All normal content pages boot the shared page runtime from `/src/core/browser/pa
 - Admin shared routes use real thin HTML wrappers under `admin/*/index.html`.
 - Admin wrappers only set admin mode and then boot the same shared runtime.
 - `admin/permissions/index.html` remains an admin-only page and does not use the shared page registry.
+- Route config constants use the `index.html` entry paths below; directory URLs like `/books/` or `/admin/books/` are also served by the filesystem-backed wrappers.
 
 Normal shared admin routes no longer depend on a server catch-all rewrite to `admin/index.html`.
 
 ## Public shared routes
 
-| Browser route | HTML entry | Shared page id |
+| Route helper path | Also served at | Shared page id |
 | --- | --- | --- |
-| `/` and `/index.html` | `/index.html` | `home` |
-| `/books/` and `/books/index.html` | `/books/index.html` | `books` |
-| `/chapters/` and `/chapters/index.html` | `/chapters/index.html` | `chapters` |
-| `/verses/` and `/verses/index.html` | `/verses/index.html` | `verses` |
-| `/explanations/` and `/explanations/index.html` | `/explanations/index.html` | `explanations` |
-| `/characters/` and `/characters/index.html` | `/characters/index.html` | `characters` |
-| `/topics/` and `/topics/index.html` | `/topics/index.html` | `topics` |
-| `/places/` and `/places/index.html` | `/places/index.html` | `places` |
-| `/profile/` and `/profile/index.html` | `/profile/index.html` | `profile` |
+| `/index.html` | `/` | `home` |
+| `/books/index.html` | `/books/` | `books` |
+| `/chapters/index.html` | `/chapters/` | `chapters` |
+| `/verses/index.html` | `/verses/` | `verses` |
+| `/explanations/index.html` | `/explanations/` | `explanations` |
+| `/characters/index.html` | `/characters/` | `characters` |
+| `/topics/index.html` | `/topics/` | `topics` |
+| `/places/index.html` | `/places/` | `places` |
+| `/profile/index.html` | `/profile/` | `profile` |
 
 ## Admin shared routes
 
-| Browser route | HTML entry | Shared page id |
+| Route helper path | Also served at | Shared page id |
 | --- | --- | --- |
-| `/admin/` and `/admin/index.html` | `/admin/index.html` | `home` |
-| `/admin/books/` and `/admin/books/index.html` | `/admin/books/index.html` | `books` |
-| `/admin/chapters/` and `/admin/chapters/index.html` | `/admin/chapters/index.html` | `chapters` |
-| `/admin/verses/` and `/admin/verses/index.html` | `/admin/verses/index.html` | `verses` |
-| `/admin/explanations/` and `/admin/explanations/index.html` | `/admin/explanations/index.html` | `explanations` |
-| `/admin/characters/` and `/admin/characters/index.html` | `/admin/characters/index.html` | `characters` |
-| `/admin/topics/` and `/admin/topics/index.html` | `/admin/topics/index.html` | `topics` |
-| `/admin/places/` and `/admin/places/index.html` | `/admin/places/index.html` | `places` |
-| `/admin/profile/` and `/admin/profile/index.html` | `/admin/profile/index.html` | `profile` |
+| `/admin/index.html` | `/admin/` | `home` |
+| `/admin/books/index.html` | `/admin/books/` | `books` |
+| `/admin/chapters/index.html` | `/admin/chapters/` | `chapters` |
+| `/admin/verses/index.html` | `/admin/verses/` | `verses` |
+| `/admin/explanations/index.html` | `/admin/explanations/` | `explanations` |
+| `/admin/characters/index.html` | `/admin/characters/` | `characters` |
+| `/admin/topics/index.html` | `/admin/topics/` | `topics` |
+| `/admin/places/index.html` | `/admin/places/` | `places` |
+| `/admin/profile/index.html` | `/admin/profile/` | `profile` |
 
 ## Admin-only routes
 
-| Browser route | HTML entry | Notes |
+| Route helper path | Also served at | Notes |
 | --- | --- | --- |
-| `/admin/permissions/` and `/admin/permissions/index.html` | `/admin/permissions/index.html` | Management-only page for roles and permissions |
+| `/admin/permissions/index.html` | `/admin/permissions/` | Management-only page for roles and permissions |
 
 ## Explicit legacy redirects
 
@@ -56,7 +57,7 @@ These redirects exist so old URLs and half-supported aliases resolve cleanly wit
 | `/verses/english-only.html` | `/verses/index.html?mode=english-only` |
 | `/verses/hindi-only.html` | `/verses/index.html?mode=hindi-only` |
 | `/characters/detail.html?slug=...` | `/characters/index.html?slug=...` |
-| `/admin/home`, `/admin/home/`, `/admin/home/index.html` | `/admin/` |
+| `/admin/home`, `/admin/home/`, `/admin/home/index.html` | `/admin/index.html` |
 | `/admin/verses/sanskrit-english.html` | `/admin/verses/index.html` |
 | `/admin/verses/sanskrit-hindi.html` | `/admin/verses/index.html?mode=sanskrit-hindi` |
 | `/admin/verses/english-only.html` | `/admin/verses/index.html?mode=english-only` |

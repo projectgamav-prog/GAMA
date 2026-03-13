@@ -61,10 +61,6 @@ export function createApp() {
     res.redirect(302, buildPathWithQuery("/admin/", req.query));
   });
 
-  app.get(["/admin/home", "/admin/home/", "/admin/home/index.html"], (req, res) => {
-    res.redirect(302, buildPathWithQuery("/admin/", req.query));
-  });
-
   registerRedirects(app, LEGACY_PUBLIC_REDIRECTS);
   registerRedirects(app, LEGACY_ADMIN_REDIRECTS);
 

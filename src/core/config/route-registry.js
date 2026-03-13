@@ -52,6 +52,8 @@ export const LEGACY_PUBLIC_REDIRECTS = Object.freeze([
 ]);
 
 export const LEGACY_ADMIN_REDIRECTS = Object.freeze([
+    Object.freeze({ from: "/admin/home", to: CANONICAL_ADMIN_PATHS.home }),
+    Object.freeze({ from: "/admin/home/", to: CANONICAL_ADMIN_PATHS.home }),
     Object.freeze({ from: "/admin/home/index.html", to: CANONICAL_ADMIN_PATHS.home }),
     Object.freeze({ from: "/admin/verses/sanskrit-english.html", to: CANONICAL_ADMIN_PATHS.verses }),
     Object.freeze({ from: "/admin/verses/sanskrit-hindi.html", to: CANONICAL_ADMIN_PATHS.verses, query: Object.freeze({ mode: "sanskrit-hindi" }) }),

@@ -81,6 +81,7 @@ function renderDockNav() {
         <a href="${routes.books.index}">Books</a>
         <a href="${routes.chapters.index}">Chapters</a>
         <a href="${routes.verses.index}">Verses</a>
+        <a href="${routes.explanations.index}">Explanations</a>
         <a href="${routes.characters.index}">Characters</a>
         <a href="${routes.topics.index}">Topics</a>
         <a href="${routes.places.index}">Places</a>
