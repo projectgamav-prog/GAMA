@@ -1,44 +1,54 @@
+import {
+    CANONICAL_PUBLIC_PATHS,
+    buildPathWithQuery,
+    normalizeVerseMode,
+} from "./route-registry.js";
+
 (function () {
     const existingContext = window.APP_CONTEXT || {};
     const mode = existingContext.mode === "admin" ? "admin" : "public";
     const routeBase = mode === "admin" ? "/admin" : "";
-    const withBase = (path) => `${routeBase}${path}`;
+    const withBase = (path, query = {}) => buildPathWithQuery(`${routeBase}${path}`, query);
 
     const routes = {
-        home: withBase("/index.html"),
+        home: withBase(CANONICAL_PUBLIC_PATHS.home),
         books: {
-            index: withBase("/books/index.html"),
-            gita: withBase("/chapters/index.html"),
+            index: withBase(CANONICAL_PUBLIC_PATHS.books),
+            gita: withBase(CANONICAL_PUBLIC_PATHS.chapters),
         },
         chapters: {
-            index: withBase("/chapters/index.html"),
+            index: withBase(CANONICAL_PUBLIC_PATHS.chapters),
         },
         verses: {
-            index: withBase("/verses/index.html"),
-            sanskritEnglish: withBase("/verses/index.html"),
-            sanskritEnglishExplicit: withBase("/verses/sanskrit-english.html"),
-            sanskritHindi: withBase("/verses/sanskrit-hindi.html"),
-            englishOnly: withBase("/verses/english-only.html"),
-            hindiOnly: withBase("/verses/hindi-only.html"),
+            index: withBase(CANONICAL_PUBLIC_PATHS.verses),
+            sanskritEnglish: withBase(CANONICAL_PUBLIC_PATHS.verses),
+            sanskritHindi: withBase(CANONICAL_PUBLIC_PATHS.verses, { mode: "sanskrit-hindi" }),
+            englishOnly: withBase(CANONICAL_PUBLIC_PATHS.verses, { mode: "english-only" }),
+            hindiOnly: withBase(CANONICAL_PUBLIC_PATHS.verses, { mode: "hindi-only" }),
+            byMode(modeName) {
+                const normalizedMode = normalizeVerseMode(modeName);
+                return normalizedMode === "sanskrit-english"
+                    ? this.index
+                    : withBase(CANONICAL_PUBLIC_PATHS.verses, { mode: normalizedMode });
+            },
         },
         explanations: {
-            index: withBase("/explanations/index.html"),
+            index: withBase(CANONICAL_PUBLIC_PATHS.explanations),
         },
         characters: {
-            index: withBase("/characters/index.html"),
-            detailBase: withBase("/characters/detail.html"),
+            index: withBase(CANONICAL_PUBLIC_PATHS.characters),
             bySlug(slug) {
-                return `${this.detailBase}?slug=${encodeURIComponent(slug)}`;
+                return withBase(CANONICAL_PUBLIC_PATHS.characters, { slug });
             },
         },
         topics: {
-            index: withBase("/topics/index.html"),
+            index: withBase(CANONICAL_PUBLIC_PATHS.topics),
         },
         places: {
-            index: withBase("/places/index.html"),
+            index: withBase(CANONICAL_PUBLIC_PATHS.places),
         },
         profile: {
-            index: withBase("/profile/index.html"),
+            index: withBase(CANONICAL_PUBLIC_PATHS.profile),
         },
         admin: {
             permissions: mode === "admin" ? withBase("/permissions/index.html") : "/admin/permissions/index.html",

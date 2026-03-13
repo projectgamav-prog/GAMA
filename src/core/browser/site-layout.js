@@ -4,9 +4,6 @@
     const routes = window.APP_ROUTES;
     if (!routes) return;
 
-    const headerMount = document.querySelector("[data-shared-header]");
-    const footerMount = document.querySelector("[data-shared-footer]");
-
     const NAV_ITEMS = {
         books: [
             { label: "All Books", href: routes.books.index, item: "books-all" },
@@ -144,7 +141,9 @@
         const explicitItem = body.dataset.educationItem;
         if (explicitItem) return explicitItem;
 
-        if (window.location.pathname === routes.characters.detailBase) {
+        const currentPath = window.location.pathname.replace(/\/$/, "");
+        const canonicalCharacterPath = routes.characters.index.replace(/\/index\.html$/, "");
+        if (currentPath === routes.characters.index || currentPath === canonicalCharacterPath) {
             const slug = new URLSearchParams(window.location.search).get("slug");
             if (slug && NAV_ITEMS.characters.some((link) => link.item === `character-${slug}`)) {
                 return `character-${slug}`;
@@ -156,6 +155,7 @@
     }
 
     function renderHeader() {
+        const headerMount = document.querySelector("[data-shared-header]");
         if (!headerMount) return;
 
         const navSection = body.dataset.navSection || "";
@@ -210,6 +210,7 @@
     }
 
     function renderFooter() {
+        const footerMount = document.querySelector("[data-shared-footer]");
         if (!footerMount) return;
 
         const variantKey = body.dataset.footerVariant || "home";
@@ -243,7 +244,25 @@
         document.body.appendChild(modalRoot);
     }
 
+    function syncEducationNavigation() {
+        const activeEducationItem = getActiveEducationItem();
+        const educationLinks = Array.from(document.querySelectorAll(".mega-menu-group a"));
+
+        educationLinks.forEach((link) => {
+            const navItem = Object.values(NAV_ITEMS)
+                .flat()
+                .find((item) => item.href === link.getAttribute("href"));
+            const isActive = Boolean(navItem && navItem.item === activeEducationItem);
+            link.classList.toggle("active", isActive);
+        });
+    }
+
     renderHeader();
     renderFooter();
     ensureSharedAuthMount();
+
+    window.sharedLayout = {
+        ...(window.sharedLayout || {}),
+        syncEducationNavigation,
+    };
 })();

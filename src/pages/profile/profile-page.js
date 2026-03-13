@@ -1,8 +1,10 @@
-(() => {
-    const AUTH_STATE_EVENT = "auth:statechange";
+import { createSharedPageDefinition } from "../shared-page.js";
 
+const AUTH_STATE_EVENT = "auth:statechange";
+
+function initializeProfilePage() {
     const body = document.body;
-    if (!body || !body.classList.contains("profile-page")) return;
+    if (!body) return;
     const storage = window.authStorage;
     if (!storage) return;
 
@@ -112,4 +114,91 @@
     storage.ready.finally(() => {
         renderFromUser(storage.toPublicUser(storage.getCurrentUser()));
     });
-})();
+}
+
+export const PROFILE_PAGE_DEFINITION = createSharedPageDefinition({
+    id: "profile",
+    title: "Bhagavad Gita | Profile",
+    bodyClasses: ["profile-page"],
+    bodyDataset: {
+        navSection: "education",
+        footerVariant: "profile",
+    },
+    shellClassName: "profile-shell",
+    render() {
+        return `
+            <main class="profile-main">
+                <nav class="profile-breadcrumb" aria-label="Breadcrumb">
+                    <a href="#" data-route="home">Home</a>
+                    <span>&gt;</span>
+                    <span>Profile</span>
+                </nav>
+
+                <section class="profile-hero-card" id="profileHeroCard" hidden>
+                    <div class="profile-avatar-large" id="profileAvatar" aria-hidden="true">P</div>
+                    <div class="profile-hero-content">
+                        <p class="profile-eyebrow">Logged-in Account</p>
+                        <h1 id="profileHeading">Your Profile</h1>
+                        <p class="profile-summary" id="profileSummary">Your account details will appear here.</p>
+                        <div class="profile-chip-list" id="profileChips"></div>
+                    </div>
+                </section>
+
+                <section class="profile-detail-grid" id="profileDetailGrid" hidden>
+                    <article class="profile-detail-panel">
+                        <p class="profile-panel-label">Account Info</p>
+                        <h2>Identity</h2>
+                        <dl class="profile-meta-list">
+                            <div class="profile-meta-row">
+                                <dt>Full Name</dt>
+                                <dd id="profileFullName">-</dd>
+                            </div>
+                            <div class="profile-meta-row">
+                                <dt>Username</dt>
+                                <dd id="profileUsername">-</dd>
+                            </div>
+                            <div class="profile-meta-row">
+                                <dt>Email</dt>
+                                <dd id="profileEmail">-</dd>
+                            </div>
+                        </dl>
+                    </article>
+
+                    <article class="profile-detail-panel">
+                        <p class="profile-panel-label">Interests</p>
+                        <h2>Learning Preferences</h2>
+                        <p id="profileInterestsText">Your chosen interests will appear here.</p>
+                        <div class="profile-chip-list" id="profileInterestChips"></div>
+                    </article>
+
+                    <article class="profile-detail-panel">
+                        <p class="profile-panel-label">Status</p>
+                        <h2>Prototype Account</h2>
+                        <dl class="profile-meta-list">
+                            <div class="profile-meta-row">
+                                <dt>Created</dt>
+                                <dd id="profileCreatedAt">-</dd>
+                            </div>
+                            <div class="profile-meta-row">
+                                <dt>Logged In</dt>
+                                <dd id="profileLoggedInAt">-</dd>
+                            </div>
+                        </dl>
+                        <p>This is a frontend-only prototype account stored in your browser.</p>
+                    </article>
+                </section>
+
+                <section class="profile-empty-state" id="profileEmptyState" hidden>
+                    <div class="profile-avatar-large" aria-hidden="true">?</div>
+                    <p class="profile-eyebrow">Sign In Required</p>
+                    <h1>Your profile is ready when you log in</h1>
+                    <p>Stay on this page and sign in to load your saved account details from this browser.</p>
+                    <button class="profile-login-btn" id="profileLoginBtn" type="button">Open Login</button>
+                </section>
+            </main>
+        `;
+    },
+    init: initializeProfilePage,
+});
+
+export { PROFILE_PAGE_DEFINITION as PAGE_DEFINITION };

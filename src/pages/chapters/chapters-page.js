@@ -3,6 +3,7 @@ import {
 } from "../../content/books/queries.js";
 import { BOOKS_QUERY_API } from "../../content/books/queries.js";
 import { renderBookChaptersPreview } from "../../content/renderers/chapters-renderer.js";
+import { createSharedPageDefinition } from "../shared-page.js";
 
 const DEFAULT_BOOK_SLUG = "bhagavad-gita";
 
@@ -17,26 +18,15 @@ function formatBookTitle(book) {
 }
 
 function syncEducationMenu(book) {
-    const activeLink = book.slug === DEFAULT_BOOK_SLUG
-        ? window.resolveAppRoute?.("books.gita")
-        : window.resolveAppRoute?.("books.index");
-
-    if (!activeLink) return;
-
-    document.querySelectorAll(".mega-menu-group a.active").forEach((link) => {
-        link.classList.remove("active");
-    });
-
-    const targetLink = Array.from(document.querySelectorAll(".mega-menu-group a")).find(
-        (link) => link.getAttribute("href") === activeLink
-    );
-
-    if (targetLink) {
-        targetLink.classList.add("active");
+    if (book.slug === DEFAULT_BOOK_SLUG) {
+        return;
     }
+
+    document.body.dataset.educationItem = "books-all";
+    window.sharedLayout?.syncEducationNavigation?.();
 }
 
-function renderChapterPage() {
+function initializeChaptersPage({ routeResolver }) {
     const book = getCurrentBook();
     if (!book) return;
 
@@ -53,14 +43,13 @@ function renderChapterPage() {
     const heroTitle = formatBookTitle(book);
 
     document.title = `Bhagavad Gita | ${heroTitle}`;
-    document.body.dataset.educationItem = book.slug === DEFAULT_BOOK_SLUG ? "books-gita" : "books-all";
     syncEducationMenu(book);
 
     renderBookChaptersPreview({
         book,
         container: sectionsContainer,
         queryApi: BOOKS_QUERY_API,
-        routeResolver: window.resolveAppRoute,
+        routeResolver,
         titleElement,
         subtitleElement,
         introElement,
@@ -68,4 +57,35 @@ function renderChapterPage() {
     });
 }
 
-renderChapterPage();
+export const CHAPTERS_PAGE_DEFINITION = createSharedPageDefinition({
+    id: "chapters",
+    title: "Bhagavad Gita | Chapters",
+    bodyClasses: ["chapter-page"],
+    bodyDataset: {
+        navSection: "education",
+        educationItem: "books-gita",
+        footerVariant: "chapter",
+    },
+    shellClassName: "chapter-shell",
+    render() {
+        return `
+            <main class="chapters-page-main">
+                <section class="chapter-hero">
+                    <span class="lotus-large" aria-hidden="true"></span>
+                    <h1 id="chapterPageTitle">Bhagavad Gita</h1>
+                    <p class="subtitle" id="chapterPageSubtitle">The Eternal Wisdom for Modern Life</p>
+                    <a class="btn btn-primary chapter-cta" id="chapterPageCta" href="#">Explore the Teachings</a>
+                </section>
+
+                <section class="chapter-list-section">
+                    <h2 class="section-title">Book Sections</h2>
+                    <p class="chapter-intro" id="chapterPageIntro">Journey through grouped movements of the Gita, where related chapters sit inside a broader teaching arc.</p>
+                    <div class="chapter-sections" id="chapterSections"></div>
+                </section>
+            </main>
+        `;
+    },
+    init: initializeChaptersPage,
+});
+
+export { CHAPTERS_PAGE_DEFINITION as PAGE_DEFINITION };

@@ -1,13 +1,17 @@
-import "./verses-page.js";
+import { normalizeVerseMode } from "../../core/config/route-registry.js";
 
-(() => {
-    const routes = window.APP_ROUTES;
+export function initializeVerseModeSwitcher(routes = window.APP_ROUTES) {
     const select = document.getElementById("verseModeSelect");
     if (!select || !routes) return;
 
-    const currentPath = window.location.pathname || routes.verses.index;
-    const normalizedCurrentPath =
-        currentPath === routes.verses.sanskritEnglishExplicit ? routes.verses.index : currentPath;
+    const modeToRoute = {
+        "sanskrit-english": routes.verses.index,
+        "sanskrit-hindi": routes.verses.sanskritHindi,
+        "english-only": routes.verses.englishOnly,
+        "hindi-only": routes.verses.hindiOnly,
+    };
+    const currentMode = normalizeVerseMode(new URLSearchParams(window.location.search).get("mode"));
+    const normalizedCurrentPath = modeToRoute[currentMode] || routes.verses.index;
     select.value = normalizedCurrentPath;
 
     select.addEventListener("change", () => {
@@ -25,4 +29,4 @@ import "./verses-page.js";
             window.location.href = nextPage;
         }
     });
-})();
+}

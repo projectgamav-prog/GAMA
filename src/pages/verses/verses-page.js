@@ -5,6 +5,9 @@ import {
 } from "../../content/books/queries.js";
 import { BOOKS_QUERY_API } from "../../content/books/queries.js";
 import { renderChapterVersesPreview } from "../../content/renderers/verses-renderer.js";
+import { normalizeVerseMode } from "../../core/config/route-registry.js";
+import { createSharedPageDefinition } from "../shared-page.js";
+import { initializeVerseModeSwitcher } from "./verse-mode-switcher.js";
 
 const DEFAULT_BOOK_SLUG = "bhagavad-gita";
 
@@ -26,10 +29,11 @@ function getCurrentContext() {
 }
 
 function getDisplayMode() {
-    return document.body.dataset.verseMode || "sanskrit-english";
+    const params = new URLSearchParams(window.location.search);
+    return normalizeVerseMode(params.get("mode") || document.body.dataset.verseMode || "sanskrit-english");
 }
 
-function renderVersesPage() {
+function initializeVersesPage({ routeResolver, routes }) {
     const context = getCurrentContext();
     const main = document.querySelector(".verse-main");
     if (!context || !main) return;
@@ -37,6 +41,9 @@ function renderVersesPage() {
     const { book, chapter, params } = context;
     const highlightedVerseNumber = Number.parseInt(params.get("verse") || "", 10);
     const mode = getDisplayMode();
+    document.body.dataset.verseMode = mode;
+    document.body.dataset.educationItem = book.slug === DEFAULT_BOOK_SLUG ? "books-gita" : "books-all";
+    window.sharedLayout?.syncEducationNavigation?.();
 
     document.title = `${book.title} | Chapter ${chapter.chapter_number}`;
 
@@ -48,13 +55,55 @@ function renderVersesPage() {
         chapter,
         container: sectionContainer,
         queryApi: BOOKS_QUERY_API,
-        routeResolver: window.resolveAppRoute,
+        routeResolver,
         mode,
         highlightedVerseNumber,
         breadcrumbElement: main.querySelector(".verse-breadcrumb"),
         chapterLabelElement: main.querySelector(".verse-chapter-label"),
         chapterNameElement: main.querySelector(".verse-chapter-name"),
     });
+
+    initializeVerseModeSwitcher(routes);
 }
 
-renderVersesPage();
+export const VERSES_PAGE_DEFINITION = createSharedPageDefinition({
+    id: "verses",
+    title: "Bhagavad Gita | Verse",
+    bodyClasses: ["verse-page"],
+    bodyDataset: {
+        verseMode: "sanskrit-english",
+        navSection: "education",
+        educationItem: "books-gita",
+        footerVariant: "verse",
+        headerSearch: "true",
+    },
+    shellClassName: "verse-shell",
+    render() {
+        return `
+            <main class="verse-main">
+                <p class="verse-breadcrumb">Bhagavad Gita &#8250; Chapter &#8250; Verse</p>
+                <div class="verse-context">
+                    <span class="lotus-large verse-lotus" aria-hidden="true"></span>
+                    <p class="verse-chapter-label">Chapter</p>
+                    <p class="verse-chapter-name">Loading chapter...</p>
+                </div>
+
+                <div class="verse-mode-bar">
+                    <label class="verse-mode-label" for="verseModeSelect">Verse Display</label>
+                    <select id="verseModeSelect" class="verse-mode-select" aria-label="Verse display mode">
+                        <option value="" data-route="verses.index">Sanskrit - English</option>
+                        <option value="" data-route="verses.sanskritHindi">Sanskrit - Hindi</option>
+                        <option value="" data-route="verses.englishOnly">English Only</option>
+                        <option value="" data-route="verses.hindiOnly">Hindi Only</option>
+                    </select>
+                </div>
+
+                <section class="verse-section"></section>
+                <div class="verse-divider" aria-hidden="true"></div>
+            </main>
+        `;
+    },
+    init: initializeVersesPage,
+});
+
+export { VERSES_PAGE_DEFINITION as PAGE_DEFINITION };

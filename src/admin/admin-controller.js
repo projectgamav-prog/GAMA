@@ -13,7 +13,7 @@ const api = createAdminApi();
 
 const state = {
     queryApi: BOOKS_QUERY_API,
-    pageKind: getPageKind(window.location.pathname),
+    pageKind: getPageKind(),
     pageContext: null,
     permissionContext: null,
     editMode: false,
@@ -48,19 +48,22 @@ async function initializeAdminController() {
     });
 }
 
-function getPageKind(pathname) {
-    const normalizedPath = pathname !== "/" && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
-    if (normalizedPath === "/admin" || normalizedPath === "/admin/index.html") return "home";
-    if (normalizedPath === "/admin/books" || normalizedPath === "/admin/books/index.html") return "books";
-    if (normalizedPath === "/admin/chapters" || normalizedPath === "/admin/chapters/index.html") return "chapters";
-    if (normalizedPath.startsWith("/admin/verses")) return "verses";
-    if (normalizedPath === "/admin/explanations" || normalizedPath === "/admin/explanations/index.html") return "explanations";
-    if (normalizedPath === "/admin/characters" || normalizedPath === "/admin/characters/index.html") return "characters";
-    if (normalizedPath === "/admin/characters/detail.html") return "character-detail";
-    if (normalizedPath === "/admin/topics" || normalizedPath === "/admin/topics/index.html") return "topics";
-    if (normalizedPath === "/admin/places" || normalizedPath === "/admin/places/index.html") return "places";
-    if (normalizedPath === "/admin/profile" || normalizedPath === "/admin/profile/index.html") return "profile";
-    return "other";
+function getPageKind() {
+    return document.body?.dataset.pageId || "other";
+}
+
+function renderDockNav() {
+    const routes = window.APP_ROUTES;
+    return `
+        <a href="${routes.home}">Home</a>
+        <a href="${routes.books.index}">Books</a>
+        <a href="${routes.chapters.index}">Chapters</a>
+        <a href="${routes.verses.index}">Verses</a>
+        <a href="${routes.characters.index}">Characters</a>
+        <a href="${routes.topics.index}">Topics</a>
+        <a href="${routes.places.index}">Places</a>
+        <a href="${routes.profile.index}">Profile</a>
+    `;
 }
 
 function getCurrentBook() {
@@ -144,17 +147,10 @@ function createDockAndDrawer() {
     dock.className = "admin-dock";
     dock.innerHTML = `
         <div class="admin-dock-inner">
-            <p class="admin-dock-eyebrow">Admin Mirror</p>
+            <p class="admin-dock-eyebrow">Admin Mode</p>
             <h2 class="admin-dock-title">Shared Public UI + Authoring Layer</h2>
             <div class="admin-dock-nav">
-                <a href="/admin/index.html">Home</a>
-                <a href="/admin/books/index.html">Books</a>
-                <a href="/admin/chapters/index.html">Chapters</a>
-                <a href="/admin/verses/index.html">Verses</a>
-                <a href="/admin/characters/index.html">Characters</a>
-                <a href="/admin/topics/index.html">Topics</a>
-                <a href="/admin/places/index.html">Places</a>
-                <a href="/admin/profile/index.html">Profile</a>
+                ${renderDockNav()}
                 ${hasPermission(state.permissionContext, "permissions.manage") || hasPermission(state.permissionContext, "users.manage")
                     ? '<a href="/admin/permissions/index.html">Permissions</a>'
                     : ""}
@@ -230,15 +226,15 @@ function renderDock() {
     }
 
     if (!canAccessAdmin(state.permissionContext)) {
-        ui.copy.textContent = "Your session can view the mirrored page, but no admin authoring permissions are assigned to this account yet.";
-        setDockStatus("Read-only admin mirror for this account.", "muted");
+        ui.copy.textContent = "Your session can view this shared page in admin mode, but no authoring permissions are assigned to this account yet.";
+        setDockStatus("Read-only admin view for this account.", "muted");
         ui.editToggle.disabled = true;
         return;
     }
 
     if (!isEditablePage()) {
-        ui.copy.textContent = "This route is mirrored into admin already, but its content model is still read-only in v1. The public UI remains the source of truth.";
-        setDockStatus("Read-only mirror page.", "muted");
+        ui.copy.textContent = "This shared route already runs in admin mode, but its content model is still read-only in v1. The public UI remains the source of truth.";
+        setDockStatus("Read-only shared page.", "muted");
         ui.editToggle.disabled = true;
         return;
     }
@@ -256,7 +252,7 @@ function renderDock() {
         : "Edit Mode is off. You are viewing the exact public page with only this floating admin dock added.";
 
     if (!ui.status.textContent.trim()) {
-        setDockStatus("Mirror is live. Turn on Edit Mode to attach authoring controls.", "muted");
+        setDockStatus("Shared page is live. Turn on Edit Mode to attach authoring controls.", "muted");
     }
 }
 

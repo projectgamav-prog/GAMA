@@ -197,6 +197,7 @@
     }
 
     window.sharedLayout = {
+        ...(window.sharedLayout || {}),
         closeMenu,
         closeEducationMenu,
         openMenu,

@@ -2,6 +2,10 @@ import express from "express";
 import path from "node:path";
 import { adminDirectory, contentDirectory, projectRoot } from "../core/paths.js";
 import { attachSessionContext } from "../auth/session.js";
+import {
+  LEGACY_PUBLIC_REDIRECTS,
+  buildPathWithQuery,
+} from "../../src/core/config/route-registry.js";
 import accessRouter from "./routes/access-routes.js";
 import authRouter from "./routes/auth-routes.js";
 import booksRouter from "./routes/books-routes.js";
@@ -36,6 +40,17 @@ export function createApp() {
 
   app.get(["/", "/index.html"], (_req, res) => {
     res.sendFile(path.join(projectRoot, "index.html"));
+  });
+
+  LEGACY_PUBLIC_REDIRECTS.forEach((entry) => {
+    app.get(entry.from, (req, res) => {
+      const query = {
+        ...req.query,
+        ...(entry.query || {}),
+      };
+
+      res.redirect(302, buildPathWithQuery(entry.to, query));
+    });
   });
 
   app.use("/assets", express.static(path.join(projectRoot, "assets")));
