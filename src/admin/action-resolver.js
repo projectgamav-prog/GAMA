@@ -80,7 +80,11 @@ function resolveInsightBinding(ownerEntity, record) {
     });
 }
 
-function getInsightBlockFieldScope(block) {
+function getInsightBlockFieldScope(ownerEntity, block) {
+    if (ownerEntity === "books" && block?.region === "insight") {
+        return "book_insight";
+    }
+
     return block?.block_type === "media" || block?.block_type === "image" || block?.block_type === "audio"
         ? "insight_media"
         : "insight_rich_text";
@@ -132,7 +136,7 @@ function buildInsightEditingActions({ ownerEntity, record, permissionContext, op
             entity: "content_blocks",
             record: insightBinding.block,
             openEditor,
-            fieldScope: getInsightBlockFieldScope(insightBinding.block),
+            fieldScope: getInsightBlockFieldScope(ownerEntity, insightBinding.block),
             allowDelete: false,
             label: `Edit ${label} Insight`,
         }));

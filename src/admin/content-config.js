@@ -1,6 +1,7 @@
 import { ALL_CONTENT_FIELD_CONFIGS } from "../content/schema/index.js";
 import { getEntityEditPermissionKey } from "../permissions/access.js";
 import { getAdminEntityApiPath } from "./entity-api-paths.js";
+import { DEFAULT_INSIGHT_MEDIA } from "../content/renderers/renderer-utils.js";
 
 function augmentFields(fields = [], overrides = {}) {
     return Object.freeze(
@@ -152,6 +153,44 @@ const CONTENT_BLOCK_INSIGHT_TEXT_FIELDS = Object.freeze([
     Object.freeze({ name: "content_body", label: "Insight Body", type: "textarea" }),
 ]);
 
+const BOOK_INSIGHT_SWITCH_FIELDS = Object.freeze([
+    Object.freeze({
+        name: "insight_block_type",
+        label: "Insight Type",
+        type: "select",
+        required: true,
+        options: Object.freeze([
+            Object.freeze({ value: "rich_text", label: "rich_text" }),
+            Object.freeze({ value: "media", label: "media" }),
+        ]),
+        description: "Switch between text-only and media-backed insight content for this book.",
+    }),
+    Object.freeze({ name: "content_title", label: "Insight Title", type: "text" }),
+    Object.freeze({
+        name: "content_body",
+        label: "Insight Body",
+        type: "textarea",
+        description: "Used when the insight type is rich_text.",
+    }),
+    Object.freeze({
+        name: "media_asset_id",
+        label: "Insight Media Asset",
+        type: "select-from-state",
+        source: "media_assets",
+        optionLabel(option) {
+            return option?.title ? `${option.title} (${option.src})` : String(option?.src || option?.id || "");
+        },
+        optionValue: "id",
+        description: "Used when the insight type is media. Leave blank to auto-link a shared default asset.",
+    }),
+    Object.freeze({
+        name: "content_caption",
+        label: "Insight Caption",
+        type: "textarea",
+        description: "Used when the insight type is media.",
+    }),
+]);
+
 const MEDIA_ASSET_INSIGHT_FIELDS = Object.freeze([
     Object.freeze({
         name: "asset_type",
@@ -177,6 +216,48 @@ function cloneObject(value, fallback = {}) {
     return value && typeof value === "object" && !Array.isArray(value)
         ? { ...value }
         : { ...fallback };
+}
+
+function getDefaultInsightMediaAsset(helpers) {
+    const assets = helpers.listRecords("media_assets");
+
+    return assets.find((asset) => asset?.id === "media-asset-insight-default-image")
+        || assets.find((asset) => asset?.metadata?.source === "legacy-insight-media" && !asset?.metadata?.owner_id)
+        || assets.find((asset) => String(asset?.src || "").trim() === DEFAULT_INSIGHT_MEDIA)
+        || null;
+}
+
+async function ensureBookInsightMediaAsset({
+    values,
+    record,
+    helpers,
+    api,
+}) {
+    const selectedAssetId = String(values.media_asset_id || record?.data?.media_asset_id || "").trim();
+    if (selectedAssetId) {
+        return selectedAssetId;
+    }
+
+    const sharedDefaultAsset = getDefaultInsightMediaAsset(helpers);
+    if (sharedDefaultAsset?.id) {
+        return sharedDefaultAsset.id;
+    }
+
+    const createdAsset = await api.createRecord("media_assets", {
+        asset_type: "image",
+        title: values.content_title || `${record?.owner_id || "book"} Insight Media`,
+        src: DEFAULT_INSIGHT_MEDIA,
+        provider: "local",
+        alt_text: values.content_title || "Insight media",
+        caption: values.content_caption || null,
+        metadata: {
+            source: "admin-generated-book-insight-media",
+            owner_entity: record?.owner_entity || "books",
+            owner_id: record?.owner_id || "",
+        },
+    });
+
+    return createdAsset?.id || "";
 }
 
 function getContentBlockLabel(record) {
@@ -400,6 +481,7 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
             ...CONTENT_BLOCK_INSIGHT_TEXT_FIELDS.filter((field) => field.name === "content_body"),
         ]),
         fieldScopes: Object.freeze({
+            book_insight: Object.freeze(BOOK_INSIGHT_SWITCH_FIELDS.map((field) => field.name)),
             insight_media: Object.freeze(CONTENT_BLOCK_INSIGHT_MEDIA_FIELDS.map((field) => field.name)),
             insight_rich_text: Object.freeze(CONTENT_BLOCK_INSIGHT_TEXT_FIELDS.map((field) => field.name)),
         }),
@@ -408,18 +490,51 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
             return getContentBlockLabel(record);
         },
         getFormValues(record) {
+            const normalizedInsightType = ["media", "image", "audio"].includes(record?.block_type)
+                ? "media"
+                : "rich_text";
+
             return {
+                insight_block_type: normalizedInsightType,
                 content_title: record?.data?.title || "",
-                content_caption: record?.data?.caption || "",
-                content_body: record?.data?.body || "",
+                content_caption: record?.data?.caption || (normalizedInsightType === "rich_text" ? record?.data?.body || "" : ""),
+                content_body: record?.data?.body || (normalizedInsightType === "media" ? record?.data?.caption || "" : ""),
                 media_asset_id: record?.data?.media_asset_id || "",
             };
         },
-        serializePayload(values, { record, fieldScope }) {
+        async serializePayload(values, { record, fieldScope, helpers, api }) {
             const nextRecord = {
                 ...record,
                 data: cloneObject(record?.data),
             };
+
+            if (fieldScope === "book_insight") {
+                const nextInsightType = values.insight_block_type === "media" ? "media" : "rich_text";
+
+                nextRecord.block_type = nextInsightType;
+
+                if (nextInsightType === "media") {
+                    const mediaAssetId = await ensureBookInsightMediaAsset({
+                        values,
+                        record,
+                        helpers,
+                        api,
+                    });
+
+                    nextRecord.data = {
+                        title: values.content_title || null,
+                        caption: values.content_caption || values.content_body || "",
+                        media_asset_id: mediaAssetId,
+                    };
+                } else {
+                    nextRecord.data = {
+                        title: values.content_title || null,
+                        body: values.content_body || values.content_caption || "",
+                    };
+                }
+
+                return nextRecord;
+            }
 
             if (fieldScope === "insight_media") {
                 nextRecord.data.title = values.content_title || null;

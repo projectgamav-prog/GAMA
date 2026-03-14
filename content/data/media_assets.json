@@ -1,9 +1,9 @@
 [
   {
     "id": "media-asset-insight-default-image",
-    "asset_type": "image",
+    "asset_type": "embed",
     "title": "Default Insight Image",
-    "src": "/assets/images/image.png",
+    "src": "https://www.youtube.com/watch?v=0jMfiTfkRSg&list=RD0jMfiTfkRSg&start_radio=1&t=1745s",
     "alt_text": "Insight media",
     "caption": null,
     "provider": "local",
@@ -11,7 +11,7 @@
       "source": "legacy-insight-media"
     },
     "created_at": "2026-03-14T00:00:00.000Z",
-    "updated_at": "2026-03-14T00:00:00.000Z"
+    "updated_at": "2026-03-14T09:39:42.978Z"
   },
   {
     "id": "media-asset-book-bhagavad-gita-insight-media",

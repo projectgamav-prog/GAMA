@@ -419,13 +419,14 @@ function createContentRecordEditorPanel({
                 payload[field.name] = serializeValue(field, input);
             });
 
-            const nextPayload = config.serializePayload?.(payload, {
+            const nextPayload = await Promise.resolve(config.serializePayload?.(payload, {
                 mode: state.mode,
                 record: state.record,
                 fieldScope: state.fieldScope,
                 context: state.openContext,
                 helpers: buildHelpers(),
-            }) || payload;
+                api,
+            })) || payload;
 
             state.saving = true;
             setMessage(state.mode === "create" ? `Creating ${config.label.toLowerCase()}...` : `Saving ${config.label.toLowerCase()}...`);
