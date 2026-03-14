@@ -197,53 +197,6 @@ function createImageBlock(block) {
     return article;
 }
 
-function createImageSequenceBlock(block) {
-    const article = createBlockShell(block, "is-image-sequence");
-    appendBlockTitle(article, block?.data?.title);
-
-    if (normalizeText(block?.data?.body)) {
-        const intro = document.createElement("div");
-        intro.className = "explanation-text";
-        appendParagraphs(intro, block.data.body);
-        article.appendChild(intro);
-    }
-
-    const list = document.createElement("ol");
-    list.className = "explanation-image-sequence";
-
-    const items = Array.isArray(block?.resolvedSequenceItems) ? block.resolvedSequenceItems : [];
-    items
-        .slice()
-        .sort((left, right) => Number(left?.position || 0) - Number(right?.position || 0))
-        .forEach((item) => {
-            const source = normalizeText(item?.resolvedMediaAsset?.src) || normalizeText(item?.src);
-            if (!source) {
-                return;
-            }
-
-            const entry = document.createElement("li");
-            entry.className = "explanation-image-sequence-item";
-
-            entry.appendChild(
-                createImageFigure({
-                    src: source,
-                    alt: normalizeText(item?.alt_text)
-                        || normalizeText(item?.resolvedMediaAsset?.alt_text)
-                        || normalizeText(item?.resolvedMediaAsset?.title)
-                        || "Sequence image",
-                    caption: normalizeText(item?.caption)
-                        || normalizeText(item?.resolvedMediaAsset?.caption),
-                })
-            );
-
-            list.appendChild(entry);
-        });
-
-    article.appendChild(list);
-    appendCaption(article, block?.data?.caption);
-    return article;
-}
-
 function createVideoFrame(embedUrl, titleText) {
     const frame = document.createElement("div");
     frame.className = "explanation-video-frame";
@@ -619,8 +572,6 @@ export function createUniversalBlockElement(block, renderOptions = {}) {
             return createTextBlock(block);
         case "image":
             return createImageBlock(block);
-        case "image_sequence":
-            return createImageSequenceBlock(block);
         case "media":
             return createMediaBlock(block);
         case "audio":

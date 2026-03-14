@@ -8,7 +8,6 @@ const CONTENT_BLOCK_TYPE_OPTIONS = Object.freeze([
     { value: "rich_text", label: "Rich Text" },
     { value: "commentary", label: "Commentary" },
     { value: "image", label: "Image" },
-    { value: "image_sequence", label: "Image Sequence" },
     { value: "video", label: "Video" },
     { value: "media", label: "Media" },
     { value: "audio", label: "Audio" },
@@ -105,13 +104,6 @@ function createDefaultBlockData(blockType = "rich_text") {
                 caption: "",
                 alt_text: "",
             };
-        case "image_sequence":
-            return {
-                title: "",
-                body: "",
-                caption: "",
-                items: [],
-            };
         case "video":
             return {
                 title: "",
@@ -174,31 +166,6 @@ function createDefaultBlockData(blockType = "rich_text") {
     }
 }
 
-function createEmptyImageSequenceItem(position = 1) {
-    return {
-        media_asset_id: "",
-        src: "",
-        alt_text: "",
-        caption: "",
-        position,
-    };
-}
-
-function normalizeImageSequenceDraftItems(items = []) {
-    return cloneArray(items).map((item, index) => ({
-        ...createEmptyImageSequenceItem(index + 1),
-        ...cloneObject(item),
-        position: Number.parseInt(item?.position, 10) || index + 1,
-    }));
-}
-
-function renumberImageSequenceItems(items = []) {
-    return normalizeImageSequenceDraftItems(items).map((item, index) => ({
-        ...item,
-        position: index + 1,
-    }));
-}
-
 function cloneBlockData(blockType, data = {}) {
     const defaults = createDefaultBlockData(blockType);
     const nextData = {
@@ -211,9 +178,7 @@ function cloneBlockData(blockType, data = {}) {
     }
 
     if (Array.isArray(defaults.items) || Array.isArray(nextData.items)) {
-        nextData.items = blockType === "image_sequence"
-            ? normalizeImageSequenceDraftItems(nextData.items)
-            : cloneArray(nextData.items).map((item) => cloneObject(item));
+        nextData.items = cloneArray(nextData.items).map((item) => cloneObject(item));
     }
 
     return nextData;
@@ -237,7 +202,6 @@ function prettyJson(value, fallback) {
 function getCompatibleAssetTypes(blockType) {
     switch (blockType) {
         case "image":
-        case "image_sequence":
             return ["image"];
         case "video":
             return ["video", "embed"];
@@ -670,6 +634,7 @@ function createAssetPicker({
 
         state.mediaAssets.importing = true;
         state.mediaAssets.error = "";
+        state.mediaAssets.notice = "";
         rerender();
 
         try {
@@ -682,6 +647,7 @@ function createAssetPicker({
                 loading: false,
                 importing: false,
                 error: "",
+                notice: "",
                 records: mediaAssetsCache,
             };
             onImportComplete?.(Array.isArray(importedAssets) ? importedAssets : []);
@@ -689,6 +655,7 @@ function createAssetPicker({
         } catch (error) {
             state.mediaAssets.importing = false;
             state.mediaAssets.error = error.message || "Unable to import local media files.";
+            state.mediaAssets.notice = "";
             rerender();
         } finally {
             importFilesInput.value = "";
@@ -732,7 +699,9 @@ function createAssetPicker({
     picker.append(importFilesInput, importFolderInput, controls);
 
     const compatibleTypes = getCompatibleAssetTypes(blockType);
-    picker.appendChild(createMediaFilterRow(state, compatibleTypes, disabled, rerender));
+    if (compatibleTypes.length > 1) {
+        picker.appendChild(createMediaFilterRow(state, compatibleTypes, disabled, rerender));
+    }
 
     if (state.mediaAssets.loading) {
         const loading = document.createElement("p");
@@ -747,7 +716,13 @@ function createAssetPicker({
         error.className = "admin-editor-field-hint is-error";
         error.textContent = state.mediaAssets.error;
         picker.appendChild(error);
-        return picker;
+    }
+
+    if (state.mediaAssets.notice) {
+        const notice = document.createElement("p");
+        notice.className = "admin-editor-field-hint";
+        notice.textContent = state.mediaAssets.notice;
+        picker.appendChild(notice);
     }
 
     const selectedAssetIds = new Set(selectedIds.filter(Boolean));
@@ -833,14 +808,6 @@ function validateSelectedAssetTypes(blockType, state, data) {
         ids.push(...data.media_asset_ids);
     }
 
-    if (Array.isArray(data.items)) {
-        data.items.forEach((item) => {
-            if (item?.media_asset_id) {
-                ids.push(item.media_asset_id);
-            }
-        });
-    }
-
     ids.forEach((assetId) => {
         const asset = getSelectedAsset(state, assetId);
         if (!asset) {
@@ -849,9 +816,7 @@ function validateSelectedAssetTypes(blockType, state, data) {
 
         const assetType = normalizeText(asset.asset_type).toLowerCase();
         if (!compatibleTypes.includes(assetType)) {
-            const fieldName = Array.isArray(data.items)
-                ? "image_sequence_items"
-                : (Array.isArray(data.media_asset_ids) ? "media_asset_ids" : "media_asset_id");
+            const fieldName = Array.isArray(data.media_asset_ids) ? "media_asset_ids" : "media_asset_id";
             throw createValidationError(
                 `${getContentBlockTypeLabel(blockType)} blocks cannot use ${assetType} assets.`,
                 {
@@ -904,18 +869,8 @@ function validateDraftBeforeNormalize(state) {
     switch (blockType) {
         case "image":
             if (!normalizeText(draftData.media_asset_id) && !normalizeText(draftData.src)) {
-                fieldErrors.media_asset_id = "Choose an image asset or enter a direct image URL.";
-                fieldErrors.src = "Enter a direct image URL or choose an image asset.";
-            }
-            break;
-        case "image_sequence":
-            if (!Array.isArray(draftData.items) || !draftData.items.length) {
-                fieldErrors.image_sequence_items = "Add at least one image item to the sequence.";
-                break;
-            }
-
-            if (draftData.items.some((item) => !normalizeText(item?.media_asset_id) && !normalizeText(item?.src))) {
-                fieldErrors.image_sequence_items = "Each image sequence item needs an image asset or a direct image URL.";
+                fieldErrors.media_asset_id = "Select an image from the media library or enter a direct image URL.";
+                fieldErrors.src = "Direct image URL is optional when an image asset is selected.";
             }
             break;
         case "video":
@@ -997,14 +952,6 @@ function buildPayload(state) {
                 title: draftData.title,
                 caption: draftData.caption,
                 media_asset_ids: cloneArray(draftData.media_asset_ids),
-            };
-            break;
-        case "image_sequence":
-            nextData = {
-                title: draftData.title,
-                body: draftData.body,
-                caption: draftData.caption,
-                items: normalizeImageSequenceDraftItems(draftData.items),
             };
             break;
         default:
@@ -1360,6 +1307,13 @@ function appendMediaFields(grid, state, busy, blockType, rerender) {
     const selectedAssetId = normalizeText(draftData.media_asset_id);
     const selectedAsset = getSelectedAsset(state, selectedAssetId);
     const directPreviewType = blockType === "media" ? (normalizeText(draftData.media_kind) || "media") : blockType;
+    const assetLabel = blockType === "image"
+        ? "Image"
+        : blockType === "video"
+            ? "Video"
+            : blockType === "audio"
+                ? "Audio"
+                : "Media";
 
     grid.appendChild(
         createField({
@@ -1423,8 +1377,16 @@ function appendMediaFields(grid, state, busy, blockType, rerender) {
 
     grid.appendChild(
         createField({
-            label: blockType === "video" ? "Video File URL" : blockType === "audio" ? "Audio URL" : "Direct Source URL",
-            hint: "Optional fallback when no reusable media asset is selected.",
+            label: blockType === "image"
+                ? "Optional Direct Image URL"
+                : blockType === "video"
+                    ? "Optional Video File URL"
+                    : blockType === "audio"
+                        ? "Optional Audio URL"
+                        : "Optional Direct Source URL",
+            hint: blockType === "image"
+                ? "Leave this empty if you selected or imported a reusable image above."
+                : "Optional fallback when no reusable media asset is selected.",
             wide: true,
             error: getFieldError(state, "src"),
             control: createInputControl({
@@ -1501,23 +1463,39 @@ function appendMediaFields(grid, state, busy, blockType, rerender) {
     pickerSection.className = "admin-content-block-picker-stack";
     pickerSection.appendChild(
         createAssetPicker({
-            title: "Reusable Media Assets",
-            hint: "Pick from shared media_assets records, or leave this blank and use the direct URL fields below.",
+            title: blockType === "image" ? "Image Library" : "Reusable Media Assets",
+            hint: blockType === "image"
+                ? "Select or import one reusable image. Direct image URL below is optional."
+                : "Pick from shared media_assets records, or leave this blank and use the direct URL fields below.",
             state,
             blockType,
             selectedIds: selectedAssetId ? [selectedAssetId] : [],
             disabled: busy,
             onSelect(assetId) {
                 draftData.media_asset_id = draftData.media_asset_id === assetId ? "" : assetId;
+                state.mediaAssets.error = "";
+                state.mediaAssets.notice = draftData.media_asset_id
+                    ? `${assetLabel} asset selected.`
+                    : "";
                 clearFieldErrors(state, "media_asset_id", "src", "embed_url");
                 rerender();
             },
             onImportComplete(importedAssets) {
-                const firstAssetId = importedAssets[0]?.id || "";
-                if (firstAssetId) {
-                    draftData.media_asset_id = firstAssetId;
+                const compatibleTypes = new Set(getCompatibleAssetTypes(blockType));
+                const importedList = Array.isArray(importedAssets) ? importedAssets : [];
+                const compatibleAsset = importedList.find((asset) => compatibleTypes.has(normalizeText(asset?.asset_type).toLowerCase()));
+
+                if (compatibleAsset?.id) {
+                    draftData.media_asset_id = compatibleAsset.id;
+                    state.assetSearchQuery = "";
+                    state.mediaAssets.error = "";
+                    state.mediaAssets.notice = `Imported ${assetLabel.toLowerCase()} selected from the project media library.`;
                     clearFieldErrors(state, "media_asset_id", "src", "embed_url");
+                    return;
                 }
+
+                state.mediaAssets.notice = "";
+                state.mediaAssets.error = `Imported files did not produce a compatible ${assetLabel.toLowerCase()} asset for this block.`;
             },
             rerender,
         })
@@ -1541,7 +1519,7 @@ function appendMediaFields(grid, state, busy, blockType, rerender) {
 
     grid.appendChild(
         createField({
-            label: "Media Picker",
+            label: blockType === "image" ? "Selected Image" : "Media Picker",
             wide: true,
             error: getFieldError(state, "media_asset_id"),
             control: pickerSection,
@@ -1658,255 +1636,6 @@ function appendGalleryFields(grid, state, busy, rerender) {
     );
 }
 
-function appendImageSequenceFields(grid, state, busy, rerender) {
-    const draftData = state.draft.data;
-    draftData.items = renumberImageSequenceItems(draftData.items);
-
-    grid.appendChild(
-        createField({
-            label: "Title",
-            control: createInputControl({
-                value: draftData.title,
-                placeholder: "Optional image sequence heading",
-                disabled: busy,
-                onInput(nextValue) {
-                    draftData.title = nextValue;
-                },
-            }),
-        })
-    );
-
-    grid.appendChild(
-        createField({
-            label: "Intro / Body",
-            wide: true,
-            control: createInputControl({
-                type: "textarea",
-                rows: 5,
-                value: draftData.body,
-                placeholder: "Optional narrative copy that introduces the image sequence",
-                disabled: busy,
-                onInput(nextValue) {
-                    draftData.body = nextValue;
-                },
-            }),
-        })
-    );
-
-    grid.appendChild(
-        createField({
-            label: "Caption",
-            wide: true,
-            control: createInputControl({
-                type: "textarea",
-                rows: 4,
-                value: draftData.caption,
-                placeholder: "Optional closing caption for the whole sequence",
-                disabled: busy,
-                onInput(nextValue) {
-                    draftData.caption = nextValue;
-                },
-            }),
-        })
-    );
-
-    const sequenceEditor = document.createElement("div");
-    sequenceEditor.className = "admin-image-sequence-editor";
-
-    const toolbar = document.createElement("div");
-    toolbar.className = "admin-image-sequence-toolbar";
-
-    const summary = document.createElement("p");
-    summary.className = "admin-editor-subtitle";
-    summary.textContent = draftData.items.length
-        ? `${draftData.items.length} image item${draftData.items.length === 1 ? "" : "s"} in this sequence.`
-        : "No image items yet. Add the first story image below.";
-    toolbar.appendChild(summary);
-
-    toolbar.appendChild(
-        createButton("Add Image", "admin-inline-bar-link is-primary", {
-            disabled: busy,
-            onClick() {
-                draftData.items = renumberImageSequenceItems([
-                    ...draftData.items,
-                    createEmptyImageSequenceItem(draftData.items.length + 1),
-                ]);
-                clearFieldErrors(state, "image_sequence_items");
-                rerender();
-            },
-        })
-    );
-
-    sequenceEditor.appendChild(toolbar);
-
-    if (!draftData.items.length) {
-        const empty = document.createElement("p");
-        empty.className = "admin-editor-field-hint";
-        empty.textContent = "Image sequence blocks need at least one image item.";
-        sequenceEditor.appendChild(empty);
-    }
-
-    draftData.items.forEach((item, index) => {
-        const card = document.createElement("div");
-        card.className = "admin-image-sequence-item-card";
-
-        const header = document.createElement("div");
-        header.className = "admin-image-sequence-item-header";
-
-        const title = document.createElement("h5");
-        title.className = "admin-content-block-picker-title";
-        title.textContent = `Image ${index + 1}`;
-        header.appendChild(title);
-
-        const actions = document.createElement("div");
-        actions.className = "admin-explanation-block-actions";
-
-        actions.appendChild(
-            createButton("Up", "admin-inline-bar-link", {
-                disabled: busy || index === 0,
-                onClick() {
-                    const nextItems = [...draftData.items];
-                    [nextItems[index - 1], nextItems[index]] = [nextItems[index], nextItems[index - 1]];
-                    draftData.items = renumberImageSequenceItems(nextItems);
-                    rerender();
-                },
-            })
-        );
-
-        actions.appendChild(
-            createButton("Down", "admin-inline-bar-link", {
-                disabled: busy || index === draftData.items.length - 1,
-                onClick() {
-                    const nextItems = [...draftData.items];
-                    [nextItems[index + 1], nextItems[index]] = [nextItems[index], nextItems[index + 1]];
-                    draftData.items = renumberImageSequenceItems(nextItems);
-                    rerender();
-                },
-            })
-        );
-
-        actions.appendChild(
-            createButton("Remove", "admin-inline-bar-link admin-editor-delete", {
-                disabled: busy,
-                onClick() {
-                    draftData.items = renumberImageSequenceItems(
-                        draftData.items.filter((_, itemIndex) => itemIndex !== index)
-                    );
-                    clearFieldErrors(state, "image_sequence_items");
-                    rerender();
-                },
-            })
-        );
-
-        header.appendChild(actions);
-        card.appendChild(header);
-
-        const itemGrid = document.createElement("div");
-        itemGrid.className = "admin-editor-grid admin-explanation-form-grid";
-
-        const selectedAsset = getSelectedAsset(state, item.media_asset_id);
-        const previewGroup = document.createElement("div");
-        previewGroup.className = "admin-content-block-preview-group";
-        previewGroup.appendChild(createAssetPreview(selectedAsset));
-        previewGroup.appendChild(createDirectSourcePreview("image", item));
-
-        const pickerStack = document.createElement("div");
-        pickerStack.className = "admin-content-block-picker-stack";
-        pickerStack.appendChild(
-            createAssetPicker({
-                title: "Image Browser",
-                hint: "Choose a reusable image asset, or import one into the project-managed media library.",
-                state,
-                blockType: "image_sequence",
-                selectedIds: item.media_asset_id ? [item.media_asset_id] : [],
-                disabled: busy,
-                onSelect(assetId) {
-                    item.media_asset_id = item.media_asset_id === assetId ? "" : assetId;
-                    clearFieldErrors(state, "image_sequence_items");
-                    rerender();
-                },
-                onImportComplete(importedAssets) {
-                    const firstAssetId = importedAssets[0]?.id || "";
-                    if (firstAssetId) {
-                        item.media_asset_id = firstAssetId;
-                        clearFieldErrors(state, "image_sequence_items");
-                    }
-                },
-                rerender,
-            })
-        );
-        pickerStack.appendChild(previewGroup);
-
-        itemGrid.appendChild(
-            createField({
-                label: "Image Picker",
-                wide: true,
-                error: getFieldError(state, "image_sequence_items"),
-                control: pickerStack,
-            })
-        );
-
-        itemGrid.appendChild(
-            createField({
-                label: "Direct Image URL",
-                wide: true,
-                control: createInputControl({
-                    value: item.src,
-                    placeholder: "Optional direct image URL",
-                    disabled: busy,
-                    onInput(nextValue) {
-                        item.src = nextValue;
-                        clearFieldErrors(state, "image_sequence_items");
-                    },
-                }),
-            })
-        );
-
-        itemGrid.appendChild(
-            createField({
-                label: "Alt Text",
-                control: createInputControl({
-                    value: item.alt_text,
-                    placeholder: "Describe this image",
-                    disabled: busy,
-                    onInput(nextValue) {
-                        item.alt_text = nextValue;
-                    },
-                }),
-            })
-        );
-
-        itemGrid.appendChild(
-            createField({
-                label: "Caption",
-                wide: true,
-                control: createInputControl({
-                    type: "textarea",
-                    rows: 3,
-                    value: item.caption,
-                    placeholder: "Optional per-image caption",
-                    disabled: busy,
-                    onInput(nextValue) {
-                        item.caption = nextValue;
-                    },
-                }),
-            })
-        );
-
-        card.appendChild(itemGrid);
-        sequenceEditor.appendChild(card);
-    });
-
-    grid.appendChild(
-        createField({
-            label: "Image Story Items",
-            wide: true,
-            error: getFieldError(state, "image_sequence_items"),
-            control: sequenceEditor,
-        })
-    );
-}
-
 function appendBlockSpecificFields(grid, state, busy, rerender) {
     switch (state.draft.block_type) {
         case "rich_text":
@@ -1918,9 +1647,6 @@ function appendBlockSpecificFields(grid, state, busy, rerender) {
         case "media":
         case "audio":
             appendMediaFields(grid, state, busy, state.draft.block_type, rerender);
-            return;
-        case "image_sequence":
-            appendImageSequenceFields(grid, state, busy, rerender);
             return;
         case "quote":
             appendQuoteFields(grid, state, busy);
@@ -1965,7 +1691,6 @@ export function getContentBlockSummary(block) {
         case "rich_text":
         case "commentary":
         case "image":
-        case "image_sequence":
         case "video":
         case "media":
         case "audio":
@@ -2014,6 +1739,7 @@ export function createContentBlockForm({
             loading: true,
             importing: false,
             error: "",
+            notice: "",
             records: [],
         },
     };
@@ -2106,6 +1832,7 @@ export function createContentBlockForm({
                 loading: false,
                 importing: false,
                 error: "",
+                notice: "",
                 records: sortMediaAssets(Array.isArray(records) ? records : []),
             };
             render();
@@ -2115,6 +1842,7 @@ export function createContentBlockForm({
                 loading: false,
                 importing: false,
                 error: error.message || "Unable to load media assets.",
+                notice: "",
                 records: [],
             };
             render();

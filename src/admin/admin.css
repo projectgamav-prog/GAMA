@@ -461,9 +461,7 @@ body.admin-mode-page {
     gap: 10px;
 }
 
-.admin-content-block-picker-tools,
-.admin-image-sequence-editor,
-.admin-image-sequence-item-card {
+.admin-content-block-picker-tools {
     display: grid;
     gap: 14px;
 }
@@ -590,22 +588,6 @@ body.admin-mode-page {
 
 .admin-content-block-preview-group {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.admin-image-sequence-toolbar,
-.admin-image-sequence-item-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.admin-image-sequence-item-card {
-    padding: 16px;
-    border: 1px solid rgba(96, 72, 38, 0.14);
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.82);
 }
 
 .admin-content-block-asset-preview,

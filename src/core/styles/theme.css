@@ -2969,7 +2969,6 @@ html[data-theme="dark"] .verse-page .verse-detail-card {
 }
 
 .explanation-page .explanation-gallery-grid,
-.explanation-page .explanation-image-sequence,
 .explanation-page .explanation-related-grid,
 .explanation-page .explanation-stat-grid {
     display: grid;
@@ -2978,16 +2977,6 @@ html[data-theme="dark"] .verse-page .verse-detail-card {
 
 .explanation-page .explanation-gallery-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.explanation-page .explanation-image-sequence {
-    list-style: decimal;
-    padding-left: 1.5rem;
-}
-
-.explanation-page .explanation-image-sequence-item {
-    display: grid;
-    gap: 0.75rem;
 }
 
 .explanation-page .explanation-gallery-item,
