@@ -2960,6 +2960,65 @@ html[data-theme="dark"] .verse-page .verse-detail-card {
     justify-self: start;
 }
 
+.explanation-page .explanation-media-card,
+.explanation-page .explanation-audio-card,
+.explanation-page .explanation-document-card {
+    display: grid;
+    gap: 1rem;
+    text-align: left;
+}
+
+.explanation-page .explanation-gallery-grid,
+.explanation-page .explanation-related-grid,
+.explanation-page .explanation-stat-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.explanation-page .explanation-gallery-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.explanation-page .explanation-gallery-item,
+.explanation-page .explanation-related-card,
+.explanation-page .explanation-stat-card {
+    min-width: 0;
+}
+
+.explanation-page .explanation-related-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.explanation-page .explanation-related-card,
+.explanation-page .explanation-stat-card,
+.explanation-page .explanation-document-card {
+    padding: 1rem;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: var(--md-sys-shape-corner-md);
+    background: color-mix(in srgb, var(--md-sys-color-surface-container-low) 92%, white);
+    box-shadow: var(--md-sys-elevation-1);
+}
+
+.explanation-page .explanation-stat-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.explanation-page .explanation-stat-card {
+    display: grid;
+    gap: 0.35rem;
+    text-align: center;
+}
+
+.explanation-page .explanation-document-type,
+.explanation-page .explanation-quote-attribution {
+    margin: 0;
+    color: var(--md-sys-color-primary);
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
 .explanation-page .explanation-text {
     inline-size: min(100%, calc(var(--content-width) - 3rem));
     margin: 0 auto;
@@ -3262,6 +3321,10 @@ html[data-theme="dark"] .verse-page .verse-detail-card {
     .journey,
     .chapter-page .chapter-list-section {
         scroll-margin-top: 1rem;
+    }
+
+    .explanation-page .explanation-gallery-grid {
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .chapter-page .chapter-group-summary {

@@ -1,520 +1,1496 @@
 import {
-    CONTENT_BLOCK_STATUSES,
-    CONTENT_BLOCK_TYPES,
-    CONTENT_BLOCK_VISIBILITIES,
+    MEDIA_ASSET_TYPES,
     normalizeContentBlockData,
 } from "../content/schema/cms-schema.js";
-import { listContentRecords } from "./content-state.js";
+import { createAdminApi } from "./api.js";
 
-const BODY_BLOCK_TYPES = Object.freeze(CONTENT_BLOCK_TYPES.filter((type) => type !== "hero"));
+const CONTENT_BLOCK_TYPE_OPTIONS = Object.freeze([
+    { value: "rich_text", label: "Rich Text" },
+    { value: "commentary", label: "Commentary" },
+    { value: "image", label: "Image" },
+    { value: "video", label: "Video" },
+    { value: "media", label: "Media" },
+    { value: "audio", label: "Audio" },
+    { value: "quote", label: "Quote" },
+    { value: "gallery", label: "Gallery" },
+    { value: "cta", label: "Call To Action" },
+    { value: "related_entities", label: "Related Entities" },
+    { value: "stat_grid", label: "Stat Grid" },
+    { value: "hero", label: "Hero" },
+]);
 
-const BLOCK_TYPE_LABELS = Object.freeze({
-    rich_text: "Rich Text",
-    video: "Video",
-    media: "Media",
-    image: "Image",
-    quote: "Quote",
-    commentary: "Commentary",
-    audio: "Audio",
-    related_entities: "Related Entities",
-    cta: "Call To Action",
-    gallery: "Gallery",
-    stat_grid: "Stat Grid",
-});
+const STATUS_OPTIONS = Object.freeze([
+    { value: "draft", label: "Draft" },
+    { value: "published", label: "Published" },
+]);
 
-function getBlockTypeLabel(type) {
-    return BLOCK_TYPE_LABELS[type] || String(type || "Block");
+const VISIBILITY_OPTIONS = Object.freeze([
+    { value: "public", label: "Visible" },
+    { value: "hidden", label: "Hidden" },
+]);
+
+const MEDIA_FILTER_OPTIONS = Object.freeze([
+    { value: "compatible", label: "Compatible" },
+    ...MEDIA_ASSET_TYPES.map((value) => ({
+        value,
+        label: value.charAt(0).toUpperCase() + value.slice(1),
+    })),
+]);
+
+const RELATED_ENTITIES_TEMPLATE = Object.freeze([
+    {
+        entity: "characters",
+        id: "character-arjuna",
+        label: "Arjuna",
+    },
+]);
+
+const STAT_GRID_TEMPLATE = Object.freeze([
+    {
+        label: "Theme",
+        value: "Action without attachment",
+    },
+]);
+
+let mediaAssetsCache = null;
+let mediaAssetsPromise = null;
+
+function cloneObject(value, fallback = {}) {
+    return value && typeof value === "object" && !Array.isArray(value)
+        ? { ...value }
+        : { ...fallback };
 }
 
-function trimText(value) {
+function cloneArray(values = []) {
+    return Array.isArray(values) ? [...values] : [];
+}
+
+function normalizeText(value) {
     return String(value ?? "").trim();
 }
 
-function truncateText(value, maxLength = 120) {
-    const normalized = trimText(value);
-    if (normalized.length <= maxLength) {
-        return normalized;
-    }
-
-    return `${normalized.slice(0, maxLength - 1).trimEnd()}...`;
-}
-
-function createFieldWrapper(labelText, hintText = "") {
-    const wrapper = document.createElement("label");
-    wrapper.className = "admin-editor-field";
-
-    const label = document.createElement("span");
-    label.className = "admin-editor-field-label";
-    label.textContent = labelText;
-    wrapper.appendChild(label);
-
-    if (hintText) {
-        const hint = document.createElement("span");
-        hint.className = "admin-editor-field-hint";
-        hint.textContent = hintText;
-        wrapper.appendChild(hint);
-    }
-
-    return wrapper;
-}
-
-function createTextControl({ name, value = "", rows = 0, required = false, disabled = false, placeholder = "" }) {
-    const input = rows > 0 ? document.createElement("textarea") : document.createElement("input");
-    input.name = name;
-    input.className = "admin-editor-input";
-    input.disabled = disabled;
-    input.required = required;
-
-    if (rows > 0) {
-        input.rows = rows;
-    } else {
-        input.type = "text";
-    }
-
-    if (placeholder) {
-        input.placeholder = placeholder;
-    }
-
-    input.value = String(value ?? "");
-    return input;
-}
-
-function appendTextField(container, field) {
-    const wrapper = createFieldWrapper(field.label, field.hint);
-    const controlWrap = document.createElement("span");
-    controlWrap.className = "admin-editor-field-control";
-    controlWrap.appendChild(createTextControl(field));
-    wrapper.appendChild(controlWrap);
-    container.appendChild(wrapper);
-}
-
-function appendSelectField(container, field) {
-    const wrapper = createFieldWrapper(field.label, field.hint);
-    const controlWrap = document.createElement("span");
-    controlWrap.className = "admin-editor-field-control";
-
-    const select = document.createElement("select");
-    select.name = field.name;
-    select.className = "admin-editor-input";
-    select.disabled = field.disabled === true;
-
-    (field.options || []).forEach((option) => {
-        const element = document.createElement("option");
-        element.value = option.value;
-        element.textContent = option.label;
-        element.selected = option.value === field.value;
-        select.appendChild(element);
-    });
-
-    controlWrap.appendChild(select);
-    wrapper.appendChild(controlWrap);
-    container.appendChild(wrapper);
-}
-
-function getMediaAssetsByType(assetTypes = []) {
-    const allowedTypes = new Set(assetTypes);
-    return listContentRecords("media_assets").filter((asset) => !allowedTypes.size || allowedTypes.has(asset.asset_type));
-}
-
-function createMediaAssetOptions(assetTypes = []) {
-    const assets = getMediaAssetsByType(assetTypes);
-    const options = [{ value: "", label: "Select media asset" }];
-
-    assets.forEach((asset) => {
-        options.push({
-            value: asset.id,
-            label: asset.title ? `${asset.title} (${asset.asset_type})` : `${asset.id} (${asset.asset_type})`,
-        });
-    });
-
-    return options;
-}
-
-function buildTypeSpecificFields(draft, disabled) {
-    switch (draft.block_type) {
-        case "rich_text":
-        case "commentary":
-            return [
-                { kind: "text", name: "title", label: "Title", value: draft.title, disabled },
-                { kind: "text", name: "body", label: "Body", value: draft.body, rows: 7, required: true, disabled },
-            ];
-        case "video":
-            return [
-                { kind: "text", name: "title", label: "Title", value: draft.title, disabled },
-                {
-                    kind: "select",
-                    name: "media_asset_id",
-                    label: "Video Asset",
-                    value: draft.media_asset_id,
-                    options: createMediaAssetOptions(["video", "embed"]),
-                    disabled,
-                    hint: "Choose a reusable video or embed asset.",
-                },
-                { kind: "text", name: "caption", label: "Caption", value: draft.caption, rows: 4, disabled },
-            ];
-        case "media":
-            return [
-                { kind: "text", name: "title", label: "Title", value: draft.title, disabled },
-                {
-                    kind: "select",
-                    name: "media_asset_id",
-                    label: "Media Asset",
-                    value: draft.media_asset_id,
-                    options: createMediaAssetOptions(),
-                    disabled,
-                },
-                { kind: "text", name: "caption", label: "Caption", value: draft.caption, rows: 4, disabled },
-            ];
-        case "image":
-            return [
-                { kind: "text", name: "title", label: "Title", value: draft.title, disabled },
-                {
-                    kind: "select",
-                    name: "media_asset_id",
-                    label: "Image Asset",
-                    value: draft.media_asset_id,
-                    options: createMediaAssetOptions(["image"]),
-                    disabled,
-                },
-                { kind: "text", name: "caption", label: "Caption", value: draft.caption, rows: 4, disabled },
-            ];
-        case "audio":
-            return [
-                { kind: "text", name: "title", label: "Title", value: draft.title, disabled },
-                {
-                    kind: "select",
-                    name: "media_asset_id",
-                    label: "Audio Asset",
-                    value: draft.media_asset_id,
-                    options: createMediaAssetOptions(["audio"]),
-                    disabled,
-                },
-                { kind: "text", name: "caption", label: "Caption", value: draft.caption, rows: 4, disabled },
-            ];
-        case "quote":
-            return [
-                { kind: "text", name: "quote", label: "Quote", value: draft.quote, rows: 5, required: true, disabled },
-                { kind: "text", name: "attribution", label: "Attribution", value: draft.attribution, disabled },
-            ];
-        case "related_entities":
-            return [
-                { kind: "text", name: "title", label: "Title", value: draft.title, disabled },
-                {
-                    kind: "text",
-                    name: "items_json",
-                    label: "Items JSON",
-                    value: draft.items_json,
-                    rows: 6,
-                    disabled,
-                    hint: 'Use a JSON array like [{"entity":"characters","id":"character-arjuna","label":"Arjuna"}].',
-                },
-            ];
-        case "cta":
-            return [
-                { kind: "text", name: "title", label: "Title", value: draft.title, required: true, disabled },
-                { kind: "text", name: "body", label: "Body", value: draft.body, rows: 4, disabled },
-                { kind: "text", name: "label", label: "Button Label", value: draft.label, required: true, disabled },
-                { kind: "text", name: "href", label: "Button URL", value: draft.href, required: true, disabled },
-            ];
-        case "gallery":
-            return [
-                { kind: "text", name: "title", label: "Title", value: draft.title, disabled },
-                {
-                    kind: "text",
-                    name: "media_asset_ids",
-                    label: "Media Asset IDs",
-                    value: draft.media_asset_ids,
-                    rows: 6,
-                    disabled,
-                    hint: "Enter one media asset id per line or as a comma-separated list.",
-                },
-                { kind: "text", name: "caption", label: "Caption", value: draft.caption, rows: 4, disabled },
-            ];
-        case "stat_grid":
-            return [
-                { kind: "text", name: "title", label: "Title", value: draft.title, disabled },
-                {
-                    kind: "text",
-                    name: "items_json",
-                    label: "Items JSON",
-                    value: draft.items_json,
-                    rows: 6,
-                    disabled,
-                    hint: 'Use a JSON array like [{"label":"Theme","value":"Detachment"}].',
-                },
-            ];
-        default:
-            return [];
-    }
-}
-
-function normalizeType(type) {
-    const normalized = String(type || "").trim().toLowerCase();
-    return BODY_BLOCK_TYPES.includes(normalized) ? normalized : "rich_text";
-}
-
-function getItemsJson(value) {
-    const normalized = trimText(value);
-    if (!normalized) {
-        return [];
-    }
-
-    const parsed = JSON.parse(normalized);
-    if (!Array.isArray(parsed)) {
-        throw new Error("Items JSON must be an array.");
-    }
-
-    return parsed;
-}
-
-function getMediaAssetIds(value) {
-    return String(value ?? "")
-        .split(/\r?\n|,/)
-        .map((entry) => entry.trim())
-        .filter(Boolean);
-}
-
-function buildBlockDataFromForm(type, formData) {
-    switch (type) {
-        case "rich_text":
-        case "commentary":
+function createDefaultBlockData(blockType = "rich_text") {
+    switch (blockType) {
+        case "hero":
             return {
-                title: trimText(formData.get("title")),
-                body: trimText(formData.get("body")),
+                eyebrow: "",
+                title: "",
+                subtitle: "",
+                media_asset_id: "",
+                cta_label: "",
+                cta_href: "",
+            };
+        case "commentary":
+        case "rich_text":
+            return {
+                title: "",
+                body: "",
+            };
+        case "image":
+            return {
+                title: "",
+                media_asset_id: "",
+                src: "",
+                caption: "",
+                alt_text: "",
             };
         case "video":
+            return {
+                title: "",
+                media_asset_id: "",
+                src: "",
+                embed_url: "",
+                caption: "",
+                provider: "",
+                alt_text: "",
+            };
         case "media":
-        case "image":
+            return {
+                title: "",
+                media_asset_id: "",
+                src: "",
+                embed_url: "",
+                caption: "",
+                provider: "",
+                alt_text: "",
+                media_kind: "",
+            };
         case "audio":
             return {
-                title: trimText(formData.get("title")),
-                media_asset_id: trimText(formData.get("media_asset_id")),
-                caption: trimText(formData.get("caption")),
+                title: "",
+                media_asset_id: "",
+                src: "",
+                caption: "",
+                provider: "",
             };
         case "quote":
             return {
-                quote: trimText(formData.get("quote")),
-                attribution: trimText(formData.get("attribution")),
-            };
-        case "related_entities":
-            return {
-                title: trimText(formData.get("title")),
-                items: getItemsJson(formData.get("items_json")),
-            };
-        case "cta":
-            return {
-                title: trimText(formData.get("title")),
-                body: trimText(formData.get("body")),
-                label: trimText(formData.get("label")),
-                href: trimText(formData.get("href")),
+                quote: "",
+                attribution: "",
             };
         case "gallery":
             return {
-                title: trimText(formData.get("title")),
-                media_asset_ids: getMediaAssetIds(formData.get("media_asset_ids")),
-                caption: trimText(formData.get("caption")),
+                title: "",
+                media_asset_ids: [],
+                caption: "",
+            };
+        case "cta":
+            return {
+                title: "",
+                body: "",
+                label: "",
+                href: "",
+            };
+        case "related_entities":
+            return {
+                title: "",
+                items: cloneArray(RELATED_ENTITIES_TEMPLATE),
             };
         case "stat_grid":
             return {
-                title: trimText(formData.get("title")),
-                items: getItemsJson(formData.get("items_json")),
+                title: "",
+                items: cloneArray(STAT_GRID_TEMPLATE),
             };
         default:
             return {};
     }
 }
 
-export function getContentBlockTypeOptions() {
-    return BODY_BLOCK_TYPES.map((type) => Object.freeze({
-        value: type,
-        label: getBlockTypeLabel(type),
-    }));
+function cloneBlockData(blockType, data = {}) {
+    const defaults = createDefaultBlockData(blockType);
+    const nextData = {
+        ...defaults,
+        ...cloneObject(data),
+    };
+
+    if (Array.isArray(defaults.media_asset_ids) || Array.isArray(nextData.media_asset_ids)) {
+        nextData.media_asset_ids = cloneArray(nextData.media_asset_ids);
+    }
+
+    if (Array.isArray(defaults.items) || Array.isArray(nextData.items)) {
+        nextData.items = cloneArray(nextData.items).map((item) => cloneObject(item));
+    }
+
+    return nextData;
 }
 
-export function getContentBlockTypeLabel(type) {
-    return getBlockTypeLabel(type);
+function createDraft(blockType = "rich_text", seed = {}) {
+    return {
+        block_type: blockType,
+        variant: seed.variant ?? "",
+        status: seed.status || "draft",
+        visibility: seed.visibility || "public",
+        is_published: seed.is_published === true || seed.status === "published",
+        data: cloneBlockData(blockType, seed.data),
+    };
 }
 
-export function createEmptyContentBlockDraft(type = "rich_text") {
-    return Object.freeze({
-        block_type: normalizeType(type),
-        variant: "",
-        status: "draft",
-        visibility: "public",
-        title: "",
-        body: "",
-        media_asset_id: "",
-        caption: "",
-        quote: "",
-        attribution: "",
-        items_json: "[]",
-        label: "",
-        href: "",
-        media_asset_ids: "",
-    });
+function prettyJson(value, fallback) {
+    return JSON.stringify(value ?? fallback, null, 2);
 }
 
-export function createContentBlockDraftFromRecord(block) {
-    const base = createEmptyContentBlockDraft(block?.block_type || "rich_text");
-    return Object.freeze({
-        ...base,
-        block_type: normalizeType(block?.block_type),
-        variant: block?.variant || "",
-        status: block?.status || "draft",
-        visibility: block?.visibility || "public",
-        title: block?.data?.title || "",
-        body: block?.data?.body || "",
-        media_asset_id: block?.data?.media_asset_id || "",
-        caption: block?.data?.caption || "",
-        quote: block?.data?.quote || "",
-        attribution: block?.data?.attribution || "",
-        items_json: JSON.stringify(block?.data?.items || [], null, 2),
-        label: block?.data?.label || "",
-        href: block?.data?.href || "",
-        media_asset_ids: Array.isArray(block?.data?.media_asset_ids) ? block.data.media_asset_ids.join("\n") : "",
-    });
-}
-
-export function getContentBlockSummary(block) {
-    switch (block?.block_type) {
-        case "rich_text":
-        case "commentary":
-            return truncateText(block?.data?.title || block?.data?.body || "Text block");
-        case "video":
-        case "media":
+function getCompatibleAssetTypes(blockType) {
+    switch (blockType) {
         case "image":
+            return ["image"];
+        case "video":
+            return ["video", "embed"];
         case "audio":
-            return truncateText(block?.data?.title || block?.data?.caption || block?.data?.media_asset_id || "Media block");
-        case "quote":
-            return truncateText(block?.data?.quote || "Quote block");
-        case "related_entities":
-            return truncateText(block?.data?.title || `${(block?.data?.items || []).length} related entit${(block?.data?.items || []).length === 1 ? "y" : "ies"}`);
-        case "cta":
-            return truncateText(block?.data?.title || block?.data?.label || "Call to action");
+            return ["audio"];
+        case "hero":
+            return ["image", "video", "embed"];
+        case "media":
+            return [...MEDIA_ASSET_TYPES];
         case "gallery":
-            return truncateText(block?.data?.title || `${(block?.data?.media_asset_ids || []).length} media items`);
-        case "stat_grid":
-            return truncateText(block?.data?.title || `${(block?.data?.items || []).length} stats`);
+            return [...MEDIA_ASSET_TYPES];
         default:
-            return "Content block";
+            return [];
     }
 }
 
-export function readContentBlockFormPayload(form) {
-    const formData = new FormData(form);
-    const blockType = normalizeType(formData.get("block_type"));
-    const status = CONTENT_BLOCK_STATUSES.includes(String(formData.get("status"))) ? String(formData.get("status")) : "draft";
-    const visibility = CONTENT_BLOCK_VISIBILITIES.includes(String(formData.get("visibility"))) ? String(formData.get("visibility")) : "public";
-    const variant = trimText(formData.get("variant")) || null;
+function getDefaultAssetFilter(blockType) {
+    if (blockType === "image") {
+        return "image";
+    }
 
-    return Object.freeze({
-        block_type: blockType,
-        variant,
-        status,
-        visibility,
-        is_published: status === "published",
-        data: normalizeContentBlockData(
-            blockType,
-            buildBlockDataFromForm(blockType, formData),
-            "Content block"
-        ),
+    if (blockType === "audio") {
+        return "audio";
+    }
+
+    return "compatible";
+}
+
+function getAssetLabel(asset) {
+    const assetType = normalizeText(asset?.asset_type) || "media";
+    const title = normalizeText(asset?.title);
+    const src = normalizeText(asset?.src);
+    return title || src || `${assetType} asset`;
+}
+
+function isImageAsset(asset) {
+    return normalizeText(asset?.asset_type).toLowerCase() === "image";
+}
+
+function getItemJsonField(blockType) {
+    if (blockType === "related_entities" || blockType === "stat_grid") {
+        return "items";
+    }
+
+    return "";
+}
+
+function createRawJsonState(draft) {
+    const blockType = draft?.block_type || "rich_text";
+    const data = cloneObject(draft?.data);
+
+    if (blockType === "related_entities") {
+        return {
+            items: prettyJson(data.items, RELATED_ENTITIES_TEMPLATE),
+        };
+    }
+
+    if (blockType === "stat_grid") {
+        return {
+            items: prettyJson(data.items, STAT_GRID_TEMPLATE),
+        };
+    }
+
+    return {};
+}
+
+async function loadMediaAssets(api) {
+    if (Array.isArray(mediaAssetsCache)) {
+        return mediaAssetsCache;
+    }
+
+    if (!mediaAssetsPromise) {
+        mediaAssetsPromise = api.listRecords("media_assets")
+            .then((records) => {
+                mediaAssetsCache = Array.isArray(records) ? [...records] : [];
+                return mediaAssetsCache;
+            })
+            .catch((error) => {
+                mediaAssetsPromise = null;
+                throw error;
+            });
+    }
+
+    return mediaAssetsPromise;
+}
+
+function createSection(titleText, subtitleText = "") {
+    const section = document.createElement("section");
+    section.className = "admin-content-block-section";
+
+    const header = document.createElement("div");
+    header.className = "admin-content-block-section-header";
+
+    const title = document.createElement("h4");
+    title.className = "admin-explanation-section-title";
+    title.textContent = titleText;
+    header.appendChild(title);
+
+    if (subtitleText) {
+        const subtitle = document.createElement("p");
+        subtitle.className = "admin-editor-subtitle admin-content-block-section-subtitle";
+        subtitle.textContent = subtitleText;
+        header.appendChild(subtitle);
+    }
+
+    section.appendChild(header);
+    return section;
+}
+
+function createField({
+    label,
+    hint = "",
+    control,
+    wide = false,
+}) {
+    const field = document.createElement("label");
+    field.className = "admin-editor-field";
+    if (wide) {
+        field.classList.add("is-wide");
+    }
+
+    const labelElement = document.createElement("span");
+    labelElement.className = "admin-editor-field-label";
+    labelElement.textContent = label;
+
+    const controlWrap = document.createElement("span");
+    controlWrap.className = "admin-editor-field-control";
+    controlWrap.appendChild(control);
+
+    field.append(labelElement, controlWrap);
+
+    if (hint) {
+        const hintElement = document.createElement("span");
+        hintElement.className = "admin-editor-field-hint";
+        hintElement.textContent = hint;
+        field.appendChild(hintElement);
+    }
+
+    return field;
+}
+
+function createInputControl({
+    type = "text",
+    value = "",
+    placeholder = "",
+    disabled = false,
+    rows = 4,
+    options = [],
+    onInput = null,
+}) {
+    let input;
+
+    if (type === "textarea") {
+        input = document.createElement("textarea");
+        input.rows = rows;
+        input.value = String(value ?? "");
+    } else if (type === "select") {
+        input = document.createElement("select");
+        options.forEach((option) => {
+            const element = document.createElement("option");
+            element.value = option.value;
+            element.textContent = option.label;
+            element.selected = String(option.value) === String(value ?? "");
+            input.appendChild(element);
+        });
+    } else {
+        input = document.createElement("input");
+        input.type = type;
+        input.value = String(value ?? "");
+    }
+
+    input.className = "admin-editor-input";
+    input.placeholder = placeholder;
+    input.disabled = disabled;
+
+    if (typeof onInput === "function") {
+        const eventName = type === "select" ? "change" : "input";
+        input.addEventListener(eventName, () => {
+            onInput(input.value);
+        });
+    }
+
+    return input;
+}
+
+function createButton(text, className, { type = "button", disabled = false, onClick = null } = {}) {
+    const button = document.createElement("button");
+    button.type = type;
+    button.className = className;
+    button.disabled = disabled;
+    button.textContent = text;
+    if (typeof onClick === "function") {
+        button.addEventListener("click", onClick);
+    }
+    return button;
+}
+
+function createAssetPreview(asset) {
+    const preview = document.createElement("div");
+    preview.className = "admin-content-block-asset-preview";
+
+    if (!asset) {
+        const empty = document.createElement("p");
+        empty.className = "admin-editor-field-hint";
+        empty.textContent = "No reusable media asset selected yet.";
+        preview.appendChild(empty);
+        return preview;
+    }
+
+    const meta = document.createElement("div");
+    meta.className = "admin-content-block-asset-preview-copy";
+
+    const eyebrow = document.createElement("span");
+    eyebrow.className = "admin-content-block-asset-badge";
+    eyebrow.textContent = normalizeText(asset.asset_type) || "media";
+
+    const title = document.createElement("strong");
+    title.textContent = getAssetLabel(asset);
+
+    const src = document.createElement("span");
+    src.className = "admin-editor-field-hint";
+    src.textContent = normalizeText(asset.src);
+
+    meta.append(eyebrow, title, src);
+
+    if (isImageAsset(asset) && normalizeText(asset.src)) {
+        const image = document.createElement("img");
+        image.className = "admin-content-block-asset-preview-image";
+        image.src = asset.src;
+        image.alt = normalizeText(asset.alt_text) || getAssetLabel(asset);
+        image.loading = "lazy";
+        preview.appendChild(image);
+    }
+
+    preview.appendChild(meta);
+    return preview;
+}
+
+function createDirectSourcePreview(blockType, draftData) {
+    const preview = document.createElement("div");
+    preview.className = "admin-content-block-direct-preview";
+
+    const src = normalizeText(draftData?.src);
+    const embedUrl = normalizeText(draftData?.embed_url);
+    const activeUrl = embedUrl || src;
+
+    if (!activeUrl) {
+        const empty = document.createElement("p");
+        empty.className = "admin-editor-field-hint";
+        empty.textContent = "No direct source set yet. Use a reusable asset or paste a URL below.";
+        preview.appendChild(empty);
+        return preview;
+    }
+
+    if (blockType === "image") {
+        const image = document.createElement("img");
+        image.className = "admin-content-block-asset-preview-image";
+        image.src = src;
+        image.alt = normalizeText(draftData?.alt_text) || normalizeText(draftData?.title) || "Image preview";
+        image.loading = "lazy";
+        preview.appendChild(image);
+    }
+
+    const link = document.createElement("a");
+    link.className = "admin-content-block-direct-link";
+    link.href = activeUrl;
+    link.target = "_blank";
+    link.rel = "noreferrer";
+    link.textContent = activeUrl;
+    preview.appendChild(link);
+
+    return preview;
+}
+
+function createMediaFilterRow(state, compatibleTypes, disabled, rerender) {
+    const row = document.createElement("div");
+    row.className = "admin-content-block-filter-row";
+
+    MEDIA_FILTER_OPTIONS.forEach((option) => {
+        if (option.value !== "compatible" && compatibleTypes.length && !compatibleTypes.includes(option.value)) {
+            return;
+        }
+
+        const button = createButton(
+            option.label,
+            `admin-content-block-filter${state.assetFilter === option.value ? " is-active" : ""}`,
+            {
+                disabled,
+                onClick() {
+                    state.assetFilter = option.value;
+                    rerender();
+                },
+            }
+        );
+        row.appendChild(button);
     });
+
+    return row;
+}
+
+function getVisibleMediaAssets(state, blockType) {
+    const compatibleTypes = getCompatibleAssetTypes(blockType);
+    const filterValue = state.assetFilter || getDefaultAssetFilter(blockType);
+    const assets = Array.isArray(state.mediaAssets.records) ? state.mediaAssets.records : [];
+
+    return assets.filter((asset) => {
+        const assetType = normalizeText(asset?.asset_type).toLowerCase();
+        if (filterValue === "compatible") {
+            return compatibleTypes.length ? compatibleTypes.includes(assetType) : true;
+        }
+
+        return assetType === filterValue;
+    });
+}
+
+function appendAssetThumbnail(card, asset) {
+    if (isImageAsset(asset) && normalizeText(asset?.src)) {
+        const image = document.createElement("img");
+        image.className = "admin-content-block-asset-card-image";
+        image.src = asset.src;
+        image.alt = normalizeText(asset.alt_text) || getAssetLabel(asset);
+        image.loading = "lazy";
+        card.appendChild(image);
+        return;
+    }
+
+    const placeholder = document.createElement("div");
+    placeholder.className = "admin-content-block-asset-card-placeholder";
+    placeholder.textContent = normalizeText(asset?.asset_type) || "media";
+    card.appendChild(placeholder);
+}
+
+function createAssetPicker({
+    title,
+    hint,
+    state,
+    blockType,
+    selectedIds = [],
+    disabled = false,
+    onSelect,
+    rerender,
+}) {
+    const picker = document.createElement("div");
+    picker.className = "admin-content-block-picker";
+
+    const header = document.createElement("div");
+    header.className = "admin-content-block-picker-header";
+
+    const copy = document.createElement("div");
+    copy.className = "admin-content-block-picker-copy";
+
+    const heading = document.createElement("h5");
+    heading.className = "admin-content-block-picker-title";
+    heading.textContent = title;
+    copy.appendChild(heading);
+
+    if (hint) {
+        const text = document.createElement("p");
+        text.className = "admin-editor-field-hint";
+        text.textContent = hint;
+        copy.appendChild(text);
+    }
+
+    header.appendChild(copy);
+    picker.appendChild(header);
+
+    const compatibleTypes = getCompatibleAssetTypes(blockType);
+    picker.appendChild(createMediaFilterRow(state, compatibleTypes, disabled, rerender));
+
+    if (state.mediaAssets.loading) {
+        const loading = document.createElement("p");
+        loading.className = "admin-editor-field-hint";
+        loading.textContent = "Loading reusable media assets...";
+        picker.appendChild(loading);
+        return picker;
+    }
+
+    if (state.mediaAssets.error) {
+        const error = document.createElement("p");
+        error.className = "admin-editor-field-hint is-error";
+        error.textContent = state.mediaAssets.error;
+        picker.appendChild(error);
+        return picker;
+    }
+
+    const selectedAssetIds = new Set(selectedIds.filter(Boolean));
+    const grid = document.createElement("div");
+    grid.className = "admin-content-block-asset-grid";
+
+    const visibleAssets = getVisibleMediaAssets(state, blockType);
+    if (!visibleAssets.length) {
+        const empty = document.createElement("p");
+        empty.className = "admin-editor-field-hint";
+        empty.textContent = "No reusable media assets match this filter yet.";
+        picker.appendChild(empty);
+    } else {
+        visibleAssets.forEach((asset) => {
+            const isSelected = selectedAssetIds.has(asset.id);
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = `admin-content-block-asset-card${isSelected ? " is-selected" : ""}`;
+            button.disabled = disabled;
+            button.addEventListener("click", () => onSelect(asset.id));
+
+            appendAssetThumbnail(button, asset);
+
+            const meta = document.createElement("div");
+            meta.className = "admin-content-block-asset-card-copy";
+
+            const badge = document.createElement("span");
+            badge.className = "admin-content-block-asset-badge";
+            badge.textContent = normalizeText(asset.asset_type) || "media";
+
+            const label = document.createElement("strong");
+            label.textContent = getAssetLabel(asset);
+
+            const src = document.createElement("span");
+            src.className = "admin-editor-field-hint";
+            src.textContent = normalizeText(asset.src);
+
+            meta.append(badge, label, src);
+            button.appendChild(meta);
+            grid.appendChild(button);
+        });
+
+        picker.appendChild(grid);
+    }
+
+    return picker;
+}
+
+function getSelectedAsset(state, assetId) {
+    if (!assetId) {
+        return null;
+    }
+
+    return state.mediaAssets.records.find((asset) => asset.id === assetId) || null;
+}
+
+function getSelectedAssets(state, assetIds = []) {
+    const wanted = new Set(assetIds.filter(Boolean));
+    return state.mediaAssets.records.filter((asset) => wanted.has(asset.id));
+}
+
+function validateSelectedAssetTypes(blockType, state, data) {
+    const compatibleTypes = getCompatibleAssetTypes(blockType);
+    if (!compatibleTypes.length || !Array.isArray(state.mediaAssets.records) || !state.mediaAssets.records.length) {
+        return;
+    }
+
+    const ids = [];
+    if (data.media_asset_id) {
+        ids.push(data.media_asset_id);
+    }
+
+    if (Array.isArray(data.media_asset_ids)) {
+        ids.push(...data.media_asset_ids);
+    }
+
+    ids.forEach((assetId) => {
+        const asset = getSelectedAsset(state, assetId);
+        if (!asset) {
+            return;
+        }
+
+        const assetType = normalizeText(asset.asset_type).toLowerCase();
+        if (!compatibleTypes.includes(assetType)) {
+            throw new Error(`${getContentBlockTypeLabel(blockType)} blocks cannot use ${assetType} assets.`);
+        }
+    });
+}
+
+function parseJsonArray(rawValue, label) {
+    let parsed;
+
+    try {
+        parsed = JSON.parse(rawValue || "[]");
+    } catch {
+        throw new Error(`${label} must be valid JSON.`);
+    }
+
+    if (!Array.isArray(parsed)) {
+        throw new Error(`${label} must be a JSON array.`);
+    }
+
+    return parsed;
+}
+
+function buildPayload(state) {
+    const blockType = state.draft.block_type;
+    const draftData = cloneObject(state.draft.data);
+    let nextData;
+
+    switch (blockType) {
+        case "related_entities":
+            nextData = {
+                title: draftData.title,
+                items: parseJsonArray(state.rawJson.items, "Related entities"),
+            };
+            break;
+        case "stat_grid":
+            nextData = {
+                title: draftData.title,
+                items: parseJsonArray(state.rawJson.items, "Stat grid items"),
+            };
+            break;
+        case "gallery":
+            nextData = {
+                title: draftData.title,
+                caption: draftData.caption,
+                media_asset_ids: cloneArray(draftData.media_asset_ids),
+            };
+            break;
+        default:
+            nextData = cloneObject(draftData);
+            break;
+    }
+
+    validateSelectedAssetTypes(blockType, state, nextData);
+
+    const normalizedData = normalizeContentBlockData(
+        blockType,
+        nextData,
+        `${getContentBlockTypeLabel(blockType)} block`
+    );
+
+    const status = state.draft.status === "published" ? "published" : "draft";
+
+    return {
+        block_type: blockType,
+        variant: normalizeText(state.draft.variant) || null,
+        status,
+        visibility: state.draft.visibility === "hidden" ? "hidden" : "public",
+        is_published: status === "published",
+        data: normalizedData,
+    };
+}
+
+function appendTopLevelFields(grid, state, busy, onTypeChange) {
+    grid.appendChild(
+        createField({
+            label: "Block Type",
+            hint: "Choose a structured editorial block. Each type gets a purpose-built form below.",
+            control: createInputControl({
+                type: "select",
+                value: state.draft.block_type,
+                options: CONTENT_BLOCK_TYPE_OPTIONS,
+                disabled: busy,
+                onInput(nextValue) {
+                    onTypeChange?.(nextValue);
+                },
+            }),
+        })
+    );
+
+    grid.appendChild(
+        createField({
+            label: "Variant",
+            hint: "Optional subtype or display hint for shared renderers.",
+            control: createInputControl({
+                value: state.draft.variant,
+                placeholder: "Optional variant",
+                disabled: busy,
+                onInput(nextValue) {
+                    state.draft.variant = nextValue;
+                },
+            }),
+        })
+    );
+
+    grid.appendChild(
+        createField({
+            label: "Status",
+            hint: "Published blocks appear on public pages. Draft blocks remain admin-only.",
+            control: createInputControl({
+                type: "select",
+                value: state.draft.status,
+                options: STATUS_OPTIONS,
+                disabled: busy,
+                onInput(nextValue) {
+                    state.draft.status = nextValue;
+                    state.draft.is_published = nextValue === "published";
+                },
+            }),
+        })
+    );
+
+    grid.appendChild(
+        createField({
+            label: "Visibility",
+            hint: "Hidden blocks stay saved but do not render publicly.",
+            control: createInputControl({
+                type: "select",
+                value: state.draft.visibility,
+                options: VISIBILITY_OPTIONS,
+                disabled: busy,
+                onInput(nextValue) {
+                    state.draft.visibility = nextValue;
+                },
+            }),
+        })
+    );
+}
+
+function appendTextFields(grid, state, busy, blockType) {
+    const draftData = state.draft.data;
+
+    grid.appendChild(
+        createField({
+            label: "Title",
+            control: createInputControl({
+                value: draftData.title,
+                placeholder: "Optional heading",
+                disabled: busy,
+                onInput(nextValue) {
+                    draftData.title = nextValue;
+                },
+            }),
+        })
+    );
+
+    grid.appendChild(
+        createField({
+            label: blockType === "commentary" ? "Commentary Body" : "Body",
+            wide: true,
+            hint: "Paragraph breaks are preserved when rendered.",
+            control: createInputControl({
+                type: "textarea",
+                rows: 8,
+                value: draftData.body,
+                placeholder: "Write the block body",
+                disabled: busy,
+                onInput(nextValue) {
+                    draftData.body = nextValue;
+                },
+            }),
+        })
+    );
+}
+
+function appendQuoteFields(grid, state, busy) {
+    const draftData = state.draft.data;
+
+    grid.appendChild(
+        createField({
+            label: "Quote",
+            wide: true,
+            control: createInputControl({
+                type: "textarea",
+                rows: 6,
+                value: draftData.quote,
+                placeholder: "Quoted text",
+                disabled: busy,
+                onInput(nextValue) {
+                    draftData.quote = nextValue;
+                },
+            }),
+        })
+    );
+
+    grid.appendChild(
+        createField({
+            label: "Attribution",
+            control: createInputControl({
+                value: draftData.attribution,
+                placeholder: "Speaker or source",
+                disabled: busy,
+                onInput(nextValue) {
+                    draftData.attribution = nextValue;
+                },
+            }),
+        })
+    );
+}
+
+function appendCtaFields(grid, state, busy) {
+    const draftData = state.draft.data;
+
+    grid.appendChild(
+        createField({
+            label: "Title",
+            control: createInputControl({
+                value: draftData.title,
+                placeholder: "CTA heading",
+                disabled: busy,
+                onInput(nextValue) {
+                    draftData.title = nextValue;
+                },
+            }),
+        })
+    );
+
+    grid.appendChild(
+        createField({
+            label: "Button Label",
+            control: createInputControl({
+                value: draftData.label,
+                placeholder: "Read more",
+                disabled: busy,
+                onInput(nextValue) {
+                    draftData.label = nextValue;
+                },
+            }),
+        })
+    );
+
+    grid.appendChild(
+        createField({
+            label: "Body",
+            wide: true,
+            control: createInputControl({
+                type: "textarea",
+                rows: 5,
+                value: draftData.body,
+                placeholder: "Short supporting copy",
+                disabled: busy,
+                onInput(nextValue) {
+                    draftData.body = nextValue;
+                },
+            }),
+        })
+    );
+
+    grid.appendChild(
+        createField({
+            label: "Link URL",
+            control: createInputControl({
+                value: draftData.href,
+                placeholder: "/path-or-url",
+                disabled: busy,
+                onInput(nextValue) {
+                    draftData.href = nextValue;
+                },
+            }),
+        })
+    );
+}
+
+function appendStructuredJsonFields(grid, state, busy, blockType) {
+    const draftData = state.draft.data;
+    const jsonField = getItemJsonField(blockType);
+    const label = blockType === "related_entities" ? "Related Items JSON" : "Stat Items JSON";
+    const hint = blockType === "related_entities"
+        ? "Provide an array of objects like { \"entity\": \"characters\", \"id\": \"character-arjuna\", \"label\": \"Arjuna\" }."
+        : "Provide an array of objects like { \"label\": \"Theme\", \"value\": \"Action\" }.";
+
+    grid.appendChild(
+        createField({
+            label: "Title",
+            control: createInputControl({
+                value: draftData.title,
+                placeholder: "Optional heading",
+                disabled: busy,
+                onInput(nextValue) {
+                    draftData.title = nextValue;
+                },
+            }),
+        })
+    );
+
+    grid.appendChild(
+        createField({
+            label,
+            wide: true,
+            hint,
+            control: createInputControl({
+                type: "textarea",
+                rows: 8,
+                value: state.rawJson[jsonField],
+                disabled: busy,
+                onInput(nextValue) {
+                    state.rawJson[jsonField] = nextValue;
+                },
+            }),
+        })
+    );
+}
+
+function appendHeroFields(grid, state, busy) {
+    const draftData = state.draft.data;
+
+    grid.appendChild(
+        createField({
+            label: "Eyebrow",
+            control: createInputControl({
+                value: draftData.eyebrow,
+                placeholder: "Optional eyebrow",
+                disabled: busy,
+                onInput(nextValue) {
+                    draftData.eyebrow = nextValue;
+                },
+            }),
+        })
+    );
+
+    grid.appendChild(
+        createField({
+            label: "Title",
+            control: createInputControl({
+                value: draftData.title,
+                placeholder: "Hero title",
+                disabled: busy,
+                onInput(nextValue) {
+                    draftData.title = nextValue;
+                },
+            }),
+        })
+    );
+
+    grid.appendChild(
+        createField({
+            label: "Subtitle",
+            wide: true,
+            control: createInputControl({
+                type: "textarea",
+                rows: 5,
+                value: draftData.subtitle,
+                placeholder: "Hero subtitle",
+                disabled: busy,
+                onInput(nextValue) {
+                    draftData.subtitle = nextValue;
+                },
+            }),
+        })
+    );
+
+    grid.appendChild(
+        createField({
+            label: "CTA Label",
+            control: createInputControl({
+                value: draftData.cta_label,
+                placeholder: "Explore",
+                disabled: busy,
+                onInput(nextValue) {
+                    draftData.cta_label = nextValue;
+                },
+            }),
+        })
+    );
+
+    grid.appendChild(
+        createField({
+            label: "CTA Link",
+            control: createInputControl({
+                value: draftData.cta_href,
+                placeholder: "/path-or-url",
+                disabled: busy,
+                onInput(nextValue) {
+                    draftData.cta_href = nextValue;
+                },
+            }),
+        })
+    );
+}
+
+function appendMediaFields(grid, state, busy, blockType, rerender) {
+    const draftData = state.draft.data;
+    const selectedAssetId = normalizeText(draftData.media_asset_id);
+    const selectedAsset = getSelectedAsset(state, selectedAssetId);
+    const directPreviewType = blockType === "media" ? (normalizeText(draftData.media_kind) || "media") : blockType;
+
+    grid.appendChild(
+        createField({
+            label: "Title",
+            control: createInputControl({
+                value: draftData.title,
+                placeholder: "Optional heading",
+                disabled: busy,
+                onInput(nextValue) {
+                    draftData.title = nextValue;
+                },
+            }),
+        })
+    );
+
+    if (blockType === "media") {
+        grid.appendChild(
+            createField({
+                label: "Media Kind",
+                hint: "Use this when saving a direct URL without choosing a reusable asset.",
+                control: createInputControl({
+                    type: "select",
+                    value: draftData.media_kind,
+                    disabled: busy,
+                    options: [
+                        { value: "", label: "Infer from asset or URL" },
+                        ...MEDIA_ASSET_TYPES.map((value) => ({
+                            value,
+                            label: value.charAt(0).toUpperCase() + value.slice(1),
+                        })),
+                    ],
+                    onInput(nextValue) {
+                        draftData.media_kind = nextValue;
+                    },
+                }),
+            })
+        );
+    }
+
+    if (blockType !== "audio") {
+        grid.appendChild(
+            createField({
+                label: "Alt Text",
+                hint: blockType === "video"
+                    ? "Used for image-style fallbacks or poster-style previews."
+                    : "Used when a direct image source is rendered.",
+                control: createInputControl({
+                    value: draftData.alt_text,
+                    placeholder: "Describe the media",
+                    disabled: busy,
+                    onInput(nextValue) {
+                        draftData.alt_text = nextValue;
+                    },
+                }),
+            })
+        );
+    }
+
+    grid.appendChild(
+        createField({
+            label: blockType === "video" ? "Video File URL" : blockType === "audio" ? "Audio URL" : "Direct Source URL",
+            hint: "Optional fallback when no reusable media asset is selected.",
+            wide: true,
+            control: createInputControl({
+                value: draftData.src,
+                placeholder: "https://example.com/media-file",
+                disabled: busy,
+                onInput(nextValue) {
+                    draftData.src = nextValue;
+                },
+            }),
+        })
+    );
+
+    if (blockType === "video" || blockType === "media") {
+        grid.appendChild(
+            createField({
+                label: "Embed URL",
+                hint: "Useful for YouTube, Vimeo, or other embeddable media.",
+                wide: true,
+                control: createInputControl({
+                    value: draftData.embed_url,
+                    placeholder: "https://www.youtube.com/embed/...",
+                    disabled: busy,
+                    onInput(nextValue) {
+                        draftData.embed_url = nextValue;
+                    },
+                }),
+            }),
+        );
+    }
+
+    if (blockType === "video" || blockType === "audio" || blockType === "media") {
+        grid.appendChild(
+            createField({
+                label: "Provider",
+                hint: "Optional provider hint like youtube, vimeo, spotify, or local.",
+                control: createInputControl({
+                    value: draftData.provider,
+                    placeholder: "youtube",
+                    disabled: busy,
+                    onInput(nextValue) {
+                        draftData.provider = nextValue;
+                    },
+                }),
+            })
+        );
+    }
+
+    grid.appendChild(
+        createField({
+            label: "Caption",
+            wide: true,
+            control: createInputControl({
+                type: "textarea",
+                rows: 4,
+                value: draftData.caption,
+                placeholder: "Optional supporting caption",
+                disabled: busy,
+                onInput(nextValue) {
+                    draftData.caption = nextValue;
+                },
+            }),
+        })
+    );
+
+    const pickerSection = document.createElement("div");
+    pickerSection.className = "admin-content-block-picker-stack";
+    pickerSection.appendChild(
+        createAssetPicker({
+            title: "Reusable Media Assets",
+            hint: "Pick from shared media_assets records, or leave this blank and use the direct URL fields below.",
+            state,
+            blockType,
+            selectedIds: selectedAssetId ? [selectedAssetId] : [],
+            disabled: busy,
+            onSelect(assetId) {
+                draftData.media_asset_id = draftData.media_asset_id === assetId ? "" : assetId;
+                rerender();
+            },
+            rerender,
+        })
+    );
+
+    const previewGroup = document.createElement("div");
+    previewGroup.className = "admin-content-block-preview-group";
+    previewGroup.appendChild(createAssetPreview(selectedAsset));
+    previewGroup.appendChild(createDirectSourcePreview(directPreviewType, draftData));
+    pickerSection.appendChild(previewGroup);
+
+    const clearButton = createButton("Clear Selected Asset", "admin-inline-bar-link", {
+        disabled: busy || !selectedAssetId,
+        onClick() {
+            draftData.media_asset_id = "";
+            rerender();
+        },
+    });
+    pickerSection.appendChild(clearButton);
+
+    grid.appendChild(
+        createField({
+            label: "Media Picker",
+            wide: true,
+            control: pickerSection,
+        })
+    );
+}
+
+function appendGalleryFields(grid, state, busy, rerender) {
+    const draftData = state.draft.data;
+    const selectedAssetIds = cloneArray(draftData.media_asset_ids);
+    const selectedAssets = getSelectedAssets(state, selectedAssetIds);
+
+    grid.appendChild(
+        createField({
+            label: "Title",
+            control: createInputControl({
+                value: draftData.title,
+                placeholder: "Optional gallery heading",
+                disabled: busy,
+                onInput(nextValue) {
+                    draftData.title = nextValue;
+                },
+            }),
+        })
+    );
+
+    grid.appendChild(
+        createField({
+            label: "Caption",
+            wide: true,
+            control: createInputControl({
+                type: "textarea",
+                rows: 4,
+                value: draftData.caption,
+                placeholder: "Optional gallery caption",
+                disabled: busy,
+                onInput(nextValue) {
+                    draftData.caption = nextValue;
+                },
+            }),
+        })
+    );
+
+    const pickerStack = document.createElement("div");
+    pickerStack.className = "admin-content-block-picker-stack";
+    pickerStack.appendChild(
+        createAssetPicker({
+            title: "Gallery Assets",
+            hint: "Select multiple reusable media assets. Clicking an asset toggles it in or out of the gallery.",
+            state,
+            blockType: "gallery",
+            selectedIds: selectedAssetIds,
+            disabled: busy,
+            onSelect(assetId) {
+                const nextIds = new Set(cloneArray(draftData.media_asset_ids));
+                if (nextIds.has(assetId)) {
+                    nextIds.delete(assetId);
+                } else {
+                    nextIds.add(assetId);
+                }
+                draftData.media_asset_ids = Array.from(nextIds);
+                rerender();
+            },
+            rerender,
+        })
+    );
+
+    const selectedWrap = document.createElement("div");
+    selectedWrap.className = "admin-content-block-gallery-selection";
+
+    if (!selectedAssets.length) {
+        const empty = document.createElement("p");
+        empty.className = "admin-editor-field-hint";
+        empty.textContent = "No gallery assets selected yet.";
+        selectedWrap.appendChild(empty);
+    } else {
+        selectedAssets.forEach((asset) => {
+            const chip = document.createElement("button");
+            chip.type = "button";
+            chip.className = "admin-content-block-selection-chip";
+            chip.disabled = busy;
+            chip.textContent = getAssetLabel(asset);
+            chip.addEventListener("click", () => {
+                draftData.media_asset_ids = cloneArray(draftData.media_asset_ids).filter((id) => id !== asset.id);
+                rerender();
+            });
+            selectedWrap.appendChild(chip);
+        });
+    }
+
+    pickerStack.appendChild(selectedWrap);
+
+    grid.appendChild(
+        createField({
+            label: "Selected Media",
+            wide: true,
+            control: pickerStack,
+        })
+    );
+}
+
+function appendBlockSpecificFields(grid, state, busy, rerender) {
+    switch (state.draft.block_type) {
+        case "rich_text":
+        case "commentary":
+            appendTextFields(grid, state, busy, state.draft.block_type);
+            return;
+        case "image":
+        case "video":
+        case "media":
+        case "audio":
+            appendMediaFields(grid, state, busy, state.draft.block_type, rerender);
+            return;
+        case "quote":
+            appendQuoteFields(grid, state, busy);
+            return;
+        case "gallery":
+            appendGalleryFields(grid, state, busy, rerender);
+            return;
+        case "cta":
+            appendCtaFields(grid, state, busy);
+            return;
+        case "related_entities":
+        case "stat_grid":
+            appendStructuredJsonFields(grid, state, busy, state.draft.block_type);
+            return;
+        case "hero":
+            appendHeroFields(grid, state, busy);
+            return;
+        default:
+            appendTextFields(grid, state, busy, "rich_text");
+    }
+}
+
+export function createContentBlockDraftFromRecord(record = {}) {
+    return createDraft(record.block_type || "rich_text", {
+        variant: record.variant,
+        status: record.status,
+        visibility: record.visibility,
+        is_published: record.is_published,
+        data: record.data,
+    });
+}
+
+export function createEmptyContentBlockDraft(blockType = "rich_text") {
+    return createDraft(blockType);
+}
+
+export function getContentBlockSummary(block) {
+    const typeLabel = getContentBlockTypeLabel(block?.block_type);
+    const data = cloneObject(block?.data);
+
+    switch (block?.block_type) {
+        case "rich_text":
+        case "commentary":
+        case "image":
+        case "video":
+        case "media":
+        case "audio":
+        case "gallery":
+        case "cta":
+        case "hero":
+            return normalizeText(data.title) || `${typeLabel} block`;
+        case "quote":
+            return normalizeText(data.quote).slice(0, 80) || `${typeLabel} block`;
+        case "related_entities":
+            return normalizeText(data.title) || `${Array.isArray(data.items) ? data.items.length : 0} related item(s)`;
+        case "stat_grid":
+            return normalizeText(data.title) || `${Array.isArray(data.items) ? data.items.length : 0} stat item(s)`;
+        default:
+            return `${typeLabel} block`;
+    }
+}
+
+export function getContentBlockTypeLabel(blockType = "") {
+    return CONTENT_BLOCK_TYPE_OPTIONS.find((option) => option.value === blockType)?.label
+        || String(blockType || "Content Block").replaceAll("_", " ");
 }
 
 export function createContentBlockForm({
     draft,
     busy = false,
     submitLabel = "Save Block",
-    cancelLabel = "Cancel",
-    onSubmit,
-    onCancel,
-    onTypeChange,
-    onError,
-}) {
-    const safeDraft = draft || createEmptyContentBlockDraft();
-    const form = document.createElement("form");
-    form.className = "admin-editor-form admin-explanation-form";
-    form.noValidate = false;
+    onCancel = null,
+    onError = null,
+    onSubmit = null,
+    onTypeChange = null,
+} = {}) {
+    const api = createAdminApi();
+    const state = {
+        draft: createDraft(draft?.block_type || "rich_text", draft),
+        rawJson: createRawJsonState(draft || {}),
+        assetFilter: getDefaultAssetFilter(draft?.block_type || "rich_text"),
+        mediaAssets: {
+            loading: true,
+            error: "",
+            records: [],
+        },
+    };
 
-    const grid = document.createElement("div");
-    grid.className = "admin-editor-grid admin-explanation-form-grid";
+    const root = document.createElement("div");
+    root.className = "admin-content-block-form";
 
-    appendSelectField(grid, {
-        name: "block_type",
-        label: "Block Type",
-        value: safeDraft.block_type,
-        options: getContentBlockTypeOptions(),
-        disabled: busy,
-        hint: "This writes directly to content_blocks for the verse body region.",
-    });
-    grid.querySelector('select[name="block_type"]')?.addEventListener("change", (event) => {
-        onTypeChange?.(normalizeType(event.currentTarget?.value));
-    });
+    function render() {
+        root.replaceChildren();
 
-    appendSelectField(grid, {
-        name: "status",
-        label: "Status",
-        value: safeDraft.status,
-        options: CONTENT_BLOCK_STATUSES.map((value) => ({ value, label: value })),
-        disabled: busy,
-    });
-    appendSelectField(grid, {
-        name: "visibility",
-        label: "Visibility",
-        value: safeDraft.visibility,
-        options: CONTENT_BLOCK_VISIBILITIES.map((value) => ({ value, label: value })),
-        disabled: busy,
-    });
-    appendTextField(grid, {
-        name: "variant",
-        label: "Variant",
-        value: safeDraft.variant,
-        disabled: busy,
-        hint: "Optional styling variant for shared rendering hooks.",
-    });
+        const metaSection = createSection(
+            "Block Setup",
+            "This stays within the unified content_blocks system. Save once and the shared public/admin renderer will use the same block payload."
+        );
 
-    buildTypeSpecificFields(safeDraft, busy).forEach((field) => {
-        if (field.kind === "select") {
-            appendSelectField(grid, field);
-            return;
-        }
+        const metaGrid = document.createElement("div");
+        metaGrid.className = "admin-editor-grid admin-explanation-form-grid";
+        appendTopLevelFields(metaGrid, state, busy, onTypeChange);
+        metaSection.appendChild(metaGrid);
+        root.appendChild(metaSection);
 
-        appendTextField(grid, field);
-    });
+        const bodySection = createSection(
+            `${getContentBlockTypeLabel(state.draft.block_type)} Fields`,
+            "These fields are specific to the selected block type and save directly into content_blocks.data."
+        );
+        const bodyGrid = document.createElement("div");
+        bodyGrid.className = "admin-editor-grid admin-explanation-form-grid";
+        appendBlockSpecificFields(bodyGrid, state, busy, render);
+        bodySection.appendChild(bodyGrid);
+        root.appendChild(bodySection);
 
-    const footer = document.createElement("div");
-    footer.className = "admin-editor-footer";
+        const footer = document.createElement("div");
+        footer.className = "admin-editor-footer";
 
-    const cancelButton = document.createElement("button");
-    cancelButton.type = "button";
-    cancelButton.className = "admin-inline-bar-link";
-    cancelButton.textContent = cancelLabel;
-    cancelButton.disabled = busy;
-    cancelButton.addEventListener("click", () => onCancel?.());
-    footer.appendChild(cancelButton);
+        footer.appendChild(
+            createButton("Cancel", "admin-inline-bar-link", {
+                disabled: busy,
+                onClick() {
+                    onCancel?.();
+                },
+            })
+        );
 
-    const submitButton = document.createElement("button");
-    submitButton.type = "submit";
-    submitButton.className = "admin-inline-bar-link is-primary";
-    submitButton.disabled = busy;
-    submitButton.textContent = submitLabel;
-    footer.appendChild(submitButton);
+        footer.appendChild(
+            createButton(submitLabel, "admin-inline-bar-link is-primary", {
+                type: "button",
+                disabled: busy,
+                onClick() {
+                    try {
+                        const payload = buildPayload(state);
+                        Promise.resolve(onSubmit?.(payload)).catch((error) => {
+                            onError?.(error.message || "Unable to save this content block.");
+                        });
+                    } catch (error) {
+                        onError?.(error.message || "Unable to save this content block.");
+                    }
+                },
+            })
+        );
 
-    form.append(grid, footer);
-    form.addEventListener("submit", async (event) => {
-        event.preventDefault();
+        root.appendChild(footer);
+    }
 
-        if (!form.reportValidity()) {
-            onError?.("Please complete the required block fields before saving.");
-            return;
-        }
+    render();
 
-        try {
-            await onSubmit?.(readContentBlockFormPayload(form));
-        } catch (error) {
-            onError?.(error?.message || "Unable to save this content block.");
-        }
-    });
+    loadMediaAssets(api)
+        .then((records) => {
+            state.mediaAssets = {
+                loading: false,
+                error: "",
+                records: Array.isArray(records) ? records : [],
+            };
+            render();
+        })
+        .catch((error) => {
+            state.mediaAssets = {
+                loading: false,
+                error: error.message || "Unable to load media assets.",
+                records: [],
+            };
+            render();
+        });
 
-    return form;
+    return root;
 }

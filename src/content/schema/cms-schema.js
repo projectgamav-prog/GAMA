@@ -4,7 +4,6 @@ import {
     MEDIA_PATH_PATTERN,
     assertUnique,
     createUniqueTracker,
-    normalizeOptionalBoolean,
     normalizeOptionalMediaPath,
     normalizeOptionalString,
     requireBoolean,
@@ -270,6 +269,26 @@ function normalizeBlockEnum(record, fieldName, values, label) {
     return normalized;
 }
 
+function normalizeOptionalEnumValue(value, fieldName, values, label) {
+    if (value == null || value === "") {
+        return null;
+    }
+
+    const normalized = String(value).trim().toLowerCase();
+    if (!values.includes(normalized)) {
+        throw new Error(`${label} must use a supported "${fieldName}" value.`);
+    }
+
+    return normalized;
+}
+
+function requireAtLeastOneMediaSource(label, fields = {}) {
+    const hasSource = Object.values(fields).some((value) => String(value || "").trim());
+    if (!hasSource) {
+        throw new Error(`${label} must provide at least one media source.`);
+    }
+}
+
 export function normalizeContentBlockData(blockType, data, label) {
     requireObject(data, `${label} data`);
 
@@ -289,15 +308,65 @@ export function normalizeContentBlockData(blockType, data, label) {
                 title: normalizeOptionalString(data, "title"),
                 body: requireString(data, "body", `${label} data`),
             });
-        case "video":
-        case "media":
-        case "image":
-        case "audio":
+        case "image": {
+            const mediaAssetId = normalizeOptionalString(data, "media_asset_id");
+            const src = normalizeOptionalMediaPath(data, "src", `${label} data`);
+            requireAtLeastOneMediaSource(label, { mediaAssetId, src });
+
             return deepFreeze({
                 title: normalizeOptionalString(data, "title"),
-                media_asset_id: requireString(data, "media_asset_id", `${label} data`),
+                media_asset_id: mediaAssetId,
+                src,
                 caption: normalizeOptionalString(data, "caption"),
+                alt_text: normalizeOptionalString(data, "alt_text"),
             });
+        }
+        case "audio": {
+            const mediaAssetId = normalizeOptionalString(data, "media_asset_id");
+            const src = normalizeOptionalMediaPath(data, "src", `${label} data`);
+            requireAtLeastOneMediaSource(label, { mediaAssetId, src });
+
+            return deepFreeze({
+                title: normalizeOptionalString(data, "title"),
+                media_asset_id: mediaAssetId,
+                src,
+                caption: normalizeOptionalString(data, "caption"),
+                provider: normalizeOptionalString(data, "provider"),
+            });
+        }
+        case "video": {
+            const mediaAssetId = normalizeOptionalString(data, "media_asset_id");
+            const src = normalizeOptionalMediaPath(data, "src", `${label} data`);
+            const embedUrl = normalizeOptionalMediaPath(data, "embed_url", `${label} data`);
+            requireAtLeastOneMediaSource(label, { mediaAssetId, src, embedUrl });
+
+            return deepFreeze({
+                title: normalizeOptionalString(data, "title"),
+                media_asset_id: mediaAssetId,
+                src,
+                embed_url: embedUrl,
+                caption: normalizeOptionalString(data, "caption"),
+                provider: normalizeOptionalString(data, "provider"),
+                alt_text: normalizeOptionalString(data, "alt_text"),
+            });
+        }
+        case "media": {
+            const mediaAssetId = normalizeOptionalString(data, "media_asset_id");
+            const src = normalizeOptionalMediaPath(data, "src", `${label} data`);
+            const embedUrl = normalizeOptionalMediaPath(data, "embed_url", `${label} data`);
+            requireAtLeastOneMediaSource(label, { mediaAssetId, src, embedUrl });
+
+            return deepFreeze({
+                title: normalizeOptionalString(data, "title"),
+                media_asset_id: mediaAssetId,
+                src,
+                embed_url: embedUrl,
+                caption: normalizeOptionalString(data, "caption"),
+                provider: normalizeOptionalString(data, "provider"),
+                alt_text: normalizeOptionalString(data, "alt_text"),
+                media_kind: normalizeOptionalEnumValue(data.media_kind, "media_kind", MEDIA_ASSET_TYPES, `${label} data`),
+            });
+        }
         case "quote":
             return deepFreeze({
                 quote: requireString(data, "quote", `${label} data`),
@@ -316,11 +385,18 @@ export function normalizeContentBlockData(blockType, data, label) {
                 href: requireString(data, "href", `${label} data`),
             });
         case "gallery":
-            return deepFreeze({
-                title: normalizeOptionalString(data, "title"),
-                media_asset_ids: normalizeStringArray(data.media_asset_ids, "media_asset_ids", `${label} data`),
-                caption: normalizeOptionalString(data, "caption"),
-            });
+            return deepFreeze((() => {
+                const mediaAssetIds = normalizeStringArray(data.media_asset_ids, "media_asset_ids", `${label} data`);
+                if (!mediaAssetIds.length) {
+                    throw new Error(`${label} data must include at least one "media_asset_ids" entry.`);
+                }
+
+                return {
+                    title: normalizeOptionalString(data, "title"),
+                    media_asset_ids: mediaAssetIds,
+                    caption: normalizeOptionalString(data, "caption"),
+                };
+            })());
         case "stat_grid":
             return deepFreeze({
                 title: normalizeOptionalString(data, "title"),
