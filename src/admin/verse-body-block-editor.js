@@ -1,16 +1,16 @@
 import { hasPermission } from "../permissions/access.js";
-import { getExplanationPageBridge } from "../content/explanations/page-bridge.js";
+import { getExplanationsPageBridge } from "../pages/explanations/page-bridge.js";
 import {
-    createEmptyExplanationBlockDraft,
-    createExplanationBlockDraftFromRecord,
-    createExplanationBlockForm,
-    getExplanationBlockSummary,
-    getExplanationBlockTypeLabel,
-} from "./explanation-block-form.js";
+    createContentBlockDraftFromRecord,
+    createContentBlockForm,
+    createEmptyContentBlockDraft,
+    getContentBlockSummary,
+    getContentBlockTypeLabel,
+} from "./content-block-form.js";
 import { createAdminApi } from "./api.js";
 
 function sortBlocks(blocks = []) {
-    return [...blocks].sort((left, right) => Number(left.sort_order) - Number(right.sort_order));
+    return [...blocks].sort((left, right) => Number(left.position) - Number(right.position));
 }
 
 function getVerseTargetContext(pageContext) {
@@ -23,11 +23,12 @@ function getVerseTargetContext(pageContext) {
     const book = pageContext?.currentBook || null;
 
     return Object.freeze({
-        targetType: "verse",
-        targetId: verse.id,
         verse,
         chapter,
         book,
+        ownerEntity: "verses",
+        ownerId: verse.id,
+        region: "body",
         label: verse?.verse_number ? `Verse ${verse.verse_number}` : "Verse",
         detail: chapter?.chapter_number
             ? `Chapter ${chapter.chapter_number}${book?.title ? ` in ${book.title}` : ""}`
@@ -35,20 +36,20 @@ function getVerseTargetContext(pageContext) {
     });
 }
 
-function canManageExplanation(permissionContext) {
+function canManageBodyBlocks(permissionContext) {
     return hasPermission(permissionContext, "verses.edit");
 }
 
-function canCreateExplanationContent(permissionContext) {
-    return canManageExplanation(permissionContext) && hasPermission(permissionContext, "content.create");
+function canCreateBodyBlocks(permissionContext) {
+    return canManageBodyBlocks(permissionContext) && hasPermission(permissionContext, "content.create");
 }
 
-function canDeleteExplanationContent(permissionContext) {
-    return canManageExplanation(permissionContext) && hasPermission(permissionContext, "content.delete");
+function canDeleteBodyBlocks(permissionContext) {
+    return canManageBodyBlocks(permissionContext) && hasPermission(permissionContext, "content.delete");
 }
 
-function canPublishExplanationContent(permissionContext) {
-    return canManageExplanation(permissionContext) && hasPermission(permissionContext, "content.publish");
+function canPublishBodyBlocks(permissionContext) {
+    return canManageBodyBlocks(permissionContext) && hasPermission(permissionContext, "content.publish");
 }
 
 function createMetaPill(text, modifier = "") {
@@ -68,7 +69,6 @@ function createSectionHeader(titleText, detailText = "") {
     const title = document.createElement("h3");
     title.className = "admin-explanation-section-title";
     title.textContent = titleText;
-
     copy.appendChild(title);
 
     if (detailText) {
@@ -82,7 +82,7 @@ function createSectionHeader(titleText, detailText = "") {
     return header;
 }
 
-export function createExplanationEditorPanel({
+export function createVerseBodyBlockEditorPanel({
     host,
     getPermissionContext,
     getPageContext,
@@ -97,7 +97,6 @@ export function createExplanationEditorPanel({
         tone: "muted",
         pageContext: null,
         target: null,
-        document: null,
         blocks: [],
         blockForm: null,
     };
@@ -121,33 +120,30 @@ export function createExplanationEditorPanel({
     }
 
     function syncPagePreview() {
-        const bridge = getExplanationPageBridge();
-        if (!bridge?.setExplanationContent || !state.target) {
+        const bridge = getExplanationsPageBridge();
+        if (!bridge?.setBodyBlocks || !state.target) {
             return;
         }
 
-        bridge.setExplanationContent({
-            document: state.document,
+        bridge.setBodyBlocks({
             blocks: state.blocks,
         });
-
         window.adminChrome?.refresh?.();
     }
 
-    async function loadExplanationState({ keepForm = true } = {}) {
+    async function loadBodyBlockState({ keepForm = true } = {}) {
         if (!state.target) {
-            state.document = null;
             state.blocks = [];
             render();
             return;
         }
 
-        const documentRecord = await api.getExplanationDocumentForTarget(state.target.targetType, state.target.targetId);
-        const blocks = documentRecord
-            ? sortBlocks(await api.listExplanationBlocks(documentRecord.id))
-            : [];
-
-        state.document = documentRecord;
+        const records = await api.listRecords("content_blocks", {
+            owner_entity: state.target.ownerEntity,
+            owner_id: state.target.ownerId,
+            region: state.target.region,
+        });
+        const blocks = sortBlocks(Array.isArray(records) ? records : []);
         state.blocks = blocks;
 
         if (!keepForm) {
@@ -157,7 +153,7 @@ export function createExplanationEditorPanel({
             state.blockForm = currentBlock
                 ? {
                     ...state.blockForm,
-                    draft: createExplanationBlockDraftFromRecord(currentBlock),
+                    draft: createContentBlockDraftFromRecord(currentBlock),
                 }
                 : null;
         }
@@ -166,20 +162,20 @@ export function createExplanationEditorPanel({
         render();
     }
 
-    async function runMutation(message, task, { successMessage = "Explanation updated.", keepForm = false } = {}) {
+    async function runMutation(message, task, { successMessage = "Body blocks updated.", keepForm = false } = {}) {
         state.busy = true;
         setMessage(message);
         render();
 
         try {
             await task();
-            await loadExplanationState({ keepForm });
+            await loadBodyBlockState({ keepForm });
             state.busy = false;
             setMessage(successMessage, "success");
             render();
         } catch (error) {
             state.busy = false;
-            setMessage(error.message || "Unable to update this explanation.", "error");
+            setMessage(error.message || "Unable to update these body blocks.", "error");
             render();
         }
     }
@@ -201,14 +197,10 @@ export function createExplanationEditorPanel({
     }
 
     function setBlockForm(mode, block = null) {
-        const draft = block
-            ? createExplanationBlockDraftFromRecord(block)
-            : createEmptyExplanationBlockDraft();
-
         state.blockForm = {
             mode,
             blockId: block?.id || "",
-            draft,
+            draft: block ? createContentBlockDraftFromRecord(block) : createEmptyContentBlockDraft(),
         };
     }
 
@@ -231,98 +223,64 @@ export function createExplanationEditorPanel({
 
     async function persistBlockOrder(blocks) {
         const orderedBlocks = [...blocks];
-        const maxSortOrder = orderedBlocks.reduce((maxValue, block) => {
-            const currentValue = Number(block.sort_order) || 0;
+        const maxPosition = orderedBlocks.reduce((maxValue, block) => {
+            const currentValue = Number(block.position) || 0;
             return currentValue > maxValue ? currentValue : maxValue;
         }, 0);
-        const temporaryBase = maxSortOrder + orderedBlocks.length + 10;
+        const temporaryBase = maxPosition + orderedBlocks.length + 10;
 
         for (let index = 0; index < orderedBlocks.length; index += 1) {
-            const block = orderedBlocks[index];
-            await api.updateExplanationBlock(block.id, {
-                sort_order: temporaryBase + index,
+            await api.updateRecord("content_blocks", orderedBlocks[index].id, {
+                position: temporaryBase + index,
             });
         }
 
         for (let index = 0; index < orderedBlocks.length; index += 1) {
-            const block = orderedBlocks[index];
-            await api.updateExplanationBlock(block.id, {
-                sort_order: index + 1,
+            await api.updateRecord("content_blocks", orderedBlocks[index].id, {
+                position: index + 1,
             });
         }
-    }
-
-    async function bootstrapDocument() {
-        await runMutation(
-            `Creating explanation document for ${state.target.label}...`,
-            async () => {
-                await api.createExplanationDocument(state.target.targetType, state.target.targetId, {
-                    status: "draft",
-                });
-            },
-            {
-                successMessage: `Explanation document created for ${state.target.label}.`,
-            }
-        );
-    }
-
-    async function updateDocumentStatus(nextStatus) {
-        if (!state.document) {
-            return;
-        }
-
-        await runMutation(
-            `Updating explanation document status to ${nextStatus}...`,
-            async () => {
-                await api.updateExplanationDocument(state.document.id, {
-                    status: nextStatus,
-                });
-            },
-            {
-                successMessage: `Explanation document is now ${nextStatus}.`,
-                keepForm: true,
-            }
-        );
     }
 
     async function saveBlock(payload) {
-        if (!state.document) {
-            throw new Error("Create the explanation document before saving blocks.");
-        }
-
         const isEdit = state.blockForm?.mode === "edit" && state.blockForm?.blockId;
         await runMutation(
-            isEdit ? "Saving explanation block..." : "Creating explanation block...",
+            isEdit ? "Saving body block..." : "Creating body block...",
             async () => {
                 if (isEdit) {
-                    await api.updateExplanationBlock(state.blockForm.blockId, payload);
+                    await api.updateRecord("content_blocks", state.blockForm.blockId, payload);
                     return;
                 }
 
-                await api.createExplanationBlock(state.document.id, {
+                await api.createRecord("content_blocks", {
+                    owner_entity: state.target.ownerEntity,
+                    owner_id: state.target.ownerId,
+                    region: state.target.region,
+                    position: state.blocks.length + 1,
                     ...payload,
-                    sort_order: state.blocks.length + 1,
                 });
             },
             {
-                successMessage: isEdit ? "Explanation block saved." : "Explanation block created.",
+                successMessage: isEdit ? "Body block saved." : "Body block created.",
             }
         );
     }
 
     async function duplicateBlock(block) {
-        if (!state.document) {
-            return;
-        }
-
         await runMutation(
-            `Duplicating ${getExplanationBlockTypeLabel(block.type).toLowerCase()}...`,
+            `Duplicating ${getContentBlockTypeLabel(block.block_type).toLowerCase()}...`,
             async () => {
-                const createdBlock = await api.createExplanationBlock(state.document.id, {
-                    type: block.type,
-                    sort_order: state.blocks.length + 1,
-                    data_json: block.data_json,
-                    is_visible: block.is_visible,
+                const createdBlock = await api.createRecord("content_blocks", {
+                    owner_entity: state.target.ownerEntity,
+                    owner_id: state.target.ownerId,
+                    region: state.target.region,
+                    block_type: block.block_type,
+                    variant: block.variant,
+                    position: state.blocks.length + 1,
+                    status: block.status,
+                    visibility: block.visibility,
+                    is_published: block.status === "published",
+                    data: block.data,
                 });
 
                 const desiredBlocks = [...state.blocks];
@@ -331,7 +289,7 @@ export function createExplanationEditorPanel({
                 await persistBlockOrder(desiredBlocks);
             },
             {
-                successMessage: `${getExplanationBlockTypeLabel(block.type)} duplicated.`,
+                successMessage: `${getContentBlockTypeLabel(block.block_type)} duplicated.`,
                 keepForm: true,
             }
         );
@@ -361,138 +319,68 @@ export function createExplanationEditorPanel({
     }
 
     async function toggleBlockVisibility(block) {
+        const nextVisibility = block.visibility === "hidden" ? "public" : "hidden";
         await runMutation(
-            block.is_visible ? "Hiding block..." : "Showing block...",
+            nextVisibility === "hidden" ? "Hiding block..." : "Showing block...",
             async () => {
-                await api.toggleExplanationBlockVisibility(block.id, !block.is_visible);
+                await api.updateRecord("content_blocks", block.id, {
+                    visibility: nextVisibility,
+                });
             },
             {
-                successMessage: block.is_visible ? "Block hidden on public pages." : "Block shown on public pages.",
+                successMessage: nextVisibility === "hidden" ? "Block hidden on public pages." : "Block shown on public pages.",
+                keepForm: true,
+            }
+        );
+    }
+
+    async function toggleBlockStatus(block) {
+        const nextStatus = block.status === "published" ? "draft" : "published";
+        await runMutation(
+            nextStatus === "published" ? "Publishing block..." : "Moving block to draft...",
+            async () => {
+                await api.updateRecord("content_blocks", block.id, {
+                    status: nextStatus,
+                    is_published: nextStatus === "published",
+                });
+            },
+            {
+                successMessage: nextStatus === "published" ? "Block published." : "Block moved to draft.",
                 keepForm: true,
             }
         );
     }
 
     async function deleteBlock(block) {
-        const confirmed = window.confirm(`Delete this ${getExplanationBlockTypeLabel(block.type).toLowerCase()} block?`);
+        const confirmed = window.confirm(`Delete this ${getContentBlockTypeLabel(block.block_type).toLowerCase()} block?`);
         if (!confirmed) {
             return;
         }
 
         await runMutation(
-            `Deleting ${getExplanationBlockTypeLabel(block.type).toLowerCase()}...`,
+            `Deleting ${getContentBlockTypeLabel(block.block_type).toLowerCase()}...`,
             async () => {
-                await api.deleteExplanationBlock(block.id);
+                await api.deleteRecord("content_blocks", block.id);
                 const remainingBlocks = state.blocks.filter((record) => record.id !== block.id);
                 if (remainingBlocks.length) {
                     await persistBlockOrder(remainingBlocks);
                 }
             },
             {
-                successMessage: `${getExplanationBlockTypeLabel(block.type)} deleted.`,
+                successMessage: `${getContentBlockTypeLabel(block.block_type)} deleted.`,
             }
         );
-    }
-
-    function renderDocumentBootstrap(permissionContext, card) {
-        const section = document.createElement("section");
-        section.className = "admin-explanation-empty-state";
-
-        const title = document.createElement("h3");
-        title.className = "admin-explanation-section-title";
-        title.textContent = "Explanation document missing";
-
-        const copy = document.createElement("p");
-        copy.className = "admin-editor-subtitle";
-        copy.textContent = `No explanation document exists yet for ${state.target.label}. Create it first, then add ordered editorial blocks.`;
-
-        section.append(title, copy);
-
-        if (canCreateExplanationContent(permissionContext)) {
-            const action = document.createElement("button");
-            action.type = "button";
-            action.className = "admin-inline-bar-link is-primary";
-            action.disabled = state.busy;
-            action.textContent = state.busy ? "Creating..." : "Create Explanation Document";
-            action.addEventListener("click", () => {
-                bootstrapDocument();
-            });
-            section.appendChild(action);
-        } else {
-            const hint = document.createElement("p");
-            hint.className = "admin-editor-field-hint";
-            hint.textContent = "Creating explanation documents requires verse edit access and content.create permission.";
-            section.appendChild(hint);
-        }
-
-        card.appendChild(section);
-    }
-
-    function renderDocumentControls(permissionContext, card) {
-        const section = document.createElement("section");
-        section.className = "admin-explanation-document-card";
-        section.appendChild(
-            createSectionHeader(
-                "Explanation Document",
-                `This document targets ${state.target.label}. Blocks stay attached to the document, not the route.`
-            )
-        );
-
-        const meta = document.createElement("div");
-        meta.className = "admin-explanation-pills";
-        meta.append(
-            createMetaPill(state.target.label),
-            createMetaPill(
-                state.document?.status === "published" ? "Published" : "Draft",
-                state.document?.status === "published" ? "is-published" : "is-draft"
-            ),
-            createMetaPill(`${state.blocks.length} Block${state.blocks.length === 1 ? "" : "s"}`)
-        );
-        section.appendChild(meta);
-
-        if (canPublishExplanationContent(permissionContext)) {
-            const actions = document.createElement("div");
-            actions.className = "admin-editor-footer admin-explanation-document-actions";
-
-            if (state.document?.status !== "published") {
-                const publishButton = document.createElement("button");
-                publishButton.type = "button";
-                publishButton.className = "admin-inline-bar-link";
-                publishButton.disabled = state.busy;
-                publishButton.textContent = "Publish";
-                publishButton.addEventListener("click", () => {
-                    updateDocumentStatus("published");
-                });
-                actions.appendChild(publishButton);
-            }
-
-            if (state.document?.status !== "draft") {
-                const draftButton = document.createElement("button");
-                draftButton.type = "button";
-                draftButton.className = "admin-inline-bar-link";
-                draftButton.disabled = state.busy;
-                draftButton.textContent = "Move To Draft";
-                draftButton.addEventListener("click", () => {
-                    updateDocumentStatus("draft");
-                });
-                actions.appendChild(draftButton);
-            }
-
-            section.appendChild(actions);
-        }
-
-        card.appendChild(section);
     }
 
     function renderBlockList(permissionContext, card) {
         const section = document.createElement("section");
         section.className = "admin-explanation-block-list";
         const header = createSectionHeader(
-            "Explanation Blocks",
-            "Create, edit, duplicate, reorder, hide, and delete the ordered editorial blocks for this verse."
+            "Body Blocks",
+            "Create, edit, duplicate, reorder, publish, hide, and delete the unified content_blocks for this verse body region."
         );
 
-        if (canCreateExplanationContent(permissionContext)) {
+        if (canCreateBodyBlocks(permissionContext)) {
             const addButton = document.createElement("button");
             addButton.type = "button";
             addButton.className = "admin-inline-bar-link is-primary";
@@ -514,11 +402,11 @@ export function createExplanationEditorPanel({
 
             const title = document.createElement("h4");
             title.className = "admin-explanation-section-title";
-            title.textContent = "No blocks yet";
+            title.textContent = "No body blocks yet";
 
             const copy = document.createElement("p");
             copy.className = "admin-editor-subtitle";
-            copy.textContent = "Add the first explanation block to start building the editorial section below Meaning.";
+            copy.textContent = "Add the first content block to start building the verse explanation body.";
 
             emptyState.append(title, copy);
             section.appendChild(emptyState);
@@ -529,7 +417,7 @@ export function createExplanationEditorPanel({
             state.blocks.forEach((block, index) => {
                 const item = document.createElement("article");
                 item.className = "admin-explanation-block-card";
-                if (block.is_visible === false) {
+                if (block.visibility === "hidden") {
                     item.classList.add("is-hidden");
                 }
 
@@ -537,13 +425,14 @@ export function createExplanationEditorPanel({
                 meta.className = "admin-explanation-block-meta";
                 meta.append(
                     createMetaPill(`#${index + 1}`),
-                    createMetaPill(getExplanationBlockTypeLabel(block.type)),
-                    block.is_visible === false ? createMetaPill("Hidden", "is-hidden") : createMetaPill("Visible", "is-visible")
+                    createMetaPill(getContentBlockTypeLabel(block.block_type)),
+                    createMetaPill(block.status === "published" ? "Published" : "Draft", block.status === "published" ? "is-published" : "is-draft"),
+                    block.visibility === "hidden" ? createMetaPill("Hidden", "is-hidden") : createMetaPill("Visible", "is-visible")
                 );
 
                 const title = document.createElement("h4");
                 title.className = "admin-explanation-block-title";
-                title.textContent = getExplanationBlockSummary(block);
+                title.textContent = getContentBlockSummary(block);
 
                 const actions = document.createElement("div");
                 actions.className = "admin-explanation-block-actions";
@@ -551,7 +440,7 @@ export function createExplanationEditorPanel({
                 const editButton = document.createElement("button");
                 editButton.type = "button";
                 editButton.className = "admin-inline-bar-link";
-                editButton.disabled = state.busy || !canManageExplanation(permissionContext);
+                editButton.disabled = state.busy || !canManageBodyBlocks(permissionContext);
                 editButton.textContent = "Edit";
                 editButton.addEventListener("click", () => {
                     setBlockForm("edit", block);
@@ -563,18 +452,30 @@ export function createExplanationEditorPanel({
                 const duplicateButton = document.createElement("button");
                 duplicateButton.type = "button";
                 duplicateButton.className = "admin-inline-bar-link";
-                duplicateButton.disabled = state.busy || !canCreateExplanationContent(permissionContext);
+                duplicateButton.disabled = state.busy || !canCreateBodyBlocks(permissionContext);
                 duplicateButton.textContent = "Duplicate";
                 duplicateButton.addEventListener("click", () => {
                     duplicateBlock(block);
                 });
                 actions.appendChild(duplicateButton);
 
+                if (canPublishBodyBlocks(permissionContext)) {
+                    const statusButton = document.createElement("button");
+                    statusButton.type = "button";
+                    statusButton.className = "admin-inline-bar-link";
+                    statusButton.disabled = state.busy;
+                    statusButton.textContent = block.status === "published" ? "Move To Draft" : "Publish";
+                    statusButton.addEventListener("click", () => {
+                        toggleBlockStatus(block);
+                    });
+                    actions.appendChild(statusButton);
+                }
+
                 const toggleButton = document.createElement("button");
                 toggleButton.type = "button";
                 toggleButton.className = "admin-inline-bar-link";
-                toggleButton.disabled = state.busy || !canManageExplanation(permissionContext);
-                toggleButton.textContent = block.is_visible ? "Hide" : "Show";
+                toggleButton.disabled = state.busy || !canManageBodyBlocks(permissionContext);
+                toggleButton.textContent = block.visibility === "hidden" ? "Show" : "Hide";
                 toggleButton.addEventListener("click", () => {
                     toggleBlockVisibility(block);
                 });
@@ -583,7 +484,7 @@ export function createExplanationEditorPanel({
                 const upButton = document.createElement("button");
                 upButton.type = "button";
                 upButton.className = "admin-inline-bar-link";
-                upButton.disabled = state.busy || index === 0 || !canManageExplanation(permissionContext);
+                upButton.disabled = state.busy || index === 0 || !canManageBodyBlocks(permissionContext);
                 upButton.textContent = "Move Up";
                 upButton.addEventListener("click", () => {
                     moveBlock(block, -1);
@@ -593,7 +494,7 @@ export function createExplanationEditorPanel({
                 const downButton = document.createElement("button");
                 downButton.type = "button";
                 downButton.className = "admin-inline-bar-link";
-                downButton.disabled = state.busy || index === state.blocks.length - 1 || !canManageExplanation(permissionContext);
+                downButton.disabled = state.busy || index === state.blocks.length - 1 || !canManageBodyBlocks(permissionContext);
                 downButton.textContent = "Move Down";
                 downButton.addEventListener("click", () => {
                     moveBlock(block, 1);
@@ -603,7 +504,7 @@ export function createExplanationEditorPanel({
                 const deleteButton = document.createElement("button");
                 deleteButton.type = "button";
                 deleteButton.className = "admin-inline-bar-link admin-editor-delete";
-                deleteButton.disabled = state.busy || !canDeleteExplanationContent(permissionContext);
+                deleteButton.disabled = state.busy || !canDeleteBodyBlocks(permissionContext);
                 deleteButton.textContent = "Delete";
                 deleteButton.addEventListener("click", () => {
                     deleteBlock(block);
@@ -622,15 +523,15 @@ export function createExplanationEditorPanel({
             formCard.className = "admin-explanation-form-card";
             formCard.appendChild(
                 createSectionHeader(
-                    state.blockForm.mode === "edit" ? "Edit Block" : "New Block",
+                    state.blockForm.mode === "edit" ? "Edit Body Block" : "New Body Block",
                     state.blockForm.mode === "edit"
-                        ? "Update the selected block fields and save back to the explanation document."
-                        : "Choose a supported block type and fill in its structured fields."
+                        ? "Update the selected content block and save it back to the verse body region."
+                        : "Choose a supported content block type and fill in its structured fields."
                 )
             );
 
             formCard.appendChild(
-                createExplanationBlockForm({
+                createContentBlockForm({
                     draft: state.blockForm.draft,
                     busy: state.busy,
                     submitLabel: state.busy
@@ -645,8 +546,9 @@ export function createExplanationEditorPanel({
                         state.blockForm = {
                             ...state.blockForm,
                             draft: {
-                                ...createEmptyExplanationBlockDraft(nextType),
-                                is_visible: state.blockForm?.draft?.is_visible !== false,
+                                ...createEmptyContentBlockDraft(nextType),
+                                status: state.blockForm?.draft?.status || "draft",
+                                visibility: state.blockForm?.draft?.visibility || "public",
                             },
                         };
                         render();
@@ -689,19 +591,19 @@ export function createExplanationEditorPanel({
 
         const eyebrow = document.createElement("p");
         eyebrow.className = "admin-inline-bar-label";
-        eyebrow.textContent = "Explanation Editor";
+        eyebrow.textContent = "Verse Body Blocks";
 
         const title = document.createElement("h2");
         title.className = "admin-editor-title";
         title.textContent = state.target
             ? `${state.target.label} Explanation`
-            : "Explanation Editor";
+            : "Verse Body Blocks";
 
         const subtitle = document.createElement("p");
         subtitle.className = "admin-editor-subtitle";
         subtitle.textContent = state.target
-            ? `Manage the explanation document and ordered editorial blocks for ${state.target.detail}.`
-            : "Open an explanation route with a real verse target to manage explanation documents and blocks.";
+            ? `Manage the unified content_blocks body region for ${state.target.detail}.`
+            : "Open an explanation route with a real verse target to manage body blocks.";
 
         copy.append(eyebrow, title, subtitle);
 
@@ -716,13 +618,13 @@ export function createExplanationEditorPanel({
 
         const message = document.createElement("p");
         message.className = `admin-editor-message is-${state.tone}`;
-        message.textContent = state.message || "Manage the explanation document first, then shape the ordered block list below.";
+        message.textContent = state.message || "Manage the verse body content_blocks below.";
         card.appendChild(message);
 
         if (state.loading) {
             const loading = document.createElement("div");
             loading.className = "admin-editor-loading";
-            loading.textContent = "Loading explanation editor...";
+            loading.textContent = "Loading body block editor...";
             card.appendChild(loading);
             panel.appendChild(card);
             return;
@@ -740,22 +642,17 @@ export function createExplanationEditorPanel({
             return;
         }
 
+        const publishedCount = state.blocks.filter((block) => block.status === "published").length;
         const summary = document.createElement("div");
         summary.className = "admin-explanation-summary-grid";
         summary.append(
             createSummaryCard("Target", state.target.label),
-            createSummaryCard("Document", state.document ? (state.document.status === "published" ? "Published" : "Draft") : "Missing"),
-            createSummaryCard("Blocks", String(state.blocks.length))
+            createSummaryCard("Blocks", String(state.blocks.length)),
+            createSummaryCard("Published", String(publishedCount))
         );
         card.appendChild(summary);
 
-        if (!state.document) {
-            renderDocumentBootstrap(permissionContext, card);
-        } else {
-            renderDocumentControls(permissionContext, card);
-            renderBlockList(permissionContext, card);
-        }
-
+        renderBlockList(permissionContext, card);
         panel.appendChild(card);
     }
 
@@ -765,25 +662,24 @@ export function createExplanationEditorPanel({
         state.busy = false;
         state.pageContext = getPageContext?.() || null;
         state.target = getVerseTargetContext(state.pageContext);
-        state.document = null;
         state.blocks = [];
         state.blockForm = null;
-        setMessage("Loading explanation editor...");
+        setMessage("Loading body block editor...");
         render();
 
         try {
-            await loadExplanationState({ keepForm: false });
+            await loadBodyBlockState({ keepForm: false });
             state.loading = false;
             setMessage(
-                state.document
-                    ? `Managing ${state.blocks.length} explanation block${state.blocks.length === 1 ? "" : "s"} for ${state.target.label}.`
-                    : `No explanation document exists yet for ${state.target.label}.`,
+                state.blocks.length
+                    ? `Managing ${state.blocks.length} body block${state.blocks.length === 1 ? "" : "s"} for ${state.target.label}.`
+                    : `No body blocks exist yet for ${state.target.label}.`,
                 "muted"
             );
             render();
         } catch (error) {
             state.loading = false;
-            setMessage(error.message || "Unable to load the explanation editor.", "error");
+            setMessage(error.message || "Unable to load the body block editor.", "error");
             render();
         }
     }
@@ -794,7 +690,6 @@ export function createExplanationEditorPanel({
         state.busy = false;
         state.pageContext = null;
         state.target = null;
-        state.document = null;
         state.blocks = [];
         state.blockForm = null;
         clearMessage();

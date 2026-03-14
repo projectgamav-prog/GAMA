@@ -1,5 +1,4 @@
 import { createBooksDatabase } from "../../src/content/books/schema.js";
-import { createExplanationsDatabase } from "../../src/content/explanations/schema.js";
 import { createCharactersDatabase } from "../../src/content/schema/characters-schema.js";
 import { createCmsDatabase } from "../../src/content/schema/cms-schema.js";
 import { createPermissionsContentDatabase } from "../../src/content/schema/permissions-schema.js";
@@ -34,7 +33,6 @@ export async function assertPublicTablesBuildable(mutatedTables = {}) {
       },
     };
     createCmsDatabase(rawTables, contentDatabase);
-    createExplanationsDatabase(rawTables, contentDatabase);
     createPermissionsContentDatabase(rawTables);
   } catch (error) {
     throw new Error(`This change would break the public content database: ${error.message}`);

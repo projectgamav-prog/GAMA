@@ -1099,5 +1099,23 @@
     },
     "created_at": "2026-03-14T10:55:53.326Z",
     "updated_at": "2026-03-14T10:55:53.326Z"
+  },
+  {
+    "owner_entity": "verses",
+    "owner_id": "verse-bg-01-001",
+    "region": "body",
+    "position": 2,
+    "block_type": "commentary",
+    "variant": null,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "karma",
+      "body": "this is the karma which cause the change. this is the karma which cause the change. this is the karma which cause the change. this is the karma which cause the change. this is the karma which cause the change. this is the karma which cause the change. this is the karma which cause the change."
+    },
+    "created_at": "2026-03-14T18:36:34.021Z",
+    "updated_at": "2026-03-14T18:36:34.021Z",
+    "id": "content-block-verses-verse-bg-01-001-body-002"
   }
 ]

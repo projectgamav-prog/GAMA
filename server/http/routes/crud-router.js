@@ -13,8 +13,6 @@ const WRITE_PERMISSION_CONFIG = Object.freeze({
   chapter_sections: { edit: "chapters.edit" },
   verses: { edit: "verses.edit" },
   media_assets: { edit: "media.upload" },
-  explanation_documents: { edit: "verses.edit", publishField: "status", publishValue: "published" },
-  explanation_blocks: { edit: "verses.edit" },
 });
 
 function resolveContentBlockWriteConfig(nextRecord = null, currentRecord = null) {

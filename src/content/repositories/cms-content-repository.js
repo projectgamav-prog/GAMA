@@ -1,5 +1,4 @@
 import { CMS_DATABASE } from "../cms/database.js";
-import { getVerseExplanationContent } from "../explanations/queries.js";
 
 function sortBlocks(blocks = []) {
     return [...blocks].sort((left, right) => {
@@ -100,90 +99,6 @@ export function synthesizeInsightBlocksFromRecord(record, ownerEntity, ownerId) 
             },
         }),
     ]);
-}
-
-export function synthesizeExplanationBlocksForVerse(verseId, { includeDraft = false, includeHidden = false } = {}) {
-    const explanationContent = getVerseExplanationContent(verseId, {
-        includeDraft,
-        includeHidden,
-    });
-
-    return Object.freeze(
-        (explanationContent.blocks || []).map((block) => {
-            switch (block.type) {
-                case "text_section":
-                    return createSyntheticBlock({
-                        id: `legacy-body-${block.id}`,
-                        ownerEntity: "verses",
-                        ownerId: verseId,
-                        region: "body",
-                        blockType: "rich_text",
-                        position: block.sort_order,
-                        visibility: block.is_visible === false ? "hidden" : "public",
-                        status: explanationContent.document?.status === "draft" ? "draft" : "published",
-                        data: {
-                            title: block.data_json?.title || null,
-                            body: block.data_json?.body || "",
-                        },
-                        source: "legacy-explanation",
-                    });
-                case "video":
-                    return createSyntheticBlock({
-                        id: `legacy-body-${block.id}`,
-                        ownerEntity: "verses",
-                        ownerId: verseId,
-                        region: "body",
-                        blockType: "media",
-                        position: block.sort_order,
-                        visibility: block.is_visible === false ? "hidden" : "public",
-                        status: explanationContent.document?.status === "draft" ? "draft" : "published",
-                        data: {
-                            title: block.data_json?.title || null,
-                            caption: block.data_json?.description || null,
-                            embed_url: block.data_json?.embed_url || null,
-                            url: block.data_json?.url || null,
-                        },
-                        source: "legacy-explanation",
-                    });
-                case "image":
-                    return createSyntheticBlock({
-                        id: `legacy-body-${block.id}`,
-                        ownerEntity: "verses",
-                        ownerId: verseId,
-                        region: "body",
-                        blockType: "image",
-                        position: block.sort_order,
-                        visibility: block.is_visible === false ? "hidden" : "public",
-                        status: explanationContent.document?.status === "draft" ? "draft" : "published",
-                        data: {
-                            title: block.data_json?.alt || null,
-                            caption: block.data_json?.caption || null,
-                            media_src: block.data_json?.src || null,
-                            media_alt: block.data_json?.alt || "Explanation image",
-                        },
-                        source: "legacy-explanation",
-                    });
-                case "divider":
-                    return createSyntheticBlock({
-                        id: `legacy-body-${block.id}`,
-                        ownerEntity: "verses",
-                        ownerId: verseId,
-                        region: "body",
-                        blockType: "commentary",
-                        variant: "divider",
-                        position: block.sort_order,
-                        visibility: block.is_visible === false ? "hidden" : "public",
-                        status: explanationContent.document?.status === "draft" ? "draft" : "published",
-                        data: {
-                            body: "",
-                        },
-                        source: "legacy-explanation",
-                    });
-                default:
-                    return null;
-            }
-        }).filter(Boolean)
-    );
 }
 
 export function buildRegionMap(blocks = []) {

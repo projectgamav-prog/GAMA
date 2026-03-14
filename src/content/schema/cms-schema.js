@@ -35,6 +35,7 @@ export const CONTENT_BLOCK_REGIONS = Object.freeze([
 export const CONTENT_BLOCK_TYPES = Object.freeze([
     "hero",
     "rich_text",
+    "video",
     "media",
     "image",
     "quote",
@@ -288,6 +289,7 @@ export function normalizeContentBlockData(blockType, data, label) {
                 title: normalizeOptionalString(data, "title"),
                 body: requireString(data, "body", `${label} data`),
             });
+        case "video":
         case "media":
         case "image":
         case "audio":

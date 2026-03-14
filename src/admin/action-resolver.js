@@ -326,13 +326,12 @@ function getVersesPageState(context, permissionContext, openEditor) {
 
 function getExplanationsPageState(context, permissionContext, openEditor) {
     const currentVerse = context.currentVerse;
-    const currentDocument = context.currentExplanationDocument;
-    const blockCount = Array.isArray(context.currentExplanationBlocks) ? context.currentExplanationBlocks.length : 0;
+    const blockCount = Array.isArray(context.currentBodyBlocks) ? context.currentBodyBlocks.length : 0;
     const actions = [];
 
     if (currentVerse && hasPermission(permissionContext, "verses.edit")) {
         actions.push(createAction(
-            currentDocument ? "Manage Explanation" : "Create Explanation",
+            blockCount ? "Manage Body Blocks" : "Create Body Blocks",
             () => openEditor({
                 workflow: "explanations",
             }),
@@ -354,11 +353,11 @@ function getExplanationsPageState(context, permissionContext, openEditor) {
         title: currentVerse ? `Explanation for ${getRecordLabel("verses", currentVerse)}` : "Explanation authoring",
         status: currentVerse
             ? (
-                currentDocument
-                    ? `${getRecordLabel("verses", currentVerse)} has a ${currentDocument.status} explanation document with ${blockCount} block${blockCount === 1 ? "" : "s"}.`
-                    : `No explanation document exists yet for ${getRecordLabel("verses", currentVerse)}. Create one to start managing ordered explanation blocks.`
+                blockCount
+                    ? `${getRecordLabel("verses", currentVerse)} has ${blockCount} unified body block${blockCount === 1 ? "" : "s"} in content_blocks.`
+                    : `No verse body blocks exist yet for ${getRecordLabel("verses", currentVerse)}. Create content_blocks to start composing the editorial explanation.`
             )
-            : "Open an explanation route with a real verse context to manage the current verse explanation document and blocks.",
+            : "Open an explanation route with a real verse context to manage the current verse body blocks.",
         tone: "muted",
         actions,
     };

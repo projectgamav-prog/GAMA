@@ -23,6 +23,10 @@ function createBlockShell(block, extraClassName = "") {
     return article;
 }
 
+function getResolvedAssetType(block) {
+    return String(block?.resolvedMediaAsset?.asset_type || "").trim().toLowerCase();
+}
+
 function resolveMediaSource(block) {
     return block?.resolvedMediaAsset?.src
         || block?.data?.media_src
@@ -90,6 +94,9 @@ function createImageLikeBlock(block) {
 
 function createVideoLikeBlock(block) {
     const article = createBlockShell(block, "is-video");
+    const assetType = getResolvedAssetType(block);
+    const embedSource = block?.data?.embed_url || (assetType === "embed" ? resolveMediaSource(block) : "");
+    const mediaUrl = block?.data?.url || (assetType === "video" || assetType === "embed" ? resolveMediaSource(block) : "");
 
     if (block?.data?.title) {
         const title = document.createElement("h3");
@@ -101,12 +108,12 @@ function createVideoLikeBlock(block) {
     const card = document.createElement("div");
     card.className = "video-player-card explanation-video-card";
 
-    if (block?.data?.embed_url) {
+    if (embedSource) {
         const frame = document.createElement("div");
         frame.className = "explanation-video-frame";
 
         const iframe = document.createElement("iframe");
-        iframe.src = block.data.embed_url;
+        iframe.src = embedSource;
         iframe.title = block?.data?.title || "Content video";
         iframe.loading = "lazy";
         iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
@@ -114,6 +121,12 @@ function createVideoLikeBlock(block) {
         iframe.allowFullscreen = true;
         frame.appendChild(iframe);
         card.appendChild(frame);
+    } else if (assetType === "video" && resolveMediaSource(block)) {
+        const video = document.createElement("video");
+        video.controls = true;
+        video.preload = "none";
+        video.src = resolveMediaSource(block);
+        card.appendChild(video);
     } else if (resolveMediaSource(block)) {
         const preview = document.createElement("div");
         preview.className = "video-player";
@@ -132,13 +145,13 @@ function createVideoLikeBlock(block) {
         card.appendChild(preview);
     }
 
-    if (block?.data?.url) {
+    if (mediaUrl) {
         const link = document.createElement("a");
         link.className = "btn btn-primary explanation-video-link";
-        link.href = block.data.url;
+        link.href = mediaUrl;
         link.target = "_blank";
         link.rel = "noreferrer";
-        link.textContent = block?.data?.embed_url ? "Open Video Source" : "Open Media";
+        link.textContent = embedSource ? "Open Video Source" : "Open Media";
         card.appendChild(link);
     }
 
@@ -360,13 +373,15 @@ export function createUniversalBlockElement(block, renderOptions = {}) {
     switch (block.block_type) {
         case "hero":
             return createHeroBlock(block);
+        case "video":
+            return createVideoLikeBlock(block);
         case "rich_text":
         case "commentary":
             return createRichTextBlock(block);
         case "image":
             return createImageLikeBlock(block);
         case "media":
-            if (block?.data?.embed_url || block?.data?.url) {
+            if (["embed", "video"].includes(getResolvedAssetType(block)) || block?.data?.embed_url || block?.data?.url) {
                 return createVideoLikeBlock(block);
             }
             return createImageLikeBlock(block);

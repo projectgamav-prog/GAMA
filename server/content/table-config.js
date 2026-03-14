@@ -42,14 +42,6 @@ export const tableConfigs = Object.freeze({
   user_role_assignments: {
     label: "User role assignment",
     relatedTables: ["roles"]
-  },
-  explanation_documents: {
-    label: "Explanation document",
-    relatedTables: ["books", "book_sections", "chapters", "chapter_sections", "verses"]
-  },
-  explanation_blocks: {
-    label: "Explanation block",
-    relatedTables: ["explanation_documents"]
   }
 });
 
@@ -58,26 +50,21 @@ export const deleteConstraints = Object.freeze({
     { table: "chapters", field: "source_book_id", label: "chapters" },
     { table: "book_sections", field: "book_id", label: "book sections" },
     { table: "book_sections", field: "source_book_id", label: "book sections" },
-    { table: "content_blocks", field: "owner_id", label: "content blocks", where: { owner_entity: "books" } },
-    { table: "explanation_documents", field: "target_id", label: "explanation documents", where: { target_type: "book" } }
+    { table: "content_blocks", field: "owner_id", label: "content blocks", where: { owner_entity: "books" } }
   ],
   book_sections: [
-    { table: "content_blocks", field: "owner_id", label: "content blocks", where: { owner_entity: "book_sections" } },
-    { table: "explanation_documents", field: "target_id", label: "explanation documents", where: { target_type: "book_section" } }
+    { table: "content_blocks", field: "owner_id", label: "content blocks", where: { owner_entity: "book_sections" } }
   ],
   chapters: [
     { table: "verses", field: "chapter_id", label: "verses" },
     { table: "chapter_sections", field: "chapter_id", label: "chapter sections" },
-    { table: "content_blocks", field: "owner_id", label: "content blocks", where: { owner_entity: "chapters" } },
-    { table: "explanation_documents", field: "target_id", label: "explanation documents", where: { target_type: "chapter" } }
+    { table: "content_blocks", field: "owner_id", label: "content blocks", where: { owner_entity: "chapters" } }
   ],
   chapter_sections: [
-    { table: "content_blocks", field: "owner_id", label: "content blocks", where: { owner_entity: "chapter_sections" } },
-    { table: "explanation_documents", field: "target_id", label: "explanation documents", where: { target_type: "chapter_section" } }
+    { table: "content_blocks", field: "owner_id", label: "content blocks", where: { owner_entity: "chapter_sections" } }
   ],
   verses: [
-    { table: "content_blocks", field: "owner_id", label: "content blocks", where: { owner_entity: "verses" } },
-    { table: "explanation_documents", field: "target_id", label: "explanation documents", where: { target_type: "verse" } }
+    { table: "content_blocks", field: "owner_id", label: "content blocks", where: { owner_entity: "verses" } }
   ],
   characters: [
     { table: "content_blocks", field: "owner_id", label: "content blocks", where: { owner_entity: "characters" } }
@@ -90,8 +77,4 @@ export const deleteConstraints = Object.freeze({
   ],
   role_capabilities: [],
   user_role_assignments: [],
-  explanation_documents: [
-    { table: "explanation_blocks", field: "explanation_id", label: "explanation blocks" }
-  ],
-  explanation_blocks: [],
 });

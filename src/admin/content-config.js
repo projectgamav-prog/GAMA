@@ -500,9 +500,9 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
     }),
     content_blocks: createEntityConfig({
         entity: "content_blocks",
-        label: "Insight Block",
-        pluralLabel: "Insight Blocks",
-        editActionLabel: "Edit Insight Block",
+        label: "Content Block",
+        pluralLabel: "Content Blocks",
+        editActionLabel: "Edit Content Block",
         endpoint: getAdminEntityApiPath("content_blocks"),
         collectionKey: "contentBlocks",
         fields: Object.freeze([

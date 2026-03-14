@@ -13,7 +13,6 @@ import {
 import {
     buildRegionMap,
     listContentBlocksForOwner,
-    synthesizeExplanationBlocksForVerse,
     synthesizeInsightBlocksFromRecord,
 } from "../repositories/cms-content-repository.js";
 
@@ -40,25 +39,10 @@ function resolveVerseBodyRegions(verse, options = {}) {
         return buildRegionMap([]);
     }
 
-    const cmsBlocks = listContentBlocksForOwner("verses", verse.id, {
+    return buildRegionMap(listContentBlocksForOwner("verses", verse.id, {
         includeDraft: options.includeDraft === true,
         includeHidden: options.includeHidden === true,
-    });
-
-    if (cmsBlocks.some((block) => block.region === "body")) {
-        return buildRegionMap(cmsBlocks);
-    }
-
-    const legacyBlocks = synthesizeExplanationBlocksForVerse(verse.id, {
-        includeDraft: options.includeDraft === true,
-        includeHidden: options.includeHidden === true,
-    });
-
-    if (legacyBlocks.length) {
-        return buildRegionMap(legacyBlocks);
-    }
-
-    return buildRegionMap(cmsBlocks);
+    }));
 }
 
 export function getBookPageModel(bookSlug, options = {}) {

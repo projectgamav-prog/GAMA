@@ -7,8 +7,6 @@ export const ADMIN_ENTITY_API_PATHS = Object.freeze({
     characters: "/api/characters",
     content_blocks: "/api/content-blocks",
     media_assets: "/api/media-assets",
-    explanation_documents: "/api/explanation-documents",
-    explanation_blocks: "/api/explanation-blocks",
 });
 
 export function getAdminEntityApiPath(entity) {

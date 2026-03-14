@@ -1,6 +1,6 @@
 import { hasPermission } from "../permissions/access.js";
 import { createAdminApi } from "./api.js";
-import { createExplanationEditorPanel } from "./explanation-editor.js";
+import { createVerseBodyBlockEditorPanel } from "./verse-body-block-editor.js";
 import {
     getContentEntityConfig,
     getContentEntityFields,
@@ -551,7 +551,7 @@ export function createAdminEditorPanel({
         onStatusChange,
     });
 
-    const explanationEditor = createExplanationEditorPanel({
+    const explanationEditor = createVerseBodyBlockEditorPanel({
         host,
         getPermissionContext,
         getPageContext,

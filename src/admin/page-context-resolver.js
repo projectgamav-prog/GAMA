@@ -5,8 +5,8 @@ import {
     resolveVersesPageContext,
 } from "../content/books/page-context.js";
 import { getCharacterBySlug } from "../content/characters/queries.js";
-import { getVerseExplanationContent } from "../content/explanations/queries.js";
-import { getExplanationPageBridge } from "../content/explanations/page-bridge.js";
+import { getVersePageModel } from "../content/services/page-models.js";
+import { getExplanationsPageBridge } from "../pages/explanations/page-bridge.js";
 import { getContentRecord } from "./content-state.js";
 
 const SUPPORTED_PAGE_IDS = new Set(["books", "chapters", "verses", "explanations", "characters"]);
@@ -51,10 +51,8 @@ function createBaseContext(pageId, selection) {
         currentChapter: null,
         currentVerse: null,
         currentCharacter: null,
-        currentExplanationDocument: null,
-        currentExplanationBlocks: Object.freeze([]),
-        currentExplanationTarget: null,
-        explanationMode: false,
+        currentBodyBlocks: Object.freeze([]),
+        currentBodyTarget: null,
     };
 }
 
@@ -65,32 +63,25 @@ function getRouteMode() {
         || "";
 }
 
-function resolveExplanationState(verse) {
-    if (!verse) {
-        return {
-            document: null,
-            blocks: Object.freeze([]),
-        };
+function resolveBodyBlockState({ book, chapter, verse }) {
+    if (!book || !chapter || !verse) {
+        return Object.freeze([]);
     }
 
-    const bridgeState = getExplanationPageBridge()?.getState?.() || null;
+    const bridgeState = getExplanationsPageBridge()?.getState?.() || null;
     if (bridgeState?.targetType === "verse" && bridgeState?.targetId === verse.id) {
-        return {
-            document: bridgeState.document || null,
-            blocks: Array.isArray(bridgeState.blocks) ? Object.freeze([...bridgeState.blocks]) : Object.freeze([]),
-        };
+        return Array.isArray(bridgeState.blocks) ? Object.freeze([...bridgeState.blocks]) : Object.freeze([]);
     }
 
     const includeDraft = getRouteMode() === "admin";
-    const explanationContent = getVerseExplanationContent(verse.id, {
+    const pageModel = getVersePageModel(book.slug, chapter.slug, verse.verse_number, {
         includeDraft,
         includeHidden: includeDraft,
     });
 
-    return {
-        document: explanationContent.document || null,
-        blocks: Array.isArray(explanationContent.blocks) ? Object.freeze([...explanationContent.blocks]) : Object.freeze([]),
-    };
+    return Array.isArray(pageModel?.bodyRegions?.body)
+        ? Object.freeze([...pageModel.bodyRegions.body])
+        : Object.freeze([]);
 }
 
 function resolveSupportedContext(pageId, selection) {
@@ -122,23 +113,25 @@ function resolveSupportedContext(pageId, selection) {
         }
         case "explanations": {
             const pageContext = resolveExplanationsPageContext(searchParams);
-            const explanationState = resolveExplanationState(pageContext?.verse || null);
+            const bodyBlocks = resolveBodyBlockState({
+                book: pageContext?.book || null,
+                chapter: pageContext?.chapter || null,
+                verse: pageContext?.verse || null,
+            });
             return {
                 ...createBaseContext(pageId, selection),
                 pageContext,
                 currentBook: pageContext?.book || null,
                 currentChapter: pageContext?.chapter || null,
                 currentVerse: pageContext?.verse || null,
-                currentExplanationDocument: explanationState.document || null,
-                currentExplanationBlocks: explanationState.blocks,
-                currentExplanationTarget: pageContext?.verse
+                currentBodyBlocks: bodyBlocks,
+                currentBodyTarget: pageContext?.verse
                     ? Object.freeze({
                         type: "verse",
                         id: pageContext.verse.id,
                         record: pageContext.verse,
                     })
                     : null,
-                explanationMode: true,
             };
         }
         case "characters": {

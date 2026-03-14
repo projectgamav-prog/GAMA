@@ -3,10 +3,10 @@ import {
     resolveExplanationsPageContext,
 } from "../../content/books/page-context.js";
 import {
-    setExplanationPageBridge,
-} from "../../content/explanations/page-bridge.js";
-import { renderExplanationBlocks } from "../../content/explanations/block-renderer.js";
+    setExplanationsPageBridge,
+} from "./page-bridge.js";
 import { getVersePageModel } from "../../content/services/page-models.js";
+import { renderRegion } from "../../render/layout/region-renderer.js";
 import { createSharedPageDefinition } from "../shared-page.js";
 
 function getCurrentContext() {
@@ -85,7 +85,7 @@ function renderMeaningCard(container, verse) {
 
 function getAdminEmptyMessage(mode) {
     return mode === "admin"
-        ? "No editorial explanation blocks exist for this verse yet. Use the inline explanation editor to create the document and add ordered blocks."
+        ? "No editorial body blocks exist for this verse yet. Use the inline body-block editor to add ordered content_blocks."
         : "Editorial explanation for this verse is still being prepared.";
 }
 
@@ -112,21 +112,17 @@ function initializeExplanationsPage({ mode, routeResolver }) {
     const pageState = {
         targetType: "verse",
         targetId: verse.id,
-        document: null,
         blocks: [],
     };
 
-    function applyExplanationContent({ document: nextDocument = null, blocks: nextBlocks = [] } = {}) {
-        pageState.document = nextDocument || null;
+    function applyExplanationContent({ blocks: nextBlocks = [] } = {}) {
         pageState.blocks = Array.isArray(nextBlocks) ? [...nextBlocks] : [];
 
         if (!(blocks instanceof HTMLElement)) {
             return;
         }
 
-        renderExplanationBlocks({
-            container: blocks,
-            blocks: pageState.blocks,
+        renderRegion(blocks, pageState.blocks, {
             emptyMessage: getAdminEmptyMessage(mode),
         });
     }
@@ -188,19 +184,18 @@ function initializeExplanationsPage({ mode, routeResolver }) {
         }
     );
 
-    setExplanationPageBridge({
+    setExplanationsPageBridge({
         getState() {
             return Object.freeze({
                 targetType: pageState.targetType,
                 targetId: pageState.targetId,
-                document: pageState.document,
                 blocks: Object.freeze([...pageState.blocks]),
             });
         },
-        setExplanationContent(nextState = {}) {
+        setBodyBlocks(nextState = {}) {
             applyExplanationContent(nextState);
         },
-        clearExplanationContent() {
+        clearBodyBlocks() {
             applyExplanationContent({ blocks: [] });
         },
     });
