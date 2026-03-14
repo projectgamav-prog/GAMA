@@ -23,7 +23,7 @@
     "owner_entity": "books",
     "owner_id": "book-path-of-action",
     "region": "insight",
-    "block_type": "rich_text",
+    "block_type": "media",
     "variant": null,
     "position": 1,
     "status": "published",
@@ -31,7 +31,8 @@
     "is_published": true,
     "data": {
       "title": "Path of Action",
-      "body": "This collection follows the discipline of action, showing how work becomes transformative when it is aligned with clarity and service."
+      "media_asset_id": "media-asset-book-path-of-action-insight-media",
+      "caption": "This collection follows the discipline of action, showing how work becomes transformative when it is aligned with clarity and service."
     },
     "created_at": "2026-03-14T00:00:00.000Z",
     "updated_at": "2026-03-14T00:00:00.000Z"

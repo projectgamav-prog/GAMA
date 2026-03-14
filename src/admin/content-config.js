@@ -218,6 +218,24 @@ function cloneObject(value, fallback = {}) {
         : { ...fallback };
 }
 
+function createOwnerScopedMediaSrc(src, ownerId) {
+    const normalizedSrc = String(src || DEFAULT_INSIGHT_MEDIA).trim() || DEFAULT_INSIGHT_MEDIA;
+    if (!ownerId || /[?&]cms_owner=/.test(normalizedSrc)) {
+        return normalizedSrc;
+    }
+
+    return `${normalizedSrc}${normalizedSrc.includes("?") ? "&" : "?"}cms_owner=${encodeURIComponent(ownerId)}`;
+}
+
+function inferMediaProvider(src, fallbackProvider = "") {
+    const normalizedSrc = String(src || "").trim().toLowerCase();
+    if (normalizedSrc.includes("youtube.com") || normalizedSrc.includes("youtu.be")) {
+        return "youtube";
+    }
+
+    return fallbackProvider || "local";
+}
+
 function getDefaultInsightMediaAsset(helpers) {
     const assets = helpers.listRecords("media_assets");
 
@@ -238,22 +256,33 @@ async function ensureBookInsightMediaAsset({
         return selectedAssetId;
     }
 
-    const sharedDefaultAsset = getDefaultInsightMediaAsset(helpers);
-    if (sharedDefaultAsset?.id) {
-        return sharedDefaultAsset.id;
+    const desiredAssetId = `media-asset-${record?.owner_id || "book"}-insight-media`;
+    const existingOwnerAsset = helpers
+        .listRecords("media_assets")
+        .find((asset) => asset?.id === desiredAssetId)
+        || null;
+    if (existingOwnerAsset?.id) {
+        return existingOwnerAsset.id;
     }
 
+    const sharedDefaultAsset = getDefaultInsightMediaAsset(helpers);
+    const seededSrc = createOwnerScopedMediaSrc(sharedDefaultAsset?.src || DEFAULT_INSIGHT_MEDIA, record?.owner_id || "");
+    const seededAssetType = sharedDefaultAsset?.asset_type || "image";
+    const seededProvider = inferMediaProvider(seededSrc, sharedDefaultAsset?.provider || "");
+
     const createdAsset = await api.createRecord("media_assets", {
-        asset_type: "image",
-        title: values.content_title || `${record?.owner_id || "book"} Insight Media`,
-        src: DEFAULT_INSIGHT_MEDIA,
-        provider: "local",
-        alt_text: values.content_title || "Insight media",
+        id: desiredAssetId,
+        asset_type: seededAssetType,
+        title: `${values.content_title || record?.owner_id || "book"} Insight Media`,
+        src: seededSrc,
+        provider: seededProvider,
+        alt_text: `${values.content_title || "Insight"} media`,
         caption: values.content_caption || null,
         metadata: {
             source: "admin-generated-book-insight-media",
             owner_entity: record?.owner_entity || "books",
             owner_id: record?.owner_id || "",
+            seeded_from_asset_id: sharedDefaultAsset?.id || null,
         },
     });
 

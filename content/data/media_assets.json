@@ -28,5 +28,22 @@
     },
     "created_at": "2026-03-14T00:00:00.000Z",
     "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "media-asset-book-path-of-action-insight-media",
+    "asset_type": "embed",
+    "title": "Path of Action Insight Media",
+    "src": "https://www.youtube.com/watch?v=0jMfiTfkRSg&list=RD0jMfiTfkRSg&start_radio=1&t=1745s&cms_owner=book-path-of-action",
+    "alt_text": "Path of Action media",
+    "caption": "This collection follows the discipline of action, showing how work becomes transformative when it is aligned with clarity and service.",
+    "provider": "youtube",
+    "metadata": {
+      "source": "admin-generated-book-insight-media",
+      "owner_entity": "books",
+      "owner_id": "book-path-of-action",
+      "seeded_from_asset_id": "media-asset-insight-default-image"
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
   }
 ]
