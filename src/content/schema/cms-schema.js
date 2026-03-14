@@ -37,6 +37,7 @@ export const CONTENT_BLOCK_TYPES = Object.freeze([
     "video",
     "media",
     "image",
+    "image_sequence",
     "quote",
     "commentary",
     "audio",
@@ -289,6 +290,32 @@ function requireAtLeastOneMediaSource(label, fields = {}) {
     }
 }
 
+function normalizeImageSequenceItems(value, label) {
+    const items = requireArray(value, "items", `${label} data`);
+    if (!items.length) {
+        throw new Error(`${label} data must include at least one image sequence item.`);
+    }
+
+    return deepFreeze(items.map((entry, index) => {
+        if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+            throw new Error(`${label} has an invalid "items" entry at index ${index}.`);
+        }
+
+        const itemLabel = `${label} item ${index + 1}`;
+        const mediaAssetId = normalizeOptionalString(entry, "media_asset_id");
+        const src = normalizeOptionalMediaPath(entry, "src", itemLabel);
+        requireAtLeastOneMediaSource(itemLabel, { mediaAssetId, src });
+
+        return deepFreeze({
+            media_asset_id: mediaAssetId,
+            src,
+            alt_text: normalizeOptionalString(entry, "alt_text"),
+            caption: normalizeOptionalString(entry, "caption"),
+            position: requirePositiveInteger(entry, "position", itemLabel),
+        });
+    }));
+}
+
 export function normalizeContentBlockData(blockType, data, label) {
     requireObject(data, `${label} data`);
 
@@ -321,6 +348,13 @@ export function normalizeContentBlockData(blockType, data, label) {
                 alt_text: normalizeOptionalString(data, "alt_text"),
             });
         }
+        case "image_sequence":
+            return deepFreeze({
+                title: normalizeOptionalString(data, "title"),
+                body: normalizeOptionalString(data, "body"),
+                caption: normalizeOptionalString(data, "caption"),
+                items: normalizeImageSequenceItems(data.items, label),
+            });
         case "audio": {
             const mediaAssetId = normalizeOptionalString(data, "media_asset_id");
             const src = normalizeOptionalMediaPath(data, "src", `${label} data`);
@@ -480,6 +514,14 @@ function normalizeContentBlockRecord(record, index, mediaAssetsById, contentData
         normalizedData.media_asset_ids.forEach((assetId) => {
             if (!mediaAssetsById[assetId]) {
                 throw new Error(`${label} references unknown media asset "${assetId}".`);
+            }
+        });
+    }
+
+    if (Array.isArray(normalizedData.items)) {
+        normalizedData.items.forEach((item, index) => {
+            if (item?.media_asset_id && !mediaAssetsById[item.media_asset_id]) {
+                throw new Error(`${label} references unknown image sequence media asset "${item.media_asset_id}" at item ${index + 1}.`);
             }
         });
     }

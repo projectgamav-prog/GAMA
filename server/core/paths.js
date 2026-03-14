@@ -10,6 +10,8 @@ export const contentDataDirectory = path.join(contentDirectory, "data");
 export const dataDirectory = path.join(projectRoot, "data");
 export const systemDataDirectory = path.join(dataDirectory, "system");
 export const adminDirectory = path.join(projectRoot, "admin");
+export const managedMediaDirectory = path.join(projectRoot, "assets", "media-library");
+export const managedMediaPublicBasePath = "/assets/media-library";
 
 export const tableFileMap = Object.freeze({
   books: "books.json",

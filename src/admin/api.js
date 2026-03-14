@@ -38,6 +38,17 @@ function buildQueryString(filters = {}) {
     return query ? `?${query}` : "";
 }
 
+function arrayBufferToBase64(buffer) {
+    const bytes = new Uint8Array(buffer);
+    let binary = "";
+
+    bytes.forEach((byte) => {
+        binary += String.fromCharCode(byte);
+    });
+
+    return window.btoa(binary);
+}
+
 export function createAdminApi() {
     function getEntityPath(entity) {
         const config = getContentEntityConfig(entity);
@@ -76,6 +87,21 @@ export function createAdminApi() {
         async deleteRecord(entity, recordId) {
             return apiRequest(`${getEntityPath(entity)}/${encodeURIComponent(recordId)}`, {
                 method: "DELETE",
+            });
+        },
+        async importMediaFiles(fileList = []) {
+            const files = await Promise.all(
+                Array.from(fileList || []).map(async (file) => ({
+                    name: file.name,
+                    type: file.type,
+                    relative_path: file.webkitRelativePath || "",
+                    data_base64: arrayBufferToBase64(await file.arrayBuffer()),
+                }))
+            );
+
+            return apiRequest(`${getEntityPath("media_assets")}/import`, {
+                method: "POST",
+                body: JSON.stringify({ files }),
             });
         },
         async getAccessSnapshot() {

@@ -463,6 +463,14 @@ export function validateRecord(tableName, record, rows, relatedTables = {}, curr
         });
       }
 
+      if (Array.isArray(normalized.data.items)) {
+        normalized.data.items.forEach((item) => {
+          if (item?.media_asset_id) {
+            assertForeignKey(relatedTables.media_assets || [], "media_asset_id", item.media_asset_id, "media_assets");
+          }
+        });
+      }
+
       assertUnique(
         rows,
         (row) =>

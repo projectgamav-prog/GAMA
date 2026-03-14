@@ -18,11 +18,18 @@ function resolveBlockMedia(block) {
     const assetId = block?.data?.media_asset_id || null;
     const asset = assetId ? CMS_DATABASE.indexes.mediaAssetsById[assetId] || null : null;
     const assetIds = Array.isArray(block?.data?.media_asset_ids) ? block.data.media_asset_ids : [];
+    const sequenceItems = Array.isArray(block?.data?.items) ? block.data.items : [];
 
     return Object.freeze({
         ...block,
         resolvedMediaAsset: normalizeMediaAsset(asset),
         resolvedMediaAssets: Object.freeze(assetIds.map((id) => normalizeMediaAsset(CMS_DATABASE.indexes.mediaAssetsById[id] || null)).filter(Boolean)),
+        resolvedSequenceItems: Object.freeze(sequenceItems.map((item) => Object.freeze({
+            ...item,
+            resolvedMediaAsset: item?.media_asset_id
+                ? normalizeMediaAsset(CMS_DATABASE.indexes.mediaAssetsById[item.media_asset_id] || null)
+                : null,
+        }))),
     });
 }
 
