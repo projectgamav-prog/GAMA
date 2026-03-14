@@ -4,6 +4,7 @@ import {
 } from "../../content/books/page-context.js";
 import { BOOKS_QUERY_API } from "../../content/books/queries.js";
 import { renderBookChaptersPreview } from "../../content/renderers/chapters-renderer.js";
+import { getBookPageModel } from "../../content/services/page-models.js";
 import { createSharedPageDefinition } from "../shared-page.js";
 
 function getCurrentBook() {
@@ -25,7 +26,13 @@ function syncEducationMenu(book) {
 
 function initializeChaptersPage({ routeResolver }) {
     const book = getCurrentBook();
-    if (!book) return;
+    const pageModel = book
+        ? getBookPageModel(book.slug, {
+            includeDraft: document.body.dataset.pageMode === "admin",
+            includeHidden: document.body.dataset.pageMode === "admin",
+        })
+        : null;
+    if (!book || !pageModel) return;
 
     const sectionsContainer = document.getElementById("chapterSections");
     const titleElement = document.getElementById("chapterPageTitle");
@@ -43,7 +50,7 @@ function initializeChaptersPage({ routeResolver }) {
     syncEducationMenu(book);
 
     renderBookChaptersPreview({
-        book,
+        pageModel,
         container: sectionsContainer,
         queryApi: BOOKS_QUERY_API,
         routeResolver,
@@ -51,10 +58,6 @@ function initializeChaptersPage({ routeResolver }) {
         subtitleElement,
         introElement,
         ctaElement,
-        blockOptions: {
-            includeDraft: document.body.dataset.pageMode === "admin",
-            includeHidden: document.body.dataset.pageMode === "admin",
-        },
     });
 }
 

@@ -3,8 +3,7 @@ import {
     createRouteHref,
 } from "./renderer-utils.js";
 import { initializeContentInteractions } from "../ui/content-interactions.js";
-import { getResolvedRegionsForOwner } from "../repositories/cms-content-repository.js";
-import { createInsightDropdownFromBlock } from "../../render/pages/insight-dropdown-renderer.js";
+import { renderRegion } from "../../render/layout/region-renderer.js";
 
 function formatBookTitle(book) {
     return book.short_title === "Bhagavad Gita" ? book.short_title : book.title;
@@ -27,7 +26,19 @@ function formatSectionRange(chapters) {
     return `Chapters ${first}-${last}`;
 }
 
-function createChapterCard(book, chapter, indexSeed, queryApi, routeResolver, blockOptions = {}) {
+function appendInsightRegion(parent, blocks, renderOptions) {
+    const host = document.createElement("div");
+    renderRegion(host, blocks, {
+        renderOptions,
+    });
+
+    if (host.childElementCount) {
+        parent.append(...Array.from(host.children));
+    }
+}
+
+function createChapterCard(book, chapterEntry, indexSeed, queryApi, routeResolver) {
+    const chapter = chapterEntry.record;
     const article = document.createElement("article");
     article.className = "chapter-list-item";
     article.setAttribute("role", "listitem");
@@ -88,9 +99,8 @@ function createChapterCard(book, chapter, indexSeed, queryApi, routeResolver, bl
     main.append(left, actions);
 
     article.append(main);
-    const chapterRegions = getResolvedRegionsForOwner(chapter, "chapters", blockOptions);
-    const insightDropdown = createInsightDropdownFromBlock({
-        block: chapterRegions.insight[0] || null,
+    appendInsightRegion(article, chapterEntry.regions.insight, {
+        presentation: "insight-dropdown",
         wrapperClassName: "chapter-row-insight",
         buttonId: `chapterInsightToggle${indexSeed}`,
         panelId: `chapterInsightPanel${indexSeed}`,
@@ -100,14 +110,13 @@ function createChapterCard(book, chapter, indexSeed, queryApi, routeResolver, bl
         alt: `${chapter.title} insight thumbnail`,
         fallbackMedia: DEFAULT_INSIGHT_MEDIA,
     });
-    if (insightDropdown) {
-        article.append(insightDropdown);
-    }
 
     return article;
 }
 
-function createSectionCard(book, section, chapters, sectionIndex, queryApi, routeResolver, blockOptions = {}) {
+function createSectionCard(book, sectionEntry, sectionIndex, queryApi, routeResolver) {
+    const section = sectionEntry.record;
+    const chapters = sectionEntry.chapters;
     const details = document.createElement("details");
     details.className = "chapter-group-card";
     details.dataset.adminEntity = "book_sections";
@@ -147,14 +156,13 @@ function createSectionCard(book, section, chapters, sectionIndex, queryApi, rout
     chapterList.className = "chapter-list";
     chapterList.setAttribute("role", "list");
 
-    chapters.forEach((chapter, chapterIndex) => {
-        chapterList.appendChild(createChapterCard(book, chapter, sectionIndex * 100 + chapterIndex + 1, queryApi, routeResolver, blockOptions));
+    chapters.forEach((chapterEntry, chapterIndex) => {
+        chapterList.appendChild(createChapterCard(book, chapterEntry, sectionIndex * 100 + chapterIndex + 1, queryApi, routeResolver));
     });
 
     body.append(copy);
-    const sectionRegions = getResolvedRegionsForOwner(section, "book_sections", blockOptions);
-    const sectionInsightDropdown = createInsightDropdownFromBlock({
-        block: sectionRegions.insight[0] || null,
+    appendInsightRegion(body, sectionEntry.regions.insight, {
+        presentation: "insight-dropdown",
         wrapperClassName: "chapter-section-insight",
         buttonId: `chapterSectionInsightToggle${sectionIndex}`,
         panelId: `chapterSectionInsightPanel${sectionIndex}`,
@@ -164,9 +172,6 @@ function createSectionCard(book, section, chapters, sectionIndex, queryApi, rout
         alt: `${section.title} insight thumbnail`,
         fallbackMedia: DEFAULT_INSIGHT_MEDIA,
     });
-    if (sectionInsightDropdown) {
-        body.append(sectionInsightDropdown);
-    }
     body.append(chapterList);
 
     details.append(summary, body);
@@ -174,7 +179,7 @@ function createSectionCard(book, section, chapters, sectionIndex, queryApi, rout
 }
 
 export function renderBookChaptersPreview({
-    book,
+    pageModel,
     container,
     queryApi,
     routeResolver,
@@ -182,14 +187,14 @@ export function renderBookChaptersPreview({
     subtitleElement = null,
     introElement = null,
     ctaElement = null,
-    blockOptions = {},
 }) {
-    if (!book || !container || !queryApi) return;
+    if (!pageModel || !container || !queryApi) return;
 
-    const bookSections = queryApi.listBookSections(book.id);
+    const book = pageModel.book;
+    const bookSections = pageModel.sections;
     const bookCounts = queryApi.getBookCounts(book.id);
     const heroTitle = formatBookTitle(book);
-    const firstChapter = bookSections.length ? queryApi.listChaptersForBookSection(bookSections[0].id)[0] : null;
+    const firstChapter = pageModel.firstChapter;
 
     if (titleElement) {
         titleElement.textContent = heroTitle;
@@ -218,9 +223,8 @@ export function renderBookChaptersPreview({
 
     container.innerHTML = "";
 
-    bookSections.forEach((section, sectionIndex) => {
-        const chapters = queryApi.listChaptersForBookSection(section.id);
-        container.appendChild(createSectionCard(book, section, chapters, sectionIndex + 1, queryApi, routeResolver, blockOptions));
+    bookSections.forEach((sectionEntry, sectionIndex) => {
+        container.appendChild(createSectionCard(book, sectionEntry, sectionIndex + 1, queryApi, routeResolver));
     });
 
     initializeContentInteractions(container);

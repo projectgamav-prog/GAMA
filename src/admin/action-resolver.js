@@ -261,6 +261,36 @@ function getExplanationsPageState(context, permissionContext, openEditor) {
     };
 }
 
+function getCharactersPageState(context, permissionContext, openEditor) {
+    const currentCharacter = context.currentCharacter;
+    const selectedCharacter = context.selection?.entity === "characters" ? context.selection.record : currentCharacter;
+    const actions = [];
+
+    if (canCreateEntity(permissionContext, "characters")) {
+        actions.push(createNewAction({ entity: "characters", openEditor }));
+    }
+
+    if (selectedCharacter && canUpdateEntity(permissionContext, "characters")) {
+        actions.push(createEditAction({
+            entity: "characters",
+            record: selectedCharacter,
+            openEditor,
+            label: currentCharacter && context.selection?.entity !== "characters"
+                ? "Edit Current Character"
+                : `Edit ${getRecordLabel("characters", selectedCharacter)}`,
+        }));
+    }
+
+    return {
+        title: selectedCharacter ? getRecordLabel("characters", selectedCharacter) : "Character authoring",
+        status: selectedCharacter
+            ? `Managing ${getRecordLabel("characters", selectedCharacter)} on the shared character page.`
+            : "Select a character card or open a character detail route to edit character content inline.",
+        tone: "muted",
+        actions,
+    };
+}
+
 function getUnsupportedPageState() {
     return {
         title: "Shared admin route",
@@ -281,6 +311,8 @@ export function resolveAdminAuthoringState({ context, permissionContext, openEdi
                 return getVersesPageState(context, permissionContext, openEditor);
             case "explanations":
                 return getExplanationsPageState(context, permissionContext, openEditor);
+            case "characters":
+                return getCharactersPageState(context, permissionContext, openEditor);
             default:
                 return getUnsupportedPageState();
         }

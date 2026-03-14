@@ -5,6 +5,7 @@ import {
     chapterSections,
     verses,
 } from "../content/books/queries.js";
+import { CHARACTERS } from "../content/characters/database.js";
 
 const ENTITY_COLLECTIONS = Object.freeze({
     books,
@@ -12,6 +13,7 @@ const ENTITY_COLLECTIONS = Object.freeze({
     chapters,
     chapter_sections: chapterSections,
     verses,
+    characters: CHARACTERS,
 });
 
 export function listContentRecords(entity) {

@@ -129,6 +129,17 @@ export function getVersePageModel(bookSlug, chapterSlug, verseNumber, options = 
             regions: resolveOwnerRegions(entry, "verses", options),
         })),
     }));
+    const assignedVerseIds = new Set(
+        sections
+            .flatMap((section) => section.verses)
+            .map((entry) => entry.record.id)
+    );
+    const unassignedVerses = verses
+        .filter((entry) => !assignedVerseIds.has(entry.id))
+        .map((entry) => ({
+            record: entry,
+            regions: resolveOwnerRegions(entry, "verses", options),
+        }));
 
     return Object.freeze({
         book,
@@ -138,6 +149,7 @@ export function getVersePageModel(bookSlug, chapterSlug, verseNumber, options = 
         regions: resolveOwnerRegions(verse, "verses", options),
         bodyRegions: resolveVerseBodyRegions(verse, options),
         sections: Object.freeze(sections),
+        unassignedVerses: Object.freeze(unassignedVerses),
     });
 }
 

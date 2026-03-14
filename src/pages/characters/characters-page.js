@@ -1,7 +1,6 @@
 import {
-    CHARACTERS,
     CHARACTER_FALLBACK_IMAGE,
-    getCharacterBySlug,
+    listCharacters,
     listCharacterFilterValues,
 } from "../../content/characters/queries.js";
 import { getCharacterPageModel } from "../../content/services/page-models.js";
@@ -151,9 +150,10 @@ function renderCollectionView(routes) {
         traditionSelect.dataset.optionsReady = "true";
     }
 
+    const allCharacters = listCharacters();
     const update = () => {
         const searchTerm = searchInput.value.trim().toLowerCase();
-        const filtered = CHARACTERS.filter((character) => {
+        const filtered = allCharacters.filter((character) => {
             if (!characterMatchesSearch(character, searchTerm)) return false;
             if (traditionSelect.value && character.tradition !== traditionSelect.value) return false;
             if (roleSelect.value && character.role !== roleSelect.value) return false;
@@ -169,7 +169,7 @@ function renderCollectionView(routes) {
             grid.appendChild(createCard(character, routes));
         });
 
-        resultCount.textContent = `Showing ${sorted.length} of ${CHARACTERS.length} characters`;
+        resultCount.textContent = `Showing ${sorted.length} of ${allCharacters.length} characters`;
         emptyState.hidden = sorted.length !== 0;
         grid.hidden = sorted.length === 0;
     };
@@ -203,6 +203,7 @@ function renderNotFound() {
     const chips = document.getElementById("characterChips");
     const note = document.getElementById("characterAvailabilityNote");
     const breadcrumb = document.getElementById("characterBreadcrumbCurrent");
+    const insightRegion = document.getElementById("characterInsightBlocks");
     const bodyRegion = document.getElementById("characterBodyBlocks");
 
     if (title) title.textContent = "Character Not Found";
@@ -216,6 +217,10 @@ function renderNotFound() {
     if (chips) chips.innerHTML = "";
     if (note) note.textContent = "No character data was found for this route.";
     if (breadcrumb) breadcrumb.textContent = "Unknown Character";
+    if (insightRegion) {
+        insightRegion.hidden = true;
+        insightRegion.innerHTML = "";
+    }
     if (bodyRegion) {
         bodyRegion.hidden = true;
         bodyRegion.innerHTML = "";
@@ -235,7 +240,7 @@ function renderDetailView(slug) {
         includeDraft: document.body.dataset.pageMode === "admin",
         includeHidden: document.body.dataset.pageMode === "admin",
     });
-    const character = pageModel?.character || getCharacterBySlug(slug);
+    const character = pageModel?.character || null;
     if (!character || !pageModel) {
         renderNotFound();
         return;
@@ -252,6 +257,7 @@ function renderDetailView(slug) {
     const note = document.getElementById("characterAvailabilityNote");
     const breadcrumb = document.getElementById("characterBreadcrumbCurrent");
     const profileCard = document.querySelector(".character-profile-card");
+    const insightRegion = document.getElementById("characterInsightBlocks");
     const bodyRegion = document.getElementById("characterBodyBlocks");
 
     if (title) title.textContent = character.name;
@@ -286,6 +292,23 @@ function renderDetailView(slug) {
         note.textContent = character.detail_available
             ? "This profile is part of the current detailed character set and will expand with deeper linked material over time."
             : "This profile currently uses a structured placeholder built from collection metadata and will expand into a fuller study page later.";
+    }
+
+    if (insightRegion instanceof HTMLElement) {
+        renderRegion(insightRegion, pageModel.regions.insight, {
+            renderOptions: {
+                presentation: "insight-dropdown",
+                wrapperClassName: "chapter-section-insight",
+                buttonId: `characterInsightToggle-${character.id}`,
+                panelId: `characterInsightPanel-${character.id}`,
+                buttonClassName: "section-insight-btn",
+                headingTag: "h2",
+                fallbackTitle: character.name,
+                alt: `${character.name} insight thumbnail`,
+                fallbackMedia: CHARACTER_FALLBACK_IMAGE,
+            },
+        });
+        insightRegion.hidden = pageModel.regions.insight.length === 0;
     }
 
     if (bodyRegion instanceof HTMLElement) {
@@ -416,6 +439,7 @@ export const CHARACTERS_PAGE_DEFINITION = createSharedPageDefinition({
                         </article>
                     </section>
 
+                    <section class="explanation-section" id="characterInsightBlocks" hidden></section>
                     <section class="explanation-section" id="characterBodyBlocks" hidden></section>
                 </section>
             </main>

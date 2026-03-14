@@ -2,8 +2,8 @@ import {
     DEFAULT_BOOK_SLUG,
     resolveVersesPageContext,
 } from "../../content/books/page-context.js";
-import { BOOKS_QUERY_API } from "../../content/books/queries.js";
 import { renderChapterVersesPreview } from "../../content/renderers/verses-renderer.js";
+import { getVersePageModel } from "../../content/services/page-models.js";
 import { normalizeVerseMode } from "../../core/config/route-registry.js";
 import { createSharedPageDefinition } from "../shared-page.js";
 import { initializeVerseModeSwitcher } from "./verse-mode-switcher.js";
@@ -23,6 +23,12 @@ function initializeVersesPage({ routeResolver, routes }) {
     if (!context || !main) return;
 
     const { book, chapter, highlightedVerseNumber } = context;
+    const pageModel = getVersePageModel(book.slug, chapter.slug, highlightedVerseNumber, {
+        includeDraft: document.body.dataset.pageMode === "admin",
+        includeHidden: document.body.dataset.pageMode === "admin",
+    });
+    if (!pageModel) return;
+
     const mode = getDisplayMode();
     document.body.dataset.verseMode = mode;
     document.body.dataset.educationItem = book.slug === DEFAULT_BOOK_SLUG ? "books-gita" : "books-all";
@@ -34,20 +40,14 @@ function initializeVersesPage({ routeResolver, routes }) {
     if (!sectionContainer) return;
 
     renderChapterVersesPreview({
-        book,
-        chapter,
+        pageModel,
         container: sectionContainer,
-        queryApi: BOOKS_QUERY_API,
         routeResolver,
         mode,
         highlightedVerseNumber,
         breadcrumbElement: main.querySelector(".verse-breadcrumb"),
         chapterLabelElement: main.querySelector(".verse-chapter-label"),
         chapterNameElement: main.querySelector(".verse-chapter-name"),
-        blockOptions: {
-            includeDraft: document.body.dataset.pageMode === "admin",
-            includeHidden: document.body.dataset.pageMode === "admin",
-        },
     });
 
     initializeVerseModeSwitcher(routes);

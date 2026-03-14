@@ -4,12 +4,13 @@ import {
     resolveExplanationsPageContext,
     resolveVersesPageContext,
 } from "../content/books/page-context.js";
+import { getCharacterBySlug } from "../content/characters/queries.js";
 import { getVerseExplanationContent } from "../content/explanations/queries.js";
 import { getExplanationPageBridge } from "../content/explanations/page-bridge.js";
 import { getContentRecord } from "./content-state.js";
 
-const SUPPORTED_PAGE_IDS = new Set(["books", "chapters", "verses", "explanations"]);
-const SUPPORTED_ENTITIES = new Set(["books", "book_sections", "chapters", "chapter_sections", "verses"]);
+const SUPPORTED_PAGE_IDS = new Set(["books", "chapters", "verses", "explanations", "characters"]);
+const SUPPORTED_ENTITIES = new Set(["books", "book_sections", "chapters", "chapter_sections", "verses", "characters"]);
 
 function getSearchParams() {
     return window.APP_PAGE_CONTEXT?.route?.searchParams || new URLSearchParams(window.location.search);
@@ -49,6 +50,7 @@ function createBaseContext(pageId, selection) {
         currentBook: null,
         currentChapter: null,
         currentVerse: null,
+        currentCharacter: null,
         currentExplanationDocument: null,
         currentExplanationBlocks: Object.freeze([]),
         currentExplanationTarget: null,
@@ -137,6 +139,18 @@ function resolveSupportedContext(pageId, selection) {
                     })
                     : null,
                 explanationMode: true,
+            };
+        }
+        case "characters": {
+            const characterSlug = String(searchParams.get("slug") || "").trim();
+            const character = characterSlug ? getCharacterBySlug(characterSlug) : null;
+            return {
+                ...createBaseContext(pageId, selection),
+                pageContext: Object.freeze({
+                    slug: characterSlug,
+                    mode: character ? "detail" : "collection",
+                }),
+                currentCharacter: character,
             };
         }
         default:

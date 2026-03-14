@@ -1,20 +1,26 @@
 import { BOOKS_QUERY_API } from "../../content/books/queries.js";
 import { renderBooksCollection } from "../../content/renderers/books-renderer.js";
+import { getBookPageModel } from "../../content/services/page-models.js";
 import { createSharedPageDefinition } from "../shared-page.js";
 
 function initializeBooksPage({ mode, routeResolver }) {
     const grid = document.getElementById("bookGrid");
     if (!grid) return;
 
+    const blockOptions = {
+        includeDraft: mode === "admin",
+        includeHidden: mode === "admin",
+    };
+    const books = mode === "admin" ? BOOKS_QUERY_API.listBooks() : BOOKS_QUERY_API.listPublishedBooks();
+    const pageModels = books
+        .map((book) => getBookPageModel(book.slug, blockOptions))
+        .filter(Boolean);
+
     renderBooksCollection({
         container: grid,
         queryApi: BOOKS_QUERY_API,
         routeResolver,
-        books: mode === "admin" ? BOOKS_QUERY_API.listBooks() : null,
-        blockOptions: {
-            includeDraft: mode === "admin",
-            includeHidden: mode === "admin",
-        },
+        pageModels,
     });
 }
 

@@ -1,4 +1,4 @@
-import { CONTENT_FIELD_CONFIGS } from "../content/books/schema.js";
+import { ALL_CONTENT_FIELD_CONFIGS } from "../content/schema/index.js";
 import { getEntityEditPermissionKey } from "../permissions/access.js";
 
 function augmentFields(fields = [], overrides = {}) {
@@ -73,14 +73,14 @@ function filterRecordsByField(records = [], fieldName, value) {
     return records.filter((record) => String(record?.[fieldName] ?? "") === String(value));
 }
 
-const BOOK_FIELDS = augmentFields(CONTENT_FIELD_CONFIGS.books, {
+const BOOK_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.books, {
     is_published: {
         permissionKey: "content.publish",
         description: "Requires publish permission.",
     },
 });
 
-const BOOK_SECTION_FIELDS = augmentFields(CONTENT_FIELD_CONFIGS.book_sections, {
+const BOOK_SECTION_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.book_sections, {
     source_book_id: {
         optionFilter(record) {
             return record?.book_type === "source";
@@ -88,7 +88,7 @@ const BOOK_SECTION_FIELDS = augmentFields(CONTENT_FIELD_CONFIGS.book_sections, {
     },
 });
 
-const CHAPTER_FIELDS = augmentFields(CONTENT_FIELD_CONFIGS.chapters, {
+const CHAPTER_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.chapters, {
     source_book_id: {
         optionFilter(record) {
             return record?.book_type === "source";
@@ -96,7 +96,7 @@ const CHAPTER_FIELDS = augmentFields(CONTENT_FIELD_CONFIGS.chapters, {
     },
 });
 
-const CHAPTER_SECTION_FIELDS = augmentFields(CONTENT_FIELD_CONFIGS.chapter_sections, {
+const CHAPTER_SECTION_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.chapter_sections, {
     chapter_id: {
         optionFilter(record, context) {
             const sourceBookId = getCurrentSourceBookId(context);
@@ -105,12 +105,19 @@ const CHAPTER_SECTION_FIELDS = augmentFields(CONTENT_FIELD_CONFIGS.chapter_secti
     },
 });
 
-const VERSE_FIELDS = augmentFields(CONTENT_FIELD_CONFIGS.verses, {
+const VERSE_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.verses, {
     chapter_id: {
         optionFilter(record, context) {
             const sourceBookId = getCurrentSourceBookId(context);
             return sourceBookId ? record?.source_book_id === sourceBookId : true;
         },
+    },
+});
+
+const CHARACTER_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.characters, {
+    is_published: {
+        permissionKey: "content.publish",
+        description: "Requires publish permission.",
     },
 });
 
@@ -274,6 +281,30 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
                 chapter_id: chapterId,
                 verse_number: getNextAvailablePositiveInteger(usedNumbers, preferredStart),
                 is_featured: false,
+            };
+        },
+    }),
+    characters: createEntityConfig({
+        entity: "characters",
+        label: "Character",
+        pluralLabel: "Characters",
+        createActionLabel: "New Character",
+        editActionLabel: "Edit Character",
+        deleteActionLabel: "Delete Character",
+        endpoint: "/api/characters",
+        collectionKey: "characters",
+        fields: CHARACTER_FIELDS,
+        permissionKey: getEntityEditPermissionKey("characters"),
+        sortable: true,
+        orderField: "ui_order",
+        getRecordLabel(record) {
+            return record?.name || record?.slug || "Character";
+        },
+        getCreateDefaults(_context, helpers) {
+            return {
+                detail_available: false,
+                is_published: false,
+                ui_order: getNextNumericValue(helpers.listRecords("characters"), "ui_order"),
             };
         },
     }),

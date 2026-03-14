@@ -11,8 +11,9 @@ export function getCharacterBySlug(slug) {
 }
 
 export function listCharacterFilterValues() {
+    const publishedCharacters = listCharacters();
     const getValues = (key) =>
-        [...new Set(CHARACTERS.map((character) => character[key]).filter(Boolean))].sort((a, b) =>
+        [...new Set(publishedCharacters.map((character) => character[key]).filter(Boolean))].sort((a, b) =>
             a.localeCompare(b)
         );
 

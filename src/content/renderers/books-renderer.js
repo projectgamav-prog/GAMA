@@ -3,10 +3,21 @@ import {
     createRouteHref,
 } from "./renderer-utils.js";
 import { initializeContentInteractions } from "../ui/content-interactions.js";
-import { getResolvedRegionsForOwner } from "../repositories/cms-content-repository.js";
-import { createInsightDropdownFromBlock } from "../../render/pages/insight-dropdown-renderer.js";
+import { renderRegion } from "../../render/layout/region-renderer.js";
 
-function createBookCard(book, index, queryApi, routeResolver, blockOptions = {}) {
+function appendInsightRegion(parent, blocks, renderOptions) {
+    const host = document.createElement("div");
+    renderRegion(host, blocks, {
+        renderOptions,
+    });
+
+    if (host.childElementCount) {
+        parent.append(...Array.from(host.children));
+    }
+}
+
+function createBookCard(pageModel, index, queryApi, routeResolver) {
+    const book = pageModel.book;
     const counts = queryApi.getBookCounts(book.id);
     const card = document.createElement("article");
     card.className = "book-card";
@@ -59,9 +70,8 @@ function createBookCard(book, index, queryApi, routeResolver, blockOptions = {})
     main.append(left, actions);
     card.append(main);
 
-    const bookRegions = getResolvedRegionsForOwner(book, "books", blockOptions);
-    const insightPanel = createInsightDropdownFromBlock({
-        block: bookRegions.insight[0] || null,
+    appendInsightRegion(card, pageModel.regions.insight, {
+        presentation: "insight-dropdown",
         wrapperClassName: "book-row-insight",
         buttonId: `bookInsightToggle${index}`,
         panelId: `bookInsightPanel${index}`,
@@ -72,10 +82,6 @@ function createBookCard(book, index, queryApi, routeResolver, blockOptions = {})
         fallbackMedia: DEFAULT_INSIGHT_MEDIA,
     });
 
-    if (insightPanel) {
-        card.append(insightPanel);
-    }
-
     return card;
 }
 
@@ -83,16 +89,14 @@ export function renderBooksCollection({
     container,
     queryApi,
     routeResolver,
-    books = null,
-    blockOptions = {},
+    pageModels = [],
 }) {
     if (!container || !queryApi) return;
 
-    const records = books || queryApi.listPublishedBooks();
     container.innerHTML = "";
 
-    records.forEach((book, index) => {
-        container.appendChild(createBookCard(book, index + 1, queryApi, routeResolver, blockOptions));
+    pageModels.forEach((pageModel, index) => {
+        container.appendChild(createBookCard(pageModel, index + 1, queryApi, routeResolver));
     });
 
     initializeContentInteractions(container);

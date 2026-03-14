@@ -5,5 +5,6 @@ export function renderRegion(container, blocks = [], options = {}) {
         container,
         blocks,
         emptyMessage: options.emptyMessage || "",
+        renderOptions: options.renderOptions || null,
     });
 }

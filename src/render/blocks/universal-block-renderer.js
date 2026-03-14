@@ -1,3 +1,6 @@
+import { DEFAULT_INSIGHT_MEDIA } from "../../content/renderers/renderer-utils.js";
+import { createInsightDropdownFromBlock } from "../pages/insight-dropdown-renderer.js";
+
 function appendParagraphs(container, text) {
     const paragraphs = String(text || "")
         .split(/\n{2,}/)
@@ -328,7 +331,32 @@ function createHeroBlock(block) {
     return article;
 }
 
-export function createUniversalBlockElement(block) {
+function createInsightDropdownBlock(block, renderOptions = {}) {
+    if (renderOptions?.presentation !== "insight-dropdown") {
+        return null;
+    }
+
+    const blockKey = block?.id || renderOptions.instanceKey || "block";
+
+    return createInsightDropdownFromBlock({
+        block,
+        wrapperClassName: renderOptions.wrapperClassName || "book-row-insight",
+        buttonId: renderOptions.buttonId || `insightToggle-${blockKey}`,
+        panelId: renderOptions.panelId || `insightPanel-${blockKey}`,
+        buttonClassName: renderOptions.buttonClassName || "",
+        headingTag: renderOptions.headingTag || "h3",
+        fallbackTitle: renderOptions.fallbackTitle || "",
+        fallbackMedia: renderOptions.fallbackMedia || DEFAULT_INSIGHT_MEDIA,
+        alt: renderOptions.alt || "",
+    });
+}
+
+export function createUniversalBlockElement(block, renderOptions = {}) {
+    const presentedInsight = createInsightDropdownBlock(block, renderOptions);
+    if (presentedInsight) {
+        return presentedInsight;
+    }
+
     switch (block.block_type) {
         case "hero":
             return createHeroBlock(block);
@@ -359,7 +387,7 @@ export function createUniversalBlockElement(block) {
     }
 }
 
-export function renderUniversalBlocks({ container, blocks = [], emptyMessage = "" } = {}) {
+export function renderUniversalBlocks({ container, blocks = [], emptyMessage = "", renderOptions = null } = {}) {
     if (!(container instanceof HTMLElement)) {
         return;
     }
@@ -380,7 +408,7 @@ export function renderUniversalBlocks({ container, blocks = [], emptyMessage = "
     }
 
     records.forEach((block) => {
-        const element = createUniversalBlockElement(block);
+        const element = createUniversalBlockElement(block, renderOptions || {});
         if (element) {
             container.appendChild(element);
         }
