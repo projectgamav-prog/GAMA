@@ -1,5 +1,6 @@
 import { ALL_CONTENT_FIELD_CONFIGS } from "../content/schema/index.js";
 import { getEntityEditPermissionKey } from "../permissions/access.js";
+import { getAdminEntityApiPath } from "./entity-api-paths.js";
 
 function augmentFields(fields = [], overrides = {}) {
     return Object.freeze(
@@ -201,7 +202,7 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
         createActionLabel: "New Book",
         editActionLabel: "Edit Book",
         deleteActionLabel: "Delete Book",
-        endpoint: "/api/books",
+        endpoint: getAdminEntityApiPath("books"),
         collectionKey: "books",
         fields: BOOK_FIELDS,
         fieldScopes: Object.freeze({
@@ -228,7 +229,7 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
         createActionLabel: "New Book Section",
         editActionLabel: "Edit Book Section",
         deleteActionLabel: "Delete Book Section",
-        endpoint: "/api/book-sections",
+        endpoint: getAdminEntityApiPath("book_sections"),
         collectionKey: "bookSections",
         fields: BOOK_SECTION_FIELDS,
         fieldScopes: Object.freeze({
@@ -265,7 +266,7 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
         createActionLabel: "New Chapter",
         editActionLabel: "Edit Chapter",
         deleteActionLabel: "Delete Chapter",
-        endpoint: "/api/chapters",
+        endpoint: getAdminEntityApiPath("chapters"),
         collectionKey: "chapters",
         fields: CHAPTER_FIELDS,
         fieldScopes: Object.freeze({
@@ -295,7 +296,7 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
         createActionLabel: "New Chapter Section",
         editActionLabel: "Edit Chapter Section",
         deleteActionLabel: "Delete Chapter Section",
-        endpoint: "/api/chapter-sections",
+        endpoint: getAdminEntityApiPath("chapter_sections"),
         collectionKey: "chapterSections",
         fields: CHAPTER_SECTION_FIELDS,
         fieldScopes: Object.freeze({
@@ -333,7 +334,7 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
         createActionLabel: "New Verse",
         editActionLabel: "Edit Verse",
         deleteActionLabel: "Delete Verse",
-        endpoint: "/api/verses",
+        endpoint: getAdminEntityApiPath("verses"),
         collectionKey: "verses",
         fields: VERSE_FIELDS,
         fieldScopes: Object.freeze({
@@ -370,7 +371,7 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
         createActionLabel: "New Character",
         editActionLabel: "Edit Character",
         deleteActionLabel: "Delete Character",
-        endpoint: "/api/characters",
+        endpoint: getAdminEntityApiPath("characters"),
         collectionKey: "characters",
         fields: CHARACTER_FIELDS,
         permissionKey: getEntityEditPermissionKey("characters"),
@@ -392,7 +393,7 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
         label: "Insight Block",
         pluralLabel: "Insight Blocks",
         editActionLabel: "Edit Insight Block",
-        endpoint: "/api/content-blocks",
+        endpoint: getAdminEntityApiPath("content_blocks"),
         collectionKey: "contentBlocks",
         fields: Object.freeze([
             ...CONTENT_BLOCK_INSIGHT_MEDIA_FIELDS,
@@ -437,7 +438,7 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
         label: "Media Asset",
         pluralLabel: "Media Assets",
         editActionLabel: "Edit Media Asset",
-        endpoint: "/api/media-assets",
+        endpoint: getAdminEntityApiPath("media_assets"),
         collectionKey: "mediaAssets",
         fields: MEDIA_ASSET_INSIGHT_FIELDS,
         fieldScopes: Object.freeze({

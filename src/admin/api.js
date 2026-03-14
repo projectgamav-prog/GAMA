@@ -1,4 +1,5 @@
 import { getContentEntityConfig } from "./content-config.js";
+import { getAdminEntityApiPath } from "./entity-api-paths.js";
 
 const EXPLANATION_ENDPOINTS = Object.freeze({
     documents: "/api/explanation-documents",
@@ -43,38 +44,42 @@ function buildQueryString(filters = {}) {
 }
 
 export function createAdminApi() {
+    function getEntityPath(entity) {
+        const config = getContentEntityConfig(entity);
+        if (!config) {
+            throw new Error(`Unsupported admin entity "${entity}".`);
+        }
+
+        const path = getAdminEntityApiPath(entity);
+        if (!path) {
+            throw new Error(`Unsupported admin entity "${entity}".`);
+        }
+
+        return path;
+    }
+
     return {
         request: apiRequest,
         async listRecords(entity, filters = {}) {
-            const config = getContentEntityConfig(entity);
-            if (!config) throw new Error(`Unsupported admin entity "${entity}".`);
-            return apiRequest(`${config.endpoint}${buildQueryString(filters)}`);
+            return apiRequest(`${getEntityPath(entity)}${buildQueryString(filters)}`);
         },
         async getRecord(entity, recordId) {
-            const config = getContentEntityConfig(entity);
-            if (!config) throw new Error(`Unsupported admin entity "${entity}".`);
-            return apiRequest(`${config.endpoint}/${encodeURIComponent(recordId)}`);
+            return apiRequest(`${getEntityPath(entity)}/${encodeURIComponent(recordId)}`);
         },
         async createRecord(entity, payload) {
-            const config = getContentEntityConfig(entity);
-            if (!config) throw new Error(`Unsupported admin entity "${entity}".`);
-            return apiRequest(config.endpoint, {
+            return apiRequest(getEntityPath(entity), {
                 method: "POST",
                 body: JSON.stringify(payload),
             });
         },
         async updateRecord(entity, recordId, payload) {
-            const config = getContentEntityConfig(entity);
-            if (!config) throw new Error(`Unsupported admin entity "${entity}".`);
-            return apiRequest(`${config.endpoint}/${recordId}`, {
+            return apiRequest(`${getEntityPath(entity)}/${encodeURIComponent(recordId)}`, {
                 method: "PUT",
                 body: JSON.stringify(payload),
             });
         },
         async deleteRecord(entity, recordId) {
-            const config = getContentEntityConfig(entity);
-            if (!config) throw new Error(`Unsupported admin entity "${entity}".`);
-            return apiRequest(`${config.endpoint}/${recordId}`, {
+            return apiRequest(`${getEntityPath(entity)}/${encodeURIComponent(recordId)}`, {
                 method: "DELETE",
             });
         },
