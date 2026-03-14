@@ -62,5 +62,73 @@
     },
     "created_at": "2026-03-14T00:00:00.000Z",
     "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "media-asset-book-path-of-devotion-insight-media",
+    "asset_type": "embed",
+    "title": "Path of Devotion Insight Media",
+    "src": "https://www.youtube.com/watch?v=0jMfiTfkRSg&list=RD0jMfiTfkRSg&start_radio=1&t=1745s&cms_owner=book-path-of-devotion",
+    "alt_text": "Path of Devotion media",
+    "caption": "This collection traces the devotional arc of the Gita, where love, surrender, and divine vision become central.",
+    "provider": "youtube",
+    "metadata": {
+      "source": "admin-generated-book-insight-media",
+      "owner_entity": "books",
+      "owner_id": "book-path-of-devotion",
+      "seeded_from_asset_id": "media-asset-insight-default-image"
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "media-asset-book-ramcharitmanas-insight-media",
+    "asset_type": "embed",
+    "title": "tulsi Insight Media",
+    "src": "https://www.youtube.com/watch?v=0jMfiTfkRSg&list=RD0jMfiTfkRSg&start_radio=1&t=1745s&cms_owner=book-ramcharitmanas",
+    "alt_text": "tulsi media",
+    "caption": "eam",
+    "provider": "youtube",
+    "metadata": {
+      "source": "admin-generated-book-insight-media",
+      "owner_entity": "books",
+      "owner_id": "book-ramcharitmanas",
+      "seeded_from_asset_id": "media-asset-insight-default-image"
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "media-asset-book-malay-insight-media",
+    "asset_type": "embed",
+    "title": "malay Insight Media",
+    "src": "https://www.youtube.com/watch?v=0jMfiTfkRSg&list=RD0jMfiTfkRSg&start_radio=1&t=1745s&cms_owner=book-malay",
+    "alt_text": "malay media",
+    "caption": "malay",
+    "provider": "youtube",
+    "metadata": {
+      "source": "admin-generated-book-insight-media",
+      "owner_entity": "books",
+      "owner_id": "book-malay",
+      "seeded_from_asset_id": "media-asset-insight-default-image"
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "media-asset-book-malaya-insight-media",
+    "asset_type": "embed",
+    "title": "malaya Insight Media",
+    "src": "https://www.youtube.com/watch?v=0jMfiTfkRSg&list=RD0jMfiTfkRSg&start_radio=1&t=1745s&cms_owner=book-malaya",
+    "alt_text": "malaya media",
+    "caption": "malaya",
+    "provider": "youtube",
+    "metadata": {
+      "source": "admin-generated-book-insight-media",
+      "owner_entity": "books",
+      "owner_id": "book-malaya",
+      "seeded_from_asset_id": "media-asset-insight-default-image"
+    },
+    "created_at": "2026-03-14T10:55:53.326Z",
+    "updated_at": "2026-03-14T10:55:53.326Z"
   }
 ]

@@ -1,8 +1,9 @@
 import express from "express";
 import { hasPermission } from "../../../src/permissions/access.js";
-import { appendRow, deleteRow, readTable, updateRow } from "../../content/table-store.js";
-import { assertPublicDataBuildable } from "../../content/public-content-validator.js";
+import { appendRow, deleteRow, readTable, updateRow, writeTable } from "../../content/table-store.js";
+import { assertPublicDataBuildable, assertPublicTablesBuildable } from "../../content/public-content-validator.js";
 import { assertDeleteAllowed, filterRows, getTableConfig, readRelatedTables } from "../../content/table-relations.js";
+import { provisionBookInsightRecords } from "../../content/book-insight-provisioner.js";
 import { validateRecord } from "../../content/record-validator.js";
 
 const WRITE_PERMISSION_CONFIG = Object.freeze({
@@ -139,6 +140,48 @@ export function createCrudRouter(tableName) {
       if (!ensureUserCanWrite(req, res, { tableName, mode: "create", nextRecord: record })) {
         return;
       }
+
+      if (tableName === "books") {
+        const [contentBlocks, mediaAssets] = await Promise.all([
+          readTable("content_blocks"),
+          readTable("media_assets"),
+        ]);
+        const nextBookRows = [...rows, record];
+        const provisioned = provisionBookInsightRecords({
+          bookRecord: record,
+          contentBlocks,
+          mediaAssets,
+        });
+        const nextMediaAsset = validateRecord("media_assets", provisioned.mediaAsset, mediaAssets, {});
+        const nextMediaAssets = provisioned.nextMediaAssets.map((asset) => (
+          asset.id === provisioned.mediaAsset.id ? nextMediaAsset : asset
+        ));
+        const nextInsightBlock = validateRecord("content_blocks", provisioned.insightBlock, contentBlocks, {
+          books: nextBookRows,
+          book_sections: [],
+          chapters: [],
+          chapter_sections: [],
+          verses: [],
+          characters: [],
+          media_assets: nextMediaAssets,
+        });
+        const nextContentBlocks = provisioned.nextContentBlocks.map((block) => (
+          block.id === provisioned.insightBlock.id ? nextInsightBlock : block
+        ));
+
+        await assertPublicTablesBuildable({
+          books: nextBookRows,
+          media_assets: nextMediaAssets,
+          content_blocks: nextContentBlocks,
+        });
+
+        await writeTable("books", nextBookRows);
+        await writeTable("media_assets", nextMediaAssets);
+        await writeTable("content_blocks", nextContentBlocks);
+        ok(res, record, 201);
+        return;
+      }
+
       await assertPublicDataBuildable(tableName, [...rows, record]);
       await appendRow(tableName, record);
       ok(res, record, 201);

@@ -15,9 +15,12 @@ async function readAllTables() {
   return Object.fromEntries(entries);
 }
 
-export async function assertPublicDataBuildable(mutatedTableName, nextRows) {
+export async function assertPublicTablesBuildable(mutatedTables = {}) {
   const rawTables = await readAllTables();
-  rawTables[mutatedTableName] = nextRows;
+
+  Object.entries(mutatedTables || {}).forEach(([tableName, nextRows]) => {
+    rawTables[tableName] = nextRows;
+  });
 
   try {
     const booksDatabase = createBooksDatabase(rawTables);
@@ -36,4 +39,10 @@ export async function assertPublicDataBuildable(mutatedTableName, nextRows) {
   } catch (error) {
     throw new Error(`This change would break the public content database: ${error.message}`);
   }
+}
+
+export async function assertPublicDataBuildable(mutatedTableName, nextRows) {
+  return assertPublicTablesBuildable({
+    [mutatedTableName]: nextRows,
+  });
 }

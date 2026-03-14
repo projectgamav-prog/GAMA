@@ -77,5 +77,39 @@
     "insight_media": null,
     "insight_caption": "eam",
     "id": "book-ramcharitmanas"
+  },
+  {
+    "slug": "malay",
+    "title": "malay",
+    "short_title": "malay",
+    "description": "malay",
+    "book_type": "source",
+    "ui_order": 6,
+    "is_published": true,
+    "cover_image": "/assets/images/lotus_background_4k.png",
+    "theme_key": "malay",
+    "meta_title": "malay",
+    "meta_description": "malay",
+    "insight_title": "malay",
+    "insight_media": null,
+    "insight_caption": "malay",
+    "id": "book-malay"
+  },
+  {
+    "slug": "malaya",
+    "title": "malaya",
+    "short_title": "malaya",
+    "description": "malaya",
+    "book_type": "source",
+    "ui_order": 7,
+    "is_published": false,
+    "cover_image": "/assets/images/lotus_background_4k.png",
+    "theme_key": "malaya",
+    "meta_title": "malaya",
+    "meta_description": "malaya",
+    "insight_title": "malaya",
+    "insight_media": null,
+    "insight_caption": "malaya",
+    "id": "book-malaya"
   }
 ]

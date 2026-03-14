@@ -61,7 +61,7 @@
     "owner_entity": "books",
     "owner_id": "book-path-of-devotion",
     "region": "insight",
-    "block_type": "rich_text",
+    "block_type": "media",
     "variant": null,
     "position": 1,
     "status": "published",
@@ -69,7 +69,8 @@
     "is_published": true,
     "data": {
       "title": "Path of Devotion",
-      "body": "This collection traces the devotional arc of the Gita, where love, surrender, and divine vision become central."
+      "media_asset_id": "media-asset-book-path-of-devotion-insight-media",
+      "caption": "This collection traces the devotional arc of the Gita, where love, surrender, and divine vision become central."
     },
     "created_at": "2026-03-14T00:00:00.000Z",
     "updated_at": "2026-03-14T00:00:00.000Z"
@@ -79,7 +80,7 @@
     "owner_entity": "books",
     "owner_id": "book-ramcharitmanas",
     "region": "insight",
-    "block_type": "rich_text",
+    "block_type": "media",
     "variant": null,
     "position": 1,
     "status": "published",
@@ -87,7 +88,27 @@
     "is_published": true,
     "data": {
       "title": "tulsi",
-      "body": "eam"
+      "media_asset_id": "media-asset-book-ramcharitmanas-insight-media",
+      "caption": "eam"
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-books-book-malay-insight",
+    "owner_entity": "books",
+    "owner_id": "book-malay",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "malay",
+      "media_asset_id": "media-asset-book-malay-insight-media",
+      "caption": "malay"
     },
     "created_at": "2026-03-14T00:00:00.000Z",
     "updated_at": "2026-03-14T00:00:00.000Z"
@@ -1059,5 +1080,24 @@
     },
     "created_at": "2026-03-13T20:11:08.390Z",
     "updated_at": "2026-03-13T20:11:08.390Z"
+  },
+  {
+    "id": "content-block-books-book-malaya-insight",
+    "owner_entity": "books",
+    "owner_id": "book-malaya",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "draft",
+    "visibility": "public",
+    "is_published": false,
+    "data": {
+      "title": "malaya",
+      "media_asset_id": "media-asset-book-malaya-insight-media",
+      "caption": "malaya"
+    },
+    "created_at": "2026-03-14T10:55:53.326Z",
+    "updated_at": "2026-03-14T10:55:53.326Z"
   }
 ]
