@@ -11,9 +11,29 @@ const WRITE_PERMISSION_CONFIG = Object.freeze({
   chapters: { edit: "chapters.edit" },
   chapter_sections: { edit: "chapters.edit" },
   verses: { edit: "verses.edit" },
+  media_assets: { edit: "media.upload" },
   explanation_documents: { edit: "verses.edit", publishField: "status", publishValue: "published" },
   explanation_blocks: { edit: "verses.edit" },
 });
+
+function resolveContentBlockWriteConfig(nextRecord = null, currentRecord = null) {
+  const ownerEntity = String(nextRecord?.owner_entity || currentRecord?.owner_entity || "").trim();
+
+  switch (ownerEntity) {
+    case "books":
+    case "book_sections":
+      return { edit: "books.edit", publishField: "status", publishValue: "published" };
+    case "chapters":
+    case "chapter_sections":
+      return { edit: "chapters.edit", publishField: "status", publishValue: "published" };
+    case "verses":
+      return { edit: "verses.edit", publishField: "status", publishValue: "published" };
+    case "characters":
+      return { edit: "characters.edit", publishField: "status", publishValue: "published" };
+    default:
+      return null;
+  }
+}
 
 function ok(res, data, statusCode = 200) {
   return res.status(statusCode).json({ success: true, data });
@@ -41,7 +61,9 @@ function failWithStatus(res, error, statusCode) {
 }
 
 function ensureUserCanWrite(req, res, { tableName, mode, nextRecord = null, currentRecord = null }) {
-  const config = WRITE_PERMISSION_CONFIG[tableName];
+  const config = tableName === "content_blocks"
+    ? resolveContentBlockWriteConfig(nextRecord, currentRecord)
+    : WRITE_PERMISSION_CONFIG[tableName];
   if (!config) {
     return true;
   }

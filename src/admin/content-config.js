@@ -10,6 +10,11 @@ function augmentFields(fields = [], overrides = {}) {
     );
 }
 
+function excludeFieldNames(fields = [], excludedNames = []) {
+    const excluded = new Set(excludedNames);
+    return Object.freeze(fields.filter((field) => !excluded.has(field.name)));
+}
+
 function getNumericValue(record, fieldName) {
     const value = Number.parseInt(record?.[fieldName], 10);
     return Number.isInteger(value) && value > 0 ? value : null;
@@ -79,6 +84,7 @@ const BOOK_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.books, {
         description: "Requires publish permission.",
     },
 });
+const BOOK_DETAILS_FIELDS = excludeFieldNames(BOOK_FIELDS, ["insight_title", "insight_media", "insight_caption"]);
 
 const BOOK_SECTION_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.book_sections, {
     source_book_id: {
@@ -87,6 +93,7 @@ const BOOK_SECTION_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.book_section
         },
     },
 });
+const BOOK_SECTION_DETAILS_FIELDS = excludeFieldNames(BOOK_SECTION_FIELDS, ["insight_title", "insight_media", "insight_caption"]);
 
 const CHAPTER_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.chapters, {
     source_book_id: {
@@ -95,6 +102,7 @@ const CHAPTER_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.chapters, {
         },
     },
 });
+const CHAPTER_DETAILS_FIELDS = excludeFieldNames(CHAPTER_FIELDS, ["insight_title", "insight_media", "insight_caption"]);
 
 const CHAPTER_SECTION_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.chapter_sections, {
     chapter_id: {
@@ -104,6 +112,7 @@ const CHAPTER_SECTION_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.chapter_s
         },
     },
 });
+const CHAPTER_SECTION_DETAILS_FIELDS = excludeFieldNames(CHAPTER_SECTION_FIELDS, ["insight_title", "insight_media", "insight_caption"]);
 
 const VERSE_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.verses, {
     chapter_id: {
@@ -113,6 +122,7 @@ const VERSE_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.verses, {
         },
     },
 });
+const VERSE_DETAILS_FIELDS = excludeFieldNames(VERSE_FIELDS, ["insight_title", "insight_media", "insight_caption"]);
 
 const CHARACTER_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.characters, {
     is_published: {
@@ -120,6 +130,60 @@ const CHARACTER_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.characters, {
         description: "Requires publish permission.",
     },
 });
+
+const CONTENT_BLOCK_INSIGHT_MEDIA_FIELDS = Object.freeze([
+    Object.freeze({ name: "content_title", label: "Insight Title", type: "text" }),
+    Object.freeze({
+        name: "media_asset_id",
+        label: "Insight Media Asset",
+        type: "select-from-state",
+        source: "media_assets",
+        optionLabel(option) {
+            return option?.title ? `${option.title} (${option.src})` : String(option?.src || option?.id || "");
+        },
+        optionValue: "id",
+    }),
+    Object.freeze({ name: "content_caption", label: "Insight Caption", type: "textarea" }),
+]);
+
+const CONTENT_BLOCK_INSIGHT_TEXT_FIELDS = Object.freeze([
+    Object.freeze({ name: "content_title", label: "Insight Title", type: "text" }),
+    Object.freeze({ name: "content_body", label: "Insight Body", type: "textarea" }),
+]);
+
+const MEDIA_ASSET_INSIGHT_FIELDS = Object.freeze([
+    Object.freeze({
+        name: "asset_type",
+        label: "Media Type",
+        type: "select",
+        required: true,
+        options: Object.freeze([
+            { value: "image", label: "image" },
+            { value: "video", label: "video" },
+            { value: "audio", label: "audio" },
+            { value: "embed", label: "embed" },
+            { value: "document", label: "document" },
+        ]),
+    }),
+    Object.freeze({ name: "title", label: "Media Title", type: "text" }),
+    Object.freeze({ name: "src", label: "Media URL", type: "text", required: true }),
+    Object.freeze({ name: "provider", label: "Provider", type: "text" }),
+    Object.freeze({ name: "alt_text", label: "Alt Text", type: "text" }),
+    Object.freeze({ name: "caption", label: "Caption", type: "textarea" }),
+]);
+
+function cloneObject(value, fallback = {}) {
+    return value && typeof value === "object" && !Array.isArray(value)
+        ? { ...value }
+        : { ...fallback };
+}
+
+function getContentBlockLabel(record) {
+    const ownerEntity = String(record?.owner_entity || "content").replaceAll("_", " ");
+    const ownerId = record?.owner_id || "record";
+    const region = record?.region || "body";
+    return `${ownerEntity} ${ownerId} ${region} block`;
+}
 
 function createEntityConfig(config) {
     return Object.freeze({
@@ -140,6 +204,9 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
         endpoint: "/api/books",
         collectionKey: "books",
         fields: BOOK_FIELDS,
+        fieldScopes: Object.freeze({
+            details: Object.freeze(BOOK_DETAILS_FIELDS.map((field) => field.name)),
+        }),
         permissionKey: getEntityEditPermissionKey("books"),
         sortable: true,
         orderField: "ui_order",
@@ -164,6 +231,9 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
         endpoint: "/api/book-sections",
         collectionKey: "bookSections",
         fields: BOOK_SECTION_FIELDS,
+        fieldScopes: Object.freeze({
+            details: Object.freeze(BOOK_SECTION_DETAILS_FIELDS.map((field) => field.name)),
+        }),
         permissionKey: getEntityEditPermissionKey("book_sections"),
         sortable: true,
         orderField: "ui_order",
@@ -198,6 +268,9 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
         endpoint: "/api/chapters",
         collectionKey: "chapters",
         fields: CHAPTER_FIELDS,
+        fieldScopes: Object.freeze({
+            details: Object.freeze(CHAPTER_DETAILS_FIELDS.map((field) => field.name)),
+        }),
         permissionKey: getEntityEditPermissionKey("chapters"),
         sortable: false,
         getRecordLabel(record) {
@@ -225,6 +298,9 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
         endpoint: "/api/chapter-sections",
         collectionKey: "chapterSections",
         fields: CHAPTER_SECTION_FIELDS,
+        fieldScopes: Object.freeze({
+            details: Object.freeze(CHAPTER_SECTION_DETAILS_FIELDS.map((field) => field.name)),
+        }),
         permissionKey: getEntityEditPermissionKey("chapter_sections"),
         sortable: true,
         orderField: "ui_order",
@@ -260,6 +336,9 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
         endpoint: "/api/verses",
         collectionKey: "verses",
         fields: VERSE_FIELDS,
+        fieldScopes: Object.freeze({
+            details: Object.freeze(VERSE_DETAILS_FIELDS.map((field) => field.name)),
+        }),
         permissionKey: getEntityEditPermissionKey("verses"),
         sortable: false,
         getRecordLabel(record) {
@@ -305,6 +384,89 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
                 detail_available: false,
                 is_published: false,
                 ui_order: getNextNumericValue(helpers.listRecords("characters"), "ui_order"),
+            };
+        },
+    }),
+    content_blocks: createEntityConfig({
+        entity: "content_blocks",
+        label: "Insight Block",
+        pluralLabel: "Insight Blocks",
+        editActionLabel: "Edit Insight Block",
+        endpoint: "/api/content-blocks",
+        collectionKey: "contentBlocks",
+        fields: Object.freeze([
+            ...CONTENT_BLOCK_INSIGHT_MEDIA_FIELDS,
+            ...CONTENT_BLOCK_INSIGHT_TEXT_FIELDS.filter((field) => field.name === "content_body"),
+        ]),
+        fieldScopes: Object.freeze({
+            insight_media: Object.freeze(CONTENT_BLOCK_INSIGHT_MEDIA_FIELDS.map((field) => field.name)),
+            insight_rich_text: Object.freeze(CONTENT_BLOCK_INSIGHT_TEXT_FIELDS.map((field) => field.name)),
+        }),
+        permissionKey: "content.create",
+        getRecordLabel(record) {
+            return getContentBlockLabel(record);
+        },
+        getFormValues(record) {
+            return {
+                content_title: record?.data?.title || "",
+                content_caption: record?.data?.caption || "",
+                content_body: record?.data?.body || "",
+                media_asset_id: record?.data?.media_asset_id || "",
+            };
+        },
+        serializePayload(values, { record, fieldScope }) {
+            const nextRecord = {
+                ...record,
+                data: cloneObject(record?.data),
+            };
+
+            if (fieldScope === "insight_media") {
+                nextRecord.data.title = values.content_title || null;
+                nextRecord.data.caption = values.content_caption || null;
+                nextRecord.data.media_asset_id = values.media_asset_id || null;
+            } else {
+                nextRecord.data.title = values.content_title || null;
+                nextRecord.data.body = values.content_body || "";
+            }
+
+            return nextRecord;
+        },
+    }),
+    media_assets: createEntityConfig({
+        entity: "media_assets",
+        label: "Media Asset",
+        pluralLabel: "Media Assets",
+        editActionLabel: "Edit Media Asset",
+        endpoint: "/api/media-assets",
+        collectionKey: "mediaAssets",
+        fields: MEDIA_ASSET_INSIGHT_FIELDS,
+        fieldScopes: Object.freeze({
+            insight_media_asset: Object.freeze(MEDIA_ASSET_INSIGHT_FIELDS.map((field) => field.name)),
+        }),
+        permissionKey: "media.upload",
+        getRecordLabel(record) {
+            return record?.title || record?.src || "Media Asset";
+        },
+        getFormValues(record) {
+            return {
+                asset_type: record?.asset_type || "image",
+                title: record?.title || "",
+                src: record?.src || "",
+                provider: record?.provider || "",
+                alt_text: record?.alt_text || "",
+                caption: record?.caption || "",
+            };
+        },
+        serializePayload(values, { record }) {
+            return {
+                ...record,
+                asset_type: values.asset_type || record.asset_type,
+                title: values.title || null,
+                src: values.src || record.src,
+                provider: values.provider || null,
+                alt_text: values.alt_text || null,
+                caption: values.caption || null,
+                metadata: cloneObject(record?.metadata),
             };
         },
     }),

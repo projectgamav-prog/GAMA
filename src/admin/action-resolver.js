@@ -1,4 +1,6 @@
 import { canEditEntity, hasPermission } from "../permissions/access.js";
+import { getEntityEditPermissionKey } from "../permissions/access.js";
+import { getMediaAssetById, listContentBlocksForOwner } from "../content/repositories/cms-content-repository.js";
 import {
     getContentEntityConfig,
 } from "./content-config.js";
@@ -54,6 +56,102 @@ function createEditAction({ entity, record, openEditor, fieldScope = "default", 
     );
 }
 
+function resolveInsightBinding(ownerEntity, record) {
+    if (!record?.id) {
+        return null;
+    }
+
+    const insightBlock = listContentBlocksForOwner(ownerEntity, record.id, {
+        includeDraft: true,
+        includeHidden: true,
+    }).find((block) => block.region === "insight") || null;
+
+    if (!insightBlock) {
+        return null;
+    }
+
+    const mediaAsset = insightBlock.data?.media_asset_id
+        ? getMediaAssetById(insightBlock.data.media_asset_id)
+        : null;
+
+    return Object.freeze({
+        block: insightBlock,
+        mediaAsset,
+    });
+}
+
+function getInsightBlockFieldScope(block) {
+    return block?.block_type === "media" || block?.block_type === "image" || block?.block_type === "audio"
+        ? "insight_media"
+        : "insight_rich_text";
+}
+
+function canEditCmsInsight(permissionContext, ownerEntity) {
+    const permissionKey = getEntityEditPermissionKey(ownerEntity);
+    return permissionKey ? hasPermission(permissionContext, permissionKey) : false;
+}
+
+function canEditCmsMedia(permissionContext, ownerEntity) {
+    return canEditCmsInsight(permissionContext, ownerEntity)
+        && hasPermission(permissionContext, "media.upload");
+}
+
+function buildInsightEditingActions({ ownerEntity, record, permissionContext, openEditor, baseLabel = "" }) {
+    if (!record) {
+        return [];
+    }
+
+    const label = baseLabel || getRecordLabel(ownerEntity, record);
+    const insightBinding = resolveInsightBinding(ownerEntity, record);
+
+    if (!insightBinding) {
+        return canUpdateEntity(permissionContext, ownerEntity)
+            ? [createEditAction({
+                entity: ownerEntity,
+                record,
+                openEditor,
+                label: `Edit ${label}`,
+            })]
+            : [];
+    }
+
+    const actions = [];
+
+    if (canUpdateEntity(permissionContext, ownerEntity)) {
+        actions.push(createEditAction({
+            entity: ownerEntity,
+            record,
+            openEditor,
+            fieldScope: "details",
+            label: `Edit ${label} Details`,
+        }));
+    }
+
+    if (canEditCmsInsight(permissionContext, ownerEntity)) {
+        actions.push(createEditAction({
+            entity: "content_blocks",
+            record: insightBinding.block,
+            openEditor,
+            fieldScope: getInsightBlockFieldScope(insightBinding.block),
+            allowDelete: false,
+            label: `Edit ${label} Insight`,
+        }));
+    }
+
+    if (insightBinding.mediaAsset && canEditCmsMedia(permissionContext, ownerEntity)) {
+        actions.push(createEditAction({
+            entity: "media_assets",
+            record: insightBinding.mediaAsset,
+            openEditor,
+            fieldScope: "insight_media_asset",
+            allowDelete: false,
+            label: `Edit ${label} Insight Media`,
+        }));
+    }
+
+    return actions;
+}
+
 function createNewAction({ entity, openEditor }) {
     const config = getContentEntityConfig(entity);
     if (!config) {
@@ -97,11 +195,11 @@ function getBooksPageState(context, permissionContext, openEditor) {
     }
 
     if (selectedBook && canUpdateEntity(permissionContext, "books")) {
-        actions.push(createEditAction({
-            entity: "books",
+        actions.push(...buildInsightEditingActions({
+            ownerEntity: "books",
             record: selectedBook,
+            permissionContext,
             openEditor,
-            label: `Edit ${getRecordLabel("books", selectedBook)}`,
         }));
     }
 
@@ -130,29 +228,29 @@ function getChaptersPageState(context, permissionContext, openEditor) {
     }
 
     if (currentBook && canUpdateEntity(permissionContext, "books")) {
-        actions.push(createEditAction({
-            entity: "books",
+        actions.push(...buildInsightEditingActions({
+            ownerEntity: "books",
             record: currentBook,
+            permissionContext,
             openEditor,
-            label: `Edit ${getRecordLabel("books", currentBook)}`,
         }));
     }
 
     if (selectedBookSection && canUpdateEntity(permissionContext, "book_sections")) {
-        actions.push(createEditAction({
-            entity: "book_sections",
+        actions.push(...buildInsightEditingActions({
+            ownerEntity: "book_sections",
             record: selectedBookSection,
+            permissionContext,
             openEditor,
-            label: `Edit ${getRecordLabel("book_sections", selectedBookSection)}`,
         }));
     }
 
     if (selectedChapter && canUpdateEntity(permissionContext, "chapters")) {
-        actions.push(createEditAction({
-            entity: "chapters",
+        actions.push(...buildInsightEditingActions({
+            ownerEntity: "chapters",
             record: selectedChapter,
+            permissionContext,
             openEditor,
-            label: `Edit ${getRecordLabel("chapters", selectedChapter)}`,
         }));
     }
 
@@ -183,31 +281,32 @@ function getVersesPageState(context, permissionContext, openEditor) {
     }
 
     if (currentChapter && canUpdateEntity(permissionContext, "chapters")) {
-        actions.push(createEditAction({
-            entity: "chapters",
+        actions.push(...buildInsightEditingActions({
+            ownerEntity: "chapters",
             record: currentChapter,
+            permissionContext,
             openEditor,
-            label: `Edit ${getRecordLabel("chapters", currentChapter)}`,
         }));
     }
 
     if (selectedChapterSection && canUpdateEntity(permissionContext, "chapter_sections")) {
-        actions.push(createEditAction({
-            entity: "chapter_sections",
+        actions.push(...buildInsightEditingActions({
+            ownerEntity: "chapter_sections",
             record: selectedChapterSection,
+            permissionContext,
             openEditor,
-            label: `Edit ${getRecordLabel("chapter_sections", selectedChapterSection)}`,
         }));
     }
 
     if (targetVerse && canUpdateEntity(permissionContext, "verses")) {
-        actions.push(createEditAction({
-            entity: "verses",
+        actions.push(...buildInsightEditingActions({
+            ownerEntity: "verses",
             record: targetVerse,
+            permissionContext,
             openEditor,
-            label: context.selection?.entity === "verses"
-                ? `Edit ${getRecordLabel("verses", targetVerse)}`
-                : "Edit Current Verse",
+            baseLabel: context.selection?.entity === "verses"
+                ? getRecordLabel("verses", targetVerse)
+                : "Current Verse",
         }));
     }
 

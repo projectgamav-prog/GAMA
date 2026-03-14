@@ -419,6 +419,14 @@ function createContentRecordEditorPanel({
                 payload[field.name] = serializeValue(field, input);
             });
 
+            const nextPayload = config.serializePayload?.(payload, {
+                mode: state.mode,
+                record: state.record,
+                fieldScope: state.fieldScope,
+                context: state.openContext,
+                helpers: buildHelpers(),
+            }) || payload;
+
             state.saving = true;
             setMessage(state.mode === "create" ? `Creating ${config.label.toLowerCase()}...` : `Saving ${config.label.toLowerCase()}...`);
             onStatusChange?.(state.message);
@@ -426,8 +434,8 @@ function createContentRecordEditorPanel({
 
             try {
                 const result = state.mode === "create"
-                    ? await api.createRecord(state.entity, payload)
-                    : await api.updateRecord(state.entity, state.recordId, payload);
+                    ? await api.createRecord(state.entity, nextPayload)
+                    : await api.updateRecord(state.entity, state.recordId, nextPayload);
 
                 state.record = result;
                 setMessage(`${getRecordLabel(state.entity, result)} saved. Refreshing...`, "success");
@@ -474,7 +482,7 @@ function createContentRecordEditorPanel({
             if (mode === "edit") {
                 const record = await api.getRecord(entity, recordId);
                 state.record = record;
-                state.values = { ...record };
+                state.values = config.getFormValues?.(record, state.openContext, buildHelpers()) || { ...record };
             } else {
                 const defaults = config.getCreateDefaults?.(state.openContext, buildHelpers()) || {};
                 state.record = null;

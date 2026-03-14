@@ -6,6 +6,7 @@ import {
     verses,
 } from "../content/books/queries.js";
 import { CHARACTERS } from "../content/characters/database.js";
+import { CMS_DATABASE } from "../content/cms/database.js";
 
 const ENTITY_COLLECTIONS = Object.freeze({
     books,
@@ -14,6 +15,8 @@ const ENTITY_COLLECTIONS = Object.freeze({
     chapter_sections: chapterSections,
     verses,
     characters: CHARACTERS,
+    content_blocks: CMS_DATABASE.contentBlocks,
+    media_assets: CMS_DATABASE.mediaAssets,
 });
 
 export function listContentRecords(entity) {
