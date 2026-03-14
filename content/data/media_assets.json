@@ -15,8 +15,8 @@
   },
   {
     "id": "media-asset-book-bhagavad-gita-insight-media",
-    "asset_type": "video",
-    "title": "Commentary of Madhav",
+    "asset_type": "embed",
+    "title": "Commentary of Layay",
     "src": "https://www.youtube.com/watch?v=LICM8e3gBFU&list=RDLICM8e3gBFU&start_radio=1&t=4979s",
     "alt_text": "Commentary of Madhav media",
     "caption": null,

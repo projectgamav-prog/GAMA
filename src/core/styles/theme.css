@@ -1636,6 +1636,35 @@ main {
     margin-bottom: 20px;
 }
 
+.book-page .book-insight-dropdown .insight-video-frame,
+.chapter-page .chapter-insight-dropdown .insight-video-frame,
+.chapter-page .section-insight-dropdown .insight-video-frame,
+.verse-page .section-insight-dropdown .insight-video-frame {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--md-sys-shape-corner-md);
+    background: color-mix(in srgb, var(--md-sys-color-surface-container-high) 90%, black 10%);
+}
+
+.book-page .book-insight-dropdown .insight-video-frame iframe,
+.chapter-page .chapter-insight-dropdown .insight-video-frame iframe,
+.chapter-page .section-insight-dropdown .insight-video-frame iframe,
+.verse-page .section-insight-dropdown .insight-video-frame iframe {
+    inline-size: 100%;
+    block-size: 100%;
+    border: 0;
+}
+
+.book-page .book-insight-dropdown .explanation-video-link,
+.chapter-page .chapter-insight-dropdown .explanation-video-link,
+.chapter-page .section-insight-dropdown .explanation-video-link,
+.verse-page .section-insight-dropdown .explanation-video-link {
+    display: inline-flex;
+    justify-self: center;
+    margin-top: 1rem;
+}
+
 .book-page .video-player {
     position: relative;
     overflow: hidden;
