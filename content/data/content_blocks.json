@@ -317,5 +317,745 @@
     },
     "created_at": "2026-03-14T00:00:00.000Z",
     "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-chapters-chapter-bg-01-insight",
+    "owner_entity": "chapters",
+    "owner_id": "chapter-bg-01",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Battlefield of Conscience",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "Chapter 1 establishes the emotional battlefield, showing Arjuna's conflict before any spiritual teaching begins."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-chapters-chapter-bg-02-insight",
+    "owner_entity": "chapters",
+    "owner_id": "chapter-bg-02",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Steady Wisdom",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "Chapter 2 introduces the core teaching of the Gita: steady wisdom, self-knowledge, and detached action."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-chapters-chapter-bg-03-insight",
+    "owner_entity": "chapters",
+    "owner_id": "chapter-bg-03",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Sacred Action",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "Chapter 3 emphasizes responsible action as a path of service, discipline, and spiritual alignment."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-chapters-chapter-bg-04-insight",
+    "owner_entity": "chapters",
+    "owner_id": "chapter-bg-04",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Knowledge in Action",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "Chapter 4 connects knowledge and action, showing how wisdom transforms the intention behind work."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-chapters-chapter-bg-05-insight",
+    "owner_entity": "chapters",
+    "owner_id": "chapter-bg-05",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Inner Renunciation",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "Chapter 5 shows that true renunciation is not withdrawal from action, but freedom from ego and attachment within action."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-chapters-chapter-bg-06-insight",
+    "owner_entity": "chapters",
+    "owner_id": "chapter-bg-06",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Meditative Discipline",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "Chapter 6 focuses on meditation, training the mind toward steadiness, restraint, and inward absorption."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-chapters-chapter-bg-07-insight",
+    "owner_entity": "chapters",
+    "owner_id": "chapter-bg-07",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Higher Knowledge",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "Chapter 7 deepens knowledge by linking metaphysical clarity with a more intimate recognition of the divine."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-chapters-chapter-bg-08-insight",
+    "owner_entity": "chapters",
+    "owner_id": "chapter-bg-08",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Imperishable Reality",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "Chapter 8 contemplates death, remembrance, and the path toward the imperishable reality beyond change."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-chapters-chapter-bg-09-insight",
+    "owner_entity": "chapters",
+    "owner_id": "chapter-bg-09",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Royal Knowledge",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "Chapter 9 presents devotion as a royal path, joining intimacy with the divine and profound spiritual knowledge."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-chapters-chapter-bg-10-insight",
+    "owner_entity": "chapters",
+    "owner_id": "chapter-bg-10",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Divine Manifestations",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "Chapter 10 reveals the divine through countless manifestations, helping the seeker see sacred presence everywhere."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-chapters-chapter-bg-11-insight",
+    "owner_entity": "chapters",
+    "owner_id": "chapter-bg-11",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Cosmic Vision",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "Chapter 11 gives the cosmic vision, overwhelming ordinary perception with the vastness of divine reality."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-chapters-chapter-bg-12-insight",
+    "owner_entity": "chapters",
+    "owner_id": "chapter-bg-12",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Loving Devotion",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "Chapter 12 distills devotion into qualities of heart, simplicity, and deep relational trust in the divine."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-chapters-chapter-bg-13-insight",
+    "owner_entity": "chapters",
+    "owner_id": "chapter-bg-13",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Field and Knower",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "Chapter 13 distinguishes the field of experience from the knower, clarifying the relation between body and consciousness."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-chapters-chapter-bg-14-insight",
+    "owner_entity": "chapters",
+    "owner_id": "chapter-bg-14",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Three Gunas",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "Chapter 14 explains the three gunas and how they shape temperament, behavior, and spiritual movement."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-chapters-chapter-bg-15-insight",
+    "owner_entity": "chapters",
+    "owner_id": "chapter-bg-15",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Supreme Person",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "Chapter 15 points toward the supreme person beyond the changing world, revealing a deeper source of being."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-chapters-chapter-bg-16-insight",
+    "owner_entity": "chapters",
+    "owner_id": "chapter-bg-16",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Character and Conduct",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "Chapter 16 contrasts divine and demonic tendencies, making moral character part of spiritual discernment."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-chapters-chapter-bg-17-insight",
+    "owner_entity": "chapters",
+    "owner_id": "chapter-bg-17",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Threefold Faith",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "Chapter 17 examines how faith colors worship, discipline, speech, food, and intention."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-chapters-chapter-bg-18-insight",
+    "owner_entity": "chapters",
+    "owner_id": "chapter-bg-18",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Integrated Freedom",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "Chapter 18 gathers the whole teaching into an integrated vision of freedom, surrender, right action, and final release."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-chapter_sections-chapter-section-bg-01-01-insight",
+    "owner_entity": "chapter_sections",
+    "owner_id": "chapter-section-bg-01-01",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Emotional Crisis",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "This opening section frames the emotional tension of the chapter and prepares the reader for Krishna's teaching on duty, clarity, and detachment."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-chapter_sections-chapter-section-bg-01-02-insight",
+    "owner_entity": "chapter_sections",
+    "owner_id": "chapter-section-bg-01-02",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Action with Discipline",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "This section groups teachings on disciplined action, showing how responsibility, steadiness, and higher purpose refine the quality of work."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-chapter_sections-chapter-section-bg-01-03-insight",
+    "owner_entity": "chapter_sections",
+    "owner_id": "chapter-section-bg-01-03",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Balanced Vision",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "This section emphasizes equanimity and wise judgment, showing how balance matures insight and conduct."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-chapter_sections-chapter-section-bg-01-04-insight",
+    "owner_entity": "chapter_sections",
+    "owner_id": "chapter-section-bg-01-04",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Service and Offering",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "This section focuses on service and non-possessiveness, showing how work changes when ego loosens its grip."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-chapter_sections-chapter-section-bg-01-05-insight",
+    "owner_entity": "chapter_sections",
+    "owner_id": "chapter-section-bg-01-05",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Mature Steadiness",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "This section turns toward mature steadiness, where clarity is no longer occasional but increasingly stable."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-chapter_sections-chapter-section-bg-01-06-insight",
+    "owner_entity": "chapter_sections",
+    "owner_id": "chapter-section-bg-01-06",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Resolve and Completion",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "This final section completes the chapter's movement by drawing its teaching toward resolve and enduring commitment."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-verses-verse-bg-01-001-insight",
+    "owner_entity": "verses",
+    "owner_id": "verse-bg-01-001",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Action Without Attachment",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "This insight explains how action gains meaning when it is performed with discipline rather than attachment."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-verses-verse-bg-01-002-insight",
+    "owner_entity": "verses",
+    "owner_id": "verse-bg-01-002",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Steadiness in Work",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "The emphasis here is on mental steadiness: right action becomes clearer when the mind is not pulled in every direction."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-verses-verse-bg-01-003-insight",
+    "owner_entity": "verses",
+    "owner_id": "verse-bg-01-003",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Equanimity",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "This verse highlights equanimity: wise action is not defined by external reward, but by inner clarity."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-verses-verse-bg-01-004-insight",
+    "owner_entity": "verses",
+    "owner_id": "verse-bg-01-004",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Clarity Over Reward",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "This verse redirects attention from reward to the quality of awareness behind action."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-verses-verse-bg-01-005-insight",
+    "owner_entity": "verses",
+    "owner_id": "verse-bg-01-005",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Balanced Action",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "Action becomes disciplined when it arises from inward balance rather than inner turbulence."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-verses-verse-bg-01-006-insight",
+    "owner_entity": "verses",
+    "owner_id": "verse-bg-01-006",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Equanimity and Yoga",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "This verse frames yoga as a disciplined steadiness that shapes both thought and action."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-verses-verse-bg-01-007-insight",
+    "owner_entity": "verses",
+    "owner_id": "verse-bg-01-007",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Skill in Action",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "This insight explains that action is not just about effort. It is also about composure, timing, and the ability to remain balanced while acting."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-verses-verse-bg-01-008-insight",
+    "owner_entity": "verses",
+    "owner_id": "verse-bg-01-008",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Duty Over Avoidance",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "This verse turns the teaching toward responsibility, insisting that sincere action is better than passive avoidance."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-verses-verse-bg-01-009-insight",
+    "owner_entity": "verses",
+    "owner_id": "verse-bg-01-009",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Action for a Higher Purpose",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "This verse expands the teaching from duty into sacred intention and inner freedom."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-verses-verse-bg-01-010-insight",
+    "owner_entity": "verses",
+    "owner_id": "verse-bg-01-010",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Detached Service",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "Detached action here means serving sincerely without turning work into self-ownership."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-verses-verse-bg-01-011-insight",
+    "owner_entity": "verses",
+    "owner_id": "verse-bg-01-011",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Living in Alignment",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "This verse places action inside a larger moral and spiritual rhythm."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-verses-verse-bg-01-012-insight",
+    "owner_entity": "verses",
+    "owner_id": "verse-bg-01-012",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Reciprocal Order",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "The verse broadens action into participation in the sustaining order of life."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-verses-verse-bg-01-013-insight",
+    "owner_entity": "verses",
+    "owner_id": "verse-bg-01-013",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Reciprocal Order",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "The verse broadens action into participation in the sustaining order of life."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-verses-verse-bg-01-014-insight",
+    "owner_entity": "verses",
+    "owner_id": "verse-bg-01-014",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Reciprocal Order",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "The verse broadens action into participation in the sustaining order of life."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-verses-verse-bg-01-001-body-01",
+    "owner_entity": "verses",
+    "owner_id": "verse-bg-01-001",
+    "region": "body",
+    "block_type": "rich_text",
+    "variant": null,
+    "position": 1,
+    "status": "draft",
+    "visibility": "public",
+    "is_published": false,
+    "data": {
+      "title": "title",
+      "body": "blah blah blah"
+    },
+    "created_at": "2026-03-13T20:11:08.390Z",
+    "updated_at": "2026-03-13T20:11:08.390Z"
   }
 ]
