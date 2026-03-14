@@ -162,7 +162,11 @@ export function createVerseBodyBlockEditorPanel({
         render();
     }
 
-    async function runMutation(message, task, { successMessage = "Body blocks updated.", keepForm = false } = {}) {
+    async function runMutation(message, task, {
+        successMessage = "Body blocks updated.",
+        keepForm = false,
+        rethrowOnError = false,
+    } = {}) {
         state.busy = true;
         setMessage(message);
         render();
@@ -177,6 +181,9 @@ export function createVerseBodyBlockEditorPanel({
             state.busy = false;
             setMessage(error.message || "Unable to update these body blocks.", "error");
             render();
+            if (rethrowOnError) {
+                throw error;
+            }
         }
     }
 
@@ -262,6 +269,7 @@ export function createVerseBodyBlockEditorPanel({
             },
             {
                 successMessage: isEdit ? "Body block saved." : "Body block created.",
+                rethrowOnError: true,
             }
         );
     }
@@ -534,6 +542,7 @@ export function createVerseBodyBlockEditorPanel({
                 createContentBlockForm({
                     draft: state.blockForm.draft,
                     busy: state.busy,
+                    externalErrorMessage: state.tone === "error" ? state.message : "",
                     submitLabel: state.busy
                         ? (state.blockForm.mode === "edit" ? "Saving..." : "Creating...")
                         : (state.blockForm.mode === "edit" ? "Save Block" : "Create Block"),
@@ -555,7 +564,6 @@ export function createVerseBodyBlockEditorPanel({
                     },
                     onError(message) {
                         setMessage(message, "error");
-                        render();
                     },
                     async onSubmit(payload) {
                         await saveBlock(payload);

@@ -130,5 +130,75 @@
     },
     "created_at": "2026-03-14T10:55:53.326Z",
     "updated_at": "2026-03-14T10:55:53.326Z"
+  },
+  {
+    "id": "media-asset-seed-image-lotus",
+    "asset_type": "image",
+    "title": "Seed Lotus Image",
+    "src": "https://mdn.github.io/learning-area/html/multimedia-and-embedding/responsive-images/elva-fairy-800w.jpg",
+    "alt_text": "Seed image for testing image and gallery blocks",
+    "caption": "Seed image asset for unified content_blocks testing.",
+    "provider": "mdn",
+    "metadata": {
+      "source": "seed-media-testing"
+    },
+    "created_at": "2026-03-15T00:00:00.000Z",
+    "updated_at": "2026-03-15T00:00:00.000Z"
+  },
+  {
+    "id": "media-asset-seed-image-river",
+    "asset_type": "image",
+    "title": "Seed River Image",
+    "src": "https://mdn.github.io/learning-area/html/multimedia-and-embedding/responsive-images/elva-fairy-480w.jpg",
+    "alt_text": "Second seed image for testing gallery selection",
+    "caption": "Secondary seed image asset for gallery testing.",
+    "provider": "mdn",
+    "metadata": {
+      "source": "seed-media-testing"
+    },
+    "created_at": "2026-03-15T00:00:00.000Z",
+    "updated_at": "2026-03-15T00:00:00.000Z"
+  },
+  {
+    "id": "media-asset-seed-video-flower",
+    "asset_type": "video",
+    "title": "Seed Flower Video",
+    "src": "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+    "alt_text": "Seed video asset for testing media and video blocks",
+    "caption": "Seed video asset for unified content_blocks testing.",
+    "provider": "mdn",
+    "metadata": {
+      "source": "seed-media-testing"
+    },
+    "created_at": "2026-03-15T00:00:00.000Z",
+    "updated_at": "2026-03-15T00:00:00.000Z"
+  },
+  {
+    "id": "media-asset-seed-audio-roar",
+    "asset_type": "audio",
+    "title": "Seed Audio Roar",
+    "src": "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3",
+    "alt_text": null,
+    "caption": "Seed audio asset for testing audio blocks.",
+    "provider": "mdn",
+    "metadata": {
+      "source": "seed-media-testing"
+    },
+    "created_at": "2026-03-15T00:00:00.000Z",
+    "updated_at": "2026-03-15T00:00:00.000Z"
+  },
+  {
+    "id": "media-asset-seed-document-dummy-pdf",
+    "asset_type": "document",
+    "title": "Seed Dummy PDF",
+    "src": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    "alt_text": null,
+    "caption": "Optional document asset for testing mixed media galleries.",
+    "provider": "w3c",
+    "metadata": {
+      "source": "seed-media-testing"
+    },
+    "created_at": "2026-03-15T00:00:00.000Z",
+    "updated_at": "2026-03-15T00:00:00.000Z"
   }
 ]

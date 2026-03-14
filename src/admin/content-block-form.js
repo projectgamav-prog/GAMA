@@ -69,6 +69,16 @@ function normalizeText(value) {
     return String(value ?? "").trim();
 }
 
+function createValidationError(message, fieldErrors = {}) {
+    const error = new Error(message);
+    error.fieldErrors = fieldErrors;
+    return error;
+}
+
+function pickFirstNonEmpty(...values) {
+    return values.find((value) => normalizeText(value));
+}
+
 function createDefaultBlockData(blockType = "rich_text") {
     switch (blockType) {
         case "hero":
@@ -304,6 +314,7 @@ function createSection(titleText, subtitleText = "") {
 function createField({
     label,
     hint = "",
+    error = "",
     control,
     wide = false,
 }) {
@@ -311,6 +322,9 @@ function createField({
     field.className = "admin-editor-field";
     if (wide) {
         field.classList.add("is-wide");
+    }
+    if (error) {
+        field.classList.add("has-error");
     }
 
     const labelElement = document.createElement("span");
@@ -328,6 +342,13 @@ function createField({
         hintElement.className = "admin-editor-field-hint";
         hintElement.textContent = hint;
         field.appendChild(hintElement);
+    }
+
+    if (error) {
+        const errorElement = document.createElement("span");
+        errorElement.className = "admin-editor-field-error";
+        errorElement.textContent = error;
+        field.appendChild(errorElement);
     }
 
     return field;
@@ -455,6 +476,13 @@ function createDirectSourcePreview(blockType, draftData) {
         preview.appendChild(image);
     }
 
+    const summary = document.createElement("p");
+    summary.className = "admin-editor-field-hint";
+    summary.textContent = embedUrl
+        ? "Using a direct embed URL fallback."
+        : "Using a direct source URL fallback.";
+    preview.appendChild(summary);
+
     const link = document.createElement("a");
     link.className = "admin-content-block-direct-link";
     link.href = activeUrl;
@@ -578,6 +606,13 @@ function createAssetPicker({
     }
 
     const selectedAssetIds = new Set(selectedIds.filter(Boolean));
+    const selectionSummary = document.createElement("p");
+    selectionSummary.className = "admin-editor-field-hint";
+    selectionSummary.textContent = selectedAssetIds.size
+        ? `${selectedAssetIds.size} asset${selectedAssetIds.size === 1 ? "" : "s"} selected.`
+        : "No assets selected yet.";
+    picker.appendChild(selectionSummary);
+
     const grid = document.createElement("div");
     grid.className = "admin-content-block-asset-grid";
 
@@ -585,7 +620,9 @@ function createAssetPicker({
     if (!visibleAssets.length) {
         const empty = document.createElement("p");
         empty.className = "admin-editor-field-hint";
-        empty.textContent = "No reusable media assets match this filter yet.";
+        empty.textContent = blockType === "gallery"
+            ? "No compatible reusable media assets exist for this gallery filter yet."
+            : `No compatible reusable media assets exist for ${getContentBlockTypeLabel(blockType)} blocks yet.`;
         picker.appendChild(empty);
     } else {
         visibleAssets.forEach((asset) => {
@@ -659,7 +696,13 @@ function validateSelectedAssetTypes(blockType, state, data) {
 
         const assetType = normalizeText(asset.asset_type).toLowerCase();
         if (!compatibleTypes.includes(assetType)) {
-            throw new Error(`${getContentBlockTypeLabel(blockType)} blocks cannot use ${assetType} assets.`);
+            const fieldName = Array.isArray(data.media_asset_ids) ? "media_asset_ids" : "media_asset_id";
+            throw createValidationError(
+                `${getContentBlockTypeLabel(blockType)} blocks cannot use ${assetType} assets.`,
+                {
+                    [fieldName]: `${getContentBlockTypeLabel(blockType)} blocks cannot use ${assetType} assets.`,
+                }
+            );
         }
     });
 }
@@ -680,23 +723,109 @@ function parseJsonArray(rawValue, label) {
     return parsed;
 }
 
+function getFieldError(state, ...fieldNames) {
+    return pickFirstNonEmpty(...fieldNames.map((fieldName) => state.fieldErrors?.[fieldName]));
+}
+
+function clearFieldErrors(state, ...fieldNames) {
+    state.dismissedExternalError = true;
+    if (!state.fieldErrors || !fieldNames.length) {
+        return;
+    }
+    fieldNames.forEach((fieldName) => {
+        delete state.fieldErrors[fieldName];
+    });
+
+    if (!Object.keys(state.fieldErrors).length) {
+        state.errorMessage = "";
+    }
+}
+
+function validateDraftBeforeNormalize(state) {
+    const blockType = state.draft.block_type;
+    const draftData = cloneObject(state.draft.data);
+    const fieldErrors = {};
+
+    switch (blockType) {
+        case "image":
+            if (!normalizeText(draftData.media_asset_id) && !normalizeText(draftData.src)) {
+                fieldErrors.media_asset_id = "Choose an image asset or enter a direct image URL.";
+                fieldErrors.src = "Enter a direct image URL or choose an image asset.";
+            }
+            break;
+        case "video":
+            if (!normalizeText(draftData.media_asset_id) && !normalizeText(draftData.src) && !normalizeText(draftData.embed_url)) {
+                fieldErrors.media_asset_id = "Choose a video/embed asset or enter a direct video URL.";
+                fieldErrors.src = "Enter a direct video URL, embed URL, or choose a reusable asset.";
+                fieldErrors.embed_url = "Enter an embed URL, direct video URL, or choose a reusable asset.";
+            }
+            break;
+        case "audio":
+            if (!normalizeText(draftData.media_asset_id) && !normalizeText(draftData.src)) {
+                fieldErrors.media_asset_id = "Choose an audio asset or enter a direct audio URL.";
+                fieldErrors.src = "Enter a direct audio URL or choose an audio asset.";
+            }
+            break;
+        case "media":
+            if (!normalizeText(draftData.media_asset_id) && !normalizeText(draftData.src) && !normalizeText(draftData.embed_url)) {
+                fieldErrors.media_asset_id = "Choose a reusable asset or enter a direct source.";
+                fieldErrors.src = "Enter a direct source URL, embed URL, or choose a reusable asset.";
+                fieldErrors.embed_url = "Enter an embed URL, direct source URL, or choose a reusable asset.";
+            }
+            break;
+        case "gallery":
+            if (!Array.isArray(draftData.media_asset_ids) || !draftData.media_asset_ids.length) {
+                fieldErrors.media_asset_ids = "Select at least one reusable media asset for the gallery.";
+            }
+            break;
+        case "related_entities":
+        case "stat_grid":
+            if (!normalizeText(state.rawJson.items)) {
+                fieldErrors.items = blockType === "related_entities"
+                    ? "Provide a JSON array of related entities."
+                    : "Provide a JSON array of stat items.";
+            }
+            break;
+        default:
+            break;
+    }
+
+    if (Object.keys(fieldErrors).length) {
+        throw createValidationError("Please fix the highlighted fields and try again.", fieldErrors);
+    }
+}
+
 function buildPayload(state) {
+    validateDraftBeforeNormalize(state);
+
     const blockType = state.draft.block_type;
     const draftData = cloneObject(state.draft.data);
     let nextData;
 
     switch (blockType) {
         case "related_entities":
-            nextData = {
-                title: draftData.title,
-                items: parseJsonArray(state.rawJson.items, "Related entities"),
-            };
+            try {
+                nextData = {
+                    title: draftData.title,
+                    items: parseJsonArray(state.rawJson.items, "Related entities"),
+                };
+            } catch (error) {
+                throw createValidationError(error.message, {
+                    items: error.message,
+                });
+            }
             break;
         case "stat_grid":
-            nextData = {
-                title: draftData.title,
-                items: parseJsonArray(state.rawJson.items, "Stat grid items"),
-            };
+            try {
+                nextData = {
+                    title: draftData.title,
+                    items: parseJsonArray(state.rawJson.items, "Stat grid items"),
+                };
+            } catch (error) {
+                throw createValidationError(error.message, {
+                    items: error.message,
+                });
+            }
             break;
         case "gallery":
             nextData = {
@@ -711,12 +840,16 @@ function buildPayload(state) {
     }
 
     validateSelectedAssetTypes(blockType, state, nextData);
-
-    const normalizedData = normalizeContentBlockData(
-        blockType,
-        nextData,
-        `${getContentBlockTypeLabel(blockType)} block`
-    );
+    let normalizedData;
+    try {
+        normalizedData = normalizeContentBlockData(
+            blockType,
+            nextData,
+            `${getContentBlockTypeLabel(blockType)} block`
+        );
+    } catch (error) {
+        throw createValidationError(error.message);
+    }
 
     const status = state.draft.status === "published" ? "published" : "draft";
 
@@ -957,6 +1090,7 @@ function appendStructuredJsonFields(grid, state, busy, blockType) {
             label,
             wide: true,
             hint,
+            error: getFieldError(state, "items"),
             control: createInputControl({
                 type: "textarea",
                 rows: 8,
@@ -964,6 +1098,7 @@ function appendStructuredJsonFields(grid, state, busy, blockType) {
                 disabled: busy,
                 onInput(nextValue) {
                     state.rawJson[jsonField] = nextValue;
+                    clearFieldErrors(state, "items");
                 },
             }),
         })
@@ -1085,6 +1220,7 @@ function appendMediaFields(grid, state, busy, blockType, rerender) {
                     ],
                     onInput(nextValue) {
                         draftData.media_kind = nextValue;
+                        clearFieldErrors(state, "media_asset_id", "src", "embed_url");
                     },
                 }),
             })
@@ -1098,12 +1234,14 @@ function appendMediaFields(grid, state, busy, blockType, rerender) {
                 hint: blockType === "video"
                     ? "Used for image-style fallbacks or poster-style previews."
                     : "Used when a direct image source is rendered.",
+                error: getFieldError(state, "alt_text"),
                 control: createInputControl({
                     value: draftData.alt_text,
                     placeholder: "Describe the media",
                     disabled: busy,
                     onInput(nextValue) {
                         draftData.alt_text = nextValue;
+                        clearFieldErrors(state, "alt_text");
                     },
                 }),
             })
@@ -1115,12 +1253,14 @@ function appendMediaFields(grid, state, busy, blockType, rerender) {
             label: blockType === "video" ? "Video File URL" : blockType === "audio" ? "Audio URL" : "Direct Source URL",
             hint: "Optional fallback when no reusable media asset is selected.",
             wide: true,
+            error: getFieldError(state, "src"),
             control: createInputControl({
                 value: draftData.src,
                 placeholder: "https://example.com/media-file",
                 disabled: busy,
                 onInput(nextValue) {
                     draftData.src = nextValue;
+                    clearFieldErrors(state, "src", "media_asset_id", "embed_url");
                 },
             }),
         })
@@ -1132,12 +1272,14 @@ function appendMediaFields(grid, state, busy, blockType, rerender) {
                 label: "Embed URL",
                 hint: "Useful for YouTube, Vimeo, or other embeddable media.",
                 wide: true,
+                error: getFieldError(state, "embed_url"),
                 control: createInputControl({
                     value: draftData.embed_url,
                     placeholder: "https://www.youtube.com/embed/...",
                     disabled: busy,
                     onInput(nextValue) {
                         draftData.embed_url = nextValue;
+                        clearFieldErrors(state, "embed_url", "media_asset_id", "src");
                     },
                 }),
             }),
@@ -1149,12 +1291,14 @@ function appendMediaFields(grid, state, busy, blockType, rerender) {
             createField({
                 label: "Provider",
                 hint: "Optional provider hint like youtube, vimeo, spotify, or local.",
+                error: getFieldError(state, "provider"),
                 control: createInputControl({
                     value: draftData.provider,
                     placeholder: "youtube",
                     disabled: busy,
                     onInput(nextValue) {
                         draftData.provider = nextValue;
+                        clearFieldErrors(state, "provider");
                     },
                 }),
             })
@@ -1165,6 +1309,7 @@ function appendMediaFields(grid, state, busy, blockType, rerender) {
         createField({
             label: "Caption",
             wide: true,
+            error: getFieldError(state, "caption"),
             control: createInputControl({
                 type: "textarea",
                 rows: 4,
@@ -1173,6 +1318,7 @@ function appendMediaFields(grid, state, busy, blockType, rerender) {
                 disabled: busy,
                 onInput(nextValue) {
                     draftData.caption = nextValue;
+                    clearFieldErrors(state, "caption");
                 },
             }),
         })
@@ -1190,6 +1336,7 @@ function appendMediaFields(grid, state, busy, blockType, rerender) {
             disabled: busy,
             onSelect(assetId) {
                 draftData.media_asset_id = draftData.media_asset_id === assetId ? "" : assetId;
+                clearFieldErrors(state, "media_asset_id", "src", "embed_url");
                 rerender();
             },
             rerender,
@@ -1206,6 +1353,7 @@ function appendMediaFields(grid, state, busy, blockType, rerender) {
         disabled: busy || !selectedAssetId,
         onClick() {
             draftData.media_asset_id = "";
+            clearFieldErrors(state, "media_asset_id");
             rerender();
         },
     });
@@ -1215,6 +1363,7 @@ function appendMediaFields(grid, state, busy, blockType, rerender) {
         createField({
             label: "Media Picker",
             wide: true,
+            error: getFieldError(state, "media_asset_id"),
             control: pickerSection,
         })
     );
@@ -1243,6 +1392,7 @@ function appendGalleryFields(grid, state, busy, rerender) {
         createField({
             label: "Caption",
             wide: true,
+            error: getFieldError(state, "caption"),
             control: createInputControl({
                 type: "textarea",
                 rows: 4,
@@ -1251,6 +1401,7 @@ function appendGalleryFields(grid, state, busy, rerender) {
                 disabled: busy,
                 onInput(nextValue) {
                     draftData.caption = nextValue;
+                    clearFieldErrors(state, "caption");
                 },
             }),
         })
@@ -1261,7 +1412,7 @@ function appendGalleryFields(grid, state, busy, rerender) {
     pickerStack.appendChild(
         createAssetPicker({
             title: "Gallery Assets",
-            hint: "Select multiple reusable media assets. Clicking an asset toggles it in or out of the gallery.",
+            hint: "Galleries use reusable media assets only. Clicking an asset toggles it in or out of the saved gallery.",
             state,
             blockType: "gallery",
             selectedIds: selectedAssetIds,
@@ -1274,6 +1425,7 @@ function appendGalleryFields(grid, state, busy, rerender) {
                     nextIds.add(assetId);
                 }
                 draftData.media_asset_ids = Array.from(nextIds);
+                clearFieldErrors(state, "media_asset_ids");
                 rerender();
             },
             rerender,
@@ -1297,6 +1449,7 @@ function appendGalleryFields(grid, state, busy, rerender) {
             chip.textContent = getAssetLabel(asset);
             chip.addEventListener("click", () => {
                 draftData.media_asset_ids = cloneArray(draftData.media_asset_ids).filter((id) => id !== asset.id);
+                clearFieldErrors(state, "media_asset_ids");
                 rerender();
             });
             selectedWrap.appendChild(chip);
@@ -1309,6 +1462,7 @@ function appendGalleryFields(grid, state, busy, rerender) {
         createField({
             label: "Selected Media",
             wide: true,
+            error: getFieldError(state, "media_asset_ids"),
             control: pickerStack,
         })
     );
@@ -1396,6 +1550,7 @@ export function createContentBlockForm({
     draft,
     busy = false,
     submitLabel = "Save Block",
+    externalErrorMessage = "",
     onCancel = null,
     onError = null,
     onSubmit = null,
@@ -1406,6 +1561,10 @@ export function createContentBlockForm({
         draft: createDraft(draft?.block_type || "rich_text", draft),
         rawJson: createRawJsonState(draft || {}),
         assetFilter: getDefaultAssetFilter(draft?.block_type || "rich_text"),
+        errorMessage: "",
+        externalErrorMessage: normalizeText(externalErrorMessage),
+        dismissedExternalError: false,
+        fieldErrors: {},
         mediaAssets: {
             loading: true,
             error: "",
@@ -1418,6 +1577,23 @@ export function createContentBlockForm({
 
     function render() {
         root.replaceChildren();
+
+        const visibleErrorMessage = normalizeText(state.errorMessage)
+            || (!state.dismissedExternalError ? normalizeText(state.externalErrorMessage) : "");
+        if (visibleErrorMessage) {
+            const banner = document.createElement("div");
+            banner.className = "admin-content-block-error-banner";
+
+            const title = document.createElement("strong");
+            title.textContent = "Block could not be saved";
+
+            const copy = document.createElement("p");
+            copy.className = "admin-editor-subtitle";
+            copy.textContent = visibleErrorMessage;
+
+            banner.append(title, copy);
+            root.appendChild(banner);
+        }
 
         const metaSection = createSection(
             "Block Setup",
@@ -1456,14 +1632,18 @@ export function createContentBlockForm({
             createButton(submitLabel, "admin-inline-bar-link is-primary", {
                 type: "button",
                 disabled: busy,
-                onClick() {
+                async onClick() {
+                    state.dismissedExternalError = true;
+                    state.errorMessage = "";
+                    state.fieldErrors = {};
                     try {
                         const payload = buildPayload(state);
-                        Promise.resolve(onSubmit?.(payload)).catch((error) => {
-                            onError?.(error.message || "Unable to save this content block.");
-                        });
+                        await Promise.resolve(onSubmit?.(payload));
                     } catch (error) {
-                        onError?.(error.message || "Unable to save this content block.");
+                        state.errorMessage = error.message || "Unable to save this content block.";
+                        state.fieldErrors = error.fieldErrors || {};
+                        onError?.(state.errorMessage);
+                        render();
                     }
                 },
             })

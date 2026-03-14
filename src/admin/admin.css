@@ -251,6 +251,20 @@ body.admin-mode-page {
     line-height: 1.45;
 }
 
+.admin-editor-field.has-error .admin-editor-input,
+.admin-editor-field.has-error textarea,
+.admin-editor-field.has-error select {
+    border-color: rgba(141, 42, 30, 0.4);
+    box-shadow: 0 0 0 2px rgba(141, 42, 30, 0.1);
+}
+
+.admin-editor-field-error {
+    color: var(--admin-danger);
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
 .admin-editor-footer {
     display: flex;
     flex-wrap: wrap;
@@ -397,6 +411,20 @@ body.admin-mode-page {
 .admin-content-block-picker-stack {
     display: grid;
     gap: 16px;
+}
+
+.admin-content-block-error-banner {
+    display: grid;
+    gap: 8px;
+    padding: 14px 16px;
+    border: 1px solid rgba(141, 42, 30, 0.24);
+    border-radius: 20px;
+    background: rgba(141, 42, 30, 0.08);
+    color: #5c2018;
+}
+
+.admin-content-block-error-banner p {
+    margin: 0;
 }
 
 .admin-content-block-section {
