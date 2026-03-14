@@ -252,10 +252,6 @@ function createVideoBlock(block) {
         );
     }
 
-    if (source && mediaKind !== "image") {
-        card.appendChild(createMediaLink(source, embedUrl ? "Open Video Source" : "Open Media"));
-    }
-
     appendCaption(card, getMediaCaption(block));
     article.appendChild(card);
     return article;

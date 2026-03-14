@@ -13,6 +13,25 @@ function sortBlocks(blocks = []) {
     return [...blocks].sort((left, right) => Number(left.position) - Number(right.position));
 }
 
+export function resolveBlocksWithMediaAssets(blocks = [], mediaAssets = []) {
+    const mediaAssetsById = new Map(
+        (Array.isArray(mediaAssets) ? mediaAssets : []).map((asset) => [asset.id, asset])
+    );
+
+    return sortBlocks(Array.isArray(blocks) ? blocks : []).map((block) => {
+        const mediaAssetId = block?.data?.media_asset_id || "";
+        const galleryAssetIds = Array.isArray(block?.data?.media_asset_ids) ? block.data.media_asset_ids : [];
+
+        return {
+            ...block,
+            resolvedMediaAsset: mediaAssetId ? mediaAssetsById.get(mediaAssetId) || null : null,
+            resolvedMediaAssets: galleryAssetIds
+                .map((assetId) => mediaAssetsById.get(assetId) || null)
+                .filter(Boolean),
+        };
+    });
+}
+
 function getVerseTargetContext(pageContext) {
     const verse = pageContext?.currentVerse || null;
     if (!verse) {
@@ -138,12 +157,15 @@ export function createVerseBodyBlockEditorPanel({
             return;
         }
 
-        const records = await api.listRecords("content_blocks", {
-            owner_entity: state.target.ownerEntity,
-            owner_id: state.target.ownerId,
-            region: state.target.region,
-        });
-        const blocks = sortBlocks(Array.isArray(records) ? records : []);
+        const [records, mediaAssets] = await Promise.all([
+            api.listRecords("content_blocks", {
+                owner_entity: state.target.ownerEntity,
+                owner_id: state.target.ownerId,
+                region: state.target.region,
+            }),
+            api.listRecords("media_assets"),
+        ]);
+        const blocks = resolveBlocksWithMediaAssets(records, mediaAssets);
         state.blocks = blocks;
 
         if (!keepForm) {

@@ -248,13 +248,13 @@ export function createInsightDropdown({
         card.appendChild(player);
     }
 
-    if (mediaPresentation.src && mediaPresentation.kind !== "image") {
+    if (mediaPresentation.src && mediaPresentation.kind !== "image" && mediaPresentation.kind !== "video") {
         const link = document.createElement("a");
         link.className = "btn btn-primary explanation-video-link";
         link.href = mediaPresentation.src;
         link.target = "_blank";
         link.rel = "noreferrer";
-        link.textContent = mediaPresentation.kind === "video" ? "Open Video Source" : "Open Media";
+        link.textContent = "Open Media";
         card.appendChild(link);
     }
 

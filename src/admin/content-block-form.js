@@ -218,6 +218,13 @@ function getCompatibleAssetTypes(blockType) {
     }
 }
 
+export function selectCompatibleImportedAsset(blockType, importedAssets = []) {
+    const compatibleTypes = new Set(getCompatibleAssetTypes(blockType));
+    return (Array.isArray(importedAssets) ? importedAssets : []).find((asset) => (
+        compatibleTypes.has(normalizeText(asset?.asset_type).toLowerCase())
+    )) || null;
+}
+
 function getDefaultAssetFilter(blockType) {
     if (blockType === "image") {
         return "image";
@@ -1475,21 +1482,19 @@ function appendMediaFields(grid, state, busy, blockType, rerender) {
                 draftData.media_asset_id = draftData.media_asset_id === assetId ? "" : assetId;
                 state.mediaAssets.error = "";
                 state.mediaAssets.notice = draftData.media_asset_id
-                    ? `${assetLabel} asset selected.`
+                    ? `${assetLabel} asset selected: ${draftData.media_asset_id}`
                     : "";
                 clearFieldErrors(state, "media_asset_id", "src", "embed_url");
                 rerender();
             },
             onImportComplete(importedAssets) {
-                const compatibleTypes = new Set(getCompatibleAssetTypes(blockType));
-                const importedList = Array.isArray(importedAssets) ? importedAssets : [];
-                const compatibleAsset = importedList.find((asset) => compatibleTypes.has(normalizeText(asset?.asset_type).toLowerCase()));
+                const compatibleAsset = selectCompatibleImportedAsset(blockType, importedAssets);
 
                 if (compatibleAsset?.id) {
                     draftData.media_asset_id = compatibleAsset.id;
                     state.assetSearchQuery = "";
                     state.mediaAssets.error = "";
-                    state.mediaAssets.notice = `Imported ${assetLabel.toLowerCase()} selected from the project media library.`;
+                    state.mediaAssets.notice = `Imported ${assetLabel.toLowerCase()} selected: ${compatibleAsset.id} (${compatibleAsset.asset_type}) -> ${compatibleAsset.src}`;
                     clearFieldErrors(state, "media_asset_id", "src", "embed_url");
                     return;
                 }
