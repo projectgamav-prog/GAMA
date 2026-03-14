@@ -17,6 +17,12 @@ export const tableFileMap = Object.freeze({
   chapters: "chapters.json",
   chapter_sections: "chapter_sections.json",
   verses: "verses.json",
+  characters: "characters.json",
+  content_blocks: "content_blocks.json",
+  media_assets: "media_assets.json",
+  roles: "roles.json",
+  role_capabilities: "role_capabilities.json",
+  user_role_assignments: "user_role_assignments.json",
   explanation_documents: "explanation_documents.json",
   explanation_blocks: "explanation_blocks.json"
 });

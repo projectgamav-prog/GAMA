@@ -3,12 +3,10 @@ import {
     resolveExplanationsPageContext,
 } from "../../content/books/page-context.js";
 import {
-    getVerseExplanationContent,
-} from "../../content/explanations/queries.js";
-import {
     setExplanationPageBridge,
 } from "../../content/explanations/page-bridge.js";
 import { renderExplanationBlocks } from "../../content/explanations/block-renderer.js";
+import { getVersePageModel } from "../../content/services/page-models.js";
 import { createSharedPageDefinition } from "../shared-page.js";
 
 function getCurrentContext() {
@@ -114,22 +112,14 @@ function initializeExplanationsPage({ mode, routeResolver }) {
     const pageState = {
         targetType: "verse",
         targetId: verse.id,
-        document: null,
         blocks: [],
     };
 
-    function applyExplanationContent({ document = null, blocks: nextBlocks = [] } = {}) {
-        pageState.document = document || null;
+    function applyExplanationContent({ blocks: nextBlocks = [] } = {}) {
         pageState.blocks = Array.isArray(nextBlocks) ? [...nextBlocks] : [];
 
         if (!(blocks instanceof HTMLElement)) {
             return;
-        }
-
-        if (pageState.document) {
-            blocks.dataset.explanationDocumentId = pageState.document.id;
-        } else {
-            delete blocks.dataset.explanationDocumentId;
         }
 
         renderExplanationBlocks({
@@ -185,10 +175,15 @@ function initializeExplanationsPage({ mode, routeResolver }) {
     renderMeaningCard(meaningCard, verse);
 
     applyExplanationContent(
-        getVerseExplanationContent(verse.id, {
-            includeDraft: mode === "admin",
-            includeHidden: mode === "admin",
-        })
+        {
+            blocks: (
+                getVersePageModel(book.slug, chapter.slug, verse.verse_number, {
+                    includeDraft: mode === "admin",
+                    includeHidden: mode === "admin",
+                })?.bodyRegions?.body
+                || []
+            ),
+        }
     );
 
     setExplanationPageBridge({
@@ -196,7 +191,6 @@ function initializeExplanationsPage({ mode, routeResolver }) {
             return Object.freeze({
                 targetType: pageState.targetType,
                 targetId: pageState.targetId,
-                document: pageState.document,
                 blocks: Object.freeze([...pageState.blocks]),
             });
         },
@@ -204,7 +198,7 @@ function initializeExplanationsPage({ mode, routeResolver }) {
             applyExplanationContent(nextState);
         },
         clearExplanationContent() {
-            applyExplanationContent({ document: null, blocks: [] });
+            applyExplanationContent({ blocks: [] });
         },
     });
 

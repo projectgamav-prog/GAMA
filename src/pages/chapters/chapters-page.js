@@ -51,6 +51,10 @@ function initializeChaptersPage({ routeResolver }) {
         subtitleElement,
         introElement,
         ctaElement,
+        blockOptions: {
+            includeDraft: document.body.dataset.pageMode === "admin",
+            includeHidden: document.body.dataset.pageMode === "admin",
+        },
     });
 }
 

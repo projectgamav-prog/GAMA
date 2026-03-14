@@ -1,9 +1,10 @@
 import {
-    createInsightDropdown,
-    createRouteHref,
     DEFAULT_INSIGHT_MEDIA,
+    createRouteHref,
 } from "./renderer-utils.js";
 import { initializeContentInteractions } from "../ui/content-interactions.js";
+import { getResolvedRegionsForOwner } from "../repositories/cms-content-repository.js";
+import { createInsightDropdownFromBlock } from "../../render/pages/insight-dropdown-renderer.js";
 
 function formatVerseRange(section, verses) {
     if (verses.length) {
@@ -44,7 +45,7 @@ function appendVerseText(article, verse, mode) {
     }
 }
 
-function createVerseCard(book, chapter, verse, indexSeed, mode, highlighted, routeResolver) {
+function createVerseCard(book, chapter, verse, indexSeed, mode, highlighted, routeResolver, blockOptions = {}) {
     const article = document.createElement("article");
     article.className = "verse-detail-card";
     article.dataset.adminEntity = "verses";
@@ -69,15 +70,15 @@ function createVerseCard(book, chapter, verse, indexSeed, mode, highlighted, rou
 
     const actions = document.createElement("div");
     actions.className = "verse-actions";
-    const insightDropdown = createInsightDropdown({
+    const verseRegions = getResolvedRegionsForOwner(verse, "verses", blockOptions);
+    const insightDropdown = createInsightDropdownFromBlock({
+        block: verseRegions.insight[0] || null,
         wrapperClassName: "verse-inline-insight",
         buttonId: `keyInsightToggle${indexSeed}`,
         panelId: `keyInsightPanel${indexSeed}`,
         headingTag: "h2",
-        title: verse.insight_title || `Verse ${verse.verse_number}`,
-        image: verse.insight_media,
+        fallbackTitle: `Verse ${verse.verse_number}`,
         alt: `${chapter.title} verse ${verse.verse_number} insight thumbnail`,
-        caption: verse.insight_caption,
         fallbackMedia: DEFAULT_INSIGHT_MEDIA,
     });
     if (insightDropdown) {
@@ -98,7 +99,7 @@ function createVerseCard(book, chapter, verse, indexSeed, mode, highlighted, rou
     return article;
 }
 
-function createSectionCard(book, chapter, section, sectionIndex, mode, highlightedVerseNumber, queryApi, routeResolver) {
+function createSectionCard(book, chapter, section, sectionIndex, mode, highlightedVerseNumber, queryApi, routeResolver, blockOptions = {}) {
     const verses = queryApi.listVersesForChapterSection(section.id);
     if (!verses.length) {
         return null;
@@ -138,16 +139,29 @@ function createSectionCard(book, chapter, section, sectionIndex, mode, highlight
     copy.textContent = section.summary || "";
     body.appendChild(copy);
 
-    const sectionInsightDropdown = createInsightDropdown({
+    const sectionRegions = section.id.startsWith(`${chapter.id}-unassigned`)
+        ? { insight: [] }
+        : getResolvedRegionsForOwner(section, "chapter_sections", blockOptions);
+    const sectionInsightDropdown = createInsightDropdownFromBlock({
+        block: sectionRegions.insight[0] || (section.id.startsWith(`${chapter.id}-unassigned`)
+            ? {
+                id: `${section.id}-insight`,
+                block_type: "media",
+                region: "insight",
+                data: {
+                    title: section.insight_title || section.title,
+                    caption: section.insight_caption || "",
+                    media_src: section.insight_media || DEFAULT_INSIGHT_MEDIA,
+                },
+            }
+            : null),
         wrapperClassName: "chapter-section-insight",
         buttonId: `sectionInsightToggle${sectionIndex}`,
         panelId: `sectionInsightPanel${sectionIndex}`,
         buttonClassName: "section-insight-btn",
         headingTag: "h2",
-        title: section.insight_title || section.title,
-        image: section.insight_media,
+        fallbackTitle: section.title,
         alt: `${section.title} insight thumbnail`,
-        caption: section.insight_caption,
         fallbackMedia: DEFAULT_INSIGHT_MEDIA,
     });
     if (sectionInsightDropdown) {
@@ -163,7 +177,8 @@ function createSectionCard(book, chapter, section, sectionIndex, mode, highlight
                 sectionIndex * 100 + verseIndex + 1,
                 mode,
                 verse.verse_number === highlightedVerseNumber,
-                routeResolver
+                routeResolver,
+                blockOptions
             )
         );
     });
@@ -172,7 +187,7 @@ function createSectionCard(book, chapter, section, sectionIndex, mode, highlight
     return details;
 }
 
-function createUnassignedSection(book, chapter, mode, sectionIndex, highlightedVerseNumber, queryApi, routeResolver) {
+function createUnassignedSection(book, chapter, mode, sectionIndex, highlightedVerseNumber, queryApi, routeResolver, blockOptions = {}) {
     const assignedVerseIds = new Set(
         queryApi.listChapterSections(chapter.id)
             .flatMap((section) => queryApi.listVersesForChapterSection(section.id))
@@ -206,7 +221,8 @@ function createUnassignedSection(book, chapter, mode, sectionIndex, highlightedV
                 return verses;
             },
         },
-        routeResolver
+        routeResolver,
+        blockOptions
     );
 }
 
@@ -221,6 +237,7 @@ export function renderChapterVersesPreview({
     breadcrumbElement = null,
     chapterLabelElement = null,
     chapterNameElement = null,
+    blockOptions = {},
 }) {
     if (!book || !chapter || !container || !queryApi) return;
 
@@ -252,13 +269,13 @@ export function renderChapterVersesPreview({
 
     let renderedSections = 0;
     queryApi.listChapterSections(chapter.id).forEach((section) => {
-        const card = createSectionCard(book, chapter, section, renderedSections + 1, mode, highlightedVerseNumber, queryApi, routeResolver);
+        const card = createSectionCard(book, chapter, section, renderedSections + 1, mode, highlightedVerseNumber, queryApi, routeResolver, blockOptions);
         if (!card) return;
         renderedSections += 1;
         container.appendChild(card);
     });
 
-    const unassignedCard = createUnassignedSection(book, chapter, mode, renderedSections + 1, highlightedVerseNumber, queryApi, routeResolver);
+    const unassignedCard = createUnassignedSection(book, chapter, mode, renderedSections + 1, highlightedVerseNumber, queryApi, routeResolver, blockOptions);
     if (unassignedCard) {
         container.appendChild(unassignedCard);
     }

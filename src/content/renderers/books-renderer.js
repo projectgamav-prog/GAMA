@@ -1,11 +1,12 @@
 import {
-    createInsightDropdown,
-    createRouteHref,
     DEFAULT_INSIGHT_MEDIA,
+    createRouteHref,
 } from "./renderer-utils.js";
 import { initializeContentInteractions } from "../ui/content-interactions.js";
+import { getResolvedRegionsForOwner } from "../repositories/cms-content-repository.js";
+import { createInsightDropdownFromBlock } from "../../render/pages/insight-dropdown-renderer.js";
 
-function createBookCard(book, index, queryApi, routeResolver) {
+function createBookCard(book, index, queryApi, routeResolver, blockOptions = {}) {
     const counts = queryApi.getBookCounts(book.id);
     const card = document.createElement("article");
     card.className = "book-card";
@@ -58,16 +59,16 @@ function createBookCard(book, index, queryApi, routeResolver) {
     main.append(left, actions);
     card.append(main);
 
-    const insightPanel = createInsightDropdown({
+    const bookRegions = getResolvedRegionsForOwner(book, "books", blockOptions);
+    const insightPanel = createInsightDropdownFromBlock({
+        block: bookRegions.insight[0] || null,
         wrapperClassName: "book-row-insight",
         buttonId: `bookInsightToggle${index}`,
         panelId: `bookInsightPanel${index}`,
         buttonClassName: "book-insight-btn",
         headingTag: "h3",
-        title: book.insight_title || book.title,
-        image: book.insight_media,
+        fallbackTitle: book.title,
         alt: `${book.title} thumbnail`,
-        caption: book.insight_caption,
         fallbackMedia: DEFAULT_INSIGHT_MEDIA,
     });
 
@@ -83,6 +84,7 @@ export function renderBooksCollection({
     queryApi,
     routeResolver,
     books = null,
+    blockOptions = {},
 }) {
     if (!container || !queryApi) return;
 
@@ -90,7 +92,7 @@ export function renderBooksCollection({
     container.innerHTML = "";
 
     records.forEach((book, index) => {
-        container.appendChild(createBookCard(book, index + 1, queryApi, routeResolver));
+        container.appendChild(createBookCard(book, index + 1, queryApi, routeResolver, blockOptions));
     });
 
     initializeContentInteractions(container);

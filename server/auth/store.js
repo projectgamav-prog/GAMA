@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
-import { systemDataDirectory } from "../core/paths.js";
+import path from "node:path";
+import { getTablePath, systemDataDirectory } from "../core/paths.js";
 import {
     createDefaultPermissionRecords,
     createDefaultRolePermissionRecords,
@@ -12,26 +13,56 @@ import { DEFAULT_ADMIN_ACCOUNT, PERMISSION_KEYS, ROLE_DEFINITIONS } from "../../
 
 const SYSTEM_FILE_MAP = Object.freeze({
     users: "users.json",
-    roles: "roles.json",
     permissions: "permissions.json",
-    role_permissions: "role_permissions.json",
-    user_roles: "user_roles.json",
     user_permission_overrides: "user_permission_overrides.json",
     sessions: "sessions.json",
 });
 
+const LEGACY_SYSTEM_FILE_MAP = Object.freeze({
+    roles: "roles.json",
+    role_permissions: "role_permissions.json",
+    user_roles: "user_roles.json",
+});
+
+const CONTENT_AUTH_COLLECTIONS = new Set(["roles", "role_capabilities", "user_role_assignments"]);
+
 function getSystemFilePath(collectionName) {
     const fileName = SYSTEM_FILE_MAP[collectionName];
     if (!fileName) {
-        throw new Error(`Unknown auth collection "${collectionName}".`);
+        throw new Error(`Unknown auth system collection "${collectionName}".`);
     }
 
-    return `${systemDataDirectory}/${fileName}`;
+    return path.join(systemDataDirectory, fileName);
+}
+
+function getLegacySystemFilePath(collectionName) {
+    const fileName = LEGACY_SYSTEM_FILE_MAP[collectionName];
+    if (!fileName) {
+        throw new Error(`Unknown legacy auth collection "${collectionName}".`);
+    }
+
+    return path.join(systemDataDirectory, fileName);
+}
+
+function getCollectionFilePath(collectionName) {
+    if (SYSTEM_FILE_MAP[collectionName]) {
+        return getSystemFilePath(collectionName);
+    }
+
+    if (CONTENT_AUTH_COLLECTIONS.has(collectionName)) {
+        return getTablePath(collectionName);
+    }
+
+    throw new Error(`Unknown auth collection "${collectionName}".`);
+}
+
+function cloneArray(rows) {
+    return Array.isArray(rows) ? [...rows] : [];
 }
 
 async function ensureCollectionFile(collectionName, defaultValue = []) {
-    await fs.mkdir(systemDataDirectory, { recursive: true });
-    const filePath = getSystemFilePath(collectionName);
+    const filePath = getCollectionFilePath(collectionName);
+    await fs.mkdir(path.dirname(filePath), { recursive: true });
 
     try {
         await fs.access(filePath);
@@ -42,17 +73,33 @@ async function ensureCollectionFile(collectionName, defaultValue = []) {
     return filePath;
 }
 
+async function readJsonArray(filePath, defaultValue = []) {
+    try {
+        const raw = await fs.readFile(filePath, "utf8");
+        if (!raw.trim()) return cloneArray(defaultValue);
+
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) {
+            throw new Error(`File "${filePath}" must contain a JSON array.`);
+        }
+
+        return parsed;
+    } catch (error) {
+        if (error?.code === "ENOENT") {
+            return cloneArray(defaultValue);
+        }
+        throw error;
+    }
+}
+
 async function readCollection(collectionName, defaultValue = []) {
     const filePath = await ensureCollectionFile(collectionName, defaultValue);
-    const raw = await fs.readFile(filePath, "utf8");
-    if (!raw.trim()) return Array.isArray(defaultValue) ? [...defaultValue] : defaultValue;
+    return readJsonArray(filePath, defaultValue);
+}
 
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-        throw new Error(`Collection "${collectionName}" must contain a JSON array.`);
-    }
-
-    return parsed;
+async function readLegacyCollection(collectionName, defaultValue = []) {
+    const filePath = getLegacySystemFilePath(collectionName);
+    return readJsonArray(filePath, defaultValue);
 }
 
 async function writeCollection(collectionName, rows) {
@@ -75,6 +122,18 @@ function normalizeEmail(email = "") {
 
 function normalizeUsername(username = "") {
     return String(username).trim().toLowerCase();
+}
+
+function normalizeToken(value = "") {
+    return String(value).trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+function createRoleCapabilityId(roleId, capabilityKey) {
+    return `role-capability-${normalizeToken(roleId)}-${normalizeToken(capabilityKey)}`;
+}
+
+function createUserRoleAssignmentId(userId, roleId) {
+    return `user-role-assignment-${normalizeToken(userId)}-${normalizeToken(roleId)}`;
 }
 
 function hashPassword(password, salt = crypto.randomBytes(16).toString("hex")) {
@@ -105,13 +164,114 @@ function uniqueStrings(values) {
     return [...new Set((values || []).map((value) => String(value || "").trim()).filter(Boolean))];
 }
 
+function dedupeRows(rows, getKey) {
+    const seen = new Set();
+
+    return rows.filter((row) => {
+        const key = getKey(row);
+        if (!key || seen.has(key)) {
+            return false;
+        }
+
+        seen.add(key);
+        return true;
+    });
+}
+
+function createDefaultRoleCapabilityRecords() {
+    return createDefaultRolePermissionRecords().map((assignment) => ({
+        id: createRoleCapabilityId(assignment.role_id, assignment.permission_key),
+        role_id: assignment.role_id,
+        capability_key: assignment.permission_key,
+    }));
+}
+
+function toLegacyRolePermission(record) {
+    return {
+        role_id: record.role_id,
+        permission_key: record.capability_key,
+    };
+}
+
+function toLegacyUserRole(record) {
+    return {
+        user_id: record.user_id,
+        role_id: record.role_id,
+    };
+}
+
+function mapRoleCapabilitiesToLegacy(roleCapabilities = []) {
+    return roleCapabilities.map(toLegacyRolePermission);
+}
+
+function mapUserRoleAssignmentsToLegacy(userRoleAssignments = []) {
+    return userRoleAssignments.map(toLegacyUserRole);
+}
+
+async function getSeedRows(collectionName, defaultRows = []) {
+    if (collectionName === "roles") {
+        const legacyRoles = await readLegacyCollection("roles", []);
+        return legacyRoles.length ? legacyRoles : cloneArray(defaultRows);
+    }
+
+    if (collectionName === "role_capabilities") {
+        const legacyRolePermissions = await readLegacyCollection("role_permissions", []);
+        if (!legacyRolePermissions.length) {
+            return cloneArray(defaultRows);
+        }
+
+        return dedupeRows(
+            legacyRolePermissions
+                .map((assignment) => {
+                    const roleId = String(assignment.role_id || "").trim();
+                    const permissionKey = String(assignment.permission_key || "").trim();
+                    if (!roleId || !permissionKey) return null;
+
+                    return {
+                        id: createRoleCapabilityId(roleId, permissionKey),
+                        role_id: roleId,
+                        capability_key: permissionKey,
+                    };
+                })
+                .filter(Boolean),
+            (row) => `${row.role_id}:${row.capability_key}`
+        );
+    }
+
+    if (collectionName === "user_role_assignments") {
+        const legacyUserRoles = await readLegacyCollection("user_roles", []);
+        if (!legacyUserRoles.length) {
+            return cloneArray(defaultRows);
+        }
+
+        return dedupeRows(
+            legacyUserRoles
+                .map((assignment) => {
+                    const userId = String(assignment.user_id || "").trim();
+                    const roleId = String(assignment.role_id || "").trim();
+                    if (!userId || !roleId) return null;
+
+                    return {
+                        id: createUserRoleAssignmentId(userId, roleId),
+                        user_id: userId,
+                        role_id: roleId,
+                    };
+                })
+                .filter(Boolean),
+            (row) => `${row.user_id}:${row.role_id}`
+        );
+    }
+
+    return cloneArray(defaultRows);
+}
+
 export async function ensureAuthDataSeeded() {
     const defaults = {
         roles: createDefaultRoleRecords(),
         permissions: createDefaultPermissionRecords(),
-        role_permissions: createDefaultRolePermissionRecords(),
+        role_capabilities: createDefaultRoleCapabilityRecords(),
         users: [],
-        user_roles: [],
+        user_role_assignments: [],
         user_permission_overrides: [],
         sessions: [],
     };
@@ -119,31 +279,36 @@ export async function ensureAuthDataSeeded() {
     const [
         existingRoles,
         existingPermissions,
-        existingRolePermissions,
+        existingRoleCapabilities,
         existingUsers,
-        existingUserRoles,
+        existingUserRoleAssignments,
     ] = await Promise.all([
-        readCollection("roles", defaults.roles),
-        readCollection("permissions", defaults.permissions),
-        readCollection("role_permissions", defaults.role_permissions),
-        readCollection("users", defaults.users),
-        readCollection("user_roles", defaults.user_roles),
+        readCollection("roles", []),
+        readCollection("permissions", []),
+        readCollection("role_capabilities", []),
+        readCollection("users", []),
+        readCollection("user_role_assignments", []),
     ]);
 
-    if (!existingRoles.length) {
-        await writeCollection("roles", defaults.roles);
+    let roles = existingRoles;
+    let roleCapabilities = existingRoleCapabilities;
+    let users = existingUsers;
+    let userRoleAssignments = existingUserRoleAssignments;
+
+    if (!roles.length) {
+        roles = await getSeedRows("roles", defaults.roles);
+        await writeCollection("roles", roles);
     }
 
     if (!existingPermissions.length) {
         await writeCollection("permissions", defaults.permissions);
     }
 
-    if (!existingRolePermissions.length) {
-        await writeCollection("role_permissions", defaults.role_permissions);
+    if (!roleCapabilities.length) {
+        roleCapabilities = await getSeedRows("role_capabilities", defaults.role_capabilities);
+        await writeCollection("role_capabilities", roleCapabilities);
     }
 
-    let users = existingUsers;
-    let userRoles = existingUserRoles;
     const adminEmail = normalizeEmail(DEFAULT_ADMIN_ACCOUNT.email);
     let adminUser = users.find((user) => normalizeEmail(user.email) === adminEmail);
 
@@ -161,10 +326,20 @@ export async function ensureAuthDataSeeded() {
         await writeCollection("users", users);
     }
 
-    const hasAdminRole = userRoles.some((assignment) => assignment.user_id === adminUser.id && assignment.role_id === "admin");
+    const hasAdminRole = userRoleAssignments.some(
+        (assignment) => assignment.user_id === adminUser.id && assignment.role_id === "admin"
+    );
+
     if (!hasAdminRole) {
-        userRoles = [...userRoles, { user_id: adminUser.id, role_id: "admin" }];
-        await writeCollection("user_roles", userRoles);
+        userRoleAssignments = [
+            ...userRoleAssignments,
+            {
+                id: createUserRoleAssignmentId(adminUser.id, "admin"),
+                user_id: adminUser.id,
+                role_id: "admin",
+            },
+        ];
+        await writeCollection("user_role_assignments", userRoleAssignments);
     }
 
     await Promise.all([
@@ -180,16 +355,16 @@ export async function readAuthState() {
         users,
         roles,
         permissions,
-        rolePermissions,
-        userRoles,
+        roleCapabilities,
+        userRoleAssignments,
         userPermissionOverrides,
         sessions,
     ] = await Promise.all([
         readCollection("users"),
         readCollection("roles"),
         readCollection("permissions"),
-        readCollection("role_permissions"),
-        readCollection("user_roles"),
+        readCollection("role_capabilities"),
+        readCollection("user_role_assignments"),
         readCollection("user_permission_overrides"),
         readCollection("sessions"),
     ]);
@@ -198,15 +373,17 @@ export async function readAuthState() {
         users,
         roles,
         permissions,
-        rolePermissions,
-        userRoles,
+        roleCapabilities,
+        userRoleAssignments,
+        rolePermissions: mapRoleCapabilitiesToLegacy(roleCapabilities),
+        userRoles: mapUserRoleAssignmentsToLegacy(userRoleAssignments),
         userPermissionOverrides,
         sessions,
     };
 }
 
 function buildUserContext(user, session, authState) {
-    const roleIds = authState.userRoles
+    const roleIds = authState.userRoleAssignments
         .filter((assignment) => assignment.user_id === user.id)
         .map((assignment) => assignment.role_id);
     const userOverrides = authState.userPermissionOverrides.filter((override) => override.user_id === user.id);
@@ -321,8 +498,19 @@ export async function registerUser({ fullName, username, email, password, intere
         createdAt: new Date().toISOString(),
     };
 
-    await writeCollection("users", [...authState.users, user]);
-    await writeCollection("user_roles", [...authState.userRoles, { user_id: user.id, role_id: "member" }]);
+    const nextUsers = [...authState.users, user];
+    const nextUserRoleAssignments = [
+        ...authState.userRoleAssignments,
+        {
+            id: createUserRoleAssignmentId(user.id, "member"),
+            user_id: user.id,
+            role_id: "member",
+        },
+    ];
+
+    await writeCollection("users", nextUsers);
+    await writeCollection("user_role_assignments", nextUserRoleAssignments);
+
     return sanitizeUser(user);
 }
 
@@ -358,6 +546,8 @@ export async function getAccessSnapshot() {
         users: authState.users.map(sanitizeUser),
         roles: authState.roles,
         permissions: authState.permissions,
+        roleCapabilities: authState.roleCapabilities,
+        userRoleAssignments: authState.userRoleAssignments,
         rolePermissions: authState.rolePermissions,
         userRoles: authState.userRoles,
         userPermissionOverrides: authState.userPermissionOverrides,
@@ -379,13 +569,18 @@ export async function updateUserRoles(userId, roleIds = []) {
         }
     });
 
-    const preserved = authState.userRoles.filter((assignment) => assignment.user_id !== userId);
+    const preserved = authState.userRoleAssignments.filter((assignment) => assignment.user_id !== userId);
     const nextAssignments = [
         ...preserved,
-        ...uniqueRoleIds.map((roleId) => ({ user_id: userId, role_id: roleId })),
+        ...uniqueRoleIds.map((roleId) => ({
+            id: createUserRoleAssignmentId(userId, roleId),
+            user_id: userId,
+            role_id: roleId,
+        })),
     ];
-    await writeCollection("user_roles", nextAssignments);
-    return nextAssignments.filter((assignment) => assignment.user_id === userId);
+
+    await writeCollection("user_role_assignments", nextAssignments);
+    return mapUserRoleAssignmentsToLegacy(nextAssignments.filter((assignment) => assignment.user_id === userId));
 }
 
 export async function updateRolePermissions(roleId, permissionKeys = []) {
@@ -402,16 +597,18 @@ export async function updateRolePermissions(roleId, permissionKeys = []) {
         }
     });
 
-    const preserved = authState.rolePermissions.filter((assignment) => assignment.role_id !== roleId);
+    const preserved = authState.roleCapabilities.filter((assignment) => assignment.role_id !== roleId);
     const nextAssignments = [
         ...preserved,
         ...uniquePermissionKeys.map((permissionKey) => ({
+            id: createRoleCapabilityId(roleId, permissionKey),
             role_id: roleId,
-            permission_key: permissionKey,
+            capability_key: permissionKey,
         })),
     ];
-    await writeCollection("role_permissions", nextAssignments);
-    return nextAssignments.filter((assignment) => assignment.role_id === roleId);
+
+    await writeCollection("role_capabilities", nextAssignments);
+    return mapRoleCapabilitiesToLegacy(nextAssignments.filter((assignment) => assignment.role_id === roleId));
 }
 
 export async function updateUserPermissionOverrides(userId, overrides = []) {

@@ -1,9 +1,10 @@
 import {
-    createInsightDropdown,
-    createRouteHref,
     DEFAULT_INSIGHT_MEDIA,
+    createRouteHref,
 } from "./renderer-utils.js";
 import { initializeContentInteractions } from "../ui/content-interactions.js";
+import { getResolvedRegionsForOwner } from "../repositories/cms-content-repository.js";
+import { createInsightDropdownFromBlock } from "../../render/pages/insight-dropdown-renderer.js";
 
 function formatBookTitle(book) {
     return book.short_title === "Bhagavad Gita" ? book.short_title : book.title;
@@ -26,7 +27,7 @@ function formatSectionRange(chapters) {
     return `Chapters ${first}-${last}`;
 }
 
-function createChapterCard(book, chapter, indexSeed, queryApi, routeResolver) {
+function createChapterCard(book, chapter, indexSeed, queryApi, routeResolver, blockOptions = {}) {
     const article = document.createElement("article");
     article.className = "chapter-list-item";
     article.setAttribute("role", "listitem");
@@ -87,16 +88,16 @@ function createChapterCard(book, chapter, indexSeed, queryApi, routeResolver) {
     main.append(left, actions);
 
     article.append(main);
-    const insightDropdown = createInsightDropdown({
+    const chapterRegions = getResolvedRegionsForOwner(chapter, "chapters", blockOptions);
+    const insightDropdown = createInsightDropdownFromBlock({
+        block: chapterRegions.insight[0] || null,
         wrapperClassName: "chapter-row-insight",
         buttonId: `chapterInsightToggle${indexSeed}`,
         panelId: `chapterInsightPanel${indexSeed}`,
         buttonClassName: "chapter-insight-btn",
         headingTag: "h3",
-        title: chapter.insight_title || chapter.title,
-        image: chapter.insight_media,
+        fallbackTitle: chapter.title,
         alt: `${chapter.title} insight thumbnail`,
-        caption: chapter.insight_caption,
         fallbackMedia: DEFAULT_INSIGHT_MEDIA,
     });
     if (insightDropdown) {
@@ -106,7 +107,7 @@ function createChapterCard(book, chapter, indexSeed, queryApi, routeResolver) {
     return article;
 }
 
-function createSectionCard(book, section, chapters, sectionIndex, queryApi, routeResolver) {
+function createSectionCard(book, section, chapters, sectionIndex, queryApi, routeResolver, blockOptions = {}) {
     const details = document.createElement("details");
     details.className = "chapter-group-card";
     details.dataset.adminEntity = "book_sections";
@@ -147,20 +148,20 @@ function createSectionCard(book, section, chapters, sectionIndex, queryApi, rout
     chapterList.setAttribute("role", "list");
 
     chapters.forEach((chapter, chapterIndex) => {
-        chapterList.appendChild(createChapterCard(book, chapter, sectionIndex * 100 + chapterIndex + 1, queryApi, routeResolver));
+        chapterList.appendChild(createChapterCard(book, chapter, sectionIndex * 100 + chapterIndex + 1, queryApi, routeResolver, blockOptions));
     });
 
     body.append(copy);
-    const sectionInsightDropdown = createInsightDropdown({
+    const sectionRegions = getResolvedRegionsForOwner(section, "book_sections", blockOptions);
+    const sectionInsightDropdown = createInsightDropdownFromBlock({
+        block: sectionRegions.insight[0] || null,
         wrapperClassName: "chapter-section-insight",
         buttonId: `chapterSectionInsightToggle${sectionIndex}`,
         panelId: `chapterSectionInsightPanel${sectionIndex}`,
         buttonClassName: "section-insight-btn",
         headingTag: "h3",
-        title: section.insight_title || section.title,
-        image: section.insight_media,
+        fallbackTitle: section.title,
         alt: `${section.title} insight thumbnail`,
-        caption: section.insight_caption,
         fallbackMedia: DEFAULT_INSIGHT_MEDIA,
     });
     if (sectionInsightDropdown) {
@@ -181,6 +182,7 @@ export function renderBookChaptersPreview({
     subtitleElement = null,
     introElement = null,
     ctaElement = null,
+    blockOptions = {},
 }) {
     if (!book || !container || !queryApi) return;
 
@@ -218,7 +220,7 @@ export function renderBookChaptersPreview({
 
     bookSections.forEach((section, sectionIndex) => {
         const chapters = queryApi.listChaptersForBookSection(section.id);
-        container.appendChild(createSectionCard(book, section, chapters, sectionIndex + 1, queryApi, routeResolver));
+        container.appendChild(createSectionCard(book, section, chapters, sectionIndex + 1, queryApi, routeResolver, blockOptions));
     });
 
     initializeContentInteractions(container);

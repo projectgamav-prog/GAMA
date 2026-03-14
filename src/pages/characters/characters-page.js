@@ -4,6 +4,8 @@ import {
     getCharacterBySlug,
     listCharacterFilterValues,
 } from "../../content/characters/queries.js";
+import { getCharacterPageModel } from "../../content/services/page-models.js";
+import { renderRegion } from "../../render/layout/region-renderer.js";
 import { createSharedPageDefinition } from "../shared-page.js";
 
 function buildOptions(select, values) {
@@ -21,6 +23,9 @@ function createCard(character, routes) {
     card.href = routes ? routes.characters.bySlug(character.slug) : `/characters/index.html?slug=${encodeURIComponent(character.slug)}`;
     card.setAttribute("role", "listitem");
     card.setAttribute("aria-label", `Open ${character.name} character page`);
+    card.dataset.adminEntity = "characters";
+    card.dataset.adminId = character.id;
+    card.dataset.adminSlug = character.slug;
 
     const media = document.createElement("span");
     media.className = "character-card-media";
@@ -198,6 +203,7 @@ function renderNotFound() {
     const chips = document.getElementById("characterChips");
     const note = document.getElementById("characterAvailabilityNote");
     const breadcrumb = document.getElementById("characterBreadcrumbCurrent");
+    const bodyRegion = document.getElementById("characterBodyBlocks");
 
     if (title) title.textContent = "Character Not Found";
     if (summary) summary.textContent = "The requested character does not exist in the current collection.";
@@ -210,6 +216,10 @@ function renderNotFound() {
     if (chips) chips.innerHTML = "";
     if (note) note.textContent = "No character data was found for this route.";
     if (breadcrumb) breadcrumb.textContent = "Unknown Character";
+    if (bodyRegion) {
+        bodyRegion.hidden = true;
+        bodyRegion.innerHTML = "";
+    }
 }
 
 function renderDetailView(slug) {
@@ -221,8 +231,12 @@ function renderDetailView(slug) {
     collectionView.hidden = true;
     detailView.hidden = false;
 
-    const character = getCharacterBySlug(slug);
-    if (!character) {
+    const pageModel = getCharacterPageModel(slug, {
+        includeDraft: document.body.dataset.pageMode === "admin",
+        includeHidden: document.body.dataset.pageMode === "admin",
+    });
+    const character = pageModel?.character || getCharacterBySlug(slug);
+    if (!character || !pageModel) {
         renderNotFound();
         return;
     }
@@ -237,6 +251,8 @@ function renderDetailView(slug) {
     const chips = document.getElementById("characterChips");
     const note = document.getElementById("characterAvailabilityNote");
     const breadcrumb = document.getElementById("characterBreadcrumbCurrent");
+    const profileCard = document.querySelector(".character-profile-card");
+    const bodyRegion = document.getElementById("characterBodyBlocks");
 
     if (title) title.textContent = character.name;
     if (summary) summary.textContent = character.summary;
@@ -250,6 +266,11 @@ function renderDetailView(slug) {
     if (overview) overview.textContent = character.overview;
     if (focus) focus.textContent = character.focus;
     if (breadcrumb) breadcrumb.textContent = character.name;
+    if (profileCard instanceof HTMLElement) {
+        profileCard.dataset.adminEntity = "characters";
+        profileCard.dataset.adminId = character.id;
+        profileCard.dataset.adminSlug = character.slug;
+    }
 
     if (chips) {
         chips.innerHTML = "";
@@ -265,6 +286,13 @@ function renderDetailView(slug) {
         note.textContent = character.detail_available
             ? "This profile is part of the current detailed character set and will expand with deeper linked material over time."
             : "This profile currently uses a structured placeholder built from collection metadata and will expand into a fuller study page later.";
+    }
+
+    if (bodyRegion instanceof HTMLElement) {
+        renderRegion(bodyRegion, pageModel.regions.body, {
+            emptyMessage: "",
+        });
+        bodyRegion.hidden = pageModel.regions.body.length === 0;
     }
 }
 
@@ -387,6 +415,8 @@ export const CHARACTERS_PAGE_DEFINITION = createSharedPageDefinition({
                             <p id="characterAvailabilityNote">Availability note will appear here.</p>
                         </article>
                     </section>
+
+                    <section class="explanation-section" id="characterBodyBlocks" hidden></section>
                 </section>
             </main>
         `;

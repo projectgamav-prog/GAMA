@@ -14,7 +14,7 @@
     "meta_description": "Canonical source text of the Bhagavad Gita with chapters, sections, and verses.",
     "insight_caption": "This source book contains the canonical chapters and verses that later collection books can reuse without duplicating content.",
     "insight_title": "Commentary of Madhav",
-    "insight_media": ""
+    "insight_media": "https://www.youtube.com/watch?v=LICM8e3gBFU&list=RDLICM8e3gBFU&start_radio=1&t=4979s"
   },
   {
     "id": "book-path-of-action",
@@ -60,5 +60,22 @@
     "meta_title": "Path of Devotion",
     "meta_description": "A curated devotional reading path through the Bhagavad Gita.",
     "insight_caption": "This collection traces the devotional arc of the Gita, where love, surrender, and divine vision become central."
+  },
+  {
+    "slug": "ramcharitmanas",
+    "title": "ram",
+    "short_title": "Ramcharit",
+    "description": "ram",
+    "book_type": "source",
+    "ui_order": 5,
+    "is_published": true,
+    "cover_image": "/assets/images/lotus_background_4k.png",
+    "theme_key": "ram-core",
+    "meta_title": "Ramcharit Core Text",
+    "meta_description": "ram",
+    "insight_title": "tulsi",
+    "insight_media": null,
+    "insight_caption": "eam",
+    "id": "book-ramcharitmanas"
   }
 ]

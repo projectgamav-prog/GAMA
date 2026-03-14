@@ -1,7 +1,9 @@
 import { CHARACTERS, CHARACTER_FALLBACK_IMAGE, getCharacterRecordBySlug } from "./database.js";
 
 export function listCharacters() {
-    return [...CHARACTERS].sort((a, b) => a.name.localeCompare(b.name));
+    return [...CHARACTERS]
+        .filter((character) => character.is_published !== false)
+        .sort((a, b) => a.ui_order - b.ui_order || a.name.localeCompare(b.name));
 }
 
 export function getCharacterBySlug(slug) {

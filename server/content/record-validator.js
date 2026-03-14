@@ -1,16 +1,23 @@
-import { CONTENT_FIELD_CONFIGS as BOOK_CONTENT_FIELD_CONFIGS } from "../../src/content/books/schema.js";
+import { ALL_CONTENT_FIELD_CONFIGS } from "../../src/content/schema/index.js";
+import {
+  CONTENT_BLOCK_OWNER_ENTITIES,
+  CONTENT_BLOCK_REGIONS,
+  CONTENT_BLOCK_STATUSES,
+  CONTENT_BLOCK_TYPES,
+  CONTENT_BLOCK_VISIBILITIES,
+  MEDIA_ASSET_TYPES,
+  normalizeContentBlockData,
+} from "../../src/content/schema/cms-schema.js";
+import { CHARACTER_SLUG_PATTERN } from "../../src/content/schema/characters-schema.js";
 import {
   EXPLANATION_BLOCK_TYPES,
   EXPLANATION_DOCUMENT_STATUSES,
   EXPLANATION_TARGET_TYPES,
-  EXPLANATION_FIELD_CONFIGS,
   normalizeExplanationBlockData,
 } from "../../src/content/explanations/schema.js";
+import { PERMISSION_KEYS } from "../../src/permissions/keys.js";
 
-const CONTENT_FIELD_CONFIGS = Object.freeze({
-  ...BOOK_CONTENT_FIELD_CONFIGS,
-  ...EXPLANATION_FIELD_CONFIGS,
-});
+const CONTENT_FIELD_CONFIGS = ALL_CONTENT_FIELD_CONFIGS;
 
 function normalizeIdPart(value) {
   return String(value ?? "")
@@ -83,6 +90,21 @@ function assertExplanationTargetExists(targetType, targetId, relatedTables = {})
   }
 }
 
+function assertContentBlockOwnerExists(ownerEntity, ownerId, relatedTables = {}) {
+  switch (ownerEntity) {
+    case "books":
+    case "book_sections":
+    case "chapters":
+    case "chapter_sections":
+    case "verses":
+    case "characters":
+      assertForeignKey(relatedTables[ownerEntity] || [], "owner_id", ownerId, ownerEntity);
+      return;
+    default:
+      throw new Error(`Unsupported content block owner_entity "${ownerEntity}".`);
+  }
+}
+
 function asPositiveInteger(value, fieldName) {
   const parsed = Number.parseInt(value, 10);
   if (!Number.isInteger(parsed) || parsed <= 0) {
@@ -97,6 +119,39 @@ function assertRequiredString(record, fieldName) {
     throw new Error(`"${fieldName}" is required.`);
   }
   return value;
+}
+
+function parseJsonObject(value, fieldName, defaultValue = {}) {
+  if (value == null || value === "") {
+    return { ...defaultValue };
+  }
+
+  if (typeof value === "object" && !Array.isArray(value)) {
+    return { ...value };
+  }
+
+  try {
+    const parsed = JSON.parse(String(value));
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      throw new Error();
+    }
+    return parsed;
+  } catch {
+    throw new Error(`"${fieldName}" must be a valid JSON object.`);
+  }
+}
+
+function parseStringList(value) {
+  if (Array.isArray(value)) {
+    return value
+      .map((entry) => String(entry ?? "").trim())
+      .filter(Boolean);
+  }
+
+  return String(value ?? "")
+    .split(/\r?\n|,/)
+    .map((entry) => entry.trim())
+    .filter(Boolean);
 }
 
 function assertUnique(rows, predicate, message, currentId) {
@@ -186,6 +241,20 @@ export function generateId(tableName, record, relatedTables = {}) {
       const verseNumber = asPositiveInteger(record.verse_number, "verse_number");
       return `verse-${normalizeIdPart(record.chapter_id)}-${padNumber(verseNumber, 3)}`;
     }
+    case "characters":
+      return `character-${normalizeIdPart(record.slug || record.name)}`;
+    case "content_blocks": {
+      const position = asPositiveInteger(record.position ?? 1, "position");
+      return `content-block-${normalizeSlug(record.owner_entity)}-${normalizeSlug(record.owner_id)}-${normalizeSlug(record.region)}-${padNumber(position, 3)}`;
+    }
+    case "media_assets":
+      return `media-asset-${normalizeIdPart(record.title || record.src || createTimestamp())}`;
+    case "roles":
+      return normalizeSlug(record.id || record.label);
+    case "role_capabilities":
+      return `role-capability-${normalizeSlug(record.role_id)}-${normalizeSlug(record.capability_key)}`;
+    case "user_role_assignments":
+      return `user-role-assignment-${normalizeSlug(record.user_id)}-${normalizeSlug(record.role_id)}`;
     case "explanation_documents":
       return `explanation-${normalizeSlug(record.target_type)}-${normalizeSlug(record.target_id)}`;
     case "explanation_blocks": {
@@ -338,6 +407,136 @@ export function validateRecord(tableName, record, rows, relatedTables = {}, curr
       if (normalized.is_featured != null) {
         normalized.is_featured = Boolean(normalized.is_featured);
       }
+      break;
+    }
+    case "characters": {
+      setDefaultValues(normalized, ["aliases", "tags", "search_terms"], []);
+      if (normalized.ui_order == null) {
+        normalized.ui_order = rows.length + 1;
+      }
+      if (normalized.is_published == null) {
+        normalized.is_published = false;
+      }
+
+      normalized.slug = normalizeSlug(assertRequiredString(normalized, "slug"));
+      normalized.name = assertRequiredString(normalized, "name");
+      normalized.image = assertRequiredString(normalized, "image");
+      normalized.tradition = assertRequiredString(normalized, "tradition");
+      normalized.role = assertRequiredString(normalized, "role");
+      normalized.era = assertRequiredString(normalized, "era");
+      normalized.collection = assertRequiredString(normalized, "collection");
+      normalized.short_meta = assertRequiredString(normalized, "short_meta");
+      normalized.summary = assertRequiredString(normalized, "summary");
+      normalized.overview = assertRequiredString(normalized, "overview");
+      normalized.focus = assertRequiredString(normalized, "focus");
+      normalized.ui_order = asPositiveInteger(normalized.ui_order, "ui_order");
+      normalized.detail_available = Boolean(normalized.detail_available);
+      normalized.is_published = Boolean(normalized.is_published);
+      normalized.aliases = parseStringList(normalized.aliases);
+      normalized.tags = parseStringList(normalized.tags);
+      normalized.search_terms = parseStringList(normalized.search_terms);
+
+      if (!CHARACTER_SLUG_PATTERN.test(normalized.slug)) {
+        throw new Error('"slug" must use lowercase kebab-case.');
+      }
+
+      assertUnique(rows, (row) => row.slug === normalized.slug, `Character slug "${normalized.slug}" already exists.`, currentId);
+      break;
+    }
+    case "media_assets": {
+      const createdAt = normalizeTimestamp(normalized.created_at, "created_at");
+      normalized.asset_type = normalizeLowerText(assertRequiredString(normalized, "asset_type"));
+      normalized.src = assertRequiredString(normalized, "src");
+      normalized.title = normalized.title ? String(normalized.title).trim() : null;
+      normalized.alt_text = normalized.alt_text ? String(normalized.alt_text).trim() : null;
+      normalized.caption = normalized.caption ? String(normalized.caption).trim() : null;
+      normalized.provider = normalized.provider ? String(normalized.provider).trim() : null;
+      normalized.metadata = parseJsonObject(normalized.metadata, "metadata");
+      normalized.created_at = currentId ? normalizeTimestamp(normalized.created_at || createdAt, "created_at") : createdAt;
+      normalized.updated_at = createTimestamp();
+
+      assertSupportedValue(normalized.asset_type, MEDIA_ASSET_TYPES, "asset_type");
+      assertUnique(rows, (row) => row.src === normalized.src, `Media asset source "${normalized.src}" already exists.`, currentId);
+      break;
+    }
+    case "content_blocks": {
+      const createdAt = normalizeTimestamp(normalized.created_at, "created_at");
+      normalized.owner_entity = normalizeLowerText(assertRequiredString(normalized, "owner_entity"));
+      normalized.owner_id = assertRequiredString(normalized, "owner_id");
+      normalized.region = normalizeLowerText(assertRequiredString(normalized, "region"));
+      normalized.block_type = normalizeLowerText(assertRequiredString(normalized, "block_type"));
+      normalized.variant = normalized.variant ? String(normalized.variant).trim() : null;
+      normalized.position = asPositiveInteger(normalized.position, "position");
+      normalized.status = normalizeLowerText(normalized.status || "draft");
+      normalized.visibility = normalizeLowerText(normalized.visibility || "public");
+      normalized.is_published = normalized.is_published == null
+        ? normalized.status === "published"
+        : Boolean(normalized.is_published);
+      normalized.data = normalizeContentBlockData(
+        normalized.block_type,
+        parseJsonObject(normalized.data, "data"),
+        "Content block"
+      );
+      normalized.created_at = currentId ? normalizeTimestamp(normalized.created_at || createdAt, "created_at") : createdAt;
+      normalized.updated_at = createTimestamp();
+
+      assertSupportedValue(normalized.owner_entity, CONTENT_BLOCK_OWNER_ENTITIES, "owner_entity");
+      assertSupportedValue(normalized.region, CONTENT_BLOCK_REGIONS, "region");
+      assertSupportedValue(normalized.block_type, CONTENT_BLOCK_TYPES, "block_type");
+      assertSupportedValue(normalized.status, CONTENT_BLOCK_STATUSES, "status");
+      assertSupportedValue(normalized.visibility, CONTENT_BLOCK_VISIBILITIES, "visibility");
+      assertContentBlockOwnerExists(normalized.owner_entity, normalized.owner_id, relatedTables);
+
+      if (normalized.data.media_asset_id) {
+        assertForeignKey(relatedTables.media_assets || [], "media_asset_id", normalized.data.media_asset_id, "media_assets");
+      }
+
+      if (Array.isArray(normalized.data.media_asset_ids)) {
+        normalized.data.media_asset_ids.forEach((assetId) => {
+          assertForeignKey(relatedTables.media_assets || [], "media_asset_id", assetId, "media_assets");
+        });
+      }
+
+      assertUnique(
+        rows,
+        (row) =>
+          row.owner_entity === normalized.owner_entity
+          && row.owner_id === normalized.owner_id
+          && row.region === normalized.region
+          && Number(row.position) === normalized.position,
+        "This position is already used inside the selected owner region.",
+        currentId
+      );
+      break;
+    }
+    case "roles": {
+      normalized.label = assertRequiredString(normalized, "label");
+      normalized.description = assertRequiredString(normalized, "description");
+      break;
+    }
+    case "role_capabilities": {
+      normalized.role_id = assertRequiredString(normalized, "role_id");
+      normalized.capability_key = assertRequiredString(normalized, "capability_key");
+      assertForeignKey(relatedTables.roles || [], "role_id", normalized.role_id, "roles");
+      assertSupportedValue(normalized.capability_key, PERMISSION_KEYS, "capability_key");
+      assertUnique(
+        rows,
+        (row) => row.role_id === normalized.role_id && row.capability_key === normalized.capability_key,
+        "This capability is already assigned to the selected role.",
+        currentId
+      );
+      break;
+    }
+    case "user_role_assignments": {
+      normalized.user_id = assertRequiredString(normalized, "user_id");
+      normalized.role_id = assertRequiredString(normalized, "role_id");
+      assertForeignKey(relatedTables.roles || [], "role_id", normalized.role_id, "roles");
+      assertUnique(
+        rows,
+        (row) => row.user_id === normalized.user_id && row.role_id === normalized.role_id,
+        "This user already has the selected role.",
+        currentId
+      );
       break;
     }
     case "explanation_documents": {

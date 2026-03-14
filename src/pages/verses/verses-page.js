@@ -44,6 +44,10 @@ function initializeVersesPage({ routeResolver, routes }) {
         breadcrumbElement: main.querySelector(".verse-breadcrumb"),
         chapterLabelElement: main.querySelector(".verse-chapter-label"),
         chapterNameElement: main.querySelector(".verse-chapter-name"),
+        blockOptions: {
+            includeDraft: document.body.dataset.pageMode === "admin",
+            includeHidden: document.body.dataset.pageMode === "admin",
+        },
     });
 
     initializeVerseModeSwitcher(routes);

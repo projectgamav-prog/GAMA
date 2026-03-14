@@ -11,6 +11,10 @@ function initializeBooksPage({ mode, routeResolver }) {
         queryApi: BOOKS_QUERY_API,
         routeResolver,
         books: mode === "admin" ? BOOKS_QUERY_API.listBooks() : null,
+        blockOptions: {
+            includeDraft: mode === "admin",
+            includeHidden: mode === "admin",
+        },
     });
 }
 

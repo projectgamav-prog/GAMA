@@ -1,0 +1,40 @@
+warning: in the working copy of 'content/data/books.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'content/data/explanation_blocks.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'content/data/explanation_documents.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/content/public-content-validator.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/content/record-validator.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/content/table-config.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/core/paths.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/content/characters/database.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/content/characters/queries.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/content/characters/schema.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/content/explanations/block-renderer.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/content/renderers/books-renderer.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/content/renderers/chapters-renderer.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/content/renderers/verses-renderer.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/pages/books/books-page.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/pages/chapters/chapters-page.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/pages/characters/characters-page.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/pages/explanations/explanations-page.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/pages/verses/verses-page.js', LF will be replaced by CRLF the next time Git touches it
+ content/data/books.json                     |  19 [32m++[m[31m-[m
+ content/data/explanation_blocks.json        |  16 [32m++[m[31m-[m
+ content/data/explanation_documents.json     |  11 [32m+[m[31m-[m
+ server/auth/store.js                        | Bin [31m15322[m -> [32m16974[m bytes
+ server/content/public-content-validator.js  |  16 [32m++[m[31m-[m
+ server/content/record-validator.js          | 211 [32m+++++++++++++++++++++++++++[m[31m-[m
+ server/content/table-config.js              |  40 [32m++++++[m
+ server/core/paths.js                        |   6 [32m+[m
+ src/content/characters/database.js          | 211 [32m+++++++[m[31m---------------------[m
+ src/content/characters/queries.js           |   4 [32m+[m[31m-[m
+ src/content/characters/schema.js            | 156 [32m+++[m[31m-----------------[m
+ src/content/explanations/block-renderer.js  | 169 [32m+[m[31m---------------------[m
+ src/content/renderers/books-renderer.js     |  18 [32m+[m[31m--[m
+ src/content/renderers/chapters-renderer.js  |  30 [32m++[m[31m--[m
+ src/content/renderers/verses-renderer.js    |  51 [32m++++[m[31m---[m
+ src/pages/books/books-page.js               |   4 [32m+[m
+ src/pages/chapters/chapters-page.js         |   4 [32m+[m
+ src/pages/characters/characters-page.js     |  34 [32m++++[m[31m-[m
+ src/pages/explanations/explanations-page.js |  30 [32m++[m[31m--[m
+ src/pages/verses/verses-page.js             |   4 [32m+[m
+ 20 files changed, 499 insertions(+), 535 deletions(-)

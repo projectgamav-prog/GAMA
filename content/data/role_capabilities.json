@@ -1,0 +1,122 @@
+[
+  {
+    "id": "role-capability-guest-books-view",
+    "role_id": "guest",
+    "capability_key": "books.view"
+  },
+  {
+    "id": "role-capability-member-books-view",
+    "role_id": "member",
+    "capability_key": "books.view"
+  },
+  {
+    "id": "role-capability-editor-books-view",
+    "role_id": "editor",
+    "capability_key": "books.view"
+  },
+  {
+    "id": "role-capability-editor-books-edit",
+    "role_id": "editor",
+    "capability_key": "books.edit"
+  },
+  {
+    "id": "role-capability-editor-chapters-edit",
+    "role_id": "editor",
+    "capability_key": "chapters.edit"
+  },
+  {
+    "id": "role-capability-editor-verses-edit",
+    "role_id": "editor",
+    "capability_key": "verses.edit"
+  },
+  {
+    "id": "role-capability-editor-content-create",
+    "role_id": "editor",
+    "capability_key": "content.create"
+  },
+  {
+    "id": "role-capability-editor-content-delete",
+    "role_id": "editor",
+    "capability_key": "content.delete"
+  },
+  {
+    "id": "role-capability-editor-content-publish",
+    "role_id": "editor",
+    "capability_key": "content.publish"
+  },
+  {
+    "id": "role-capability-editor-media-upload",
+    "role_id": "editor",
+    "capability_key": "media.upload"
+  },
+  {
+    "id": "role-capability-admin-books-view",
+    "role_id": "admin",
+    "capability_key": "books.view"
+  },
+  {
+    "id": "role-capability-admin-books-edit",
+    "role_id": "admin",
+    "capability_key": "books.edit"
+  },
+  {
+    "id": "role-capability-admin-chapters-edit",
+    "role_id": "admin",
+    "capability_key": "chapters.edit"
+  },
+  {
+    "id": "role-capability-admin-verses-edit",
+    "role_id": "admin",
+    "capability_key": "verses.edit"
+  },
+  {
+    "id": "role-capability-admin-places-edit",
+    "role_id": "admin",
+    "capability_key": "places.edit"
+  },
+  {
+    "id": "role-capability-admin-characters-edit",
+    "role_id": "admin",
+    "capability_key": "characters.edit"
+  },
+  {
+    "id": "role-capability-admin-topics-edit",
+    "role_id": "admin",
+    "capability_key": "topics.edit"
+  },
+  {
+    "id": "role-capability-admin-content-create",
+    "role_id": "admin",
+    "capability_key": "content.create"
+  },
+  {
+    "id": "role-capability-admin-content-delete",
+    "role_id": "admin",
+    "capability_key": "content.delete"
+  },
+  {
+    "id": "role-capability-admin-content-publish",
+    "role_id": "admin",
+    "capability_key": "content.publish"
+  },
+  {
+    "id": "role-capability-admin-media-upload",
+    "role_id": "admin",
+    "capability_key": "media.upload"
+  },
+  {
+    "id": "role-capability-admin-users-manage",
+    "role_id": "admin",
+    "capability_key": "users.manage"
+  },
+  {
+    "id": "role-capability-admin-permissions-manage",
+    "role_id": "admin",
+    "capability_key": "permissions.manage"
+  },
+  {
+    "id": "role-capability-admin-settings-manage",
+    "role_id": "admin",
+    "capability_key": "settings.manage"
+  }
+]
