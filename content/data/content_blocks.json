@@ -1,1 +1,321 @@
-[]
+[
+  {
+    "id": "content-block-books-book-bhagavad-gita-insight",
+    "owner_entity": "books",
+    "owner_id": "book-bhagavad-gita",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Commentary of Madhav",
+      "media_asset_id": "media-asset-book-bhagavad-gita-insight-media",
+      "caption": "This source book contains the canonical chapters and verses that later collection books can reuse without duplicating content."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-books-book-path-of-action-insight",
+    "owner_entity": "books",
+    "owner_id": "book-path-of-action",
+    "region": "insight",
+    "block_type": "rich_text",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Path of Action",
+      "body": "This collection follows the discipline of action, showing how work becomes transformative when it is aligned with clarity and service."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-books-book-path-of-knowledge-insight",
+    "owner_entity": "books",
+    "owner_id": "book-path-of-knowledge",
+    "region": "insight",
+    "block_type": "rich_text",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Path of Knowledge",
+      "body": "This collection gathers chapters where discrimination, self-knowledge, and insight into reality become the dominant emphasis."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-books-book-path-of-devotion-insight",
+    "owner_entity": "books",
+    "owner_id": "book-path-of-devotion",
+    "region": "insight",
+    "block_type": "rich_text",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Path of Devotion",
+      "body": "This collection traces the devotional arc of the Gita, where love, surrender, and divine vision become central."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-books-book-ramcharitmanas-insight",
+    "owner_entity": "books",
+    "owner_id": "book-ramcharitmanas",
+    "region": "insight",
+    "block_type": "rich_text",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "tulsi",
+      "body": "eam"
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-book_sections-book-section-bhagavad-gita-01-insight",
+    "owner_entity": "book_sections",
+    "owner_id": "book-section-bhagavad-gita-01",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "From Crisis to Clarity",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "This section moves from emotional collapse to philosophical clarity, showing how duty becomes meaningful when guided by right understanding."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-book_sections-book-section-bhagavad-gita-02-insight",
+    "owner_entity": "book_sections",
+    "owner_id": "book-section-bhagavad-gita-02",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Inner Discipline",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "This section develops inward discipline, showing how renunciation, meditation, and knowledge support one another."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-book_sections-book-section-bhagavad-gita-03-insight",
+    "owner_entity": "book_sections",
+    "owner_id": "book-section-bhagavad-gita-03",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Devotion and Vision",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "This section gathers the devotional heart of the Gita, where intimacy, manifestation, and divine vision converge."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-book_sections-book-section-bhagavad-gita-04-insight",
+    "owner_entity": "book_sections",
+    "owner_id": "book-section-bhagavad-gita-04",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Field and Source",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "This section refines metaphysical understanding by distinguishing body, nature, qualities, and the supreme person."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-book_sections-book-section-bhagavad-gita-05-insight",
+    "owner_entity": "book_sections",
+    "owner_id": "book-section-bhagavad-gita-05",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Character and Release",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "This final section turns the teaching toward lived character, the quality of faith, and the integrated path to liberation."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-book_sections-book-section-path-of-action-01-insight",
+    "owner_entity": "book_sections",
+    "owner_id": "book-section-path-of-action-01",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Action Foundations",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "This selection focuses on the move from confusion to clarity and on the disciplined logic of action without attachment."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-book_sections-book-section-path-of-action-02-insight",
+    "owner_entity": "book_sections",
+    "owner_id": "book-section-path-of-action-02",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Renunciation in Motion",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "This section shows that the path of action matures through inner renunciation and meditative steadiness."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-book_sections-book-section-path-of-knowledge-01-insight",
+    "owner_entity": "book_sections",
+    "owner_id": "book-section-path-of-knowledge-01",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Steady Wisdom",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "This section begins the knowledge path with the classic teaching on the self, equanimity, and steady understanding."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-book_sections-book-section-path-of-knowledge-02-insight",
+    "owner_entity": "book_sections",
+    "owner_id": "book-section-path-of-knowledge-02",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Higher Knowing",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "This section widens knowledge from inward discrimination into a broader apprehension of the divine and the imperishable."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-book_sections-book-section-path-of-knowledge-03-insight",
+    "owner_entity": "book_sections",
+    "owner_id": "book-section-path-of-knowledge-03",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Metaphysical Clarity",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "This selection focuses on metaphysical clarity: the field and knower, the gunas, and the supreme person beyond change."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-book_sections-book-section-path-of-devotion-01-insight",
+    "owner_entity": "book_sections",
+    "owner_id": "book-section-path-of-devotion-01",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "The Heart of Devotion",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "This section traces how devotion moves from trust and intimacy into cosmic vision and loving devotion."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "content-block-book_sections-book-section-path-of-devotion-02-insight",
+    "owner_entity": "book_sections",
+    "owner_id": "book-section-path-of-devotion-02",
+    "region": "insight",
+    "block_type": "media",
+    "variant": null,
+    "position": 1,
+    "status": "published",
+    "visibility": "public",
+    "is_published": true,
+    "data": {
+      "title": "Final Surrender",
+      "media_asset_id": "media-asset-insight-default-image",
+      "caption": "This section closes the devotional path by showing surrender as the culmination of knowledge, action, and trust."
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  }
+]

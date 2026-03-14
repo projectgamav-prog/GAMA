@@ -1,1 +1,32 @@
-[]
+[
+  {
+    "id": "media-asset-insight-default-image",
+    "asset_type": "image",
+    "title": "Default Insight Image",
+    "src": "/assets/images/image.png",
+    "alt_text": "Insight media",
+    "caption": null,
+    "provider": "local",
+    "metadata": {
+      "source": "legacy-insight-media"
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  },
+  {
+    "id": "media-asset-book-bhagavad-gita-insight-media",
+    "asset_type": "video",
+    "title": "Commentary of Madhav",
+    "src": "https://www.youtube.com/watch?v=LICM8e3gBFU&list=RDLICM8e3gBFU&start_radio=1&t=4979s",
+    "alt_text": "Commentary of Madhav media",
+    "caption": null,
+    "provider": "youtube",
+    "metadata": {
+      "source": "legacy-insight-media",
+      "owner_entity": "books",
+      "owner_id": "book-bhagavad-gita"
+    },
+    "created_at": "2026-03-14T00:00:00.000Z",
+    "updated_at": "2026-03-14T00:00:00.000Z"
+  }
+]

@@ -112,10 +112,12 @@ function initializeExplanationsPage({ mode, routeResolver }) {
     const pageState = {
         targetType: "verse",
         targetId: verse.id,
+        document: null,
         blocks: [],
     };
 
-    function applyExplanationContent({ blocks: nextBlocks = [] } = {}) {
+    function applyExplanationContent({ document: nextDocument = null, blocks: nextBlocks = [] } = {}) {
+        pageState.document = nextDocument || null;
         pageState.blocks = Array.isArray(nextBlocks) ? [...nextBlocks] : [];
 
         if (!(blocks instanceof HTMLElement)) {
@@ -191,6 +193,7 @@ function initializeExplanationsPage({ mode, routeResolver }) {
             return Object.freeze({
                 targetType: pageState.targetType,
                 targetId: pageState.targetId,
+                document: pageState.document,
                 blocks: Object.freeze([...pageState.blocks]),
             });
         },
