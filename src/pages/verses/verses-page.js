@@ -78,10 +78,10 @@ export const VERSES_PAGE_DEFINITION = createSharedPageDefinition({
                 <div class="verse-mode-bar">
                     <label class="verse-mode-label" for="verseModeSelect">Verse Display</label>
                     <select id="verseModeSelect" class="verse-mode-select" aria-label="Verse display mode">
-                        <option value="" data-route="verses.index">Sanskrit - English</option>
-                        <option value="" data-route="verses.sanskritHindi">Sanskrit - Hindi</option>
-                        <option value="" data-route="verses.englishOnly">English Only</option>
-                        <option value="" data-route="verses.hindiOnly">Hindi Only</option>
+                        <option value="sanskrit-english">Sanskrit - English</option>
+                        <option value="sanskrit-hindi">Sanskrit - Hindi</option>
+                        <option value="english-only">English Only</option>
+                        <option value="hindi-only">Hindi Only</option>
                     </select>
                 </div>
 

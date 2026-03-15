@@ -354,15 +354,6 @@ function getVersesPageState(context, permissionContext, openEditor) {
         actions.push(createNewAction({ entity: "verses", openEditor }));
     }
 
-    if (currentChapter && canUpdateEntity(permissionContext, "chapters")) {
-        actions.push(...buildInsightEditingActions({
-            ownerEntity: "chapters",
-            record: currentChapter,
-            permissionContext,
-            openEditor,
-        }));
-    }
-
     if (selectedChapterSection && canUpdateEntity(permissionContext, "chapter_sections")) {
         actions.push(...buildInsightEditingActions({
             ownerEntity: "chapter_sections",
@@ -373,6 +364,16 @@ function getVersesPageState(context, permissionContext, openEditor) {
     }
 
     if (targetVerse && canUpdateEntity(permissionContext, "verses")) {
+        actions.push(createEditAction({
+            entity: "verses",
+            record: targetVerse,
+            openEditor,
+            allowDelete: false,
+            label: context.selection?.entity === "verses"
+                ? "Edit Verse"
+                : "Edit Current Verse",
+        }));
+
         actions.push(...buildInsightEditingActions({
             ownerEntity: "verses",
             record: targetVerse,

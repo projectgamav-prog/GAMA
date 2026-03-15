@@ -25,17 +25,5 @@
     "audio_url": null,
     "is_featured": false,
     "id": "verse-bhagavad-gita-01-002"
-  },
-  {
-    "chapter_id": "chapter-bhagavad-gita-01",
-    "verse_number": 3,
-    "slug": "verse-3",
-    "sanskrit_text": "1",
-    "transliteration_text": "1",
-    "english_text": "1",
-    "hindi_text": "1",
-    "audio_url": null,
-    "is_featured": false,
-    "id": "verse-bhagavad-gita-01-003"
   }
 ]

@@ -4,29 +4,24 @@ export function initializeVerseModeSwitcher(routes = window.APP_ROUTES) {
     const select = document.getElementById("verseModeSelect");
     if (!select || !routes) return;
 
-    const modeToRoute = {
-        "sanskrit-english": routes.verses.index,
-        "sanskrit-hindi": routes.verses.sanskritHindi,
-        "english-only": routes.verses.englishOnly,
-        "hindi-only": routes.verses.hindiOnly,
-    };
     const currentMode = normalizeVerseMode(new URLSearchParams(window.location.search).get("mode"));
-    const normalizedCurrentPath = modeToRoute[currentMode] || routes.verses.index;
-    select.value = normalizedCurrentPath;
+    select.value = currentMode;
 
     select.addEventListener("change", () => {
-        const nextPage = select.value;
-        if (!nextPage || nextPage === normalizedCurrentPath) return;
+        const nextMode = normalizeVerseMode(select.value);
+        if (nextMode === currentMode) return;
 
         try {
-            const url = new URL(nextPage, window.location.origin);
-            const currentParams = new URLSearchParams(window.location.search);
-            currentParams.forEach((value, key) => {
-                url.searchParams.set(key, value);
-            });
+            const url = new URL(window.location.href);
+            if (nextMode === "sanskrit-english") {
+                url.searchParams.delete("mode");
+            } else {
+                url.searchParams.set("mode", nextMode);
+            }
             window.location.href = `${url.pathname}${url.search}`;
         } catch {
-            window.location.href = nextPage;
+            const fallbackPath = routes.verses.byMode(nextMode) || routes.verses.index;
+            window.location.href = fallbackPath;
         }
     });
 }

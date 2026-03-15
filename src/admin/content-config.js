@@ -12,6 +12,20 @@ function augmentFields(fields = [], overrides = {}) {
     );
 }
 
+function mergeUniqueFields(...fieldGroups) {
+    const fieldsByName = new Map();
+
+    fieldGroups.flat().forEach((field) => {
+        if (!field?.name || fieldsByName.has(field.name)) {
+            return;
+        }
+
+        fieldsByName.set(field.name, field);
+    });
+
+    return Object.freeze(Array.from(fieldsByName.values()));
+}
+
 function getNumericValue(record, fieldName) {
     const value = Number.parseInt(record?.[fieldName], 10);
     return Number.isInteger(value) && value > 0 ? value : null;
@@ -572,10 +586,7 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
         editActionLabel: "Edit Content Block",
         endpoint: getAdminEntityApiPath("content_blocks"),
         collectionKey: "contentBlocks",
-        fields: Object.freeze([
-            ...CONTENT_BLOCK_INSIGHT_MEDIA_FIELDS,
-            ...CONTENT_BLOCK_INSIGHT_TEXT_FIELDS.filter((field) => field.name === "content_body"),
-        ]),
+        fields: mergeUniqueFields(INSIGHT_BLOCK_FIELDS, VERSE_INSIGHT_FIELDS),
         fieldScopes: Object.freeze({
             insight_block: Object.freeze(INSIGHT_BLOCK_FIELDS.map((field) => field.name)),
             verse_insight: Object.freeze(VERSE_INSIGHT_FIELDS.map((field) => field.name)),

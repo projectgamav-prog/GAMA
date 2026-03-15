@@ -128,6 +128,13 @@ function renderVerseInsightContent(host, insight, fallbackMedia = DEFAULT_INSIGH
             iframe.allowFullscreen = true;
             frame.appendChild(iframe);
             host.appendChild(frame);
+        } else if (mediaPresentation.kind === "video" && mediaPresentation.src) {
+            const video = document.createElement("video");
+            video.className = "explanation-video";
+            video.controls = true;
+            video.preload = "metadata";
+            video.src = mediaPresentation.src;
+            host.appendChild(video);
         } else if (mediaPresentation.kind === "image" || mediaPresentation.previewImage) {
             const player = document.createElement("div");
             player.className = "video-player";
@@ -141,6 +148,21 @@ function renderVerseInsightContent(host, insight, fallbackMedia = DEFAULT_INSIGH
             };
             player.appendChild(imageElement);
             host.appendChild(player);
+        } else if (mediaPresentation.kind === "audio" && mediaPresentation.src) {
+            const audio = document.createElement("audio");
+            audio.className = "explanation-audio";
+            audio.controls = true;
+            audio.preload = "metadata";
+            audio.src = mediaPresentation.src;
+            host.appendChild(audio);
+        } else if (mediaPresentation.kind === "link" && mediaPresentation.src) {
+            const link = document.createElement("a");
+            link.className = "btn btn-primary explanation-video-link";
+            link.href = mediaPresentation.src;
+            link.target = "_blank";
+            link.rel = "noreferrer";
+            link.textContent = "Open Media";
+            host.appendChild(link);
         }
     }
 

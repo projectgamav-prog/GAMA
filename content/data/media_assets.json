@@ -22,5 +22,128 @@
     "created_at": "2026-03-15T05:52:40.228Z",
     "updated_at": "2026-03-15T05:52:40.228Z",
     "id": "media-asset-asdasdasd"
+  },
+  {
+    "asset_type": "video",
+    "title": null,
+    "src": "https://www.youtube.com/watch?v=PV8RK0aXcYk&list=RDQzeNd4-kkLc&index=6",
+    "provider": "youtube",
+    "alt_text": "ddasdas",
+    "caption": null,
+    "metadata": {},
+    "created_at": "2026-03-15T06:06:08.229Z",
+    "updated_at": "2026-03-15T06:06:08.229Z",
+    "id": "media-asset-https-www-youtube-com-watch-v-pv8rk0axcyk-list-rdqzend4-kklc-index-6"
+  },
+  {
+    "asset_type": "video",
+    "title": null,
+    "src": "https://www.youtube.com/watch?v=0jMfiTfkRSg&list=RD0jMfiTfkRSg&start_radio=1&t=1745s",
+    "provider": "youtube",
+    "alt_text": "ddasdas",
+    "caption": null,
+    "metadata": {},
+    "created_at": "2026-03-15T06:10:54.059Z",
+    "updated_at": "2026-03-15T06:10:54.059Z",
+    "id": "media-asset-https-www-youtube-com-watch-v-0jmfitfkrsg-list-rd0jmfitfkrsg-start-radio-1-t-1745s"
+  },
+  {
+    "id": "media-asset-book-section-bhagavad-gita-01-insight-media",
+    "asset_type": "video",
+    "title": "Commentary of Malay Insight Media",
+    "src": "https://www.youtube.com/watch?v=6PBnTUKbtuI&list=RDGMEMAG5Rymn0tbCIY1Nh3hIfZQVM6PBnTUKbtuI&start_radio=1",
+    "provider": "local",
+    "alt_text": "Commentary of Malay media",
+    "caption": "1",
+    "metadata": {
+      "source": "admin-generated-book-insight-media",
+      "owner_entity": "book_sections",
+      "owner_id": "book-section-bhagavad-gita-01",
+      "seeded_from_asset_id": null
+    },
+    "created_at": "2026-03-15T06:11:21.385Z",
+    "updated_at": "2026-03-15T06:12:07.555Z"
+  },
+  {
+    "asset_type": "video",
+    "title": "1",
+    "src": "https://www.youtube.com/watch?v=3PAPihtnTcw&list=RDGMEMAG5Rymn0tbCIY1Nh3hIfZQVM6PBnTUKbtuI&index=2",
+    "provider": "1",
+    "alt_text": "1",
+    "caption": "1",
+    "metadata": {},
+    "created_at": "2026-03-15T06:12:43.722Z",
+    "updated_at": "2026-03-15T06:13:03.731Z",
+    "id": "media-asset-1"
+  },
+  {
+    "id": "media-asset-chapter-section-bhagavad-gita-01-01-insight-media",
+    "asset_type": "image",
+    "title": "Commentary of Malay Insight Media",
+    "src": "/assets/images/image.png?cms_owner=chapter-section-bhagavad-gita-01-01",
+    "provider": "local",
+    "alt_text": "Commentary of Malay media",
+    "caption": "1",
+    "metadata": {
+      "source": "admin-generated-book-insight-media",
+      "owner_entity": "chapter_sections",
+      "owner_id": "chapter-section-bhagavad-gita-01-01",
+      "seeded_from_asset_id": null
+    },
+    "created_at": "2026-03-15T06:13:19.241Z",
+    "updated_at": "2026-03-15T06:13:19.241Z"
+  },
+  {
+    "asset_type": "image",
+    "title": "12112",
+    "src": "https://www.youtube.com/watch?v=0DvM8l55GVw&list=RDGMEMAG5Rymn0tbCIY1Nh3hIfZQVM6PBnTUKbtuI&index=8",
+    "provider": "1",
+    "alt_text": "1",
+    "caption": "1",
+    "metadata": {},
+    "created_at": "2026-03-15T06:14:06.434Z",
+    "updated_at": "2026-03-15T06:14:06.435Z",
+    "id": "media-asset-12112"
+  },
+  {
+    "id": "media-asset-chapter-section-bhagavad-gita-01-02-insight-media",
+    "asset_type": "video",
+    "title": "asdasdas Insight Media",
+    "src": "https://www.youtube.com/watch?v=-o6UF2vz_T4&list=RDGMEMAG5Rymn0tbCIY1Nh3hIfZQVM6PBnTUKbtuI&index=11",
+    "provider": "local",
+    "alt_text": "asdasdas media",
+    "caption": "asdasd",
+    "metadata": {
+      "source": "admin-generated-book-insight-media",
+      "owner_entity": "chapter_sections",
+      "owner_id": "chapter-section-bhagavad-gita-01-02",
+      "seeded_from_asset_id": null
+    },
+    "created_at": "2026-03-15T06:14:40.410Z",
+    "updated_at": "2026-03-15T06:15:35.429Z"
+  },
+  {
+    "asset_type": "video",
+    "title": "asdasdas",
+    "src": "https://www.youtube.com/watch?v=qHYuPp2gGLQ&list=RDGMEMAG5Rymn0tbCIY1Nh3hIfZQVM6PBnTUKbtuI&index=14",
+    "provider": "asdasd",
+    "alt_text": "1",
+    "caption": "asdasd",
+    "metadata": {},
+    "created_at": "2026-03-15T06:19:57.131Z",
+    "updated_at": "2026-03-15T06:19:57.131Z",
+    "id": "media-asset-asdasdas"
+  },
+  {
+    "asset_type": "video",
+    "title": "this is media title",
+    "src": "https://www.youtube.com/watch?v=jDn2bn7_YSM&list=RDgOt4QFTQpBU&index=18",
+    "provider": "youtube",
+    "alt_text": "ths is alt text",
+    "caption": "this is media caption",
+    "metadata": {},
+    "created_at": "2026-03-15T06:29:42.146Z",
+    "updated_at": "2026-03-15T06:29:42.146Z",
+    "id": "media-asset-this-is-media-title"
   }
 ]

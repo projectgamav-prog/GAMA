@@ -127,6 +127,18 @@ export function getInsightMediaPresentation({
         };
     }
 
+    if (assetType === "document") {
+        return {
+            kind: "link",
+            assetType,
+            provider,
+            src,
+            embedUrl: "",
+            previewImage: previewImage || "",
+            alt: normalizedAlt,
+        };
+    }
+
     return {
         kind: "image",
         assetType: assetType || "image",
@@ -219,6 +231,13 @@ export function createInsightDropdown({
         iframe.allowFullscreen = true;
         frame.appendChild(iframe);
         card.appendChild(frame);
+    } else if (mediaPresentation.kind === "video" && mediaPresentation.src) {
+        const video = document.createElement("video");
+        video.className = "explanation-video";
+        video.controls = true;
+        video.preload = "metadata";
+        video.src = mediaPresentation.src;
+        card.appendChild(video);
     } else if (mediaPresentation.kind === "image" || mediaPresentation.previewImage) {
         const player = document.createElement("div");
         player.className = "video-player";
@@ -243,9 +262,16 @@ export function createInsightDropdown({
         }
 
         card.appendChild(player);
+    } else if (mediaPresentation.kind === "audio" && mediaPresentation.src) {
+        const audio = document.createElement("audio");
+        audio.className = "explanation-audio";
+        audio.controls = true;
+        audio.preload = "metadata";
+        audio.src = mediaPresentation.src;
+        card.appendChild(audio);
     }
 
-    if (mediaPresentation.src && mediaPresentation.kind !== "image" && mediaPresentation.kind !== "video") {
+    if (mediaPresentation.src && mediaPresentation.kind === "link") {
         const link = document.createElement("a");
         link.className = "btn btn-primary explanation-video-link";
         link.href = mediaPresentation.src;
