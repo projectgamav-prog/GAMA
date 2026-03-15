@@ -683,6 +683,7 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
         entity: "media_assets",
         label: "Media Asset",
         pluralLabel: "Media Assets",
+        createActionLabel: "Create Media Asset",
         editActionLabel: "Edit Media Asset",
         endpoint: getAdminEntityApiPath("media_assets"),
         collectionKey: "mediaAssets",
@@ -693,6 +694,19 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
         permissionKey: "media.upload",
         getRecordLabel(record) {
             return record?.title || record?.src || "Media Asset";
+        },
+        getCreateDefaults(context) {
+            return {
+                asset_type: "image",
+                title: "",
+                src: "",
+                provider: "",
+                alt_text: "",
+                caption: "",
+                metadata: context?.mediaAssetUsage === "insight"
+                    ? { source: "admin-insight-media" }
+                    : {},
+            };
         },
         getFormValues(record) {
             return {

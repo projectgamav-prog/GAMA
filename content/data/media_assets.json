@@ -1,1 +1,26 @@
-[]
+[
+  {
+    "asset_type": "video",
+    "title": "ffff",
+    "src": "https://www.youtube.com/watch?v=2IXNyRSXQuw&list=RDgOt4QFTQpBU&index=11",
+    "provider": "youtube",
+    "alt_text": "ddasdas",
+    "caption": "sdasdasd",
+    "metadata": {},
+    "created_at": "2026-03-15T05:51:14.197Z",
+    "updated_at": "2026-03-15T05:51:14.197Z",
+    "id": "media-asset-ffff"
+  },
+  {
+    "asset_type": "video",
+    "title": "asdasdasd",
+    "src": "https://www.youtube.com/watch?v=QzeNd4-kkLc&list=RDQzeNd4-kkLc&start_radio=1",
+    "provider": "youtube",
+    "alt_text": "ddasdas",
+    "caption": "asdasdasd",
+    "metadata": {},
+    "created_at": "2026-03-15T05:52:40.228Z",
+    "updated_at": "2026-03-15T05:52:40.228Z",
+    "id": "media-asset-asdasdasd"
+  }
+]

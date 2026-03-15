@@ -14,5 +14,18 @@
     "insight_media": null,
     "insight_caption": null,
     "id": "chapter-section-bhagavad-gita-01-01"
+  },
+  {
+    "chapter_id": "chapter-bhagavad-gita-01",
+    "section_number": 2,
+    "slug": "chapter-section-1-1",
+    "title": "section 2",
+    "summary": "ffgfff",
+    "ui_order": 2,
+    "verse_start": 2,
+    "verse_end": 2,
+    "card_variant": "1",
+    "accent_key": "1",
+    "id": "chapter-section-bhagavad-gita-01-02"
   }
 ]

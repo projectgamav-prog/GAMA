@@ -111,6 +111,7 @@ server.on("listening", async () => {
     bookSectionId: null,
     chapterSectionId: null,
     verseId: null,
+    insightMediaAssetId: null,
     verseInsightBlockIds: [],
     bodyBlockId: null,
   };
@@ -291,6 +292,32 @@ server.on("listening", async () => {
       "A verse with zero CMS insight blocks should not expose fake insight options."
     );
 
+    const tempInsightMediaAsset = {
+      asset_type: "image",
+      title: `Verify Insight Media ${suffix}`,
+      src: `/assets/images/lotus_background_4k.png?verify_insight_media=${suffix}`,
+      provider: "local",
+      alt_text: "Verification insight media",
+      caption: "Temporary insight media asset for API verification.",
+    };
+
+    const { response: createInsightMediaAssetResponse, payload: createInsightMediaAssetPayload } = await requestJson(
+      baseUrl,
+      "/api/media-assets",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(tempInsightMediaAsset),
+      }
+    );
+    assert(createInsightMediaAssetResponse.status === 201, "Temporary insight media asset was not created.");
+    createdIds.insightMediaAssetId = createInsightMediaAssetPayload.data.id;
+    await assertTableContains(
+      "media_assets",
+      (row) => row.id === createdIds.insightMediaAssetId,
+      "Insight media asset was not written to media_assets.json."
+    );
+
     const tempVerseInsightBlockOne = {
       owner_entity: "verses",
       owner_id: createdIds.verseId,
@@ -305,7 +332,7 @@ server.on("listening", async () => {
         title: "Malay Commentary",
         body: "Temporary verse insight body one.",
         caption: "Temporary verse insight caption one.",
-        media_asset_id: null,
+        media_asset_id: createdIds.insightMediaAssetId,
       },
     };
 
@@ -334,6 +361,10 @@ server.on("listening", async () => {
     assert(singleVerseInsightBlocksPayload.data.length === 1, "A verse with one insight block should expose exactly one CMS insight option.");
     assert(singleVerseInsightBlocksPayload.data[0].block_type === "verse_insight", "Verse insight blocks must use the verse_insight block_type.");
     assert(singleVerseInsightBlocksPayload.data[0].data.label === "Commentary of Malay", "Verse insight option label did not persist.");
+    assert(
+      singleVerseInsightBlocksPayload.data[0].data.media_asset_id === createdIds.insightMediaAssetId,
+      "Verse insight blocks should persist the selected media_assets id on content_blocks.data.media_asset_id."
+    );
 
     const tempVerseInsightBlockTwo = {
       owner_entity: "verses",
@@ -634,6 +665,7 @@ server.on("listening", async () => {
     const cleanupSteps = [
       ...createdIds.verseInsightBlockIds.map((id) => ["/api/content-blocks", id, "content_blocks", (row) => row.id === id]),
       ["/api/content-blocks", createdIds.bodyBlockId, "content_blocks", (row) => row.id === createdIds.bodyBlockId],
+      ["/api/media-assets", createdIds.insightMediaAssetId, "media_assets", (row) => row.id === createdIds.insightMediaAssetId],
       ["/api/verses", createdIds.verseId, "verses", (row) => row.id === createdIds.verseId],
       ["/api/chapter-sections", createdIds.chapterSectionId, "chapter_sections", (row) => row.id === createdIds.chapterSectionId],
       ["/api/book-sections", createdIds.bookSectionId, "book_sections", (row) => row.id === createdIds.bookSectionId],
@@ -657,6 +689,7 @@ server.on("listening", async () => {
       ["/api/books", createdIds.blankInsightBookId],
       ...createdIds.verseInsightBlockIds.map((id) => ["/api/content-blocks", id]),
       ["/api/content-blocks", createdIds.bodyBlockId],
+      ["/api/media-assets", createdIds.insightMediaAssetId],
       ["/api/verses", createdIds.verseId],
       ["/api/chapter-sections", createdIds.chapterSectionId],
       ["/api/book-sections", createdIds.bookSectionId],

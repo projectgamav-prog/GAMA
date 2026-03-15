@@ -68,7 +68,25 @@
     },
     "variant": null,
     "created_at": "2026-03-15T05:18:42.855Z",
-    "updated_at": "2026-03-15T05:18:42.855Z",
+    "updated_at": "2026-03-15T05:52:44.069Z",
     "id": "content-block-chapter-sections-chapter-section-bhagavad-gita-01-01-insight-001"
+  },
+  {
+    "owner_entity": "chapter_sections",
+    "owner_id": "chapter-section-bhagavad-gita-01-02",
+    "region": "insight",
+    "block_type": "rich_text",
+    "position": 1,
+    "status": "draft",
+    "visibility": "public",
+    "is_published": false,
+    "data": {
+      "title": "asdasdas",
+      "body": "asdasd"
+    },
+    "variant": null,
+    "created_at": "2026-03-15T05:51:28.301Z",
+    "updated_at": "2026-03-15T05:51:28.301Z",
+    "id": "content-block-chapter-sections-chapter-section-bhagavad-gita-01-02-insight-001"
   }
 ]

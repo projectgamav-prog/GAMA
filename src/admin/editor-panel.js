@@ -54,7 +54,7 @@ function getFieldValue(field, values) {
     return rawValue == null ? "" : rawValue;
 }
 
-function getFieldOptions(field, context) {
+function getFieldOptions(field, context, optionRecords = null) {
     if (field.type === "select") {
         return field.options || [];
     }
@@ -63,7 +63,11 @@ function getFieldOptions(field, context) {
         return [];
     }
 
-    return listContentRecords(field.source).filter((record) => {
+    const sourceRecords = Array.isArray(optionRecords?.[field.source])
+        ? optionRecords[field.source]
+        : listContentRecords(field.source);
+
+    return sourceRecords.filter((record) => {
         if (typeof field.optionFilter === "function") {
             return field.optionFilter(record, context) !== false;
         }
@@ -138,7 +142,11 @@ function getFieldHint(field, permissionContext) {
     return field.description || "";
 }
 
-function createFieldElement(field, values, context, permissionContext, loading) {
+function createFieldElement(field, values, context, permissionContext, loading, {
+    optionRecords = null,
+    onValueChange = null,
+    inlineActions = [],
+} = {}) {
     const wrapper = document.createElement("label");
     wrapper.className = "admin-editor-field";
 
@@ -160,7 +168,7 @@ function createFieldElement(field, values, context, permissionContext, loading) 
         placeholder.textContent = `Select ${field.label}`;
         input.appendChild(placeholder);
 
-        getFieldOptions(field, context).forEach((option) => {
+        getFieldOptions(field, context, optionRecords).forEach((option) => {
             const optionElement = document.createElement("option");
             optionElement.value = getOptionValue(field, option);
             optionElement.textContent = getOptionLabel(field, option);
@@ -195,9 +203,39 @@ function createFieldElement(field, values, context, permissionContext, loading) 
         input.value = String(getFieldValue(field, values));
     }
 
+    if (typeof onValueChange === "function") {
+        const eventName = field.type === "checkbox"
+            ? "change"
+            : (isSelectField(field) ? "change" : "input");
+        input.addEventListener(eventName, () => {
+            onValueChange(field.name, serializeValue(field, input));
+        });
+    }
+
     const hint = getFieldHint(field, permissionContext);
 
     controlWrap.appendChild(input);
+
+    if (Array.isArray(inlineActions) && inlineActions.length) {
+        const actions = document.createElement("div");
+        actions.className = "admin-editor-field-actions";
+
+        inlineActions.forEach((action) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "admin-inline-bar-link";
+            button.textContent = action.label;
+            button.disabled = loading || action.disabled === true;
+            button.addEventListener("click", (event) => {
+                event.preventDefault();
+                action.onClick?.();
+            });
+            actions.appendChild(button);
+        });
+
+        controlWrap.appendChild(actions);
+    }
+
     wrapper.append(label, controlWrap);
 
     if (hint) {
@@ -231,6 +269,7 @@ function createContentRecordEditorPanel({
         message: "",
         tone: "muted",
         openContext: null,
+        optionRecords: {},
         refreshTimerId: null,
         allowDelete: true,
     };
@@ -251,6 +290,130 @@ function createContentRecordEditorPanel({
     function setMessage(message, tone = "muted") {
         state.message = message ? String(message) : "";
         state.tone = tone || "muted";
+    }
+
+    function cloneEditorValues(values) {
+        return values && typeof values === "object"
+            ? { ...values }
+            : {};
+    }
+
+    async function refreshEntityOptions(entity) {
+        if (!entity) {
+            return [];
+        }
+
+        const records = await api.listRecords(entity);
+        state.optionRecords = {
+            ...state.optionRecords,
+            [entity]: Array.isArray(records) ? records : [],
+        };
+        return state.optionRecords[entity];
+    }
+
+    async function refreshSelectFieldSources(entity, fieldScope) {
+        const fields = getContentEntityFields(entity, fieldScope);
+        const sources = Array.from(new Set(
+            fields
+                .filter((field) => field.type === "select-from-state" && field.source)
+                .map((field) => field.source)
+        ));
+
+        await Promise.all(sources.map((source) => refreshEntityOptions(source)));
+    }
+
+    function shouldEnableInsightMediaCreateAction(field, permissionContext) {
+        return field?.name === "media_asset_id"
+            && state.entity === "content_blocks"
+            && (state.fieldScope === "insight_block" || state.fieldScope === "verse_insight")
+            && hasPermission(permissionContext, "media.upload");
+    }
+
+    function createReturnToEditorSnapshot(fieldName) {
+        return {
+            entity: state.entity,
+            mode: state.mode,
+            recordId: state.recordId,
+            record: state.record,
+            values: cloneEditorValues(state.values),
+            fieldScope: state.fieldScope,
+            allowDelete: state.allowDelete,
+            openContext: {
+                ...(state.openContext || {}),
+            },
+            fieldName,
+        };
+    }
+
+    function restoreReturnEditor(returnToEditor, {
+        selectedAssetId = "",
+        latestMediaAssets = null,
+        message = "",
+        tone = "success",
+    } = {}) {
+        if (!returnToEditor) {
+            close();
+            return;
+        }
+
+        state.entity = returnToEditor.entity;
+        state.mode = returnToEditor.mode;
+        state.recordId = returnToEditor.recordId;
+        state.record = returnToEditor.record;
+        state.fieldScope = returnToEditor.fieldScope || "default";
+        state.allowDelete = returnToEditor.allowDelete !== false;
+        state.isOpen = true;
+        state.loading = false;
+        state.saving = false;
+        state.deleting = false;
+        state.openContext = {
+            ...(returnToEditor.openContext || {}),
+        };
+        state.values = {
+            ...cloneEditorValues(returnToEditor.values),
+            ...(selectedAssetId ? { [returnToEditor.fieldName]: selectedAssetId } : {}),
+        };
+
+        if (Array.isArray(latestMediaAssets)) {
+            state.optionRecords = {
+                ...state.optionRecords,
+                media_assets: latestMediaAssets,
+            };
+        }
+
+        setMessage(
+            message || (selectedAssetId ? "Media asset created and selected. Continue editing the insight block." : "Returned to the insight editor."),
+            tone
+        );
+        render();
+    }
+
+    async function openInlineInsightMediaEditor(fieldName) {
+        const returnToEditor = createReturnToEditorSnapshot(fieldName);
+        await loadEditorState({
+            entity: "media_assets",
+            mode: "create",
+            fieldScope: "insight_media_asset",
+            allowDelete: false,
+            context: {
+                ...(state.openContext || {}),
+                mediaAssetUsage: "insight",
+                returnToEditor,
+            },
+        });
+    }
+
+    function getInlineFieldActions(field, permissionContext) {
+        if (!shouldEnableInsightMediaCreateAction(field, permissionContext)) {
+            return [];
+        }
+
+        return [{
+            label: "Create Insight Media",
+            onClick() {
+                openInlineInsightMediaEditor(field.name);
+            },
+        }];
     }
 
     function buildHelpers() {
@@ -298,7 +461,7 @@ function createContentRecordEditorPanel({
         const closeButton = document.createElement("button");
         closeButton.type = "button";
         closeButton.className = "admin-inline-bar-link";
-        closeButton.textContent = "Close";
+        closeButton.textContent = state.openContext?.returnToEditor ? "Back" : "Close";
         closeButton.addEventListener("click", () => {
             close();
         });
@@ -335,7 +498,17 @@ function createContentRecordEditorPanel({
                     state.values,
                     state.openContext,
                     permissionContext,
-                    state.saving || state.deleting
+                    state.saving || state.deleting,
+                    {
+                        optionRecords: state.optionRecords,
+                        onValueChange(fieldName, value) {
+                            state.values = {
+                                ...(state.values || {}),
+                                [fieldName]: value,
+                            };
+                        },
+                        inlineActions: getInlineFieldActions(field, permissionContext),
+                    }
                 )
             );
         });
@@ -347,7 +520,7 @@ function createContentRecordEditorPanel({
         cancelButton.type = "button";
         cancelButton.className = "admin-inline-bar-link";
         cancelButton.disabled = state.saving || state.deleting;
-        cancelButton.textContent = "Cancel";
+        cancelButton.textContent = state.openContext?.returnToEditor ? "Back to Insight" : "Cancel";
         cancelButton.addEventListener("click", () => close());
 
         footer.appendChild(cancelButton);
@@ -438,6 +611,16 @@ function createContentRecordEditorPanel({
                     ? await api.createRecord(state.entity, nextPayload)
                     : await api.updateRecord(state.entity, state.recordId, nextPayload);
 
+                if (state.entity === "media_assets" && state.openContext?.returnToEditor) {
+                    const latestMediaAssets = await refreshEntityOptions("media_assets");
+                    restoreReturnEditor(state.openContext.returnToEditor, {
+                        selectedAssetId: result.id,
+                        latestMediaAssets,
+                        message: `${getRecordLabel(state.entity, result)} created and auto-selected for this insight.`,
+                    });
+                    return;
+                }
+
                 state.record = result;
                 setMessage(`${getRecordLabel(state.entity, result)} saved. Refreshing...`, "success");
                 onStatusChange?.(`${getRecordLabel(state.entity, result)} saved. Refreshing...`, "success");
@@ -483,6 +666,8 @@ function createContentRecordEditorPanel({
         render();
 
         try {
+            await refreshSelectFieldSources(entity, state.fieldScope);
+
             if (mode === "edit") {
                 const record = await api.getRecord(entity, recordId);
                 state.record = record;
@@ -508,6 +693,14 @@ function createContentRecordEditorPanel({
     }
 
     function close() {
+        if (state.openContext?.returnToEditor) {
+            restoreReturnEditor(state.openContext.returnToEditor, {
+                message: "Returned to the insight editor.",
+                tone: "muted",
+            });
+            return;
+        }
+
         clearRefreshTimer();
         state.isOpen = false;
         state.loading = false;
@@ -519,6 +712,7 @@ function createContentRecordEditorPanel({
         state.recordId = "";
         state.fieldScope = "default";
         state.openContext = null;
+        state.optionRecords = {};
         state.allowDelete = true;
         setMessage("");
         render();
