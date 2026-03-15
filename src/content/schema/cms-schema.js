@@ -44,6 +44,7 @@ export const CONTENT_BLOCK_TYPES = Object.freeze([
     "cta",
     "gallery",
     "stat_grid",
+    "verse_insight",
 ]);
 
 export const CONTENT_BLOCK_STATUSES = Object.freeze([
@@ -401,6 +402,14 @@ export function normalizeContentBlockData(blockType, data, label) {
             return deepFreeze({
                 title: normalizeOptionalString(data, "title"),
                 items: normalizeObjectArray(data.items, "items", `${label} data`),
+            });
+        case "verse_insight":
+            return deepFreeze({
+                label: requireString(data, "label", `${label} data`),
+                title: requireString(data, "title", `${label} data`),
+                body: requireString(data, "body", `${label} data`),
+                caption: normalizeOptionalString(data, "caption"),
+                media_asset_id: normalizeOptionalString(data, "media_asset_id"),
             });
         default:
             throw new Error(`${label} uses unsupported block type "${blockType}".`);

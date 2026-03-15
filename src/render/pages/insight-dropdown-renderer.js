@@ -1,4 +1,8 @@
-import { createInsightDropdown, DEFAULT_INSIGHT_MEDIA } from "../../content/renderers/renderer-utils.js";
+import {
+    createInsightDropdown,
+    DEFAULT_INSIGHT_MEDIA,
+    getInsightMediaPresentation,
+} from "../../content/renderers/renderer-utils.js";
 
 export function resolveInsightBlockContent(block, fallbackTitle = "") {
     if (!block) {
@@ -82,4 +86,154 @@ export function createInsightDropdownFromBlock({
         fallbackMedia,
         media: insight.media || null,
     });
+}
+
+function appendParagraphs(container, text) {
+    String(text || "")
+        .split(/\n{2,}/)
+        .map((paragraph) => paragraph.trim())
+        .filter(Boolean)
+        .forEach((paragraph) => {
+            const element = document.createElement("p");
+            element.textContent = paragraph;
+            container.appendChild(element);
+        });
+}
+
+function renderVerseInsightContent(host, insight, fallbackMedia = DEFAULT_INSIGHT_MEDIA) {
+    host.replaceChildren();
+
+    const title = document.createElement("h2");
+    title.className = "section-title";
+    title.textContent = insight.title || insight.label || "Insight";
+    host.appendChild(title);
+
+    const mediaPresentation = getInsightMediaPresentation({
+        title: insight.title || insight.label || "Insight",
+        fallbackMedia,
+        media: insight.media || null,
+    });
+
+    if (insight.media) {
+        if (mediaPresentation.kind === "video" && mediaPresentation.embedUrl) {
+            const frame = document.createElement("div");
+            frame.className = "explanation-video-frame insight-video-frame";
+
+            const iframe = document.createElement("iframe");
+            iframe.src = mediaPresentation.embedUrl;
+            iframe.title = insight.title || insight.label || "Insight video";
+            iframe.loading = "lazy";
+            iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+            iframe.referrerPolicy = "strict-origin-when-cross-origin";
+            iframe.allowFullscreen = true;
+            frame.appendChild(iframe);
+            host.appendChild(frame);
+        } else if (mediaPresentation.kind === "image" || mediaPresentation.previewImage) {
+            const player = document.createElement("div");
+            player.className = "video-player";
+
+            const imageElement = document.createElement("img");
+            imageElement.src = mediaPresentation.previewImage || mediaPresentation.src || fallbackMedia;
+            imageElement.alt = mediaPresentation.alt;
+            imageElement.loading = "lazy";
+            imageElement.onerror = () => {
+                imageElement.src = fallbackMedia;
+            };
+            player.appendChild(imageElement);
+            host.appendChild(player);
+        }
+    }
+
+    if (insight.caption) {
+        const caption = document.createElement("p");
+        caption.className = "video-caption";
+        caption.textContent = insight.caption;
+        host.appendChild(caption);
+    }
+
+    if (insight.body) {
+        const body = document.createElement("div");
+        body.className = "explanation-text";
+        appendParagraphs(body, insight.body);
+        host.appendChild(body);
+    }
+}
+
+export function createVerseInsightDropdown({
+    insights = [],
+    wrapperClassName,
+    buttonId,
+    panelId,
+    buttonClassName = "",
+    fallbackMedia = DEFAULT_INSIGHT_MEDIA,
+} = {}) {
+    const options = Array.isArray(insights)
+        ? [...insights].sort((left, right) => left.ui_order - right.ui_order || left.label.localeCompare(right.label))
+        : [];
+    if (!options.length) {
+        return null;
+    }
+
+    const selectedInsight = options[0];
+    const wrapper = document.createElement("div");
+    wrapper.className = wrapperClassName || "verse-inline-insight";
+
+    const button = document.createElement("button");
+    button.className = `insight-btn${buttonClassName ? ` ${buttonClassName}` : ""}`;
+    button.id = buttonId;
+    button.type = "button";
+    button.setAttribute("aria-expanded", "false");
+    button.setAttribute("aria-controls", panelId);
+
+    const icon = document.createElement("span");
+    icon.className = "insight-btn-icon";
+    icon.setAttribute("aria-hidden", "true");
+    icon.innerHTML = "&#9662;";
+
+    const text = document.createElement("span");
+    text.textContent = selectedInsight.label || selectedInsight.title || "Insight";
+    button.append(icon, text);
+
+    const panel = document.createElement("section");
+    panel.className = "key-insight-dropdown section-insight-dropdown";
+    panel.id = panelId;
+    panel.setAttribute("aria-labelledby", buttonId);
+
+    const card = document.createElement("div");
+    card.className = "video-player-card";
+
+    let activeInsight = selectedInsight;
+
+    if (options.length > 1) {
+        const optionList = document.createElement("div");
+        optionList.className = "verse-insight-option-list";
+
+        options.forEach((insight) => {
+            const optionButton = document.createElement("button");
+            optionButton.type = "button";
+            optionButton.className = "admin-inline-bar-link";
+            optionButton.textContent = insight.label || insight.title || "Insight";
+            optionButton.dataset.active = String(insight.id === activeInsight.id);
+            optionButton.addEventListener("click", () => {
+                activeInsight = insight;
+                text.textContent = insight.label || insight.title || "Insight";
+                Array.from(optionList.children).forEach((child) => {
+                    child.dataset.active = String(child === optionButton);
+                });
+                renderVerseInsightContent(contentHost, activeInsight, fallbackMedia);
+            });
+            optionList.appendChild(optionButton);
+        });
+
+        card.appendChild(optionList);
+    }
+
+    const contentHost = document.createElement("div");
+    contentHost.className = "verse-insight-content";
+    renderVerseInsightContent(contentHost, activeInsight, fallbackMedia);
+    card.appendChild(contentHost);
+
+    panel.appendChild(card);
+    wrapper.append(button, panel);
+    return wrapper;
 }

@@ -13,7 +13,7 @@ import {
 import {
     buildRegionMap,
     listContentBlocksForOwner,
-    synthesizeInsightBlocksFromRecord,
+    listVerseInsightOptions,
 } from "../repositories/cms-content-repository.js";
 
 function resolveOwnerRegions(record, ownerEntity, options = {}) {
@@ -27,11 +27,7 @@ function resolveOwnerRegions(record, ownerEntity, options = {}) {
     };
 
     const cmsBlocks = listContentBlocksForOwner(ownerEntity, record.id, blockOptions);
-    if (cmsBlocks.length) {
-        return buildRegionMap(cmsBlocks);
-    }
-
-    return buildRegionMap(synthesizeInsightBlocksFromRecord(record, ownerEntity, record.id));
+    return buildRegionMap(cmsBlocks);
 }
 
 function resolveVerseBodyRegions(verse, options = {}) {
@@ -111,6 +107,7 @@ export function getVersePageModel(bookSlug, chapterSlug, verseNumber, options = 
         verses: listCanonicalVersesForChapterSection(section.id).map((entry) => ({
             record: entry,
             regions: resolveOwnerRegions(entry, "verses", options),
+            insightOptions: listVerseInsightOptions(entry.id, options),
         })),
     }));
     const assignedVerseIds = new Set(
@@ -123,12 +120,14 @@ export function getVersePageModel(bookSlug, chapterSlug, verseNumber, options = 
         .map((entry) => ({
             record: entry,
             regions: resolveOwnerRegions(entry, "verses", options),
+            insightOptions: listVerseInsightOptions(entry.id, options),
         }));
 
     return Object.freeze({
         book,
         chapter,
         verse,
+        insightOptions: listVerseInsightOptions(verse.id, options),
         verses: Object.freeze(verses),
         regions: resolveOwnerRegions(verse, "verses", options),
         bodyRegions: resolveVerseBodyRegions(verse, options),

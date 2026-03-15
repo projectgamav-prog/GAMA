@@ -458,7 +458,7 @@ function createContentRecordEditorPanel({
         panel.appendChild(card);
     }
 
-    async function loadEditorState({ entity, mode, recordId = "", fieldScope = "default", allowDelete = true }) {
+    async function loadEditorState({ entity, mode, recordId = "", fieldScope = "default", allowDelete = true, context = null }) {
         const config = getContentEntityConfig(entity);
         if (!config) {
             throw new Error(`Unsupported admin entity "${entity}".`);
@@ -475,7 +475,10 @@ function createContentRecordEditorPanel({
         state.deleting = false;
         state.record = null;
         state.values = null;
-        state.openContext = getPageContext?.() || null;
+        state.openContext = {
+            ...(getPageContext?.() || {}),
+            ...(context || {}),
+        };
         setMessage(mode === "create" ? `Preparing ${config.label.toLowerCase()} form...` : `Loading ${config.label.toLowerCase()}...`);
         render();
 

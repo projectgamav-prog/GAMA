@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "book_id": "book-bhagavad-gita",
+    "source_book_id": "book-bhagavad-gita",
+    "title": "section 1",
+    "slug": "section-1",
+    "summary": "this is section 1",
+    "ui_order": 1,
+    "chapter_start": 1,
+    "chapter_end": 1,
+    "badge_text": "1",
+    "cover_image": "/assets/images/lotus_background_4k.png",
+    "insight_title": null,
+    "insight_media": null,
+    "insight_caption": null,
+    "id": "book-section-bhagavad-gita-01"
+  }
+]

@@ -111,6 +111,7 @@ server.on("listening", async () => {
     bookSectionId: null,
     chapterSectionId: null,
     verseId: null,
+    verseInsightBlockIds: [],
     bodyBlockId: null,
   };
 
@@ -279,6 +280,105 @@ server.on("listening", async () => {
     assert(createVerseResponse.status === 201, "Temporary verse was not created.");
     createdIds.verseId = createVersePayload.data.id;
     await assertTableContains("verses", (row) => row.id === createdIds.verseId, "Verse was not written to verses.json.");
+
+    const { response: initialVerseInsightBlocksResponse, payload: initialVerseInsightBlocksPayload } = await requestJson(
+      baseUrl,
+      `/api/content-blocks?owner_entity=verses&owner_id=${createdIds.verseId}&region=insight`
+    );
+    assert(initialVerseInsightBlocksResponse.ok, "Filtered verse insight blocks endpoint did not return 200 for the empty state.");
+    assert(
+      Array.isArray(initialVerseInsightBlocksPayload.data) && initialVerseInsightBlocksPayload.data.length === 0,
+      "A verse with zero CMS insight blocks should not expose fake insight options."
+    );
+
+    const tempVerseInsightBlockOne = {
+      owner_entity: "verses",
+      owner_id: createdIds.verseId,
+      region: "insight",
+      block_type: "verse_insight",
+      position: 1,
+      status: "published",
+      visibility: "public",
+      is_published: true,
+      data: {
+        label: "Commentary of Malay",
+        title: "Malay Commentary",
+        body: "Temporary verse insight body one.",
+        caption: "Temporary verse insight caption one.",
+        media_asset_id: null,
+      },
+    };
+
+    const { response: createVerseInsightOneResponse, payload: createVerseInsightOnePayload } = await requestJson(
+      baseUrl,
+      "/api/content-blocks",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(tempVerseInsightBlockOne),
+      }
+    );
+    assert(createVerseInsightOneResponse.status === 201, "First verse insight block was not created.");
+    createdIds.verseInsightBlockIds.push(createVerseInsightOnePayload.data.id);
+    await assertTableContains(
+      "content_blocks",
+      (row) => row.id === createVerseInsightOnePayload.data.id,
+      "First verse insight block was not written to content_blocks.json."
+    );
+
+    const { response: singleVerseInsightBlocksResponse, payload: singleVerseInsightBlocksPayload } = await requestJson(
+      baseUrl,
+      `/api/content-blocks?owner_entity=verses&owner_id=${createdIds.verseId}&region=insight`
+    );
+    assert(singleVerseInsightBlocksResponse.ok, "Filtered verse insight blocks endpoint did not return 200 after creating one insight.");
+    assert(singleVerseInsightBlocksPayload.data.length === 1, "A verse with one insight block should expose exactly one CMS insight option.");
+    assert(singleVerseInsightBlocksPayload.data[0].block_type === "verse_insight", "Verse insight blocks must use the verse_insight block_type.");
+    assert(singleVerseInsightBlocksPayload.data[0].data.label === "Commentary of Malay", "Verse insight option label did not persist.");
+
+    const tempVerseInsightBlockTwo = {
+      owner_entity: "verses",
+      owner_id: createdIds.verseId,
+      region: "insight",
+      block_type: "verse_insight",
+      position: 2,
+      status: "published",
+      visibility: "public",
+      is_published: true,
+      data: {
+        label: "Commentary of Sanskrit",
+        title: "Sanskrit Commentary",
+        body: "Temporary verse insight body two.",
+        caption: "",
+        media_asset_id: null,
+      },
+    };
+
+    const { response: createVerseInsightTwoResponse, payload: createVerseInsightTwoPayload } = await requestJson(
+      baseUrl,
+      "/api/content-blocks",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(tempVerseInsightBlockTwo),
+      }
+    );
+    assert(createVerseInsightTwoResponse.status === 201, "Second verse insight block was not created.");
+    createdIds.verseInsightBlockIds.push(createVerseInsightTwoPayload.data.id);
+
+    const { response: multiVerseInsightBlocksResponse, payload: multiVerseInsightBlocksPayload } = await requestJson(
+      baseUrl,
+      `/api/content-blocks?owner_entity=verses&owner_id=${createdIds.verseId}&region=insight`
+    );
+    assert(multiVerseInsightBlocksResponse.ok, "Filtered verse insight blocks endpoint did not return 200 after creating multiple insights.");
+    assert(multiVerseInsightBlocksPayload.data.length === 2, "A verse with multiple insight blocks should expose the same number of CMS insight options.");
+    assert(
+      multiVerseInsightBlocksPayload.data[0].position === 1 && multiVerseInsightBlocksPayload.data[1].position === 2,
+      "Verse insight options should preserve ui_order via content block position."
+    );
+    assert(
+      multiVerseInsightBlocksPayload.data.every((row) => row.block_type === "verse_insight"),
+      "Verse insight rendering should not depend on legacy insight_* fields or non-verse-insight block types."
+    );
 
     const tempBodyBlock = {
       owner_entity: "verses",
@@ -528,10 +628,11 @@ server.on("listening", async () => {
       `/api/verses/${createdIds.verseId}`,
       { method: "DELETE" }
     );
-    assert(blockedVerseDeleteResponse.status === 409, "Delete protection for verses did not return 409 when body content blocks exist.");
+    assert(blockedVerseDeleteResponse.status === 409, "Delete protection for verses did not return 409 when dependent content blocks exist.");
     assert(blockedVerseDeletePayload.success === false, "Delete protection for verses did not return an error payload.");
 
     const cleanupSteps = [
+      ...createdIds.verseInsightBlockIds.map((id) => ["/api/content-blocks", id, "content_blocks", (row) => row.id === id]),
       ["/api/content-blocks", createdIds.bodyBlockId, "content_blocks", (row) => row.id === createdIds.bodyBlockId],
       ["/api/verses", createdIds.verseId, "verses", (row) => row.id === createdIds.verseId],
       ["/api/chapter-sections", createdIds.chapterSectionId, "chapter_sections", (row) => row.id === createdIds.chapterSectionId],
@@ -554,6 +655,7 @@ server.on("listening", async () => {
   } finally {
     const cleanupSteps = [
       ["/api/books", createdIds.blankInsightBookId],
+      ...createdIds.verseInsightBlockIds.map((id) => ["/api/content-blocks", id]),
       ["/api/content-blocks", createdIds.bodyBlockId],
       ["/api/verses", createdIds.verseId],
       ["/api/chapter-sections", createdIds.chapterSectionId],

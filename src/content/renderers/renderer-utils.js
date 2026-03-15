@@ -66,20 +66,20 @@ export function createRouteHref(routeResolver, routeKey, params = {}) {
     }
 }
 
-export function getInsightContent(record, fallbackTitle, fallbackMedia) {
-    const title = String(record.insight_title || "").trim() || String(fallbackTitle || "").trim();
-    const caption = String(record.insight_caption || "").trim();
-    const image = String(record.insight_media || "").trim();
+export function getInsightContent({ title = "", caption = "", image = "", fallbackTitle = "" } = {}) {
+    const normalizedTitle = String(title || "").trim() || String(fallbackTitle || "").trim();
+    const normalizedCaption = String(caption || "").trim();
+    const normalizedImage = String(image || "").trim();
 
-    if (!title && !caption && !image) {
+    if (!normalizedTitle && !normalizedCaption && !normalizedImage) {
         return null;
     }
 
     return {
-        buttonLabel: title || String(fallbackTitle || "").trim() || "Insight",
-        title: title || String(fallbackTitle || "").trim() || "Insight",
-        caption,
-        image: image || fallbackMedia,
+        buttonLabel: normalizedTitle || "Insight",
+        title: normalizedTitle || "Insight",
+        caption: normalizedCaption,
+        image: normalizedImage,
     };
 }
 
@@ -151,15 +151,12 @@ export function createInsightDropdown({
     fallbackMedia,
     media = null,
 }) {
-    const insight = getInsightContent(
-        {
-            insight_title: title,
-            insight_media: image,
-            insight_caption: caption,
-        },
+    const insight = getInsightContent({
         title,
-        fallbackMedia
-    );
+        image,
+        caption,
+        fallbackTitle: title,
+    });
     if (!insight) {
         return null;
     }

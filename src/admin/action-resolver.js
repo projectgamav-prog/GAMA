@@ -34,7 +34,7 @@ function createAction(label, onClick, variant = "secondary") {
     };
 }
 
-function createEditAction({ entity, record, openEditor, fieldScope = "default", allowDelete = true, label = "" }) {
+function createEditAction({ entity, record, openEditor, fieldScope = "default", allowDelete = true, label = "", context = null }) {
     if (!record) {
         return null;
     }
@@ -52,42 +52,71 @@ function createEditAction({ entity, record, openEditor, fieldScope = "default", 
             recordId: record.id,
             fieldScope,
             allowDelete,
+            context,
         })
     );
 }
 
-function resolveInsightBinding(ownerEntity, record) {
-    if (!record?.id) {
+function createCreateAction({ entity, openEditor, fieldScope = "default", label = "", context = null }) {
+    const config = getContentEntityConfig(entity);
+    if (!config) {
         return null;
     }
 
-    const insightBlock = listContentBlocksForOwner(ownerEntity, record.id, {
+    return createAction(
+        label || config.createActionLabel || `New ${config.label}`,
+        () => openEditor({
+            entity,
+            mode: "create",
+            fieldScope,
+            context,
+        })
+    );
+}
+
+function listInsightBindings(ownerEntity, record) {
+    if (!record?.id) {
+        return [];
+    }
+
+    const insightBlocks = listContentBlocksForOwner(ownerEntity, record.id, {
         includeDraft: true,
         includeHidden: true,
-    }).find((block) => block.region === "insight") || null;
+    }).filter((block) => block.region === "insight");
 
-    if (!insightBlock) {
-        return null;
-    }
+    const filteredBlocks = ownerEntity === "verses"
+        ? insightBlocks.filter((block) => block.block_type === "verse_insight")
+        : insightBlocks.slice(0, 1);
 
-    const mediaAsset = insightBlock.data?.media_asset_id
-        ? getMediaAssetById(insightBlock.data.media_asset_id)
-        : null;
-
-    return Object.freeze({
-        block: insightBlock,
-        mediaAsset,
-    });
+    return Object.freeze(
+        filteredBlocks.map((block) => Object.freeze({
+            block,
+            mediaAsset: block.data?.media_asset_id
+                ? getMediaAssetById(block.data.media_asset_id)
+                : null,
+        }))
+    );
 }
 
 function getInsightBlockFieldScope(ownerEntity, block) {
-    if (ownerEntity === "books" && block?.region === "insight") {
-        return "book_insight";
+    if (ownerEntity === "verses" || block?.block_type === "verse_insight") {
+        return "verse_insight";
     }
 
-    return block?.block_type === "media" || block?.block_type === "image" || block?.block_type === "audio"
-        ? "insight_media"
-        : "insight_rich_text";
+    return "insight_block";
+}
+
+function getInsightOptionLabel(ownerEntity, recordLabel, binding, index) {
+    if (ownerEntity === "verses") {
+        const optionLabel = String(binding?.block?.data?.label || binding?.block?.data?.title || "").trim();
+        if (optionLabel) {
+            return `${recordLabel} Insight: ${optionLabel}`;
+        }
+
+        return `${recordLabel} Insight ${index + 1}`;
+    }
+
+    return `${recordLabel} Insight`;
 }
 
 function canEditCmsInsight(permissionContext, ownerEntity) {
@@ -106,19 +135,7 @@ function buildInsightEditingActions({ ownerEntity, record, permissionContext, op
     }
 
     const label = baseLabel || getRecordLabel(ownerEntity, record);
-    const insightBinding = resolveInsightBinding(ownerEntity, record);
-
-    if (!insightBinding) {
-        return canUpdateEntity(permissionContext, ownerEntity)
-            ? [createEditAction({
-                entity: ownerEntity,
-                record,
-                openEditor,
-                label: `Edit ${label}`,
-            })]
-            : [];
-    }
-
+    const insightBindings = listInsightBindings(ownerEntity, record);
     const actions = [];
 
     if (canUpdateEntity(permissionContext, ownerEntity)) {
@@ -132,20 +149,73 @@ function buildInsightEditingActions({ ownerEntity, record, permissionContext, op
     }
 
     if (canEditCmsInsight(permissionContext, ownerEntity)) {
-        actions.push(createEditAction({
-            entity: "content_blocks",
-            record: insightBinding.block,
-            openEditor,
-            fieldScope: getInsightBlockFieldScope(ownerEntity, insightBinding.block),
-            allowDelete: false,
-            label: `Edit ${label} Insight`,
-        }));
+        if (ownerEntity === "verses") {
+            actions.push(createCreateAction({
+                entity: "content_blocks",
+                openEditor,
+                fieldScope: "verse_insight",
+                label: insightBindings.length ? `Create Another ${label} Insight` : `Create ${label} Insight`,
+                context: {
+                    requestedOwnerEntity: ownerEntity,
+                    requestedOwnerRecord: record,
+                },
+            }));
+
+            insightBindings.forEach((binding, index) => {
+                actions.push(createEditAction({
+                    entity: "content_blocks",
+                    record: binding.block,
+                    openEditor,
+                    fieldScope: "verse_insight",
+                    label: `Edit ${getInsightOptionLabel(ownerEntity, label, binding, index)}`,
+                    context: {
+                        requestedOwnerEntity: ownerEntity,
+                        requestedOwnerRecord: record,
+                    },
+                }));
+
+                if (binding.mediaAsset && canEditCmsMedia(permissionContext, ownerEntity)) {
+                    actions.push(createEditAction({
+                        entity: "media_assets",
+                        record: binding.mediaAsset,
+                        openEditor,
+                        fieldScope: "insight_media_asset",
+                        allowDelete: false,
+                        label: `Edit ${getInsightOptionLabel(ownerEntity, label, binding, index)} Media`,
+                    }));
+                }
+            });
+        } else if (insightBindings[0]) {
+            actions.push(createEditAction({
+                entity: "content_blocks",
+                record: insightBindings[0].block,
+                openEditor,
+                fieldScope: getInsightBlockFieldScope(ownerEntity, insightBindings[0].block),
+                allowDelete: false,
+                label: `Edit ${label} Insight`,
+                context: {
+                    requestedOwnerEntity: ownerEntity,
+                    requestedOwnerRecord: record,
+                },
+            }));
+        } else {
+            actions.push(createCreateAction({
+                entity: "content_blocks",
+                openEditor,
+                fieldScope: "insight_block",
+                label: `Create ${label} Insight`,
+                context: {
+                    requestedOwnerEntity: ownerEntity,
+                    requestedOwnerRecord: record,
+                },
+            }));
+        }
     }
 
-    if (insightBinding.mediaAsset && canEditCmsMedia(permissionContext, ownerEntity)) {
+    if (ownerEntity !== "verses" && insightBindings[0]?.mediaAsset && canEditCmsMedia(permissionContext, ownerEntity)) {
         actions.push(createEditAction({
             entity: "media_assets",
-            record: insightBinding.mediaAsset,
+            record: insightBindings[0].mediaAsset,
             openEditor,
             fieldScope: "insight_media_asset",
             allowDelete: false,

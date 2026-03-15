@@ -160,6 +160,12 @@ function setDefaultValues(record, fieldNames, defaultValue = null) {
   });
 }
 
+function stripDeprecatedInsightFields(record) {
+  delete record.insight_title;
+  delete record.insight_caption;
+  delete record.insight_media;
+}
+
 function assertSchemaRequiredFields(tableName, record) {
   const fields = CONTENT_FIELD_CONFIGS[tableName] || [];
 
@@ -239,7 +245,7 @@ export function validateRecord(tableName, record, rows, relatedTables = {}, curr
   switch (tableName) {
     case "books": {
       setDefaultValues(normalized, ["cover_image", "theme_key", "meta_title", "meta_description"], null);
-      setDefaultValues(normalized, ["insight_title", "insight_media", "insight_caption"], "");
+      stripDeprecatedInsightFields(normalized);
       if (normalized.ui_order == null) {
         normalized.ui_order = rows.length + 1;
       }
@@ -258,7 +264,8 @@ export function validateRecord(tableName, record, rows, relatedTables = {}, curr
       break;
     }
     case "book_sections": {
-      setDefaultValues(normalized, ["summary", "badge_text", "cover_image", "insight_title", "insight_media", "insight_caption"], null);
+      setDefaultValues(normalized, ["summary", "badge_text", "cover_image"], null);
+      stripDeprecatedInsightFields(normalized);
       normalized.book_id = assertRequiredString(normalized, "book_id");
       normalized.source_book_id = assertRequiredString(normalized, "source_book_id");
       normalized.title = assertRequiredString(normalized, "title");
@@ -293,7 +300,8 @@ export function validateRecord(tableName, record, rows, relatedTables = {}, curr
       break;
     }
     case "chapters": {
-      setDefaultValues(normalized, ["summary", "insight_title", "insight_media", "insight_caption", "hero_image", "audio_intro_url"], null);
+      setDefaultValues(normalized, ["summary", "hero_image", "audio_intro_url"], null);
+      stripDeprecatedInsightFields(normalized);
       normalized.source_book_id = assertRequiredString(normalized, "source_book_id");
       normalized.chapter_number = asPositiveInteger(normalized.chapter_number, "chapter_number");
       normalized.title = assertRequiredString(normalized, "title");
@@ -325,7 +333,8 @@ export function validateRecord(tableName, record, rows, relatedTables = {}, curr
       break;
     }
     case "chapter_sections": {
-      setDefaultValues(normalized, ["summary", "insight_title", "insight_media", "insight_caption", "card_variant", "accent_key"], null);
+      setDefaultValues(normalized, ["summary", "card_variant", "accent_key"], null);
+      stripDeprecatedInsightFields(normalized);
       normalized.chapter_id = assertRequiredString(normalized, "chapter_id");
       normalized.section_number = asPositiveInteger(normalized.section_number, "section_number");
       normalized.title = assertRequiredString(normalized, "title");
@@ -355,9 +364,10 @@ export function validateRecord(tableName, record, rows, relatedTables = {}, curr
     case "verses": {
       setDefaultValues(
         normalized,
-        ["sanskrit_text", "transliteration_text", "english_text", "hindi_text", "insight_title", "insight_media", "insight_caption", "audio_url"],
+        ["sanskrit_text", "transliteration_text", "english_text", "hindi_text", "audio_url"],
         null
       );
+      stripDeprecatedInsightFields(normalized);
       normalized.chapter_id = assertRequiredString(normalized, "chapter_id");
       normalized.verse_number = asPositiveInteger(normalized.verse_number, "verse_number");
       normalized.slug = normalizeSlug(
@@ -377,6 +387,7 @@ export function validateRecord(tableName, record, rows, relatedTables = {}, curr
     }
     case "characters": {
       setDefaultValues(normalized, ["aliases", "tags", "search_terms"], []);
+      stripDeprecatedInsightFields(normalized);
       if (normalized.ui_order == null) {
         normalized.ui_order = rows.length + 1;
       }

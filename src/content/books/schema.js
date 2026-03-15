@@ -99,9 +99,6 @@ export const CONTENT_TABLE_SCHEMAS = Object.freeze({
             "theme_key",
             "meta_title",
             "meta_description",
-            "insight_title",
-            "insight_caption",
-            "insight_media",
         ],
         [
             "id",
@@ -129,9 +126,6 @@ export const CONTENT_TABLE_SCHEMAS = Object.freeze({
             "ui_order",
             "chapter_start",
             "chapter_end",
-            "insight_title",
-            "insight_caption",
-            "insight_media",
             "badge_text",
             "cover_image",
         ],
@@ -156,9 +150,6 @@ export const CONTENT_TABLE_SCHEMAS = Object.freeze({
             "title",
             "summary",
             "ui_order",
-            "insight_title",
-            "insight_caption",
-            "insight_media",
             "hero_image",
             "audio_intro_url",
         ],
@@ -183,9 +174,6 @@ export const CONTENT_TABLE_SCHEMAS = Object.freeze({
             "ui_order",
             "verse_start",
             "verse_end",
-            "insight_title",
-            "insight_caption",
-            "insight_media",
             "card_variant",
             "accent_key",
         ],
@@ -213,9 +201,6 @@ export const CONTENT_TABLE_SCHEMAS = Object.freeze({
             "hindi_text",
             "audio_url",
             "is_featured",
-            "insight_title",
-            "insight_caption",
-            "insight_media",
         ],
         [
             "id",
@@ -266,9 +251,6 @@ export const CONTENT_FIELD_CONFIGS = Object.freeze({
         { name: "theme_key", label: "Theme Key", type: "text" },
         { name: "meta_title", label: "Meta Title", type: "text" },
         { name: "meta_description", label: "Meta Description", type: "textarea" },
-        { name: "insight_title", label: "Insight Title", type: "text" },
-        { name: "insight_media", label: "Insight Media", type: "text" },
-        { name: "insight_caption", label: "Insight Caption", type: "textarea" },
     ]),
     book_sections: withSchemaRequiredFlags("book_sections", [
         { name: "book_id", label: "Book", type: "select-from-state", source: "books", optionLabel: "title", optionValue: "id", required: true },
@@ -281,9 +263,6 @@ export const CONTENT_FIELD_CONFIGS = Object.freeze({
         { name: "chapter_end", label: "Chapter End", type: "number", min: 1, required: true },
         { name: "badge_text", label: "Badge Text", type: "text" },
         { name: "cover_image", label: "Cover Image", type: "text" },
-        { name: "insight_title", label: "Insight Title", type: "text" },
-        { name: "insight_media", label: "Insight Media", type: "text" },
-        { name: "insight_caption", label: "Insight Caption", type: "textarea" },
     ]),
     chapters: withSchemaRequiredFlags("chapters", [
         { name: "source_book_id", label: "Source Book", type: "select-from-state", source: "books", optionLabel: "title", optionValue: "id", required: true },
@@ -294,9 +273,6 @@ export const CONTENT_FIELD_CONFIGS = Object.freeze({
         { name: "ui_order", label: "UI Order", type: "number", min: 1, required: true },
         { name: "hero_image", label: "Hero Image", type: "text" },
         { name: "audio_intro_url", label: "Audio Intro URL", type: "text" },
-        { name: "insight_title", label: "Insight Title", type: "text" },
-        { name: "insight_media", label: "Insight Media", type: "text" },
-        { name: "insight_caption", label: "Insight Caption", type: "textarea" },
     ]),
     chapter_sections: withSchemaRequiredFlags("chapter_sections", [
         {
@@ -319,9 +295,6 @@ export const CONTENT_FIELD_CONFIGS = Object.freeze({
         { name: "verse_end", label: "Verse End", type: "number", min: 1, required: true },
         { name: "card_variant", label: "Card Variant", type: "text" },
         { name: "accent_key", label: "Accent Key", type: "text" },
-        { name: "insight_title", label: "Insight Title", type: "text" },
-        { name: "insight_media", label: "Insight Media", type: "text" },
-        { name: "insight_caption", label: "Insight Caption", type: "textarea" },
     ]),
     verses: withSchemaRequiredFlags("verses", [
         {
@@ -343,9 +316,6 @@ export const CONTENT_FIELD_CONFIGS = Object.freeze({
         { name: "hindi_text", label: "Hindi Text", type: "textarea" },
         { name: "audio_url", label: "Audio URL", type: "text" },
         { name: "is_featured", label: "Featured", type: "checkbox" },
-        { name: "insight_title", label: "Insight Title", type: "text" },
-        { name: "insight_media", label: "Insight Media", type: "text" },
-        { name: "insight_caption", label: "Insight Caption", type: "textarea" },
     ]),
 });
 
@@ -363,9 +333,6 @@ export const CONTENT_FIELD_CONFIGS = Object.freeze({
  * @property {string | null} theme_key
  * @property {string | null} meta_title
  * @property {string | null} meta_description
- * @property {string | null} insight_title
- * @property {string | null} insight_caption
- * @property {string | null} insight_media
  */
 
 /**
@@ -379,9 +346,6 @@ export const CONTENT_FIELD_CONFIGS = Object.freeze({
  * @property {number} ui_order
  * @property {number | null} chapter_start
  * @property {number | null} chapter_end
- * @property {string | null} insight_title
- * @property {string | null} insight_caption
- * @property {string | null} insight_media
  * @property {string | null} badge_text
  * @property {string | null} cover_image
  */
@@ -395,9 +359,6 @@ export const CONTENT_FIELD_CONFIGS = Object.freeze({
  * @property {string} title
  * @property {string | null} summary
  * @property {number} ui_order
- * @property {string | null} insight_title
- * @property {string | null} insight_caption
- * @property {string | null} insight_media
  * @property {string | null} hero_image
  * @property {string | null} audio_intro_url
  */
@@ -411,9 +372,6 @@ export const CONTENT_FIELD_CONFIGS = Object.freeze({
  * @property {string} title
  * @property {string | null} summary
  * @property {number} ui_order
- * @property {string | null} insight_title
- * @property {string | null} insight_caption
- * @property {string | null} insight_media
  * @property {string | null} card_variant
  * @property {string | null} accent_key
  * @property {number | null} verse_start
@@ -430,9 +388,6 @@ export const CONTENT_FIELD_CONFIGS = Object.freeze({
  * @property {string | null} transliteration_text
  * @property {string | null} english_text
  * @property {string | null} hindi_text
- * @property {string | null} insight_title
- * @property {string | null} insight_caption
- * @property {string | null} insight_media
  * @property {string | null} audio_url
  * @property {boolean | null} is_featured
  */
@@ -446,14 +401,6 @@ export const CONTENT_FIELD_CONFIGS = Object.freeze({
  * @property {readonly VerseRecord[]} verses
  * @property {Readonly<Record<string, unknown>>} indexes
  */
-
-function normalizeOptionalInsightFields(record, label) {
-    return {
-        insight_title: normalizeOptionalString(record, "insight_title"),
-        insight_caption: normalizeOptionalString(record, "insight_caption"),
-        insight_media: normalizeOptionalMediaPath(record, "insight_media", label),
-    };
-}
 
 function sortByUiOrder(records) {
     return [...records].sort((a, b) => a.ui_order - b.ui_order);
@@ -505,7 +452,6 @@ function normalizeBooks(rawBooks) {
             theme_key: normalizeOptionalString(record, "theme_key"),
             meta_title: normalizeOptionalString(record, "meta_title"),
             meta_description: normalizeOptionalString(record, "meta_description"),
-            ...normalizeOptionalInsightFields(record, label),
         };
 
         if (!BOOK_TYPES.includes(normalized.book_type)) {
@@ -551,7 +497,6 @@ function normalizeBookSections(rawBookSections, booksById) {
             ui_order: requirePositiveInteger(record, "ui_order", label),
             chapter_start: normalizeOptionalPositiveInteger(record, "chapter_start", label),
             chapter_end: normalizeOptionalPositiveInteger(record, "chapter_end", label),
-            ...normalizeOptionalInsightFields(record, label),
             badge_text: normalizeOptionalString(record, "badge_text"),
             cover_image: normalizeOptionalMediaPath(record, "cover_image", label),
         };
@@ -599,7 +544,6 @@ function normalizeChapters(rawChapters, booksById) {
             title: requireString(record, "title", label),
             summary: normalizeOptionalString(record, "summary"),
             ui_order: requirePositiveInteger(record, "ui_order", label),
-            ...normalizeOptionalInsightFields(record, label),
             hero_image: normalizeOptionalMediaPath(record, "hero_image", label),
             audio_intro_url: normalizeOptionalMediaPath(record, "audio_intro_url", label),
         };
@@ -646,7 +590,6 @@ function normalizeChapterSections(rawChapterSections, chaptersById) {
             title: requireString(record, "title", label),
             summary: normalizeOptionalString(record, "summary"),
             ui_order: requirePositiveInteger(record, "ui_order", label),
-            ...normalizeOptionalInsightFields(record, label),
             card_variant: normalizeOptionalString(record, "card_variant"),
             accent_key: normalizeOptionalString(record, "accent_key"),
             verse_start: verseStart,
@@ -686,7 +629,6 @@ function normalizeVerses(rawVerses, chaptersById) {
             transliteration_text: normalizeOptionalString(record, "transliteration_text"),
             english_text: normalizeOptionalString(record, "english_text"),
             hindi_text: normalizeOptionalString(record, "hindi_text"),
-            ...normalizeOptionalInsightFields(record, label),
             audio_url: normalizeOptionalMediaPath(record, "audio_url", label),
             is_featured: normalizeOptionalBoolean(record, "is_featured", label),
         };

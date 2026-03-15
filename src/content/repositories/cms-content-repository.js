@@ -26,35 +26,6 @@ function resolveBlockMedia(block) {
     });
 }
 
-function createSyntheticBlock({
-    id,
-    ownerEntity,
-    ownerId,
-    region,
-    blockType,
-    variant = null,
-    position = 1,
-    status = "published",
-    visibility = "public",
-    data = {},
-    source = "legacy",
-}) {
-    return resolveBlockMedia({
-        id,
-        owner_entity: ownerEntity,
-        owner_id: ownerId,
-        region,
-        block_type: blockType,
-        variant,
-        position,
-        status,
-        visibility,
-        is_published: status === "published",
-        data,
-        source,
-    });
-}
-
 export function listContentBlocksForOwner(ownerEntity, ownerId, { includeDraft = false, includeHidden = false } = {}) {
     const key = `${ownerEntity}:${ownerId}`;
     const blocks = CMS_DATABASE.indexes.blocksByOwnerEntityKey[key] || [];
@@ -75,30 +46,22 @@ export function listMediaAssetsByIds(assetIds = []) {
     return assetIds.map((assetId) => getMediaAssetById(assetId)).filter(Boolean);
 }
 
-export function synthesizeInsightBlocksFromRecord(record, ownerEntity, ownerId) {
-    const title = String(record?.insight_title || "").trim();
-    const caption = String(record?.insight_caption || "").trim();
-    const mediaSrc = String(record?.insight_media || "").trim();
-
-    if (!title && !caption && !mediaSrc) {
-        return Object.freeze([]);
-    }
-
-    return Object.freeze([
-        createSyntheticBlock({
-            id: `legacy-insight-${ownerEntity}-${ownerId}`,
-            ownerEntity,
-            ownerId,
-            region: "insight",
-            blockType: "media",
-            data: {
-                title: title || record?.title || record?.name || "Insight",
-                caption,
-                media_src: mediaSrc || null,
-                media_alt: `${record?.title || record?.name || "Insight"} media`,
-            },
-        }),
-    ]);
+export function listVerseInsightOptions(verseId, { includeDraft = false, includeHidden = false } = {}) {
+    return Object.freeze(
+        listContentBlocksForOwner("verses", verseId, { includeDraft, includeHidden })
+            .filter((block) => block?.region === "insight" && block?.block_type === "verse_insight")
+            .map((block) => Object.freeze({
+                id: block.id,
+                label: String(block?.data?.label || "").trim(),
+                title: String(block?.data?.title || "").trim(),
+                body: String(block?.data?.body || "").trim(),
+                caption: String(block?.data?.caption || "").trim(),
+                media_asset_id: String(block?.data?.media_asset_id || "").trim() || null,
+                ui_order: Number(block?.position) || 0,
+                published: block?.status === "published" && block?.is_published === true,
+                media: block?.data?.media_asset_id ? getMediaAssetById(block.data.media_asset_id) : null,
+            }))
+    );
 }
 
 export function buildRegionMap(blocks = []) {
@@ -126,14 +89,8 @@ export function getResolvedRegionsForOwner(record, ownerEntity, options = {}) {
         return buildRegionMap([]);
     }
 
-    const cmsBlocks = listContentBlocksForOwner(ownerEntity, record.id, {
+    return buildRegionMap(listContentBlocksForOwner(ownerEntity, record.id, {
         includeDraft: options.includeDraft === true,
         includeHidden: options.includeHidden === true,
-    });
-
-    if (cmsBlocks.length) {
-        return buildRegionMap(cmsBlocks);
-    }
-
-    return buildRegionMap(synthesizeInsightBlocksFromRecord(record, ownerEntity, record.id));
+    }));
 }

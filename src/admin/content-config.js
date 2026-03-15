@@ -12,11 +12,6 @@ function augmentFields(fields = [], overrides = {}) {
     );
 }
 
-function excludeFieldNames(fields = [], excludedNames = []) {
-    const excluded = new Set(excludedNames);
-    return Object.freeze(fields.filter((field) => !excluded.has(field.name)));
-}
-
 function getNumericValue(record, fieldName) {
     const value = Number.parseInt(record?.[fieldName], 10);
     return Number.isInteger(value) && value > 0 ? value : null;
@@ -86,7 +81,7 @@ const BOOK_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.books, {
         description: "Requires publish permission.",
     },
 });
-const BOOK_DETAILS_FIELDS = excludeFieldNames(BOOK_FIELDS, ["insight_title", "insight_media", "insight_caption"]);
+const BOOK_DETAILS_FIELDS = BOOK_FIELDS;
 
 const BOOK_SECTION_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.book_sections, {
     source_book_id: {
@@ -95,7 +90,7 @@ const BOOK_SECTION_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.book_section
         },
     },
 });
-const BOOK_SECTION_DETAILS_FIELDS = excludeFieldNames(BOOK_SECTION_FIELDS, ["insight_title", "insight_media", "insight_caption"]);
+const BOOK_SECTION_DETAILS_FIELDS = BOOK_SECTION_FIELDS;
 
 const CHAPTER_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.chapters, {
     source_book_id: {
@@ -104,7 +99,7 @@ const CHAPTER_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.chapters, {
         },
     },
 });
-const CHAPTER_DETAILS_FIELDS = excludeFieldNames(CHAPTER_FIELDS, ["insight_title", "insight_media", "insight_caption"]);
+const CHAPTER_DETAILS_FIELDS = CHAPTER_FIELDS;
 
 const CHAPTER_SECTION_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.chapter_sections, {
     chapter_id: {
@@ -114,7 +109,7 @@ const CHAPTER_SECTION_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.chapter_s
         },
     },
 });
-const CHAPTER_SECTION_DETAILS_FIELDS = excludeFieldNames(CHAPTER_SECTION_FIELDS, ["insight_title", "insight_media", "insight_caption"]);
+const CHAPTER_SECTION_DETAILS_FIELDS = CHAPTER_SECTION_FIELDS;
 
 const VERSE_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.verses, {
     chapter_id: {
@@ -124,7 +119,7 @@ const VERSE_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.verses, {
         },
     },
 });
-const VERSE_DETAILS_FIELDS = excludeFieldNames(VERSE_FIELDS, ["insight_title", "insight_media", "insight_caption"]);
+const VERSE_DETAILS_FIELDS = VERSE_FIELDS;
 
 const CHARACTER_FIELDS = augmentFields(ALL_CONTENT_FIELD_CONFIGS.characters, {
     is_published: {
@@ -153,7 +148,7 @@ const CONTENT_BLOCK_INSIGHT_TEXT_FIELDS = Object.freeze([
     Object.freeze({ name: "content_body", label: "Insight Body", type: "textarea" }),
 ]);
 
-const BOOK_INSIGHT_SWITCH_FIELDS = Object.freeze([
+const INSIGHT_BLOCK_FIELDS = Object.freeze([
     Object.freeze({
         name: "insight_block_type",
         label: "Insight Type",
@@ -163,7 +158,7 @@ const BOOK_INSIGHT_SWITCH_FIELDS = Object.freeze([
             Object.freeze({ value: "rich_text", label: "rich_text" }),
             Object.freeze({ value: "media", label: "media" }),
         ]),
-        description: "Switch between text-only and media-backed insight content for this book.",
+        description: "Switch between text-only and media-backed insight content for this record.",
     }),
     Object.freeze({ name: "content_title", label: "Insight Title", type: "text" }),
     Object.freeze({
@@ -181,13 +176,30 @@ const BOOK_INSIGHT_SWITCH_FIELDS = Object.freeze([
             return option?.title ? `${option.title} (${option.src})` : String(option?.src || option?.id || "");
         },
         optionValue: "id",
-        description: "Used when the insight type is media. Leave blank to auto-link a shared default asset.",
+        description: "Used when the insight type is media. Leave blank to auto-create a reusable default asset.",
     }),
     Object.freeze({
         name: "content_caption",
         label: "Insight Caption",
         type: "textarea",
         description: "Used when the insight type is media.",
+    }),
+]);
+
+const VERSE_INSIGHT_FIELDS = Object.freeze([
+    Object.freeze({ name: "content_label", label: "Option Label", type: "text", required: true }),
+    Object.freeze({ name: "content_title", label: "Insight Title", type: "text", required: true }),
+    Object.freeze({ name: "content_body", label: "Insight Body", type: "textarea", required: true }),
+    Object.freeze({ name: "content_caption", label: "Insight Caption", type: "textarea" }),
+    Object.freeze({
+        name: "media_asset_id",
+        label: "Insight Media Asset",
+        type: "select-from-state",
+        source: "media_assets",
+        optionLabel(option) {
+            return option?.title ? `${option.title} (${option.src})` : String(option?.src || option?.id || "");
+        },
+        optionValue: "id",
     }),
 ]);
 
@@ -245,6 +257,53 @@ function getDefaultInsightMediaAsset(helpers) {
         || null;
 }
 
+function resolveInsightTarget(context) {
+    const requestedOwnerEntity = String(context?.requestedOwnerEntity || "").trim();
+    const requestedOwnerRecord = context?.requestedOwnerRecord || null;
+
+    if (requestedOwnerEntity && requestedOwnerRecord?.id) {
+        return {
+            ownerEntity: requestedOwnerEntity,
+            ownerRecord: requestedOwnerRecord,
+        };
+    }
+
+    const selectedEntity = String(context?.selection?.entity || "").trim();
+    const selectedRecord = context?.selection?.record || null;
+    if (selectedEntity && selectedRecord?.id) {
+        return {
+            ownerEntity: selectedEntity,
+            ownerRecord: selectedRecord,
+        };
+    }
+
+    if (context?.currentVerse?.id) {
+        return { ownerEntity: "verses", ownerRecord: context.currentVerse };
+    }
+
+    if (context?.currentChapter?.id) {
+        return { ownerEntity: "chapters", ownerRecord: context.currentChapter };
+    }
+
+    if (context?.currentBook?.id) {
+        return { ownerEntity: "books", ownerRecord: context.currentBook };
+    }
+
+    return null;
+}
+
+function getNextInsightBlockPosition(helpers, ownerEntity, ownerId) {
+    const scopedBlocks = helpers
+        .listRecords("content_blocks")
+        .filter((block) =>
+            String(block?.owner_entity || "") === String(ownerEntity || "")
+            && String(block?.owner_id || "") === String(ownerId || "")
+            && String(block?.region || "") === "insight"
+        );
+
+    return getNextNumericValue(scopedBlocks, "position");
+}
+
 async function ensureBookInsightMediaAsset({
     values,
     record,
@@ -290,6 +349,13 @@ async function ensureBookInsightMediaAsset({
 }
 
 function getContentBlockLabel(record) {
+    if (record?.block_type === "verse_insight") {
+        const optionLabel = String(record?.data?.label || record?.data?.title || "").trim();
+        if (optionLabel) {
+            return `verse insight ${optionLabel}`;
+        }
+    }
+
     const ownerEntity = String(record?.owner_entity || "content").replaceAll("_", " ");
     const ownerId = record?.owner_id || "record";
     const region = record?.region || "body";
@@ -502,6 +568,7 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
         entity: "content_blocks",
         label: "Content Block",
         pluralLabel: "Content Blocks",
+        createActionLabel: "Create Insight Block",
         editActionLabel: "Edit Content Block",
         endpoint: getAdminEntityApiPath("content_blocks"),
         collectionKey: "contentBlocks",
@@ -510,13 +577,27 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
             ...CONTENT_BLOCK_INSIGHT_TEXT_FIELDS.filter((field) => field.name === "content_body"),
         ]),
         fieldScopes: Object.freeze({
-            book_insight: Object.freeze(BOOK_INSIGHT_SWITCH_FIELDS.map((field) => field.name)),
-            insight_media: Object.freeze(CONTENT_BLOCK_INSIGHT_MEDIA_FIELDS.map((field) => field.name)),
-            insight_rich_text: Object.freeze(CONTENT_BLOCK_INSIGHT_TEXT_FIELDS.map((field) => field.name)),
+            insight_block: Object.freeze(INSIGHT_BLOCK_FIELDS.map((field) => field.name)),
+            verse_insight: Object.freeze(VERSE_INSIGHT_FIELDS.map((field) => field.name)),
         }),
         permissionKey: "content.create",
         getRecordLabel(record) {
             return getContentBlockLabel(record);
+        },
+        getCreateDefaults(context) {
+            const target = resolveInsightTarget(context);
+            if (!target?.ownerEntity || !target?.ownerRecord?.id) {
+                throw new Error("Select a supported content record before creating an insight block.");
+            }
+
+            return {
+                insight_block_type: "rich_text",
+                content_label: "",
+                content_title: "",
+                content_caption: "",
+                content_body: "",
+                media_asset_id: "",
+            };
         },
         getFormValues(record) {
             const normalizedInsightType = ["media", "image", "audio"].includes(record?.block_type)
@@ -525,19 +606,38 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
 
             return {
                 insight_block_type: normalizedInsightType,
+                content_label: record?.data?.label || "",
                 content_title: record?.data?.title || "",
                 content_caption: record?.data?.caption || (normalizedInsightType === "rich_text" ? record?.data?.body || "" : ""),
                 content_body: record?.data?.body || (normalizedInsightType === "media" ? record?.data?.caption || "" : ""),
                 media_asset_id: record?.data?.media_asset_id || "",
             };
         },
-        async serializePayload(values, { record, fieldScope, helpers, api }) {
+        async serializePayload(values, { record, fieldScope, context, helpers, api }) {
+            const target = resolveInsightTarget(context);
+            const baseRecord = record
+                ? {
+                    ...record,
+                    data: cloneObject(record?.data),
+                }
+                : {
+                    owner_entity: target?.ownerEntity || "",
+                    owner_id: target?.ownerRecord?.id || "",
+                    region: "insight",
+                    block_type: "rich_text",
+                    position: getNextInsightBlockPosition(helpers, target?.ownerEntity, target?.ownerRecord?.id),
+                    status: target?.ownerRecord?.is_published ? "published" : "draft",
+                    visibility: "public",
+                    is_published: Boolean(target?.ownerRecord?.is_published),
+                    data: {},
+                };
+
             const nextRecord = {
-                ...record,
-                data: cloneObject(record?.data),
+                ...baseRecord,
+                data: cloneObject(baseRecord?.data),
             };
 
-            if (fieldScope === "book_insight") {
+            if (fieldScope === "insight_block") {
                 const nextInsightType = values.insight_block_type === "media" ? "media" : "rich_text";
 
                 nextRecord.block_type = nextInsightType;
@@ -545,7 +645,7 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
                 if (nextInsightType === "media") {
                     const mediaAssetId = await ensureBookInsightMediaAsset({
                         values,
-                        record,
+                        record: nextRecord,
                         helpers,
                         api,
                     });
@@ -565,15 +665,17 @@ export const CONTENT_ADMIN_ENTITY_CONFIGS = Object.freeze({
                 return nextRecord;
             }
 
-            if (fieldScope === "insight_media") {
-                nextRecord.data.title = values.content_title || null;
-                nextRecord.data.caption = values.content_caption || null;
-                nextRecord.data.media_asset_id = values.media_asset_id || null;
-            } else {
-                nextRecord.data.title = values.content_title || null;
-                nextRecord.data.body = values.content_body || "";
+            if (fieldScope === "verse_insight") {
+                nextRecord.block_type = "verse_insight";
+                nextRecord.data = {
+                    label: values.content_label || values.content_title || "Insight",
+                    title: values.content_title || values.content_label || "Insight",
+                    body: values.content_body || "",
+                    caption: values.content_caption || null,
+                    media_asset_id: values.media_asset_id || null,
+                };
+                return nextRecord;
             }
-
             return nextRecord;
         },
     }),

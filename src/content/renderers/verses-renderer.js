@@ -4,6 +4,7 @@ import {
 } from "./renderer-utils.js";
 import { initializeContentInteractions } from "../ui/content-interactions.js";
 import { renderRegion } from "../../render/layout/region-renderer.js";
+import { createVerseInsightDropdown } from "../../render/pages/insight-dropdown-renderer.js";
 
 function formatVerseRange(section, verses) {
     if (verses.length) {
@@ -95,16 +96,16 @@ function createVerseCard(pageModel, verseEntry, indexSeed, mode, highlighted, ro
 
     const actions = document.createElement("div");
     actions.className = "verse-actions";
-    appendInsightRegion(actions, verseEntry.regions.insight, {
-        presentation: "insight-dropdown",
+    const verseInsightDropdown = createVerseInsightDropdown({
+        insights: verseEntry.insightOptions || [],
         wrapperClassName: "verse-inline-insight",
         buttonId: `keyInsightToggle${indexSeed}`,
         panelId: `keyInsightPanel${indexSeed}`,
-        headingTag: "h2",
-        fallbackTitle: `Verse ${verse.verse_number}`,
-        alt: `${chapter.title} verse ${verse.verse_number} insight thumbnail`,
         fallbackMedia: DEFAULT_INSIGHT_MEDIA,
     });
+    if (verseInsightDropdown) {
+        actions.appendChild(verseInsightDropdown);
+    }
 
     const explanationLink = document.createElement("a");
     explanationLink.className = "btn btn-primary verse-detail-cta";

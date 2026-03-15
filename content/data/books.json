@@ -1,1 +1,19 @@
-[]
+[
+  {
+    "slug": "bhagavad-gita",
+    "title": "Bhagwad Gita",
+    "short_title": "gita",
+    "description": "voice of krishna",
+    "book_type": "source",
+    "ui_order": 1,
+    "is_published": true,
+    "cover_image": "/assets/images/lotus_background_4k.png",
+    "theme_key": "gita-core",
+    "meta_title": "Bhagavad Gita Core Text",
+    "meta_description": "metadata",
+    "insight_title": "",
+    "insight_media": "",
+    "insight_caption": "",
+    "id": "book-bhagavad-gita"
+  }
+]

@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "chapter_id": "chapter-bhagavad-gita-01",
+    "verse_number": 1,
+    "slug": "verse-1",
+    "sanskrit_text": "1",
+    "transliteration_text": "1",
+    "english_text": "1",
+    "hindi_text": "1",
+    "audio_url": null,
+    "is_featured": true,
+    "insight_title": null,
+    "insight_media": null,
+    "insight_caption": null,
+    "id": "verse-bhagavad-gita-01-001"
+  }
+]
