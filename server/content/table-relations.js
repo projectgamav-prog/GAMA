@@ -30,12 +30,22 @@ export function filterRows(rows, query) {
   );
 }
 
-export async function assertDeleteAllowed(tableName, id) {
+export async function assertDeleteAllowed(tableName, id, options = {}) {
   const constraints = deleteConstraints[tableName] || [];
+  const ignoreMatchers = Array.isArray(options.ignore) ? options.ignore : [];
 
   for (const constraint of constraints) {
     const rows = await readTable(constraint.table);
     const dependencyCount = rows.filter((row) => {
+      const shouldIgnore = ignoreMatchers.some((matcher) =>
+        matcher?.table === constraint.table
+        && typeof matcher.predicate === "function"
+        && matcher.predicate(row) === true
+      );
+      if (shouldIgnore) {
+        return false;
+      }
+
       if (row[constraint.field] !== id) {
         return false;
       }

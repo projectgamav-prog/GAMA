@@ -3,7 +3,10 @@ import { hasPermission } from "../../../src/permissions/access.js";
 import { appendRow, deleteRow, readTable, updateRow, writeTable } from "../../content/table-store.js";
 import { assertPublicDataBuildable, assertPublicTablesBuildable } from "../../content/public-content-validator.js";
 import { assertDeleteAllowed, filterRows, getTableConfig, readRelatedTables } from "../../content/table-relations.js";
-import { provisionBookInsightRecords } from "../../content/book-insight-provisioner.js";
+import {
+  getOwnedBookInsightCleanup,
+  provisionBookInsightRecords,
+} from "../../content/book-insight-provisioner.js";
 import { validateRecord } from "../../content/record-validator.js";
 
 const WRITE_PERMISSION_CONFIG = Object.freeze({
@@ -150,22 +153,31 @@ export function createCrudRouter(tableName) {
           contentBlocks,
           mediaAssets,
         });
-        const nextMediaAsset = validateRecord("media_assets", provisioned.mediaAsset, mediaAssets, {});
-        const nextMediaAssets = provisioned.nextMediaAssets.map((asset) => (
-          asset.id === provisioned.mediaAsset.id ? nextMediaAsset : asset
-        ));
-        const nextInsightBlock = validateRecord("content_blocks", provisioned.insightBlock, contentBlocks, {
-          books: nextBookRows,
-          book_sections: [],
-          chapters: [],
-          chapter_sections: [],
-          verses: [],
-          characters: [],
-          media_assets: nextMediaAssets,
-        });
-        const nextContentBlocks = provisioned.nextContentBlocks.map((block) => (
-          block.id === provisioned.insightBlock.id ? nextInsightBlock : block
-        ));
+        let nextMediaAssets = mediaAssets;
+        let nextContentBlocks = contentBlocks;
+
+        if (provisioned.didProvision) {
+          const nextMediaAsset = provisioned.mediaAsset
+            ? validateRecord("media_assets", provisioned.mediaAsset, mediaAssets, {})
+            : null;
+          nextMediaAssets = provisioned.mediaAsset
+            ? provisioned.nextMediaAssets.map((asset) => (
+              asset.id === provisioned.mediaAsset.id ? nextMediaAsset : asset
+            ))
+            : provisioned.nextMediaAssets;
+          const nextInsightBlock = validateRecord("content_blocks", provisioned.insightBlock, contentBlocks, {
+            books: nextBookRows,
+            book_sections: [],
+            chapters: [],
+            chapter_sections: [],
+            verses: [],
+            characters: [],
+            media_assets: nextMediaAssets,
+          });
+          nextContentBlocks = provisioned.nextContentBlocks.map((block) => (
+            block.id === provisioned.insightBlock.id ? nextInsightBlock : block
+          ));
+        }
 
         await assertPublicTablesBuildable({
           books: nextBookRows,
@@ -174,8 +186,10 @@ export function createCrudRouter(tableName) {
         });
 
         await writeTable("books", nextBookRows);
-        await writeTable("media_assets", nextMediaAssets);
-        await writeTable("content_blocks", nextContentBlocks);
+        if (provisioned.didProvision) {
+          await writeTable("media_assets", nextMediaAssets);
+          await writeTable("content_blocks", nextContentBlocks);
+        }
         ok(res, record, 201);
         return;
       }
@@ -219,6 +233,47 @@ export function createCrudRouter(tableName) {
       if (!ensureUserCanWrite(req, res, { tableName, mode: "delete" })) {
         return;
       }
+
+      if (tableName === "books") {
+        const [rows, contentBlocks, mediaAssets] = await Promise.all([
+          readTable("books"),
+          readTable("content_blocks"),
+          readTable("media_assets"),
+        ]);
+        const existing = rows.find((row) => row.id === req.params.id);
+        if (!existing) {
+          return fail(res, new Error(`${label} "${req.params.id}" not found.`), 404);
+        }
+
+        const cleanup = getOwnedBookInsightCleanup(req.params.id, contentBlocks, mediaAssets);
+        await assertDeleteAllowed(tableName, req.params.id, {
+          ignore: [
+            {
+              table: "content_blocks",
+              predicate(row) {
+                return cleanup.blockIds.has(row?.id);
+              },
+            },
+          ],
+        });
+
+        const nextRows = rows.filter((row) => row.id !== req.params.id);
+        const nextContentBlocks = contentBlocks.filter((row) => !cleanup.blockIds.has(row.id));
+        const nextMediaAssets = mediaAssets.filter((row) => !cleanup.mediaAssetIds.has(row.id));
+
+        await assertPublicTablesBuildable({
+          books: nextRows,
+          content_blocks: nextContentBlocks,
+          media_assets: nextMediaAssets,
+        });
+
+        await writeTable("content_blocks", nextContentBlocks);
+        await writeTable("media_assets", nextMediaAssets);
+        await writeTable("books", nextRows);
+        ok(res, existing);
+        return;
+      }
+
       await assertDeleteAllowed(tableName, req.params.id);
       const rows = await readTable(tableName);
       const nextRows = rows.filter((row) => row.id !== req.params.id);

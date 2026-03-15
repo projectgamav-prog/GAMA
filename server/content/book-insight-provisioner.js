@@ -58,11 +58,22 @@ function getInsightCaption(bookRecord, existingBlock = null) {
     || "";
 }
 
-function getBookInsightBlockId(bookId) {
+function getExplicitInsightTitle(bookRecord, existingBlock = null) {
+  return normalizeText(existingBlock?.data?.title)
+    || normalizeText(bookRecord?.insight_title);
+}
+
+function getExplicitInsightBody(bookRecord, existingBlock = null) {
+  return normalizeText(existingBlock?.data?.body)
+    || normalizeText(existingBlock?.data?.caption)
+    || normalizeText(bookRecord?.insight_caption);
+}
+
+export function getBookInsightBlockId(bookId) {
   return `content-block-books-${bookId}-insight`;
 }
 
-function getBookInsightMediaAssetId(bookId) {
+export function getBookInsightMediaAssetId(bookId) {
   return `media-asset-${bookId}-insight-media`;
 }
 
@@ -102,10 +113,14 @@ export function buildProvisionedBookInsightMediaAsset(bookRecord, mediaAssets = 
     return existingAsset;
   }
 
-  const seedAsset = getSeedInsightMediaAsset(mediaAssets);
   const bookId = normalizeText(bookRecord?.id);
-  const seededSrc = normalizeText(bookRecord?.insight_media)
-    || createOwnerScopedMediaSrc(seedAsset?.src || FALLBACK_INSIGHT_MEDIA, bookId);
+  const explicitSrc = normalizeText(bookRecord?.insight_media);
+  if (!explicitSrc) {
+    return null;
+  }
+
+  const seedAsset = getSeedInsightMediaAsset(mediaAssets);
+  const seededSrc = createOwnerScopedMediaSrc(explicitSrc || seedAsset?.src || FALLBACK_INSIGHT_MEDIA, bookId);
   const provider = inferMediaProvider(seededSrc, seedAsset?.provider || "");
 
   return {
@@ -128,26 +143,46 @@ export function buildProvisionedBookInsightMediaAsset(bookRecord, mediaAssets = 
 export function buildProvisionedBookInsightBlock(bookRecord, mediaAssetRecord, contentBlocks = []) {
   const existingBlock = findExistingBookInsightBlock(bookRecord, contentBlocks);
   const status = normalizeText(existingBlock?.status) || (bookRecord?.is_published ? "published" : "draft");
+  const body = getExplicitInsightBody(bookRecord, existingBlock);
+  const blockType = normalizeText(existingBlock?.block_type) || (mediaAssetRecord ? "media" : "rich_text");
+
+  if (!mediaAssetRecord && !body) {
+    return null;
+  }
 
   return {
     id: normalizeText(existingBlock?.id) || getBookInsightBlockId(bookRecord?.id || ""),
     owner_entity: "books",
     owner_id: normalizeText(bookRecord?.id),
     region: "insight",
-    block_type: "media",
+    block_type: blockType,
     variant: existingBlock?.variant ?? null,
     position: Number(existingBlock?.position) > 0 ? Number(existingBlock.position) : 1,
     status,
     visibility: normalizeText(existingBlock?.visibility) || "public",
     is_published: existingBlock?.is_published == null ? status === "published" : Boolean(existingBlock.is_published),
-    data: {
-      title: getInsightTitle(bookRecord, existingBlock),
-      media_asset_id: normalizeText(mediaAssetRecord?.id),
-      caption: getInsightCaption(bookRecord, existingBlock),
-    },
+    data: mediaAssetRecord
+      ? {
+        title: getInsightTitle(bookRecord, existingBlock),
+        media_asset_id: normalizeText(mediaAssetRecord?.id),
+        caption: getInsightCaption(bookRecord, existingBlock),
+      }
+      : {
+        title: getExplicitInsightTitle(bookRecord, existingBlock) || getInsightTitle(bookRecord, existingBlock),
+        body,
+      },
     created_at: existingBlock?.created_at,
     updated_at: existingBlock?.updated_at,
   };
+}
+
+function shouldProvisionBookInsightRecord(bookRecord, existingBlock = null, existingAsset = null) {
+  return Boolean(
+    existingBlock
+    || existingAsset
+    || normalizeText(bookRecord?.insight_media)
+    || getExplicitInsightBody(bookRecord, existingBlock)
+  );
 }
 
 export function provisionBookInsightRecords({
@@ -156,21 +191,78 @@ export function provisionBookInsightRecords({
   mediaAssets = [],
 }) {
   const insightBlock = findExistingBookInsightBlock(bookRecord, contentBlocks);
+  const existingAsset = findExistingBookMediaAsset(bookRecord, mediaAssets, insightBlock);
+
+  if (!shouldProvisionBookInsightRecord(bookRecord, insightBlock, existingAsset)) {
+    return {
+      didProvision: false,
+      mediaAsset: null,
+      insightBlock: null,
+      nextMediaAssets: mediaAssets,
+      nextContentBlocks: contentBlocks,
+    };
+  }
+
   const mediaAsset = buildProvisionedBookInsightMediaAsset(bookRecord, mediaAssets, insightBlock);
   const provisionedBlock = buildProvisionedBookInsightBlock(bookRecord, mediaAsset, contentBlocks);
 
-  const nextMediaAssets = findExistingBookMediaAsset(bookRecord, mediaAssets, insightBlock)
-    ? mediaAssets.map((asset) => (asset.id === mediaAsset.id ? mediaAsset : asset))
-    : [...mediaAssets, mediaAsset];
+  if (!provisionedBlock) {
+    return {
+      didProvision: false,
+      mediaAsset: null,
+      insightBlock: null,
+      nextMediaAssets: mediaAssets,
+      nextContentBlocks: contentBlocks,
+    };
+  }
+
+  const nextMediaAssets = mediaAsset
+    ? (
+      existingAsset
+        ? mediaAssets.map((asset) => (asset.id === mediaAsset.id ? mediaAsset : asset))
+        : [...mediaAssets, mediaAsset]
+    )
+    : mediaAssets;
 
   const nextContentBlocks = insightBlock
     ? contentBlocks.map((block) => (block.id === insightBlock.id ? provisionedBlock : block))
     : [...contentBlocks, provisionedBlock];
 
   return {
+    didProvision: true,
     mediaAsset,
     insightBlock: provisionedBlock,
     nextMediaAssets,
     nextContentBlocks,
+  };
+}
+
+export function getOwnedBookInsightCleanup(bookId, contentBlocks = [], mediaAssets = []) {
+  const normalizedBookId = normalizeText(bookId);
+  const ownedInsightBlockIds = new Set(
+    contentBlocks
+      .filter((block) =>
+        block?.id === getBookInsightBlockId(normalizedBookId)
+        && block?.owner_entity === "books"
+        && block?.owner_id === normalizedBookId
+        && block?.region === "insight"
+      )
+      .map((block) => block.id)
+  );
+
+  const ownedInsightMediaAssetIds = new Set(
+    mediaAssets
+      .filter((asset) =>
+        asset?.id === getBookInsightMediaAssetId(normalizedBookId)
+        && asset?.metadata?.source === "admin-generated-book-insight-media"
+        && asset?.metadata?.owner_entity === "books"
+        && asset?.metadata?.owner_id === normalizedBookId
+      )
+      .map((asset) => asset.id)
+  );
+
+  return {
+    blockIds: ownedInsightBlockIds,
+    mediaAssetIds: ownedInsightMediaAssetIds,
   };
 }

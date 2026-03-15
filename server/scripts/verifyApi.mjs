@@ -16,14 +16,6 @@ function assert(condition, message) {
   }
 }
 
-function getBookInsightBlockId(bookId) {
-  return `content-block-books-${bookId}-insight`;
-}
-
-function getBookInsightMediaAssetId(bookId) {
-  return `media-asset-${bookId}-insight-media`;
-}
-
 let sessionCookie = "";
 
 async function requestJson(baseUrl, pathname, options = {}) {
@@ -94,9 +86,27 @@ server.on("listening", async () => {
     meta_description: "Temporary collection book metadata for API verification.",
   };
 
+  const tempBlankInsightBook = {
+    slug: `verify-blank-insight-${suffix}`,
+    title: `Verify Blank Insight ${suffix}`,
+    short_title: `Blank ${suffix}`,
+    description: "Temporary blank-insight book for API verification.",
+    book_type: "collection",
+    ui_order: 9003,
+    is_published: false,
+    cover_image: "/assets/images/lotus_background_4k.png",
+    theme_key: `verify-blank-insight-${suffix}`,
+    meta_title: `Verify Blank Insight ${suffix}`,
+    meta_description: "Temporary blank-insight metadata for API verification.",
+    insight_title: "",
+    insight_caption: "",
+    insight_media: "",
+  };
+
   const createdIds = {
     sourceBookId: null,
     collectionBookId: null,
+    blankInsightBookId: null,
     chapterId: null,
     bookSectionId: null,
     chapterSectionId: null,
@@ -112,6 +122,11 @@ server.on("listening", async () => {
     const { response: booksResponse, payload: booksPayload } = await requestJson(baseUrl, "/api/books");
     assert(booksResponse.ok, "Books endpoint did not return 200.");
     assert(Array.isArray(booksPayload.data), "Books endpoint did not return an array.");
+
+    const adminBooksPageResponse = await fetch(`${baseUrl}/admin/books/index.html`);
+    assert(adminBooksPageResponse.ok, "Admin books page did not return 200.");
+    const adminBooksPageHtml = await adminBooksPageResponse.text();
+    assert(adminBooksPageHtml.includes("/src/core/browser/page-entry.js"), "Admin books page did not include the shared page bootstrap.");
 
     if (devAdminModeEnabled) {
       const { response: sessionResponse, payload: sessionPayload } = await requestJson(baseUrl, "/api/auth/session");
@@ -155,8 +170,37 @@ server.on("listening", async () => {
     assert(createCollectionResponse.status === 201, "Temporary collection book was not created.");
     createdIds.collectionBookId = createCollectionPayload.data.id;
 
+    const { response: createBlankInsightBookResponse, payload: createBlankInsightBookPayload } = await requestJson(baseUrl, "/api/books", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(tempBlankInsightBook),
+    });
+    assert(createBlankInsightBookResponse.status === 201, "Temporary blank-insight book was not created.");
+    createdIds.blankInsightBookId = createBlankInsightBookPayload.data.id;
+
     await assertTableContains("books", (row) => row.id === createdIds.sourceBookId, "Source book was not written to books.json.");
     await assertTableContains("books", (row) => row.id === createdIds.collectionBookId, "Collection book was not written to books.json.");
+    await assertTableContains("books", (row) => row.id === createdIds.blankInsightBookId, "Blank-insight book was not written to books.json.");
+    await assertTableOmits(
+      "content_blocks",
+      (row) => row.owner_entity === "books" && row.owner_id === createdIds.blankInsightBookId,
+      "Blank optional insight fields should not auto-provision book content blocks."
+    );
+    await assertTableOmits(
+      "media_assets",
+      (row) => row.metadata?.owner_entity === "books" && row.metadata?.owner_id === createdIds.blankInsightBookId,
+      "Blank optional insight fields should not auto-provision book media assets."
+    );
+
+    const { response: deleteBlankInsightBookResponse, payload: deleteBlankInsightBookPayload } = await requestJson(
+      baseUrl,
+      `/api/books/${createdIds.blankInsightBookId}`,
+      { method: "DELETE" }
+    );
+    assert(deleteBlankInsightBookResponse.ok, "Deleting a newly created empty book failed.");
+    assert(deleteBlankInsightBookPayload.success === true, "Deleting a newly created empty book did not return success.");
+    await assertTableOmits("books", (row) => row.id === createdIds.blankInsightBookId, "Blank-insight book was not removed from books.json.");
+    createdIds.blankInsightBookId = null;
 
     const tempChapter = {
       source_book_id: createdIds.sourceBookId,
@@ -493,11 +537,7 @@ server.on("listening", async () => {
       ["/api/chapter-sections", createdIds.chapterSectionId, "chapter_sections", (row) => row.id === createdIds.chapterSectionId],
       ["/api/book-sections", createdIds.bookSectionId, "book_sections", (row) => row.id === createdIds.bookSectionId],
       ["/api/chapters", createdIds.chapterId, "chapters", (row) => row.id === createdIds.chapterId],
-      ["/api/content-blocks", getBookInsightBlockId(createdIds.collectionBookId), "content_blocks", (row) => row.id === getBookInsightBlockId(createdIds.collectionBookId)],
-      ["/api/media-assets", getBookInsightMediaAssetId(createdIds.collectionBookId), "media_assets", (row) => row.id === getBookInsightMediaAssetId(createdIds.collectionBookId)],
       ["/api/books", createdIds.collectionBookId, "books", (row) => row.id === createdIds.collectionBookId],
-      ["/api/content-blocks", getBookInsightBlockId(createdIds.sourceBookId), "content_blocks", (row) => row.id === getBookInsightBlockId(createdIds.sourceBookId)],
-      ["/api/media-assets", getBookInsightMediaAssetId(createdIds.sourceBookId), "media_assets", (row) => row.id === getBookInsightMediaAssetId(createdIds.sourceBookId)],
       ["/api/books", createdIds.sourceBookId, "books", (row) => row.id === createdIds.sourceBookId],
     ];
 
@@ -513,16 +553,13 @@ server.on("listening", async () => {
     process.exitCode = 1;
   } finally {
     const cleanupSteps = [
+      ["/api/books", createdIds.blankInsightBookId],
       ["/api/content-blocks", createdIds.bodyBlockId],
       ["/api/verses", createdIds.verseId],
       ["/api/chapter-sections", createdIds.chapterSectionId],
       ["/api/book-sections", createdIds.bookSectionId],
       ["/api/chapters", createdIds.chapterId],
-      ["/api/content-blocks", createdIds.collectionBookId ? getBookInsightBlockId(createdIds.collectionBookId) : null],
-      ["/api/media-assets", createdIds.collectionBookId ? getBookInsightMediaAssetId(createdIds.collectionBookId) : null],
       ["/api/books", createdIds.collectionBookId],
-      ["/api/content-blocks", createdIds.sourceBookId ? getBookInsightBlockId(createdIds.sourceBookId) : null],
-      ["/api/media-assets", createdIds.sourceBookId ? getBookInsightMediaAssetId(createdIds.sourceBookId) : null],
       ["/api/books", createdIds.sourceBookId],
     ];
 
