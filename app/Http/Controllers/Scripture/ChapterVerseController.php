@@ -72,6 +72,13 @@ class ChapterVerseController extends Controller
                             'number' => $verse->number,
                             'text' => $verse->text,
                             'sort_order' => $verse->sort_order,
+                            'href' => route('scripture.chapters.verses.show', [
+                                'book' => $book,
+                                'bookSection' => $bookSection,
+                                'chapter' => $chapter,
+                                'chapterSection' => $section,
+                                'verse' => $verse,
+                            ]),
                         ])
                         ->values()
                         ->all(),

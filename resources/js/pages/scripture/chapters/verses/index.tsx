@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -114,6 +114,16 @@ export default function ChapterVersesIndex({
                                         {verseLabel(verse.number)}
                                     </p>
                                     <p className="leading-8">{verse.text}</p>
+                                    {verse.href && (
+                                        <div className="mt-4">
+                                            <Button asChild size="sm" variant="outline">
+                                                <Link href={verse.href}>
+                                                    Open Verse
+                                                    <ArrowRight className="size-4" />
+                                                </Link>
+                                            </Button>
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </CardContent>

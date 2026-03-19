@@ -51,6 +51,27 @@ export type ScriptureVerse = {
     number: string | null;
     text: string;
     sort_order: number;
+    href?: string;
+};
+
+export type ScriptureVerseTranslation = {
+    id: number;
+    source_key: string;
+    source_name: string;
+    language_code: string;
+    text: string;
+    sort_order: number;
+};
+
+export type ScriptureVerseCommentary = {
+    id: number;
+    source_key: string;
+    source_name: string;
+    author_name: string | null;
+    language_code: string;
+    title: string | null;
+    body: string;
+    sort_order: number;
 };
 
 export type BookShowProps = {
@@ -80,4 +101,17 @@ export type ChapterVersesIndexProps = {
             verses: ScriptureVerse[];
         }
     >;
+};
+
+export type VerseShowProps = {
+    book: ScriptureBook;
+    book_section: ScriptureBookSection;
+    chapter: ScriptureChapter;
+    chapter_section: ScriptureChapterSection & {
+        href: string;
+    };
+    verse: ScriptureVerse;
+    translations: ScriptureVerseTranslation[];
+    commentaries: ScriptureVerseCommentary[];
+    content_blocks: ScriptureContentBlock[];
 };
