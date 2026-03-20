@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "categories": [
+    {
+      "slug": "gita",
+      "name": "Gita",
+      "description": "Texts or excerpts connected to the Gita tradition.",
+      "sort_order": 1
+    },
+    {
+      "slug": "philosophy",
+      "name": "Philosophy",
+      "description": "Works centered on reflection, teaching, and insight.",
+      "sort_order": 2
+    },
+    {
+      "slug": "scripture",
+      "name": "Scripture",
+      "description": "Canonical or devotional source texts.",
+      "sort_order": 3
+    },
+    {
+      "slug": "epic",
+      "name": "Epic",
+      "description": "Narrative works with large-scale mythic scope.",
+      "sort_order": 4
+    },
+    {
+      "slug": "itihasa",
+      "name": "Itihasa",
+      "description": "Traditional history-style sacred narratives.",
+      "sort_order": 5
+    },
+    {
+      "slug": "poetry",
+      "name": "Poetry",
+      "description": "Verse-oriented works, including dohas and short poems.",
+      "sort_order": 6
+    }
+  ]
+}

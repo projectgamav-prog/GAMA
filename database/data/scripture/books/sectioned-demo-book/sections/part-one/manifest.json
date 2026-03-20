@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "section": {
+    "slug": "part-one",
+    "number": "1",
+    "title": "Part One",
+    "sort_order": 1
+  },
+  "chapters": [
+    {
+      "path": "chapters/chapter-01.json"
+    }
+  ]
+}

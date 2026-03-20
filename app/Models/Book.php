@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
@@ -22,6 +23,16 @@ class Book extends Model
     public function bookSections(): HasMany
     {
         return $this->hasMany(BookSection::class)->orderBy('sort_order');
+    }
+
+    /**
+     * Get the categories assigned to the book.
+     */
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(BookCategory::class, 'book_category_assignments')
+            ->withTimestamps()
+            ->orderBy('sort_order');
     }
 
     /**

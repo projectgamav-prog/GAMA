@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "book": {
+    "slug": "wisdom-sutras",
+    "title": "Wisdom Sutras",
+    "description": "A simple non-sectioned book with explicit chapter sections.",
+    "sort_order": 5
+  },
+  "category_slugs": [
+    "philosophy",
+    "scripture"
+  ],
+  "structure": {
+    "has_book_sections": false,
+    "has_chapter_sections": true
+  },
+  "defaults": {
+    "book_section": {
+      "slug": "main",
+      "title": "Main",
+      "sort_order": 1
+    }
+  },
+  "chapters": [
+    {
+      "path": "chapters/chapter-01.json"
+    }
+  ]
+}

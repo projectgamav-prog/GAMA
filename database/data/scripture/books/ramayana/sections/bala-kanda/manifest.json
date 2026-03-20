@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "section": {
+    "slug": "bala-kanda",
+    "number": "1",
+    "title": "Bala Kanda",
+    "sort_order": 1
+  },
+  "chapters": [
+    {
+      "path": "chapters/chapter-01.json"
+    }
+  ]
+}

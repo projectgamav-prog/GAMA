@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "chapter": {
+    "slug": "chapter-1",
+    "number": "1",
+    "title": "Arjuna Vishada Yoga",
+    "sort_order": 1
+  },
+  "chapter_sections": [
+    {
+      "slug": "chapter-1-main",
+      "number": "1",
+      "title": "Main Passage",
+      "sort_order": 1,
+      "verses": [
+        {
+          "slug": "verse-1",
+          "number": "1",
+          "text": "dhrtarastra said: on the field of dharma, what did my people and the pandavas do?",
+          "sort_order": 1,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "Dhritarashtra puchhte hain ki Kurukshetra mein kya hua.",
+              "sort_order": 2
+            }
+          ]
+        },
+        {
+          "slug": "verse-28",
+          "number": "28",
+          "text": "arjuna said: seeing my own kinsmen standing here for battle, my heart trembles.",
+          "sort_order": 2,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Arjuna sees his own people gathered for war.",
+              "sort_order": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Models\Book;
 use App\Models\Character;
 use App\Models\Topic;
-use App\Models\Verse;
+use App\Support\Scripture\ScriptureJsonImporter;
 use Illuminate\Database\Seeder;
 
 class BhagavadGitaDevelopmentSeeder extends Seeder
@@ -15,127 +15,37 @@ class BhagavadGitaDevelopmentSeeder extends Seeder
      */
     public function run(): void
     {
-        $book = Book::query()->updateOrCreate(
-            ['slug' => 'bhagavad-gita'],
-            [
-                'title' => 'Bhagavad Gita',
-                'description' => 'A minimal development dataset for the Bhagavad Gita canon and related study content.',
-                'sort_order' => 1,
-            ],
-        );
+        app(ScriptureJsonImporter::class)->import('bhagavad-gita');
 
-        $bookSection = $book->bookSections()->updateOrCreate(
-            ['slug' => 'main-text'],
-            [
-                'number' => '1',
-                'title' => 'Main Text',
-                'sort_order' => 1,
-            ],
-        );
+        $book = Book::query()
+            ->where('slug', 'bhagavad-gita')
+            ->firstOrFail();
 
-        $chapterOne = $bookSection->chapters()->updateOrCreate(
-            ['slug' => 'chapter-1'],
-            [
-                'number' => '1',
-                'title' => 'Arjuna Vishada Yoga',
-                'sort_order' => 1,
-            ],
-        );
+        $bookSection = $book->bookSections()
+            ->where('slug', 'main')
+            ->firstOrFail();
 
-        $chapterTwo = $bookSection->chapters()->updateOrCreate(
-            ['slug' => 'chapter-2'],
-            [
-                'number' => '2',
-                'title' => 'Sankhya Yoga',
-                'sort_order' => 2,
-            ],
-        );
+        $chapterOneSection = $bookSection->chapters()
+            ->where('slug', 'chapter-1')
+            ->firstOrFail()
+            ->chapterSections()
+            ->where('slug', 'chapter-1-main')
+            ->firstOrFail();
 
-        $chapterOneSection = $chapterOne->chapterSections()->updateOrCreate(
-            ['slug' => 'chapter-1-main'],
-            [
-                'number' => '1',
-                'title' => 'Main Passage',
-                'sort_order' => 1,
-            ],
-        );
+        $chapterTwoSection = $bookSection->chapters()
+            ->where('slug', 'chapter-2')
+            ->firstOrFail()
+            ->chapterSections()
+            ->where('slug', 'chapter-2-main')
+            ->firstOrFail();
 
-        $chapterTwoSection = $chapterTwo->chapterSections()->updateOrCreate(
-            ['slug' => 'chapter-2-main'],
-            [
-                'number' => '1',
-                'title' => 'Main Passage',
-                'sort_order' => 1,
-            ],
-        );
+        $verseOneTwentyEight = $chapterOneSection->verses()
+            ->where('slug', 'verse-28')
+            ->firstOrFail();
 
-        $verseOneOne = $chapterOneSection->verses()->updateOrCreate(
-            ['slug' => 'verse-1'],
-            [
-                'number' => '1',
-                'text' => 'धृतराष्ट्र उवाच। धर्मक्षेत्रे कुरुक्षेत्रे समवेता युयुत्सवः। मामकाः पाण्डवाश्चैव किमकुर्वत सञ्जय॥',
-                'sort_order' => 1,
-            ],
-        );
-
-        $verseOneTwentyEight = $chapterOneSection->verses()->updateOrCreate(
-            ['slug' => 'verse-28'],
-            [
-                'number' => '28',
-                'text' => 'अर्जुन उवाच। दृष्ट्वेमं स्वजनं कृष्ण युयुत्सुं समुपस्थितम्॥',
-                'sort_order' => 2,
-            ],
-        );
-
-        $verseTwoFortySeven = $chapterTwoSection->verses()->updateOrCreate(
-            ['slug' => 'verse-47'],
-            [
-                'number' => '47',
-                'text' => 'कर्मण्येवाधिकारस्ते मा फलेषु कदाचन। मा कर्मफलहेतुर्भूर्मा ते सङ्गोऽस्त्वकर्मणि॥',
-                'sort_order' => 1,
-            ],
-        );
-
-        $verseTwoFortyEight = $chapterTwoSection->verses()->updateOrCreate(
-            ['slug' => 'verse-48'],
-            [
-                'number' => '48',
-                'text' => 'योगस्थः कुरु कर्माणि सङ्गं त्यक्त्वा धनञ्जय। सिद्ध्यसिद्ध्योः समो भूत्वा समत्वं योग उच्यते॥',
-                'sort_order' => 2,
-            ],
-        );
-
-        $this->seedTranslationPair(
-            $verseOneOne,
-            'Dhritarashtra said: On the field of dharma at Kurukshetra, what did my people and the Pandavas do, O Sanjaya?',
-            'धृतराष्ट्र ने कहा: धर्मभूमि कुरुक्षेत्र में एकत्र मेरे और पाण्डु-पुत्रों ने क्या किया, हे संजय?',
-        );
-
-        $this->seedTranslationPair(
-            $verseTwoFortySeven,
-            'Your responsibility is in action alone, never in its fruits. Do not act for reward, and do not fall into inaction.',
-            'तुम्हारा अधिकार केवल कर्म पर है, उसके फलों पर कभी नहीं। फल की इच्छा से कर्म मत करो और अकर्मण्यता से भी मत जुड़ो।',
-        );
-
-        $this->seedTranslationPair(
-            $verseTwoFortyEight,
-            'Established in yoga, perform action without attachment. Stay even in success and failure; that balance is called yoga.',
-            'योग में स्थित होकर आसक्ति छोड़े हुए कर्म करो। सफलता और असफलता में समभाव रखना ही योग कहलाता है।',
-        );
-
-        $verseTwoFortySeven->commentaries()->updateOrCreate(
-            [
-                'language_code' => 'en',
-                'source_key' => 'dev-commentary',
-            ],
-            [
-                'source_name' => 'Development Notes',
-                'author_name' => 'Gama Editorial',
-                'title' => 'Action without attachment',
-                'body' => 'This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.',
-                'sort_order' => 1,
-            ],
-        );
+        $verseTwoFortySeven = $chapterTwoSection->verses()
+            ->where('slug', 'verse-47')
+            ->firstOrFail();
 
         $topic = Topic::query()->updateOrCreate(
             ['slug' => 'dharma'],
@@ -243,36 +153,6 @@ class BhagavadGitaDevelopmentSeeder extends Seeder
                 'meta_json' => [
                     'note' => 'Development cross-link from character to speech verse.',
                 ],
-            ],
-        );
-    }
-
-    /**
-     * Seed one English and one Hindi translation for a verse.
-     */
-    private function seedTranslationPair(Verse $verse, string $englishText, string $hindiText): void
-    {
-        $verse->translations()->updateOrCreate(
-            [
-                'language_code' => 'en',
-                'source_key' => 'dev-en',
-            ],
-            [
-                'source_name' => 'Development English',
-                'text' => $englishText,
-                'sort_order' => 1,
-            ],
-        );
-
-        $verse->translations()->updateOrCreate(
-            [
-                'language_code' => 'hi',
-                'source_key' => 'dev-hi',
-            ],
-            [
-                'source_name' => 'Development Hindi',
-                'text' => $hindiText,
-                'sort_order' => 2,
             ],
         );
     }

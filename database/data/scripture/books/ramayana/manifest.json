@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "book": {
+    "slug": "ramayana",
+    "title": "Ramayana",
+    "description": "Small sectioned sample dataset for the Ramayana.",
+    "sort_order": 2
+  },
+  "category_slugs": [
+    "epic",
+    "itihasa",
+    "scripture"
+  ],
+  "structure": {
+    "has_book_sections": true,
+    "has_chapter_sections": false
+  },
+  "defaults": {
+    "chapter_section": {
+      "slug": "main",
+      "title": "Main",
+      "sort_order": 1
+    }
+  },
+  "sections": [
+    {
+      "slug": "bala-kanda",
+      "path": "sections/bala-kanda/manifest.json"
+    },
+    {
+      "slug": "ayodhya-kanda",
+      "path": "sections/ayodhya-kanda/manifest.json"
+    }
+  ]
+}

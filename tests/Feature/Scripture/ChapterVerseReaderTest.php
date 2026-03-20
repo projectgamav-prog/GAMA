@@ -14,7 +14,7 @@ beforeEach(function () {
         ->firstOrFail();
 
     $this->bookSection = $this->book->bookSections()
-        ->where('slug', 'main-text')
+        ->where('slug', 'main')
         ->firstOrFail();
 
     $this->chapter = $this->bookSection->chapters()

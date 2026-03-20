@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "books": [
+    {
+      "slug": "bhagavad-gita",
+      "path": "books/bhagavad-gita/manifest.json",
+      "enabled": true
+    },
+    {
+      "slug": "ramayana",
+      "path": "books/ramayana/manifest.json",
+      "enabled": true
+    },
+    {
+      "slug": "kabir-dohe",
+      "path": "books/kabir-dohe/manifest.json",
+      "enabled": true
+    },
+    {
+      "slug": "small-poem-book",
+      "path": "books/small-poem-book/manifest.json",
+      "enabled": true
+    },
+    {
+      "slug": "wisdom-sutras",
+      "path": "books/wisdom-sutras/manifest.json",
+      "enabled": true
+    },
+    {
+      "slug": "sectioned-demo-book",
+      "path": "books/sectioned-demo-book/manifest.json",
+      "enabled": true
+    }
+  ]
+}

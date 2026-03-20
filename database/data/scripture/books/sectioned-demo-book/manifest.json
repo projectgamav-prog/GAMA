@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "book": {
+    "slug": "sectioned-demo-book",
+    "title": "Sectioned Demo Book",
+    "description": "A compact example with explicit section manifests and chapter sections.",
+    "sort_order": 6
+  },
+  "category_slugs": [
+    "scripture",
+    "poetry"
+  ],
+  "structure": {
+    "has_book_sections": true,
+    "has_chapter_sections": true
+  },
+  "sections": [
+    {
+      "slug": "part-one",
+      "path": "sections/part-one/manifest.json"
+    },
+    {
+      "slug": "part-two",
+      "path": "sections/part-two/manifest.json"
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "chapter": {
+    "slug": "chapter-2",
+    "number": "2",
+    "title": "Sankhya Yoga",
+    "sort_order": 2
+  },
+  "chapter_sections": [
+    {
+      "slug": "chapter-2-main",
+      "number": "1",
+      "title": "Main Passage",
+      "sort_order": 1,
+      "verses": [
+        {
+          "slug": "verse-47",
+          "number": "47",
+          "text": "Your responsibility is in action alone, never in the fruits.",
+          "sort_order": 1,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Your responsibility is in action alone, never in its fruits.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+              "sort_order": 2
+            }
+          ],
+          "commentaries": [
+            {
+              "source_key": "dev-commentary",
+              "source_name": "Development Notes",
+              "author_name": "Gama Editorial",
+              "language_code": "en",
+              "title": "Action without attachment",
+              "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+              "sort_order": 1
+            }
+          ]
+        },
+        {
+          "slug": "verse-48",
+          "number": "48",
+          "text": "Established in yoga, perform action without attachment.",
+          "sort_order": 2,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Remain balanced in success and failure; that balance is called yoga.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "Safalta aur asafalta mein samabhav rakhna hi yoga hai.",
+              "sort_order": 2
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

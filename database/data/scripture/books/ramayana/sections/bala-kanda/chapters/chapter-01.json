@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "chapter": {
+    "slug": "chapter-1",
+    "number": "1",
+    "title": "The Princes Are Born",
+    "sort_order": 1
+  },
+  "verses": [
+    {
+      "slug": "verse-1",
+      "number": "1",
+      "text": "A wish for heirs leads to a sacred rite in Ayodhya.",
+      "sort_order": 1
+    },
+    {
+      "slug": "verse-2",
+      "number": "2",
+      "text": "Joy rises in the city when the princes are born.",
+      "sort_order": 2
+    }
+  ]
+}
