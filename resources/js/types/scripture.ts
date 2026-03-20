@@ -105,6 +105,10 @@ export type BookShowProps = {
     >;
 };
 
+export type BooksIndexProps = {
+    books: ScriptureBook[];
+};
+
 export type ChapterShowProps = {
     book: ScriptureBook;
     book_section: ScriptureBookSection;

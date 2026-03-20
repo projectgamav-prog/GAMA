@@ -13,6 +13,31 @@ use Inertia\Response;
 class BookController extends Controller
 {
     /**
+     * Display the public scripture library.
+     */
+    public function index(): Response
+    {
+        $books = Book::query()
+            ->orderBy('sort_order')
+            ->orderBy('title')
+            ->get();
+
+        return Inertia::render('scripture/books/index', [
+            'books' => $books
+                ->map(fn (Book $book) => [
+                    'id' => $book->id,
+                    'slug' => $book->slug,
+                    'title' => $book->title,
+                    'description' => $book->description,
+                    'sort_order' => $book->sort_order,
+                    'href' => route('scripture.books.show', $book),
+                ])
+                ->values()
+                ->all(),
+        ]);
+    }
+
+    /**
      * Display a read-only scripture book page.
      */
     public function show(Book $book): Response

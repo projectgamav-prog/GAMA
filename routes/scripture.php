@@ -10,6 +10,9 @@ Route::prefix('books')
     ->name('scripture.')
     ->scopeBindings()
     ->group(function () {
+        Route::get('/', [BookController::class, 'index'])
+            ->name('books.index');
+
         Route::get('{book:slug}', [BookController::class, 'show'])
             ->name('books.show');
 

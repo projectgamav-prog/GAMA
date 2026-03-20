@@ -20,6 +20,26 @@ beforeEach(function () {
         ->firstOrFail();
 });
 
+test('books page lists available public scripture books', function () {
+    app(ScriptureJsonImporter::class)->import('ramayana');
+
+    $response = $this->get(route('scripture.books.index'));
+
+    $response
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('scripture/books/index')
+            ->has('books', 2)
+            ->where('books.0.slug', 'bhagavad-gita')
+            ->where('books.0.href', route('scripture.books.show', $this->book))
+            ->where('books.1.slug', 'ramayana')
+            ->where(
+                'books.1.href',
+                route('scripture.books.show', Book::query()->where('slug', 'ramayana')->firstOrFail()),
+            ),
+        );
+});
+
 test('book page is displayed for scripture browsing', function () {
     $response = $this->get(route('scripture.books.show', $this->book));
 
