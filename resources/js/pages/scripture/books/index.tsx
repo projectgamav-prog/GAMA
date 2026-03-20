@@ -16,7 +16,7 @@ export default function BooksIndex({ books }: BooksIndexProps) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Books',
-            href: route('scripture.books.index'),
+            href: '/books',
         },
     ];
 
