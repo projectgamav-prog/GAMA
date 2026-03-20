@@ -10,7 +10,7 @@
     "poetry",
     "philosophy"
   ],
-  "sections": [
+  "section": [
     {
       "slug": "main",
       "number": "1",

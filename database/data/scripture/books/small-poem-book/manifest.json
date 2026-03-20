@@ -9,7 +9,7 @@
   "categories": [
     "poetry"
   ],
-  "sections": [
+  "section": [
     {
       "slug": "main",
       "number": "1",

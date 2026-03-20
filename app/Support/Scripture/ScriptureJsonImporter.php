@@ -178,7 +178,7 @@ class ScriptureJsonImporter
                         $manifestDirectory,
                     ),
                 ],
-                $manifest['sections'],
+                $manifest['section'],
             ),
         ];
     }
@@ -231,9 +231,9 @@ class ScriptureJsonImporter
 
                 $processedFiles++;
                 $counts['chapters']++;
-                $counts['chapter_sections'] += count($payload['chapter-sections']);
+                $counts['chapter_sections'] += count($payload['chapter-section']);
 
-                foreach ($payload['chapter-sections'] as $chapterSection) {
+                foreach ($payload['chapter-section'] as $chapterSection) {
                     $verses = $chapterSection['verses'];
                     $counts['verses'] += count($verses);
                     $counts['translations'] += $this->countNestedRecords($verses, 'translations');
@@ -326,7 +326,7 @@ class ScriptureJsonImporter
         );
         $changes['chapters'][$state]++;
 
-        foreach ($payload['chapter-sections'] as $index => $chapterSectionRecord) {
+        foreach ($payload['chapter-section'] as $index => $chapterSectionRecord) {
             [$chapterSection, $state] = $this->upsert(
                 ChapterSection::query(),
                 [
@@ -443,13 +443,13 @@ class ScriptureJsonImporter
                 'book.sort_order' => ['nullable', 'integer'],
                 'categories' => ['required', 'array'],
                 'categories.*' => ['required', 'string'],
-                'sections' => ['required', 'array', 'min:1'],
-                'sections.*.slug' => ['required', 'string'],
-                'sections.*.number' => ['nullable', 'string'],
-                'sections.*.title' => ['required', 'string'],
-                'sections.*.sort_order' => ['nullable', 'integer'],
-                'sections.*.chapters' => ['required', 'array', 'min:1'],
-                'sections.*.chapters.*.path' => ['required', 'string'],
+                'section' => ['required', 'array', 'min:1'],
+                'section.*.slug' => ['required', 'string'],
+                'section.*.number' => ['nullable', 'string'],
+                'section.*.title' => ['required', 'string'],
+                'section.*.sort_order' => ['nullable', 'integer'],
+                'section.*.chapters' => ['required', 'array', 'min:1'],
+                'section.*.chapters.*.path' => ['required', 'string'],
             ],
             'Invalid scripture book manifest',
         );
@@ -457,7 +457,7 @@ class ScriptureJsonImporter
         $this->assertSchemaVersion($payload['schema_version'], 'scripture book manifest');
         $this->assertUniqueStrings($payload['categories'], sprintf('book manifest [%s] categories', $path));
         $this->assertUniqueStrings(
-            array_map(fn (array $section): string => $section['slug'], $payload['sections']),
+            array_map(fn (array $section): string => $section['slug'], $payload['section']),
             sprintf('book manifest [%s] section slugs', $path),
         );
 
@@ -478,21 +478,21 @@ class ScriptureJsonImporter
                     'chapter.number' => ['nullable', 'string'],
                     'chapter.title' => ['nullable', 'string'],
                     'chapter.sort_order' => ['nullable', 'integer'],
-                    'chapter-sections' => ['required', 'array', 'min:1'],
-                    'chapter-sections.*.slug' => ['required', 'string'],
-                    'chapter-sections.*.number' => ['nullable', 'string'],
-                    'chapter-sections.*.title' => ['required', 'string'],
-                    'chapter-sections.*.sort_order' => ['nullable', 'integer'],
-                    'chapter-sections.*.verses' => ['required', 'array', 'min:1'],
+                    'chapter-section' => ['required', 'array', 'min:1'],
+                    'chapter-section.*.slug' => ['required', 'string'],
+                    'chapter-section.*.number' => ['nullable', 'string'],
+                    'chapter-section.*.title' => ['required', 'string'],
+                    'chapter-section.*.sort_order' => ['nullable', 'integer'],
+                    'chapter-section.*.verses' => ['required', 'array', 'min:1'],
                 ],
-                $this->verseRules('chapter-sections.*.verses.*.'),
+                $this->verseRules('chapter-section.*.verses.*.'),
             ),
             'Invalid scripture chapter dataset',
         );
 
         $this->assertSchemaVersion($payload['schema_version'], 'scripture chapter dataset');
         $this->assertUniqueStrings(
-            array_map(fn (array $section): string => $section['slug'], $payload['chapter-sections']),
+            array_map(fn (array $section): string => $section['slug'], $payload['chapter-section']),
             sprintf('chapter dataset [%s] chapter-section slugs', $path),
         );
 
