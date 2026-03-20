@@ -60,7 +60,7 @@ export default function VerseShow({
             href: chapter.href,
         },
         {
-            title: 'Verses',
+            title: 'Reader',
             href: chapter.verses_href ?? chapter.href,
         },
         {
@@ -99,7 +99,7 @@ export default function VerseShow({
                     <Button asChild variant="outline">
                         <Link href={chapter.verses_href ?? chapter.href}>
                             <ArrowLeft className="size-4" />
-                            Back to Verse List
+                            Back to Reader
                         </Link>
                     </Button>
                     <Button asChild variant="outline">
@@ -194,7 +194,7 @@ export default function VerseShow({
                                         {commentary.source_key && (
                                             <span>
                                                 {' '}
-                                                • Source key:{' '}
+                                                - Source key:{' '}
                                                 {commentary.source_key}
                                             </span>
                                         )}
@@ -220,7 +220,7 @@ export default function VerseShow({
             </section>
 
             {content_blocks.length > 0 && (
-                <section className="space-y-4">
+                <section id="published-notes" className="space-y-4">
                     <div className="space-y-1">
                         <h2 className="text-xl font-semibold">Published Notes</h2>
                         <p className="text-sm text-muted-foreground">

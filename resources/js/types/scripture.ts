@@ -54,6 +54,26 @@ export type ScriptureVerse = {
     href?: string;
 };
 
+export type ScriptureReaderVerse = {
+    id: number;
+    slug: string;
+    number: string | null;
+    text: string;
+    explanation_href: string;
+    video_href: string | null;
+    translations: {
+        en: string | null;
+        hi: string | null;
+    };
+};
+
+export type ScriptureReaderCard = {
+    id: string;
+    type: 'single' | 'group';
+    label: string;
+    verses: ScriptureReaderVerse[];
+};
+
 export type ScriptureVerseTranslation = {
     id: number;
     source_key: string;
@@ -96,9 +116,11 @@ export type ChapterVersesIndexProps = {
     book: ScriptureBook;
     book_section: ScriptureBookSection;
     chapter: ScriptureChapter;
+    reader_languages: Array<'en' | 'hi'>;
+    default_language: 'en' | 'hi' | null;
     chapter_sections: Array<
         ScriptureChapterSection & {
-            verses: ScriptureVerse[];
+            cards: ScriptureReaderCard[];
         }
     >;
 };

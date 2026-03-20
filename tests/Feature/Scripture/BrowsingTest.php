@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Book;
-use App\Models\ContentBlock;
 use App\Models\Verse;
 use Database\Seeders\BhagavadGitaDevelopmentSeeder;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -56,7 +55,7 @@ test('chapter page is displayed and supports zero published content blocks', fun
         );
 });
 
-test('chapter verse list page is displayed in canonical order', function () {
+test('chapter verse reader page is displayed in canonical order', function () {
     $chapter = $this->bookSection->chapters()
         ->where('slug', 'chapter-2')
         ->firstOrFail();
@@ -72,11 +71,15 @@ test('chapter verse list page is displayed in canonical order', function () {
         ->assertInertia(fn (Assert $page) => $page
             ->component('scripture/chapters/verses/index')
             ->where('chapter.number', '2')
+            ->where('default_language', 'en')
+            ->where('reader_languages.0', 'en')
+            ->where('reader_languages.1', 'hi')
             ->has('chapter_sections', 1)
-            ->has('chapter_sections.0.verses', 2)
-            ->where('chapter_sections.0.verses.0.number', '47')
+            ->has('chapter_sections.0.cards', 2)
+            ->where('chapter_sections.0.cards.0.type', 'single')
+            ->where('chapter_sections.0.cards.0.verses.0.number', '47')
             ->where(
-                'chapter_sections.0.verses.0.href',
+                'chapter_sections.0.cards.0.verses.0.explanation_href',
                 route('scripture.chapters.verses.show', [
                     'book' => $this->book,
                     'bookSection' => $this->bookSection,
@@ -85,7 +88,7 @@ test('chapter verse list page is displayed in canonical order', function () {
                     'verse' => Verse::query()->where('slug', 'verse-47')->firstOrFail(),
                 ]),
             )
-            ->where('chapter_sections.0.verses.1.number', '48'),
+            ->where('chapter_sections.0.cards.1.verses.0.number', '48'),
         );
 });
 

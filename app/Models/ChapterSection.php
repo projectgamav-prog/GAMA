@@ -34,6 +34,14 @@ class ChapterSection extends Model
     }
 
     /**
+     * Get presentation-only verse card groupings within the section.
+     */
+    public function verseCardGroups(): HasMany
+    {
+        return $this->hasMany(VerseCardGroup::class);
+    }
+
+    /**
      * Get editorial blocks attached to the section.
      */
     public function contentBlocks(): MorphMany

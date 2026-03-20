@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Verse extends Model
@@ -39,6 +40,14 @@ class Verse extends Model
     public function commentaries(): HasMany
     {
         return $this->hasMany(VerseCommentary::class)->orderBy('sort_order');
+    }
+
+    /**
+     * Get the presentation-only card group membership row for the verse.
+     */
+    public function verseCardGroupItem(): HasOne
+    {
+        return $this->hasOne(VerseCardGroupItem::class);
     }
 
     /**
