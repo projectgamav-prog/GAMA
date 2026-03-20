@@ -1,5 +1,10 @@
 import { Link } from '@inertiajs/react';
-import { ArrowLeft, BookOpenText, MessageSquareQuote } from 'lucide-react';
+import {
+    ArrowLeft,
+    ArrowRight,
+    BookOpenText,
+    MessageSquareQuote,
+} from 'lucide-react';
 import { ContentBlockRenderer } from '@/components/scripture/content-block-renderer';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -43,9 +48,12 @@ const verseLabel = (number: string | null) => {
 
 export default function VerseShow({
     book,
+    book_section,
     chapter,
     chapter_section,
     verse,
+    previous_verse,
+    next_verse,
     translations,
     commentaries,
     content_blocks,
@@ -56,16 +64,20 @@ export default function VerseShow({
             href: book.href,
         },
         {
+            title: sectionLabel(book_section.number, book_section.title),
+            href: book_section.href,
+        },
+        {
             title: chapterLabel(chapter.number, chapter.title),
             href: chapter.href,
         },
         {
-            title: 'Reader',
-            href: chapter.verses_href ?? chapter.href,
+            title: sectionLabel(chapter_section.number, chapter_section.title),
+            href: chapter_section.href,
         },
         {
             title: verseLabel(verse.number),
-            href: chapter_section.href,
+            href: chapter.href,
         },
     ];
 
@@ -77,7 +89,14 @@ export default function VerseShow({
             <Card>
                 <CardHeader className="gap-4">
                     <div className="flex flex-wrap items-center gap-2">
-                        <Badge variant="outline">{book.title}</Badge>
+                        <Badge variant="outline">Verse Details</Badge>
+                        <Badge variant="secondary">{book.title}</Badge>
+                        <Badge variant="secondary">
+                            {sectionLabel(
+                                book_section.number,
+                                book_section.title,
+                            )}
+                        </Badge>
                         <Badge variant="secondary">
                             {sectionLabel(
                                 chapter_section.number,
@@ -96,6 +115,22 @@ export default function VerseShow({
                     </div>
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-3">
+                    {previous_verse && (
+                        <Button asChild variant="outline">
+                            <Link href={previous_verse.href}>
+                                <ArrowLeft className="size-4" />
+                                Previous Verse
+                            </Link>
+                        </Button>
+                    )}
+                    {next_verse && (
+                        <Button asChild>
+                            <Link href={next_verse.href}>
+                                Next Verse
+                                <ArrowRight className="size-4" />
+                            </Link>
+                        </Button>
+                    )}
                     <Button asChild variant="outline">
                         <Link href={chapter.verses_href ?? chapter.href}>
                             <ArrowLeft className="size-4" />

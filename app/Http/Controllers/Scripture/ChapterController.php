@@ -18,6 +18,9 @@ class ChapterController extends Controller
      */
     public function show(Book $book, BookSection $bookSection, Chapter $chapter): Response
     {
+        $bookHref = route('scripture.books.show', $book);
+        $bookSectionHref = $bookHref.'#section-'.$bookSection->slug;
+
         $contentBlocks = $chapter->contentBlocks()
             ->where('status', 'published')
             ->orderBy('sort_order')
@@ -40,7 +43,7 @@ class ChapterController extends Controller
                 'slug' => $book->slug,
                 'title' => $book->title,
                 'sort_order' => $book->sort_order,
-                'href' => route('scripture.books.show', $book),
+                'href' => $bookHref,
             ],
             'book_section' => [
                 'id' => $bookSection->id,
@@ -48,6 +51,7 @@ class ChapterController extends Controller
                 'number' => $bookSection->number,
                 'title' => $bookSection->title,
                 'sort_order' => $bookSection->sort_order,
+                'href' => $bookSectionHref,
             ],
             'chapter' => [
                 'id' => $chapter->id,

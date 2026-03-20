@@ -61,8 +61,10 @@ export default function ChapterVersesIndex({
     chapter_sections,
 }: ChapterVersesIndexProps) {
     const [language, setLanguage] = useState<'en' | 'hi'>(
-        default_language ?? 'en',
+        default_language ?? reader_languages[0] ?? 'en',
     );
+    const hasReaderLanguages = reader_languages.length > 0;
+    const showsLanguageToggle = reader_languages.length > 1;
 
     const totalCards = chapter_sections.reduce(
         (sum, section) => sum + section.cards.length,
@@ -73,6 +75,10 @@ export default function ChapterVersesIndex({
         {
             title: book.title,
             href: book.href,
+        },
+        {
+            title: sectionLabel(book_section.number, book_section.title),
+            href: book_section.href,
         },
         {
             title: chapterLabel(chapter.number, chapter.title),
@@ -95,7 +101,10 @@ export default function ChapterVersesIndex({
                         <Badge variant="outline">Reader</Badge>
                         <Badge variant="secondary">{book.title}</Badge>
                         <Badge variant="secondary">
-                            {book_section.title ?? book_section.slug}
+                            {sectionLabel(
+                                book_section.number,
+                                book_section.title,
+                            )}
                         </Badge>
                         <Badge variant="secondary">
                             {totalCards} card{totalCards === 1 ? '' : 's'}
@@ -116,34 +125,62 @@ export default function ChapterVersesIndex({
                     <div className="space-y-2">
                         <p className="text-sm font-medium">Reader Controls</p>
                         <div className="flex flex-wrap items-center gap-3">
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Languages className="size-4" />
-                                <span>Translation</span>
-                            </div>
-                            <ToggleGroup
-                                type="single"
-                                value={language}
-                                variant="outline"
-                                onValueChange={(value) => {
-                                    if (value === 'en' || value === 'hi') {
-                                        setLanguage(value);
-                                    }
-                                }}
-                            >
-                                {reader_languages.map((readerLanguage) => (
-                                    <ToggleGroupItem
-                                        key={readerLanguage}
-                                        value={readerLanguage}
-                                    >
-                                        {languageLabel(readerLanguage)}
-                                    </ToggleGroupItem>
-                                ))}
-                            </ToggleGroup>
+                            {hasReaderLanguages ? (
+                                <>
+                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                        <Languages className="size-4" />
+                                        <span>Translation</span>
+                                    </div>
+                                    {showsLanguageToggle ? (
+                                        <ToggleGroup
+                                            type="single"
+                                            value={language}
+                                            variant="outline"
+                                            onValueChange={(value) => {
+                                                if (
+                                                    value === 'en' ||
+                                                    value === 'hi'
+                                                ) {
+                                                    setLanguage(value);
+                                                }
+                                            }}
+                                        >
+                                            {reader_languages.map(
+                                                (readerLanguage) => (
+                                                    <ToggleGroupItem
+                                                        key={readerLanguage}
+                                                        value={readerLanguage}
+                                                    >
+                                                        {languageLabel(
+                                                            readerLanguage,
+                                                        )}
+                                                    </ToggleGroupItem>
+                                                ),
+                                            )}
+                                        </ToggleGroup>
+                                    ) : (
+                                        <Badge variant="outline">
+                                            {languageLabel(
+                                                reader_languages[0],
+                                            )}{' '}
+                                            Translation
+                                        </Badge>
+                                    )}
+                                </>
+                            ) : (
+                                <p className="text-sm text-muted-foreground">
+                                    No supporting translations are available for
+                                    this chapter yet.
+                                </p>
+                            )}
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                            Sanskrit remains visible. The control only switches
-                            the supporting translation line below each verse.
-                        </p>
+                        {showsLanguageToggle && (
+                            <p className="text-sm text-muted-foreground">
+                                Sanskrit remains visible. The control only
+                                switches the supporting translation line below
+                                each verse.
+                            </p>
+                        )}
                     </div>
                     <Button asChild variant="outline">
                         <Link href={chapter.href}>
@@ -234,7 +271,7 @@ export default function ChapterVersesIndex({
                                                                     }
                                                                 >
                                                                     <MessageSquareQuote className="size-4" />
-                                                                    Explanation
+                                                                    Verse Details
                                                                 </Link>
                                                             </Button>
                                                             {verse.video_href && (
@@ -249,6 +286,7 @@ export default function ChapterVersesIndex({
                                                                         }
                                                                     >
                                                                         <PlayCircle className="size-4" />
+                                                                        Notes &
                                                                         Video
                                                                     </Link>
                                                                 </Button>
@@ -262,12 +300,12 @@ export default function ChapterVersesIndex({
 
                                                     <div className="rounded-lg bg-muted/40 px-4 py-4">
                                                         <p className="mb-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                                                            {languageLabel(
-                                                                language,
-                                                            )}{' '}
-                                                            Translation
+                                                            {hasReaderLanguages
+                                                                ? `${languageLabel(language)} Translation`
+                                                                : 'Translation'}
                                                         </p>
-                                                        {verse.translations[
+                                                        {hasReaderLanguages &&
+                                                        verse.translations[
                                                             language
                                                         ] ? (
                                                             <p className="leading-8 text-muted-foreground">
@@ -277,6 +315,14 @@ export default function ChapterVersesIndex({
                                                                         language
                                                                     ]
                                                                 }
+                                                            </p>
+                                                        ) : !hasReaderLanguages ? (
+                                                            <p className="text-sm text-muted-foreground">
+                                                                No supporting
+                                                                translations are
+                                                                available for
+                                                                this chapter
+                                                                yet.
                                                             </p>
                                                         ) : (
                                                             <p className="text-sm text-muted-foreground">

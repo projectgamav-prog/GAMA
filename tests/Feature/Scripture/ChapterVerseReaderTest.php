@@ -279,3 +279,26 @@ test('reader includes a video link only for verses with published video blocks',
             ),
         );
 });
+
+test('reader exposes only languages available in the current chapter', function () {
+    $this->chapterSection->verses->each(function ($verse): void {
+        $verse->translations()
+            ->where('language_code', 'hi')
+            ->delete();
+    });
+
+    $response = $this->get(route('scripture.chapters.verses.index', [
+        'book' => $this->book,
+        'bookSection' => $this->bookSection,
+        'chapter' => $this->chapter,
+    ]));
+
+    $response
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('scripture/chapters/verses/index')
+            ->has('reader_languages', 1)
+            ->where('reader_languages.0', 'en')
+            ->where('default_language', 'en'),
+        );
+});

@@ -23,6 +23,7 @@ export type ScriptureBookSection = {
     number: string | null;
     title: string | null;
     sort_order: number;
+    href: string;
 };
 
 export type ScriptureChapter = {
@@ -133,6 +134,8 @@ export type VerseShowProps = {
         href: string;
     };
     verse: ScriptureVerse;
+    previous_verse: (ScriptureVerse & { href: string }) | null;
+    next_verse: (ScriptureVerse & { href: string }) | null;
     translations: ScriptureVerseTranslation[];
     commentaries: ScriptureVerseCommentary[];
     content_blocks: ScriptureContentBlock[];

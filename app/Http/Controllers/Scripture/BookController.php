@@ -17,6 +17,8 @@ class BookController extends Controller
      */
     public function show(Book $book): Response
     {
+        $bookHref = route('scripture.books.show', $book);
+
         $book->load([
             'bookSections' => fn ($query) => $query
                 ->orderBy('sort_order')
@@ -37,7 +39,7 @@ class BookController extends Controller
                 'title' => $book->title,
                 'description' => $book->description,
                 'sort_order' => $book->sort_order,
-                'href' => route('scripture.books.show', $book),
+                'href' => $bookHref,
             ],
             'content_blocks' => $contentBlocks
                 ->map(fn (ContentBlock $block) => $this->contentBlockData($block))
@@ -50,6 +52,7 @@ class BookController extends Controller
                     'number' => $section->number,
                     'title' => $section->title,
                     'sort_order' => $section->sort_order,
+                    'href' => $bookHref.'#section-'.$section->slug,
                     'chapters' => $section->chapters
                         ->map(fn (Chapter $chapter) => [
                             'id' => $chapter->id,

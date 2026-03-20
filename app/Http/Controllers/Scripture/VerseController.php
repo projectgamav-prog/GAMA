@@ -26,10 +26,21 @@ class VerseController extends Controller
         ChapterSection $chapterSection,
         Verse $verse,
     ): Response {
+        $bookHref = route('scripture.books.show', $book);
+        $bookSectionHref = $bookHref.'#section-'.$bookSection->slug;
+
         $verse->load([
             'translations' => fn ($query) => $query->orderBy('sort_order'),
             'commentaries' => fn ($query) => $query->orderBy('sort_order'),
         ]);
+
+        $chapterSectionVerses = $chapterSection->verses()
+            ->orderBy('sort_order')
+            ->get();
+
+        $currentVerseIndex = $chapterSectionVerses->search(
+            fn (Verse $candidate): bool => (int) $candidate->getKey() === (int) $verse->getKey(),
+        );
 
         $versesHref = route('scripture.chapters.verses.index', [
             'book' => $book,
@@ -48,7 +59,7 @@ class VerseController extends Controller
                 'slug' => $book->slug,
                 'title' => $book->title,
                 'sort_order' => $book->sort_order,
-                'href' => route('scripture.books.show', $book),
+                'href' => $bookHref,
             ],
             'book_section' => [
                 'id' => $bookSection->id,
@@ -56,6 +67,7 @@ class VerseController extends Controller
                 'number' => $bookSection->number,
                 'title' => $bookSection->title,
                 'sort_order' => $bookSection->sort_order,
+                'href' => $bookSectionHref,
             ],
             'chapter' => [
                 'id' => $chapter->id,
@@ -85,6 +97,24 @@ class VerseController extends Controller
                 'text' => $verse->text,
                 'sort_order' => $verse->sort_order,
             ],
+            'previous_verse' => $currentVerseIndex === false
+                ? null
+                : $this->adjacentVerseData(
+                    $book,
+                    $bookSection,
+                    $chapter,
+                    $chapterSection,
+                    $chapterSectionVerses->get($currentVerseIndex - 1),
+                ),
+            'next_verse' => $currentVerseIndex === false
+                ? null
+                : $this->adjacentVerseData(
+                    $book,
+                    $bookSection,
+                    $chapter,
+                    $chapterSection,
+                    $chapterSectionVerses->get($currentVerseIndex + 1),
+                ),
             'translations' => $verse->translations
                 ->map(fn (VerseTranslation $translation) => [
                     'id' => $translation->id,
@@ -131,6 +161,38 @@ class VerseController extends Controller
             'body' => $block->body,
             'data_json' => $block->data_json,
             'sort_order' => $block->sort_order,
+        ];
+    }
+
+    /**
+     * Transform an adjacent verse into a navigation link payload.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function adjacentVerseData(
+        Book $book,
+        BookSection $bookSection,
+        Chapter $chapter,
+        ChapterSection $chapterSection,
+        ?Verse $verse,
+    ): ?array {
+        if (! $verse instanceof Verse) {
+            return null;
+        }
+
+        return [
+            'id' => $verse->id,
+            'slug' => $verse->slug,
+            'number' => $verse->number,
+            'text' => $verse->text,
+            'sort_order' => $verse->sort_order,
+            'href' => route('scripture.chapters.verses.show', [
+                'book' => $book,
+                'bookSection' => $bookSection,
+                'chapter' => $chapter,
+                'chapterSection' => $chapterSection,
+                'verse' => $verse,
+            ]),
         ];
     }
 }

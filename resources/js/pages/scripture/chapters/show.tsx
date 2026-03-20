@@ -50,6 +50,10 @@ export default function ChapterShow({
             href: book.href,
         },
         {
+            title: sectionLabel(book_section.number, book_section.title),
+            href: book_section.href,
+        },
+        {
             title: chapterLabel(chapter.number, chapter.title),
             href: chapter.href,
         },
@@ -63,9 +67,13 @@ export default function ChapterShow({
             <Card>
                 <CardHeader className="gap-4">
                     <div className="flex flex-wrap items-center gap-2">
-                        <Badge variant="outline">{book.title}</Badge>
+                        <Badge variant="outline">Chapter</Badge>
+                        <Badge variant="secondary">{book.title}</Badge>
                         <Badge variant="secondary">
-                            {book_section.title ?? book_section.slug}
+                            {sectionLabel(
+                                book_section.number,
+                                book_section.title,
+                            )}
                         </Badge>
                     </div>
                     <div className="space-y-2">
@@ -74,14 +82,14 @@ export default function ChapterShow({
                         </CardTitle>
                         <CardDescription className="text-base leading-7">
                             Read the chapter overview first, then open the
-                            canonical verse list.
+                            reader and continue in canonical order.
                         </CardDescription>
                     </div>
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-3">
                     <Button asChild>
                         <Link href={chapter.verses_href ?? chapter.href}>
-                            View Verses
+                            Open Reader
                             <ArrowRight className="size-4" />
                         </Link>
                     </Button>
@@ -115,7 +123,7 @@ export default function ChapterShow({
                     <h2 className="text-xl font-semibold">Chapter Sections</h2>
                     <p className="text-sm text-muted-foreground">
                         Canonical sections inside this chapter, with verse
-                        counts for quick browsing.
+                        counts for quick entry into the reader.
                     </p>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
@@ -134,7 +142,7 @@ export default function ChapterShow({
                             <CardContent className="flex items-center justify-between gap-3">
                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                     <ListTree className="size-4" />
-                                    <span>Open this section in the verse list</span>
+                                    <span>Open this section in the reader</span>
                                 </div>
                                 <Button asChild variant="outline" size="sm">
                                     <Link
@@ -145,7 +153,7 @@ export default function ChapterShow({
                                         }
                                     >
                                         <BookOpenText className="size-4" />
-                                        Read
+                                        Open Reader
                                     </Link>
                                 </Button>
                             </CardContent>

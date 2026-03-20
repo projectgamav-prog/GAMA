@@ -72,7 +72,10 @@ class BuildChapterVerseReaderData
             ->all();
 
         return [
-            'reader_languages' => ['en', 'hi'],
+            'reader_languages' => array_values(array_filter([
+                $hasEnglish ? 'en' : null,
+                $hasHindi ? 'hi' : null,
+            ])),
             'default_language' => $hasEnglish ? 'en' : ($hasHindi ? 'hi' : null),
             'chapter_sections' => $chapterSections,
         ];

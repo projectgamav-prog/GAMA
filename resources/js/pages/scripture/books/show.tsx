@@ -24,6 +24,8 @@ const sectionLabel = (number: string | null, title: string | null) => {
     return title ?? 'Section';
 };
 
+const sectionAnchorId = (slug: string) => `section-${slug}`;
+
 const chapterLabel = (number: string | null, title: string | null) => {
     if (number && title) {
         return `Chapter ${number}: ${title}`;
@@ -100,7 +102,7 @@ export default function BookShow({
 
                 <div className="space-y-4">
                     {book_sections.map((section) => (
-                        <Card key={section.id}>
+                        <Card key={section.id} id={sectionAnchorId(section.slug)}>
                             <CardHeader>
                                 <CardTitle>
                                     {sectionLabel(section.number, section.title)}
