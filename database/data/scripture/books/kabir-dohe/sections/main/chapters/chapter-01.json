@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "chapter": {
+    "slug": "chapter-1",
+    "number": "1",
+    "title": "Selected Dohe",
+    "sort_order": 1
+  },
+  "chapter-sections": [
+    {
+      "slug": "main",
+      "number": "1",
+      "title": "Main",
+      "sort_order": 1,
+      "verses": [
+        {
+          "slug": "doha-1",
+          "number": "1",
+          "text": "Slowly, slowly, O mind; everything unfolds in its own season.",
+          "sort_order": 1,
+          "translations": [
+            {
+              "source_key": "study-en",
+              "source_name": "Study English",
+              "language_code": "en",
+              "text": "Patience ripens what force cannot hurry.",
+              "sort_order": 1
+            }
+          ]
+        },
+        {
+          "slug": "doha-2",
+          "number": "2",
+          "text": "Look within the heart; the sought companion is already there.",
+          "sort_order": 2
+        }
+      ]
+    }
+  ]
+}

@@ -6,24 +6,21 @@
     "description": "A simple non-sectioned book with explicit chapter sections.",
     "sort_order": 5
   },
-  "category_slugs": [
+  "categories": [
     "philosophy",
     "scripture"
   ],
-  "structure": {
-    "has_book_sections": false,
-    "has_chapter_sections": true
-  },
-  "defaults": {
-    "book_section": {
-      "slug": "main",
-      "title": "Main",
-      "sort_order": 1
-    }
-  },
-  "chapters": [
+  "sections": [
     {
-      "path": "chapters/chapter-01.json"
+      "slug": "main",
+      "number": "1",
+      "title": "Main",
+      "sort_order": 1,
+      "chapters": [
+        {
+          "path": "sections/main/chapters/chapter-01.json"
+        }
+      ]
     }
   ]
 }

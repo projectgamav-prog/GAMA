@@ -41,7 +41,7 @@ test('scripture import command imports one book by slug', function () {
 
 test('scripture import command imports one declared chapter file by path', function () {
     $this->artisan('scripture:import', [
-        'target' => 'database/data/scripture/books/bhagavad-gita/chapters/chapter-01.json',
+        'target' => 'database/data/scripture/books/bhagavad-gita/sections/main/chapters/chapter-01.json',
     ])->assertExitCode(0);
 
     expect(Book::query()->count())->toBe(1);

@@ -6,29 +6,21 @@
     "description": "Short doha-style sample dataset.",
     "sort_order": 3
   },
-  "category_slugs": [
+  "categories": [
     "poetry",
     "philosophy"
   ],
-  "structure": {
-    "has_book_sections": false,
-    "has_chapter_sections": false
-  },
-  "defaults": {
-    "book_section": {
-      "slug": "main",
-      "title": "Main",
-      "sort_order": 1
-    },
-    "chapter_section": {
-      "slug": "main",
-      "title": "Main",
-      "sort_order": 1
-    }
-  },
-  "chapters": [
+  "sections": [
     {
-      "path": "chapters/chapter-01.json"
+      "slug": "main",
+      "number": "1",
+      "title": "Main",
+      "sort_order": 1,
+      "chapters": [
+        {
+          "path": "sections/main/chapters/chapter-01.json"
+        }
+      ]
     }
   ]
 }

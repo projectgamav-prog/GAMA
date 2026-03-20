@@ -24,15 +24,10 @@ class ScriptureJsonImporter
 
     public const CATEGORIES_PATH = 'database/data/scripture/categories.json';
 
-    /**
-     * Import scripture JSON data into the canonical scripture tables.
-     *
-     * @return array<string, mixed>
-     */
     public function import(?string $target = null, bool $dryRun = false): array
     {
         $rootManifest = $this->loadRootManifest();
-        $categoriesManifest = $this->loadCategoriesManifest();
+        $categoryManifest = $this->loadCategoriesManifest();
         $resolvedTarget = $this->resolveTarget($target, $rootManifest);
 
         $summary = [
@@ -53,7 +48,7 @@ class ScriptureJsonImporter
             $bookDefinition = $this->loadBookDefinition($bookTarget['entry']);
             $preparedImport = $this->prepareBookImport(
                 $bookDefinition,
-                $categoriesManifest,
+                $categoryManifest,
                 $bookTarget['selected_files'],
             );
 
@@ -77,28 +72,17 @@ class ScriptureJsonImporter
         return $summary;
     }
 
-    /**
-     * @param  array<string, mixed>  $rootManifest
-     * @return array{
-     *     mode: string,
-     *     target: string,
-     *     books: list<array{
-     *         entry: array<string, mixed>,
-     *         selected_files: array<string, bool>|null
-     *     }>
-     * }
-     */
     private function resolveTarget(?string $target, array $rootManifest): array
     {
         $entries = array_values($rootManifest['books']);
 
         if ($target === null) {
-            $enabledEntries = array_values(array_filter(
+            $books = array_values(array_filter(
                 $entries,
                 fn (array $entry): bool => (bool) $entry['enabled'],
             ));
 
-            if ($enabledEntries === []) {
+            if ($books === []) {
                 throw new RuntimeException('Scripture corpus manifest does not contain any enabled books.');
             }
 
@@ -110,7 +94,7 @@ class ScriptureJsonImporter
                         'entry' => $entry,
                         'selected_files' => null,
                     ],
-                    $enabledEntries,
+                    $books,
                 ),
             ];
         }
@@ -120,9 +104,8 @@ class ScriptureJsonImporter
 
             foreach ($entries as $entry) {
                 $bookDefinition = $this->loadBookDefinition($entry);
-                $matchingPath = $this->findMatchingChapterPath($bookDefinition, $resolvedPath);
 
-                if ($matchingPath === null) {
+                if (! $this->bookContainsChapterPath($bookDefinition, $resolvedPath)) {
                     continue;
                 }
 
@@ -131,7 +114,7 @@ class ScriptureJsonImporter
                     'target' => $resolvedPath,
                     'books' => [[
                         'entry' => $entry,
-                        'selected_files' => [$matchingPath => true],
+                        'selected_files' => [$resolvedPath => true],
                     ]],
                 ];
             }
@@ -163,78 +146,43 @@ class ScriptureJsonImporter
         ));
     }
 
-    /**
-     * @param  array<string, mixed>  $rootEntry
-     * @return array<string, mixed>
-     */
-    private function loadBookDefinition(array $rootEntry): array
+    private function loadBookDefinition(array $entry): array
     {
         $rootDirectory = dirname($this->resolvePath(self::ROOT_MANIFEST_PATH));
-        $manifestPath = $this->resolvePath($rootEntry['path'], $rootDirectory);
+        $manifestPath = $this->resolvePath($entry['path'], $rootDirectory);
         $manifest = $this->loadBookManifest($manifestPath);
+        $manifestDirectory = dirname($manifestPath);
 
-        if ($manifest['book']['slug'] !== $rootEntry['slug']) {
+        if ($manifest['book']['slug'] !== $entry['slug']) {
             throw new RuntimeException(sprintf(
                 'Book manifest [%s] slug [%s] does not match root manifest slug [%s].',
                 $manifestPath,
                 $manifest['book']['slug'],
-                $rootEntry['slug'],
+                $entry['slug'],
             ));
-        }
-
-        $manifestDirectory = dirname($manifestPath);
-        $sections = [];
-
-        if ((bool) $manifest['structure']['has_book_sections']) {
-            foreach ($manifest['sections'] as $sectionReference) {
-                $sectionManifestPath = $this->resolvePath($sectionReference['path'], $manifestDirectory);
-                $sectionManifest = $this->loadSectionManifest($sectionManifestPath);
-
-                if (
-                    array_key_exists('slug', $sectionReference)
-                    && $sectionReference['slug'] !== null
-                    && $sectionReference['slug'] !== $sectionManifest['section']['slug']
-                ) {
-                    throw new RuntimeException(sprintf(
-                        'Section manifest [%s] slug [%s] does not match declared slug [%s].',
-                        $sectionManifestPath,
-                        $sectionManifest['section']['slug'],
-                        $sectionReference['slug'],
-                    ));
-                }
-
-                $sections[] = [
-                    'record' => $sectionManifest['section'],
-                    'chapters' => $this->normalizeChapterReferences(
-                        $sectionManifest['chapters'],
-                        dirname($sectionManifestPath),
-                    ),
-                ];
-            }
-        } else {
-            $sections[] = [
-                'record' => $this->defaultBookSection($manifest),
-                'chapters' => $this->normalizeChapterReferences(
-                    $manifest['chapters'],
-                    $manifestDirectory,
-                ),
-            ];
         }
 
         return [
             'book' => $manifest['book'],
-            'defaults' => $manifest['defaults'] ?? [],
-            'category_slugs' => array_values($manifest['category_slugs']),
-            'sections' => $sections,
+            'categories' => array_values($manifest['categories']),
+            'sections' => array_map(
+                fn (array $section): array => [
+                    'record' => [
+                        'slug' => $section['slug'],
+                        'number' => $section['number'] ?? null,
+                        'title' => $section['title'],
+                        'sort_order' => $section['sort_order'] ?? 0,
+                    ],
+                    'chapters' => $this->normalizeChapterReferences(
+                        $section['chapters'],
+                        $manifestDirectory,
+                    ),
+                ],
+                $manifest['sections'],
+            ),
         ];
     }
 
-    /**
-     * @param  array<string, mixed>  $bookDefinition
-     * @param  array<string, mixed>  $categoriesManifest
-     * @param  array<string, bool>|null  $selectedFiles
-     * @return array<string, mixed>
-     */
     private function prepareBookImport(
         array $bookDefinition,
         array $categoriesManifest,
@@ -242,19 +190,20 @@ class ScriptureJsonImporter
     ): array {
         $categoryRecords = $this->resolveCategoryRecords(
             $categoriesManifest,
-            $bookDefinition['category_slugs'],
+            $bookDefinition['categories'],
             $bookDefinition['book']['slug'],
         );
 
-        $preparedSections = [];
         $counts = $this->emptyCountSummary();
         $counts['books'] = 1;
         $counts['categories'] = count($categoryRecords);
-        $counts['category_assignments'] = count($bookDefinition['category_slugs']);
+        $counts['category_assignments'] = count($bookDefinition['categories']);
+
         $processedFiles = 0;
+        $sections = [];
 
         foreach ($bookDefinition['sections'] as $sectionDefinition) {
-            $preparedChapters = [];
+            $chapters = [];
 
             foreach ($sectionDefinition['chapters'] as $chapterReference) {
                 if ($selectedFiles !== null && ! array_key_exists($chapterReference['path'], $selectedFiles)) {
@@ -275,39 +224,31 @@ class ScriptureJsonImporter
                     ));
                 }
 
-                $preparedChapters[] = [
+                $chapters[] = [
                     'path' => $chapterReference['path'],
                     'payload' => $payload,
                 ];
 
                 $processedFiles++;
                 $counts['chapters']++;
+                $counts['chapter_sections'] += count($payload['chapter-sections']);
 
-                $chapterSectionRecords = $payload['chapter_sections'] ?? [
-                    array_merge(
-                        $this->defaultChapterSection($bookDefinition),
-                        ['verses' => $payload['verses']],
-                    ),
-                ];
-
-                $counts['chapter_sections'] += count($chapterSectionRecords);
-
-                foreach ($chapterSectionRecords as $chapterSectionRecord) {
-                    $verses = $chapterSectionRecord['verses'];
+                foreach ($payload['chapter-sections'] as $chapterSection) {
+                    $verses = $chapterSection['verses'];
                     $counts['verses'] += count($verses);
                     $counts['translations'] += $this->countNestedRecords($verses, 'translations');
                     $counts['commentaries'] += $this->countNestedRecords($verses, 'commentaries');
                 }
             }
 
-            if ($preparedChapters === []) {
+            if ($chapters === []) {
                 continue;
             }
 
             $counts['book_sections']++;
-            $preparedSections[] = [
+            $sections[] = [
                 'record' => $sectionDefinition['record'],
-                'chapters' => $preparedChapters,
+                'chapters' => $chapters,
             ];
         }
 
@@ -320,19 +261,13 @@ class ScriptureJsonImporter
 
         return [
             'book' => $bookDefinition['book'],
-            'defaults' => $bookDefinition['defaults'],
-            'category_records' => $categoryRecords,
-            'category_slugs' => $bookDefinition['category_slugs'],
-            'sections' => $preparedSections,
+            'categories' => $categoryRecords,
+            'sections' => $sections,
             'processed_files' => $processedFiles,
             'counts' => $counts,
         ];
     }
 
-    /**
-     * @param  array<string, mixed>  $preparedImport
-     * @return array<string, array<string, int>>
-     */
     private function importBook(array $preparedImport): array
     {
         $changes = $this->emptyChangeSummary();
@@ -347,11 +282,11 @@ class ScriptureJsonImporter
 
             $categoryIds = [];
 
-            foreach ($preparedImport['category_records'] as $categoryRecord) {
+            foreach ($preparedImport['categories'] as $record) {
                 [$category, $state] = $this->upsert(
                     BookCategory::query(),
-                    ['slug' => $categoryRecord['slug']],
-                    $this->categoryValues($categoryRecord),
+                    ['slug' => $record['slug']],
+                    $this->categoryValues($record),
                 );
                 $changes['categories'][$state]++;
                 $categoryIds[] = (int) $category->getKey();
@@ -371,12 +306,7 @@ class ScriptureJsonImporter
                 $changes['book_sections'][$state]++;
 
                 foreach ($sectionImport['chapters'] as $chapterImport) {
-                    $this->importChapterFile(
-                        $bookSection,
-                        $chapterImport['payload'],
-                        $preparedImport['defaults'] ?? [],
-                        $changes,
-                    );
+                    $this->importChapterFile($bookSection, $chapterImport['payload'], $changes);
                 }
             }
         });
@@ -384,16 +314,8 @@ class ScriptureJsonImporter
         return $changes;
     }
 
-    /**
-     * @param  array<string, mixed>  $defaults
-     * @param  array<string, array<string, int>>  $changes
-     */
-    private function importChapterFile(
-        BookSection $bookSection,
-        array $payload,
-        array $defaults,
-        array &$changes,
-    ): void {
+    private function importChapterFile(BookSection $bookSection, array $payload, array &$changes): void
+    {
         [$chapter, $state] = $this->upsert(
             Chapter::query(),
             [
@@ -404,25 +326,14 @@ class ScriptureJsonImporter
         );
         $changes['chapters'][$state]++;
 
-        $chapterSectionRecords = $payload['chapter_sections'] ?? [
-            array_merge(
-                $this->defaultChapterSection(['defaults' => $defaults]),
-                ['verses' => $payload['verses']],
-            ),
-        ];
-
-        foreach ($chapterSectionRecords as $sectionIndex => $chapterSectionRecord) {
+        foreach ($payload['chapter-sections'] as $index => $chapterSectionRecord) {
             [$chapterSection, $state] = $this->upsert(
                 ChapterSection::query(),
                 [
                     'chapter_id' => $chapter->getKey(),
                     'slug' => $chapterSectionRecord['slug'],
                 ],
-                $this->chapterSectionValues(
-                    $chapter->getKey(),
-                    $chapterSectionRecord,
-                    $sectionIndex,
-                ),
+                $this->chapterSectionValues($chapter->getKey(), $chapterSectionRecord, $index),
             );
             $changes['chapter_sections'][$state]++;
 
@@ -466,317 +377,208 @@ class ScriptureJsonImporter
         }
     }
 
-    /**
-     * @param  array<string, mixed>  $categoriesManifest
-     * @param  list<string>  $categorySlugs
-     * @return list<array<string, mixed>>
-     */
-    private function resolveCategoryRecords(
-        array $categoriesManifest,
-        array $categorySlugs,
-        string $bookSlug,
-    ): array {
-        $recordsBySlug = [];
-
-        foreach ($categoriesManifest['categories'] as $record) {
-            $recordsBySlug[$record['slug']] = $record;
-        }
-
-        $records = [];
-
-        foreach ($categorySlugs as $categorySlug) {
-            if (! array_key_exists($categorySlug, $recordsBySlug)) {
-                throw new RuntimeException(sprintf(
-                    'Book [%s] references unknown category slug [%s].',
-                    $bookSlug,
-                    $categorySlug,
-                ));
-            }
-
-            $records[] = $recordsBySlug[$categorySlug];
-        }
-
-        return $records;
-    }
-
-    /**
-     * @param  list<int>  $categoryIds
-     * @param  array<string, array<string, int>>  $changes
-     */
-    private function syncBookCategories(Book $book, array $categoryIds, array &$changes): void
-    {
-        $targetIds = array_values(array_unique($categoryIds));
-        sort($targetIds);
-
-        $currentIds = $book->categories()
-            ->pluck('book_categories.id')
-            ->map(fn ($id): int => (int) $id)
-            ->sort()
-            ->values()
-            ->all();
-
-        $attached = array_values(array_diff($targetIds, $currentIds));
-        $detached = array_values(array_diff($currentIds, $targetIds));
-        $unchanged = array_values(array_intersect($currentIds, $targetIds));
-
-        $book->categories()->sync($targetIds);
-
-        $changes['category_assignments']['attached'] += count($attached);
-        $changes['category_assignments']['detached'] += count($detached);
-        $changes['category_assignments']['unchanged'] += count($unchanged);
-    }
-
-    /**
-     * @param  array<string, mixed>  $payload
-     */
-    private function loadBookManifest(string $path): array
-    {
-        $payload = $this->loadJson($path);
-        $validator = Validator::make($payload, [
-            'schema_version' => ['required', 'integer'],
-            'book' => ['required', 'array'],
-            'book.slug' => ['required', 'string'],
-            'book.title' => ['required', 'string'],
-            'book.description' => ['nullable', 'string'],
-            'book.sort_order' => ['nullable', 'integer'],
-            'category_slugs' => ['required', 'array'],
-            'category_slugs.*' => ['required', 'string'],
-            'structure' => ['required', 'array'],
-            'structure.has_book_sections' => ['required', 'boolean'],
-            'structure.has_chapter_sections' => ['required', 'boolean'],
-            'defaults' => ['sometimes', 'array'],
-            'defaults.book_section' => ['sometimes', 'array'],
-            'defaults.book_section.slug' => ['sometimes', 'string'],
-            'defaults.book_section.number' => ['nullable', 'string'],
-            'defaults.book_section.title' => ['nullable', 'string'],
-            'defaults.book_section.sort_order' => ['nullable', 'integer'],
-            'defaults.chapter_section' => ['sometimes', 'array'],
-            'defaults.chapter_section.slug' => ['sometimes', 'string'],
-            'defaults.chapter_section.number' => ['nullable', 'string'],
-            'defaults.chapter_section.title' => ['nullable', 'string'],
-            'defaults.chapter_section.sort_order' => ['nullable', 'integer'],
-            'chapters' => ['sometimes', 'array', 'min:1'],
-            'chapters.*.path' => ['required_with:chapters', 'string'],
-            'chapters.*.slug' => ['nullable', 'string'],
-            'sections' => ['sometimes', 'array', 'min:1'],
-            'sections.*.path' => ['required_with:sections', 'string'],
-            'sections.*.slug' => ['nullable', 'string'],
-        ]);
-
-        if ($validator->fails()) {
-            throw new RuntimeException("Invalid scripture book manifest:\n".$this->formatValidationMessages($validator->errors()->all()));
-        }
-
-        if ((int) $payload['schema_version'] !== 1) {
-            throw new RuntimeException(sprintf(
-                'Unsupported scripture book manifest schema version [%s].',
-                $payload['schema_version'],
-            ));
-        }
-
-        $hasBookSections = (bool) $payload['structure']['has_book_sections'];
-        $hasSections = array_key_exists('sections', $payload);
-        $hasChapters = array_key_exists('chapters', $payload);
-
-        if ($hasBookSections !== $hasSections || $hasSections === $hasChapters) {
-            throw new RuntimeException(sprintf(
-                'Book manifest [%s] must use either sections or chapters in a shape consistent with has_book_sections.',
-                $path,
-            ));
-        }
-
-        $this->assertUniqueStrings($payload['category_slugs'], sprintf('book manifest [%s] category slugs', $path));
-
-        return $payload;
-    }
-
-    /**
-     * @param  array<string, mixed>  $payload
-     */
-    private function loadSectionManifest(string $path): array
-    {
-        $payload = $this->loadJson($path);
-        $validator = Validator::make($payload, [
-            'schema_version' => ['required', 'integer'],
-            'section' => ['required', 'array'],
-            'section.slug' => ['required', 'string'],
-            'section.number' => ['nullable', 'string'],
-            'section.title' => ['nullable', 'string'],
-            'section.sort_order' => ['nullable', 'integer'],
-            'chapters' => ['required', 'array', 'min:1'],
-            'chapters.*.path' => ['required', 'string'],
-            'chapters.*.slug' => ['nullable', 'string'],
-        ]);
-
-        if ($validator->fails()) {
-            throw new RuntimeException("Invalid scripture section manifest:\n".$this->formatValidationMessages($validator->errors()->all()));
-        }
-
-        if ((int) $payload['schema_version'] !== 1) {
-            throw new RuntimeException(sprintf(
-                'Unsupported scripture section manifest schema version [%s].',
-                $payload['schema_version'],
-            ));
-        }
-
-        return $payload;
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
     private function loadRootManifest(): array
     {
-        $path = $this->resolvePath(self::ROOT_MANIFEST_PATH);
-        $payload = $this->loadJson($path);
-        $validator = Validator::make($payload, [
-            'schema_version' => ['required', 'integer'],
-            'books' => ['required', 'array', 'min:1'],
-            'books.*.slug' => ['required', 'string'],
-            'books.*.path' => ['required', 'string'],
-            'books.*.enabled' => ['required', 'boolean'],
-        ]);
+        $payload = $this->loadJson($this->resolvePath(self::ROOT_MANIFEST_PATH));
 
-        if ($validator->fails()) {
-            throw new RuntimeException("Invalid scripture corpus manifest:\n".$this->formatValidationMessages($validator->errors()->all()));
-        }
+        $this->validate(
+            $payload,
+            [
+                'schema_version' => ['required', 'integer'],
+                'books' => ['required', 'array', 'min:1'],
+                'books.*.slug' => ['required', 'string'],
+                'books.*.path' => ['required', 'string'],
+                'books.*.enabled' => ['required', 'boolean'],
+            ],
+            'Invalid scripture corpus manifest',
+        );
 
-        if ((int) $payload['schema_version'] !== 1) {
-            throw new RuntimeException(sprintf(
-                'Unsupported scripture corpus manifest schema version [%s].',
-                $payload['schema_version'],
-            ));
-        }
-
+        $this->assertSchemaVersion($payload['schema_version'], 'scripture corpus manifest');
         $this->assertUniqueStrings(
-            array_map(fn (array $entry): string => $entry['slug'], $payload['books']),
+            array_map(fn (array $book): string => $book['slug'], $payload['books']),
             'scripture corpus book slugs',
         );
 
         return $payload;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     private function loadCategoriesManifest(): array
     {
-        $path = $this->resolvePath(self::CATEGORIES_PATH);
-        $payload = $this->loadJson($path);
-        $validator = Validator::make($payload, [
-            'schema_version' => ['required', 'integer'],
-            'categories' => ['required', 'array', 'min:1'],
-            'categories.*.slug' => ['required', 'string'],
-            'categories.*.name' => ['required', 'string'],
-            'categories.*.description' => ['nullable', 'string'],
-            'categories.*.sort_order' => ['nullable', 'integer'],
-        ]);
+        $payload = $this->loadJson($this->resolvePath(self::CATEGORIES_PATH));
 
-        if ($validator->fails()) {
-            throw new RuntimeException("Invalid scripture categories manifest:\n".$this->formatValidationMessages($validator->errors()->all()));
-        }
+        $this->validate(
+            $payload,
+            [
+                'schema_version' => ['required', 'integer'],
+                'categories' => ['required', 'array', 'min:1'],
+                'categories.*.slug' => ['required', 'string'],
+                'categories.*.name' => ['required', 'string'],
+                'categories.*.description' => ['nullable', 'string'],
+                'categories.*.sort_order' => ['nullable', 'integer'],
+            ],
+            'Invalid scripture categories manifest',
+        );
 
-        if ((int) $payload['schema_version'] !== 1) {
-            throw new RuntimeException(sprintf(
-                'Unsupported scripture categories schema version [%s].',
-                $payload['schema_version'],
-            ));
-        }
-
+        $this->assertSchemaVersion($payload['schema_version'], 'scripture categories manifest');
         $this->assertUniqueStrings(
-            array_map(fn (array $record): string => $record['slug'], $payload['categories']),
+            array_map(fn (array $category): string => $category['slug'], $payload['categories']),
             'scripture category slugs',
         );
 
         return $payload;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    private function loadChapterPayload(string $path): array
+    private function loadBookManifest(string $path): array
     {
         $payload = $this->loadJson($path);
-        $validator = Validator::make($payload, [
-            'schema_version' => ['required', 'integer'],
-            'chapter' => ['required', 'array'],
-            'chapter.slug' => ['required', 'string'],
-            'chapter.number' => ['nullable', 'string'],
-            'chapter.title' => ['nullable', 'string'],
-            'chapter.sort_order' => ['nullable', 'integer'],
-            'chapter_sections' => ['sometimes', 'array', 'min:1'],
-            'chapter_sections.*.slug' => ['required_with:chapter_sections', 'string'],
-            'chapter_sections.*.number' => ['nullable', 'string'],
-            'chapter_sections.*.title' => ['nullable', 'string'],
-            'chapter_sections.*.sort_order' => ['nullable', 'integer'],
-            'chapter_sections.*.verses' => ['required_with:chapter_sections', 'array', 'min:1'],
-            'chapter_sections.*.verses.*.slug' => ['required_with:chapter_sections', 'string'],
-            'chapter_sections.*.verses.*.number' => ['nullable', 'string'],
-            'chapter_sections.*.verses.*.text' => ['required_with:chapter_sections', 'string'],
-            'chapter_sections.*.verses.*.sort_order' => ['nullable', 'integer'],
-            'chapter_sections.*.verses.*.translations' => ['sometimes', 'array'],
-            'chapter_sections.*.verses.*.translations.*.source_key' => ['required', 'string'],
-            'chapter_sections.*.verses.*.translations.*.source_name' => ['required', 'string'],
-            'chapter_sections.*.verses.*.translations.*.language_code' => ['required', 'string'],
-            'chapter_sections.*.verses.*.translations.*.text' => ['required', 'string'],
-            'chapter_sections.*.verses.*.translations.*.sort_order' => ['nullable', 'integer'],
-            'chapter_sections.*.verses.*.commentaries' => ['sometimes', 'array'],
-            'chapter_sections.*.verses.*.commentaries.*.source_key' => ['required', 'string'],
-            'chapter_sections.*.verses.*.commentaries.*.source_name' => ['required', 'string'],
-            'chapter_sections.*.verses.*.commentaries.*.language_code' => ['required', 'string'],
-            'chapter_sections.*.verses.*.commentaries.*.body' => ['required', 'string'],
-            'chapter_sections.*.verses.*.commentaries.*.author_name' => ['nullable', 'string'],
-            'chapter_sections.*.verses.*.commentaries.*.title' => ['nullable', 'string'],
-            'chapter_sections.*.verses.*.commentaries.*.sort_order' => ['nullable', 'integer'],
-            'verses' => ['sometimes', 'array', 'min:1'],
-            'verses.*.slug' => ['required_with:verses', 'string'],
-            'verses.*.number' => ['nullable', 'string'],
-            'verses.*.text' => ['required_with:verses', 'string'],
-            'verses.*.sort_order' => ['nullable', 'integer'],
-            'verses.*.translations' => ['sometimes', 'array'],
-            'verses.*.translations.*.source_key' => ['required', 'string'],
-            'verses.*.translations.*.source_name' => ['required', 'string'],
-            'verses.*.translations.*.language_code' => ['required', 'string'],
-            'verses.*.translations.*.text' => ['required', 'string'],
-            'verses.*.translations.*.sort_order' => ['nullable', 'integer'],
-            'verses.*.commentaries' => ['sometimes', 'array'],
-            'verses.*.commentaries.*.source_key' => ['required', 'string'],
-            'verses.*.commentaries.*.source_name' => ['required', 'string'],
-            'verses.*.commentaries.*.language_code' => ['required', 'string'],
-            'verses.*.commentaries.*.body' => ['required', 'string'],
-            'verses.*.commentaries.*.author_name' => ['nullable', 'string'],
-            'verses.*.commentaries.*.title' => ['nullable', 'string'],
-            'verses.*.commentaries.*.sort_order' => ['nullable', 'integer'],
-        ]);
 
-        if ($validator->fails()) {
-            throw new RuntimeException("Invalid scripture chapter dataset:\n".$this->formatValidationMessages($validator->errors()->all()));
-        }
+        $this->validate(
+            $payload,
+            [
+                'schema_version' => ['required', 'integer'],
+                'book' => ['required', 'array'],
+                'book.slug' => ['required', 'string'],
+                'book.title' => ['required', 'string'],
+                'book.description' => ['nullable', 'string'],
+                'book.sort_order' => ['nullable', 'integer'],
+                'categories' => ['required', 'array'],
+                'categories.*' => ['required', 'string'],
+                'sections' => ['required', 'array', 'min:1'],
+                'sections.*.slug' => ['required', 'string'],
+                'sections.*.number' => ['nullable', 'string'],
+                'sections.*.title' => ['required', 'string'],
+                'sections.*.sort_order' => ['nullable', 'integer'],
+                'sections.*.chapters' => ['required', 'array', 'min:1'],
+                'sections.*.chapters.*.path' => ['required', 'string'],
+            ],
+            'Invalid scripture book manifest',
+        );
 
-        if ((int) $payload['schema_version'] !== 1) {
-            throw new RuntimeException(sprintf(
-                'Unsupported scripture chapter dataset schema version [%s].',
-                $payload['schema_version'],
-            ));
-        }
-
-        $hasChapterSections = array_key_exists('chapter_sections', $payload);
-        $hasVerses = array_key_exists('verses', $payload);
-
-        if ($hasChapterSections === $hasVerses) {
-            throw new RuntimeException(sprintf(
-                'Chapter dataset [%s] must define exactly one of chapter_sections or verses.',
-                $path,
-            ));
-        }
+        $this->assertSchemaVersion($payload['schema_version'], 'scripture book manifest');
+        $this->assertUniqueStrings($payload['categories'], sprintf('book manifest [%s] categories', $path));
+        $this->assertUniqueStrings(
+            array_map(fn (array $section): string => $section['slug'], $payload['sections']),
+            sprintf('book manifest [%s] section slugs', $path),
+        );
 
         return $payload;
     }
 
-    /**
-     * @param  list<array<string, mixed>>  $references
-     * @return list<array<string, string|null>>
-     */
+    private function loadChapterPayload(string $path): array
+    {
+        $payload = $this->loadJson($path);
+
+        $this->validate(
+            $payload,
+            array_merge(
+                [
+                    'schema_version' => ['required', 'integer'],
+                    'chapter' => ['required', 'array'],
+                    'chapter.slug' => ['required', 'string'],
+                    'chapter.number' => ['nullable', 'string'],
+                    'chapter.title' => ['nullable', 'string'],
+                    'chapter.sort_order' => ['nullable', 'integer'],
+                    'chapter-sections' => ['required', 'array', 'min:1'],
+                    'chapter-sections.*.slug' => ['required', 'string'],
+                    'chapter-sections.*.number' => ['nullable', 'string'],
+                    'chapter-sections.*.title' => ['required', 'string'],
+                    'chapter-sections.*.sort_order' => ['nullable', 'integer'],
+                    'chapter-sections.*.verses' => ['required', 'array', 'min:1'],
+                ],
+                $this->verseRules('chapter-sections.*.verses.*.'),
+            ),
+            'Invalid scripture chapter dataset',
+        );
+
+        $this->assertSchemaVersion($payload['schema_version'], 'scripture chapter dataset');
+        $this->assertUniqueStrings(
+            array_map(fn (array $section): string => $section['slug'], $payload['chapter-sections']),
+            sprintf('chapter dataset [%s] chapter-section slugs', $path),
+        );
+
+        return $payload;
+    }
+
+    private function verseRules(string $prefix): array
+    {
+        return [
+            $prefix.'slug' => ['required', 'string'],
+            $prefix.'number' => ['nullable', 'string'],
+            $prefix.'text' => ['required', 'string'],
+            $prefix.'sort_order' => ['nullable', 'integer'],
+            $prefix.'translations' => ['sometimes', 'array'],
+            $prefix.'translations.*.source_key' => ['required', 'string'],
+            $prefix.'translations.*.source_name' => ['required', 'string'],
+            $prefix.'translations.*.language_code' => ['required', 'string'],
+            $prefix.'translations.*.text' => ['required', 'string'],
+            $prefix.'translations.*.sort_order' => ['nullable', 'integer'],
+            $prefix.'commentaries' => ['sometimes', 'array'],
+            $prefix.'commentaries.*.source_key' => ['required', 'string'],
+            $prefix.'commentaries.*.source_name' => ['required', 'string'],
+            $prefix.'commentaries.*.language_code' => ['required', 'string'],
+            $prefix.'commentaries.*.body' => ['required', 'string'],
+            $prefix.'commentaries.*.author_name' => ['nullable', 'string'],
+            $prefix.'commentaries.*.title' => ['nullable', 'string'],
+            $prefix.'commentaries.*.sort_order' => ['nullable', 'integer'],
+        ];
+    }
+
+    private function validate(array $payload, array $rules, string $message): void
+    {
+        $validator = Validator::make($payload, $rules);
+
+        if ($validator->fails()) {
+            throw new RuntimeException($message.":\n".implode(PHP_EOL, $validator->errors()->all()));
+        }
+    }
+
+    private function assertSchemaVersion(int $version, string $label): void
+    {
+        if ($version === 1) {
+            return;
+        }
+
+        throw new RuntimeException(sprintf('Unsupported %s schema version [%s].', $label, $version));
+    }
+
+    private function resolveCategoryRecords(array $categoryManifest, array $categorySlugs, string $bookSlug): array
+    {
+        $recordsBySlug = [];
+
+        foreach ($categoryManifest['categories'] as $record) {
+            $recordsBySlug[$record['slug']] = $record;
+        }
+
+        $records = [];
+
+        foreach ($categorySlugs as $slug) {
+            if (! array_key_exists($slug, $recordsBySlug)) {
+                throw new RuntimeException(sprintf(
+                    'Book [%s] references unknown category slug [%s].',
+                    $bookSlug,
+                    $slug,
+                ));
+            }
+
+            $records[] = $recordsBySlug[$slug];
+        }
+
+        return $records;
+    }
+
+    private function bookContainsChapterPath(array $bookDefinition, string $path): bool
+    {
+        foreach ($bookDefinition['sections'] as $sectionDefinition) {
+            foreach ($sectionDefinition['chapters'] as $chapterReference) {
+                if ($chapterReference['path'] === $path) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     private function normalizeChapterReferences(array $references, string $baseDirectory): array
     {
         $normalized = [];
@@ -802,57 +604,6 @@ class ScriptureJsonImporter
         return $normalized;
     }
 
-    /**
-     * @param  array<string, mixed>  $bookDefinition
-     * @return array<string, mixed>
-     */
-    private function defaultBookSection(array $bookDefinition): array
-    {
-        $default = $bookDefinition['defaults']['book_section'] ?? [];
-
-        return [
-            'slug' => $default['slug'] ?? 'main',
-            'number' => $default['number'] ?? null,
-            'title' => $default['title'] ?? 'Main',
-            'sort_order' => $default['sort_order'] ?? 1,
-        ];
-    }
-
-    /**
-     * @param  array<string, mixed>  $bookDefinition
-     * @return array<string, mixed>
-     */
-    private function defaultChapterSection(array $bookDefinition): array
-    {
-        $default = $bookDefinition['defaults']['chapter_section'] ?? [];
-
-        return [
-            'slug' => $default['slug'] ?? 'main',
-            'number' => $default['number'] ?? null,
-            'title' => $default['title'] ?? 'Main',
-            'sort_order' => $default['sort_order'] ?? 1,
-        ];
-    }
-
-    /**
-     * @param  array<string, mixed>  $bookDefinition
-     */
-    private function findMatchingChapterPath(array $bookDefinition, string $path): ?string
-    {
-        foreach ($bookDefinition['sections'] as $sectionDefinition) {
-            foreach ($sectionDefinition['chapters'] as $chapterReference) {
-                if ($chapterReference['path'] === $path) {
-                    return $chapterReference['path'];
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
     private function loadJson(string $path): array
     {
         $contents = file_get_contents($path);
@@ -892,13 +643,9 @@ class ScriptureJsonImporter
 
     private function resolvePath(string $path, ?string $baseDirectory = null): string
     {
-        $candidate = $path;
-
-        if (! is_file($candidate)) {
-            $candidate = $baseDirectory !== null
-                ? $baseDirectory.DIRECTORY_SEPARATOR.$path
-                : base_path($path);
-        }
+        $candidate = is_file($path)
+            ? $path
+            : ($baseDirectory !== null ? $baseDirectory.DIRECTORY_SEPARATOR.$path : base_path($path));
 
         if (! is_file($candidate)) {
             throw new RuntimeException(sprintf('Scripture dataset [%s] was not found.', $path));
@@ -907,9 +654,6 @@ class ScriptureJsonImporter
         return realpath($candidate) ?: $candidate;
     }
 
-    /**
-     * @param  list<string>  $values
-     */
     private function assertUniqueStrings(array $values, string $label): void
     {
         if (count($values) === count(array_unique($values))) {
@@ -919,10 +663,25 @@ class ScriptureJsonImporter
         throw new RuntimeException(sprintf('Duplicate values are not allowed in %s.', $label));
     }
 
-    /**
-     * @param  array<string, mixed>  $record
-     * @return array<string, mixed>
-     */
+    private function syncBookCategories(Book $book, array $categoryIds, array &$changes): void
+    {
+        $targetIds = array_values(array_unique($categoryIds));
+        sort($targetIds);
+
+        $currentIds = $book->categories()
+            ->pluck('book_categories.id')
+            ->map(fn ($id): int => (int) $id)
+            ->sort()
+            ->values()
+            ->all();
+
+        $book->categories()->sync($targetIds);
+
+        $changes['category_assignments']['attached'] += count(array_diff($targetIds, $currentIds));
+        $changes['category_assignments']['detached'] += count(array_diff($currentIds, $targetIds));
+        $changes['category_assignments']['unchanged'] += count(array_intersect($currentIds, $targetIds));
+    }
+
     private function bookValues(array $record): array
     {
         return [
@@ -933,10 +692,6 @@ class ScriptureJsonImporter
         ];
     }
 
-    /**
-     * @param  array<string, mixed>  $record
-     * @return array<string, mixed>
-     */
     private function categoryValues(array $record): array
     {
         return [
@@ -947,10 +702,6 @@ class ScriptureJsonImporter
         ];
     }
 
-    /**
-     * @param  array<string, mixed>  $record
-     * @return array<string, mixed>
-     */
     private function bookSectionValues(int $bookId, array $record): array
     {
         return [
@@ -962,10 +713,6 @@ class ScriptureJsonImporter
         ];
     }
 
-    /**
-     * @param  array<string, mixed>  $record
-     * @return array<string, mixed>
-     */
     private function chapterValues(int $bookSectionId, array $record): array
     {
         return [
@@ -977,25 +724,17 @@ class ScriptureJsonImporter
         ];
     }
 
-    /**
-     * @param  array<string, mixed>  $record
-     * @return array<string, mixed>
-     */
-    private function chapterSectionValues(int $chapterId, array $record, int $index = 0): array
+    private function chapterSectionValues(int $chapterId, array $record, int $index): array
     {
         return [
             'chapter_id' => $chapterId,
             'slug' => $record['slug'],
             'number' => $record['number'] ?? null,
-            'title' => $record['title'] ?? null,
+            'title' => $record['title'],
             'sort_order' => $record['sort_order'] ?? ($index + 1),
         ];
     }
 
-    /**
-     * @param  array<string, mixed>  $record
-     * @return array<string, mixed>
-     */
     private function verseValues(int $chapterSectionId, array $record, int $index): array
     {
         return [
@@ -1007,10 +746,6 @@ class ScriptureJsonImporter
         ];
     }
 
-    /**
-     * @param  array<string, mixed>  $record
-     * @return array<string, mixed>
-     */
     private function translationValues(int $verseId, array $record, int $index): array
     {
         return [
@@ -1023,10 +758,6 @@ class ScriptureJsonImporter
         ];
     }
 
-    /**
-     * @param  array<string, mixed>  $record
-     * @return array<string, mixed>
-     */
     private function commentaryValues(int $verseId, array $record, int $index): array
     {
         return [
@@ -1041,12 +772,6 @@ class ScriptureJsonImporter
         ];
     }
 
-    /**
-     * @param  Builder<Model>  $builder
-     * @param  array<string, mixed>  $identity
-     * @param  array<string, mixed>  $values
-     * @return array{0: Model, 1: string}
-     */
     private function upsert(Builder $builder, array $identity, array $values): array
     {
         $model = $builder->firstOrNew($identity);
@@ -1099,9 +824,6 @@ class ScriptureJsonImporter
         return $sqlState === '23000' && $driverCode === 1062;
     }
 
-    /**
-     * @param  array<int, array<string, mixed>>  $verses
-     */
     private function countNestedRecords(array $verses, string $key): int
     {
         $count = 0;
@@ -1113,9 +835,6 @@ class ScriptureJsonImporter
         return $count;
     }
 
-    /**
-     * @return array<string, int>
-     */
     private function emptyCountSummary(): array
     {
         return [
@@ -1131,9 +850,6 @@ class ScriptureJsonImporter
         ];
     }
 
-    /**
-     * @return array<string, array<string, int>>
-     */
     private function emptyChangeSummary(): array
     {
         $upsertStates = [
@@ -1159,11 +875,6 @@ class ScriptureJsonImporter
         ];
     }
 
-    /**
-     * @param  array<string, int>  $left
-     * @param  array<string, int>  $right
-     * @return array<string, int>
-     */
     private function mergeNumericSummary(array $left, array $right): array
     {
         foreach ($right as $key => $value) {
@@ -1173,11 +884,6 @@ class ScriptureJsonImporter
         return $left;
     }
 
-    /**
-     * @param  array<string, array<string, int>>  $left
-     * @param  array<string, array<string, int>>  $right
-     * @return array<string, array<string, int>>
-     */
     private function mergeChangeSummary(array $left, array $right): array
     {
         foreach ($right as $type => $states) {
@@ -1187,13 +893,5 @@ class ScriptureJsonImporter
         }
 
         return $left;
-    }
-
-    /**
-     * @param  list<string>  $messages
-     */
-    private function formatValidationMessages(array $messages): string
-    {
-        return implode(PHP_EOL, $messages);
     }
 }

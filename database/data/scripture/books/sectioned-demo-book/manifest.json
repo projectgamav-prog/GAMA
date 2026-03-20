@@ -6,22 +6,32 @@
     "description": "A compact example with explicit section manifests and chapter sections.",
     "sort_order": 6
   },
-  "category_slugs": [
+  "categories": [
     "scripture",
     "poetry"
   ],
-  "structure": {
-    "has_book_sections": true,
-    "has_chapter_sections": true
-  },
   "sections": [
     {
       "slug": "part-one",
-      "path": "sections/part-one/manifest.json"
+      "number": "1",
+      "title": "Part One",
+      "sort_order": 1,
+      "chapters": [
+        {
+          "path": "sections/part-one/chapters/chapter-01.json"
+        }
+      ]
     },
     {
       "slug": "part-two",
-      "path": "sections/part-two/manifest.json"
+      "number": "2",
+      "title": "Part Two",
+      "sort_order": 2,
+      "chapters": [
+        {
+          "path": "sections/part-two/chapters/chapter-01.json"
+        }
+      ]
     }
   ]
 }

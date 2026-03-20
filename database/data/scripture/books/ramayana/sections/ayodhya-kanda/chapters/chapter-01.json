@@ -6,18 +6,26 @@
     "title": "Rama Leaves for the Forest",
     "sort_order": 1
   },
-  "verses": [
+  "chapter-sections": [
     {
-      "slug": "verse-1",
+      "slug": "main",
       "number": "1",
-      "text": "The command to leave the kingdom falls with sudden force.",
-      "sort_order": 1
-    },
-    {
-      "slug": "verse-2",
-      "number": "2",
-      "text": "Rama accepts exile with calm and steady dignity.",
-      "sort_order": 2
+      "title": "Main",
+      "sort_order": 1,
+      "verses": [
+        {
+          "slug": "verse-1",
+          "number": "1",
+          "text": "The command to leave the kingdom falls with sudden force.",
+          "sort_order": 1
+        },
+        {
+          "slug": "verse-2",
+          "number": "2",
+          "text": "Rama accepts exile with calm and steady dignity.",
+          "sort_order": 2
+        }
+      ]
     }
   ]
 }
