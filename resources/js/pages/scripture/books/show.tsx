@@ -26,6 +26,23 @@ const sectionLabel = (number: string | null, title: string | null) => {
 
 const sectionAnchorId = (slug: string) => `section-${slug}`;
 
+const normalizeSectionText = (value: string | null) =>
+    value?.trim().toLowerCase() ?? '';
+
+const isGenericSingleSectionLabel = (slug: string, title: string | null) => {
+    const normalizedSlug = normalizeSectionText(slug);
+    const normalizedTitle = normalizeSectionText(title);
+
+    return (
+        normalizedTitle === 'main' ||
+        normalizedTitle === 'main text' ||
+        normalizedTitle === 'main passage' ||
+        normalizedSlug === 'main' ||
+        normalizedSlug === 'main-text' ||
+        normalizedSlug.endsWith('-main')
+    );
+};
+
 const chapterLabel = (number: string | null, title: string | null) => {
     if (number && title) {
         return `Chapter ${number}: ${title}`;
@@ -43,6 +60,13 @@ export default function BookShow({
     content_blocks,
     book_sections,
 }: BookShowProps) {
+    const hidesGenericSingleSection =
+        book_sections.length === 1 &&
+        isGenericSingleSectionLabel(
+            book_sections[0].slug,
+            book_sections[0].title,
+        );
+
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: book.title,
@@ -95,8 +119,9 @@ export default function BookShow({
                 <div className="space-y-1">
                     <h2 className="text-xl font-semibold">Canonical Browse</h2>
                     <p className="text-sm text-muted-foreground">
-                        Browse from the book into its canonical sections and
-                        chapters.
+                        {hidesGenericSingleSection
+                            ? 'Browse this book chapter by chapter.'
+                            : 'Browse from the book into its canonical sections and chapters.'}
                     </p>
                 </div>
 
@@ -105,7 +130,12 @@ export default function BookShow({
                         <Card key={section.id} id={sectionAnchorId(section.slug)}>
                             <CardHeader>
                                 <CardTitle>
-                                    {sectionLabel(section.number, section.title)}
+                                    {hidesGenericSingleSection
+                                        ? 'Chapters'
+                                        : sectionLabel(
+                                              section.number,
+                                              section.title,
+                                          )}
                                 </CardTitle>
                                 <CardDescription>
                                     {section.chapters.length} chapter

@@ -44,6 +44,23 @@ const sectionLabel = (number: string | null, title: string | null) => {
     return title ?? 'Section';
 };
 
+const normalizeSectionText = (value: string | null) =>
+    value?.trim().toLowerCase() ?? '';
+
+const isGenericSingleSectionLabel = (slug: string, title: string | null) => {
+    const normalizedSlug = normalizeSectionText(slug);
+    const normalizedTitle = normalizeSectionText(title);
+
+    return (
+        normalizedTitle === 'main' ||
+        normalizedTitle === 'main text' ||
+        normalizedTitle === 'main passage' ||
+        normalizedSlug === 'main' ||
+        normalizedSlug === 'main-text' ||
+        normalizedSlug.endsWith('-main')
+    );
+};
+
 const verseLabel = (number: string | null) => {
     return number ? `Verse ${number}` : 'Verse';
 };
@@ -70,6 +87,16 @@ export default function ChapterVersesIndex({
         (sum, section) => sum + section.cards.length,
         0,
     );
+    const hidesGenericBookSection = isGenericSingleSectionLabel(
+        book_section.slug,
+        book_section.title,
+    );
+    const hidesGenericChapterSection =
+        chapter_sections.length === 1 &&
+        isGenericSingleSectionLabel(
+            chapter_sections[0].slug,
+            chapter_sections[0].title,
+        );
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -100,12 +127,14 @@ export default function ChapterVersesIndex({
                     <div className="flex flex-wrap items-center gap-2">
                         <Badge variant="outline">Reader</Badge>
                         <Badge variant="secondary">{book.title}</Badge>
-                        <Badge variant="secondary">
-                            {sectionLabel(
-                                book_section.number,
-                                book_section.title,
-                            )}
-                        </Badge>
+                        {!hidesGenericBookSection && (
+                            <Badge variant="secondary">
+                                {sectionLabel(
+                                    book_section.number,
+                                    book_section.title,
+                                )}
+                            </Badge>
+                        )}
                         <Badge variant="secondary">
                             {totalCards} card{totalCards === 1 ? '' : 's'}
                         </Badge>
@@ -216,7 +245,12 @@ export default function ChapterVersesIndex({
                                     </Badge>
                                 </div>
                                 <h2 className="text-xl font-semibold">
-                                    {sectionLabel(section.number, section.title)}
+                                    {hidesGenericChapterSection
+                                        ? 'All Verses'
+                                        : sectionLabel(
+                                              section.number,
+                                              section.title,
+                                          )}
                                 </h2>
                             </div>
 

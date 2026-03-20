@@ -37,6 +37,23 @@ const sectionLabel = (number: string | null, title: string | null) => {
     return title ?? 'Section';
 };
 
+const normalizeSectionText = (value: string | null) =>
+    value?.trim().toLowerCase() ?? '';
+
+const isGenericSingleSectionLabel = (slug: string, title: string | null) => {
+    const normalizedSlug = normalizeSectionText(slug);
+    const normalizedTitle = normalizeSectionText(title);
+
+    return (
+        normalizedTitle === 'main' ||
+        normalizedTitle === 'main text' ||
+        normalizedTitle === 'main passage' ||
+        normalizedSlug === 'main' ||
+        normalizedSlug === 'main-text' ||
+        normalizedSlug.endsWith('-main')
+    );
+};
+
 export default function ChapterShow({
     book,
     book_section,
@@ -44,6 +61,17 @@ export default function ChapterShow({
     content_blocks,
     chapter_sections,
 }: ChapterShowProps) {
+    const hidesGenericBookSection = isGenericSingleSectionLabel(
+        book_section.slug,
+        book_section.title,
+    );
+    const hidesGenericChapterSection =
+        chapter_sections.length === 1 &&
+        isGenericSingleSectionLabel(
+            chapter_sections[0].slug,
+            chapter_sections[0].title,
+        );
+
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: book.title,
@@ -69,12 +97,14 @@ export default function ChapterShow({
                     <div className="flex flex-wrap items-center gap-2">
                         <Badge variant="outline">Chapter</Badge>
                         <Badge variant="secondary">{book.title}</Badge>
-                        <Badge variant="secondary">
-                            {sectionLabel(
-                                book_section.number,
-                                book_section.title,
-                            )}
-                        </Badge>
+                        {!hidesGenericBookSection && (
+                            <Badge variant="secondary">
+                                {sectionLabel(
+                                    book_section.number,
+                                    book_section.title,
+                                )}
+                            </Badge>
+                        )}
                     </div>
                     <div className="space-y-2">
                         <CardTitle className="text-3xl">
@@ -120,10 +150,15 @@ export default function ChapterShow({
 
             <section className="space-y-4">
                 <div className="space-y-1">
-                    <h2 className="text-xl font-semibold">Chapter Sections</h2>
+                    <h2 className="text-xl font-semibold">
+                        {hidesGenericChapterSection
+                            ? 'Reader Entry'
+                            : 'Chapter Sections'}
+                    </h2>
                     <p className="text-sm text-muted-foreground">
-                        Canonical sections inside this chapter, with verse
-                        counts for quick entry into the reader.
+                        {hidesGenericChapterSection
+                            ? 'This chapter flows through one continuous reader entry point.'
+                            : 'Canonical sections inside this chapter, with verse counts for quick entry into the reader.'}
                     </p>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
@@ -136,7 +171,12 @@ export default function ChapterShow({
                                     </Badge>
                                 </div>
                                 <CardTitle>
-                                    {sectionLabel(section.number, section.title)}
+                                    {hidesGenericChapterSection
+                                        ? 'All Verses'
+                                        : sectionLabel(
+                                              section.number,
+                                              section.title,
+                                          )}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="flex items-center justify-between gap-3">
