@@ -7,8 +7,8 @@
       "enabled": true
     },
     {
-      "slug": "ramayana",
-      "path": "books/ramayana/manifest.json",
+      "slug": "ramcharitmanas",
+      "path": "books/ramcharitmanas/manifest.json",
       "enabled": true
     },
     {

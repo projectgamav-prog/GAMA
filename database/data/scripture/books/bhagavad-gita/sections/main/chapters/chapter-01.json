@@ -3,12 +3,12 @@
   "chapter": {
     "slug": "chapter-1",
     "number": "1",
-    "title": "Arjuna Vishada Yoga",
+    "title": "अर्जुन विषादयोग ",
     "sort_order": 1
   },
   "chapter-section": [
     {
-      "slug": "chapter-1-main",
+      "slug": "section-1-main",
       "number": "1",
       "title": "Main Passage",
       "sort_order": 1,
@@ -16,7 +16,7 @@
         {
           "slug": "verse-1",
           "number": "1",
-          "text": "dhrtarastra said: on the field of dharma, what did my people and the pandavas do?",
+          "text": "धृतराष्ट्र उवाच धर्मक्षेत्रे कुरुक्षेत्रे समवेता युयुत्सवः | मामकाः पाण्डवाश्र्चैव किमकुर्वत सञ्जय || १ ||",
           "sort_order": 1,
           "translations": [
             {
@@ -30,27 +30,1049 @@
               "source_key": "dev-hi",
               "source_name": "Development Hindi",
               "language_code": "hi",
-              "text": "Dhritarashtra puchhte hain ki Kurukshetra mein kya hua.",
+              "text": "धृतराष्ट्र ने कहा -- हे संजय! धर्मभूमि कुरुक्षेत्र में युद्ध की इच्छा से एकत्र हुए मेरे तथा पाण्डु के पुत्रों ने क्या किया ?",
               "sort_order": 2
             }
           ]
         },
-        {
-          "slug": "verse-28",
-          "number": "28",
-          "text": "arjuna said: seeing my own kinsmen standing here for battle, my heart trembles.",
+	{
+          "slug": "verse-2",
+          "number": "2",
+          "text": "सञ्जय उवाच दृष्ट्वा तु पाण्डवानीकं व्यूढं दुर्योधनस्तदा | आचार्यमुपसङ्गम्य राजा वचनमब्रवीत् || २ ||",
           "sort_order": 2,
           "translations": [
             {
               "source_key": "dev-en",
               "source_name": "Development English",
               "language_code": "en",
-              "text": "Arjuna sees his own people gathered for war.",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
               "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "संजय ने कहा - हे राजन! पाण्डुपुत्रों द्वारा सेना की व्यूहरचना देखकर राजा दुर्योधन अपने गुरु के पास गया और उसने ये शब्द कहे ।",
+              "sort_order": 2
+            }
+          ]
+        },
+	{
+          "slug": "verse-3",
+          "number": "3",
+          "text": "पश्यैतां पाण्डुपुत्राणामाचार्य महतीं चमूम् | व्यूढां द्रुपदपुत्रेण तव शिष्येण धीमता || ३ ||",
+          "sort_order": 3,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": " हे आचार्य! पाण्डुपुत्रों की विशाल सेना को देखें, जिसे आपके बुद्धिमान् शिष्य द्रुपद के पुत्र ने इतने कौशल से व्यवस्थित किया है ।",
+              "sort_order": 2
+            }
+          ]
+        },
+	{
+          "slug": "verse-4",
+          "number": "4",
+          "text": "अत्र श्रूरा महेष्वासा भीमार्जुनसमा युधि | युयुधानो विराटश्र्च द्रुपदश्र्च महारथः || ४ ||",
+          "sort_order": 4,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "इस सेना में भीम तथा अर्जुन के समान युद्ध करने वाले अनेक वीर धनुर्धर हैं - यथा महारथी युयुधान, विराट तथा द्रुपद ।",
+              "sort_order": 2
+            }
+          ]
+        },
+	{
+          "slug": "verse-5",
+          "number": "5",
+          "text": "धृष्टकेतुश्र्चेकितानः काशिराजश्र्च वीर्यवान् | पुरुजित्कुन्तिभोजश्र्च शैब्यश्र्च नरपुङ्गवः || ५ ||",
+          "sort_order": 5,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "इनके साथ ही धृष्टकेतु, चेकितान, काशिराज, पुरुजित्, कुन्तिभोज तथा शैब्य जैसे महान शक्तिशाली योद्धा भी हैं ।",
+              "sort_order": 2
+            }
+          ]
+        },
+	{
+          "slug": "verse-6",
+          "number": "6",
+          "text": "युधामन्युश्र्च विक्रान्त उत्तमौजाश्र्च वीर्यवान् | सौभद्रो द्रौपदेयाश्र्च सर्व एव महारथाः || ६ ||",
+          "sort_order": 6,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "asd",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "पराक्रमी युधामन्यु, अत्यन्त शक्तिशाली उत्तमौजा, सुभद्रा का पुत्र तथा द्रोपदी के पुत्र - ये सभी महारथी हैं ।",
+              "sort_order": 2
+            }
+          ]
+        },
+	{
+          "slug": "verse-7",
+          "number": "7",
+          "text": "अस्माकं तु विशिष्टा ये तान्निबोध द्विजोत्तम | नायका मम सैन्यस्य संज्ञार्थं तान्ब्रवीमि ते || ७ ||",
+          "sort_order": 7,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "asd",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "किन्तु हे ब्राह्मणश्रेष्ठ! आपकी सूचना के लिए मैं अपनी सेना के उन नायकों के विषय में बताना चाहूँगा जो मेरी सेना को संचालित करने में विशेष रूप से निपुण हैं ।",
+              "sort_order": 2
+            }
+          ]
+        },
+	{
+          "slug": "verse-8",
+          "number": "8",
+          "text": "भवान्भीष्मश्र्च कर्णश्र्च कृपश्र्च समितिंजयः | अश्र्वत्थामा विकर्णश्र्च सौमदत्तिस्तथैव च || ८ ||",
+          "sort_order": 8,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "मेरी सेना में स्वयं आप, भीष्म, कर्ण, कृपाचार्य; अश्र्वत्थामा, विकर्ण तथा सोमदत्त का पुत्र भूरिश्रवा आदि हैं जो युद्ध में सदैव विजयी रहे हैं ।",
+              "sort_order": 2
+            }
+          ]
+        },
+	{
+          "slug": "verse-9",
+          "number": "9",
+          "text": "अन्य च बहवः श्रूरा मदर्थे त्यक्तजीविताः | नानाशस्त्रप्रहरणाः सर्वे युद्धविशारदाः || ९ ||",
+          "sort_order": 9,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "अन्य च बहवः श्रूरा मदर्थे त्यक्तजीविताः | नानाशस्त्रप्रहरणाः सर्वे युद्धविशारदाः || ९ ||",
+              "sort_order": 2
+            }
+          ]
+        },
+	{
+          "slug": "verse-10",
+          "number": "10",
+          "text": "अपर्याप्तं तदस्माकं बलं भीष्माभिरक्षितम् | पर्याप्तं त्विदमेतेषां बलं भीमाभिरक्षितम् || १० ||",
+          "sort_order": 10,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "हमारी शक्ति अपरिमेय है और हम सब पितामह द्वारा भलीभाँति संरक्षित हैं, जबकि पाण्डवों की शक्ति भीम द्वारा भलीभाँति संरक्षित होकर भी सीमित है ।",
+              "sort_order": 2
+            }
+          ]
+        },
+	{
+          "slug": "verse-11",
+          "number": "11",
+          "text": "अयनेषु च सर्वेषु यथाभागमवस्थिताः | भीष्ममेवाभिरक्षन्तु भवन्तः सर्व एव हि || ११ ||",
+          "sort_order": 11,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "अतएव सैन्यव्यूह में अपने-अपने मोर्चों पर खड़े रहकर आप सभी भीष्म पितामह को पूरी-पूरी सहायता दें ।",
+              "sort_order": 2
             }
           ]
         }
-      ]
+      ]	     
+    },
+    {
+      "slug": "section-2-main",
+      "number": "2",
+      "title": "Main Passage",
+      "sort_order": 2,
+      "verses": [
+        {
+          "slug": "verse-12",
+          "number": "12",
+          "text": "तस्य सञ्जनयन्हर्षं कुरुवृद्धः पितामहः | सिंहनादं विनद्योच्चैः शङ्खं दध्मौ प्रतापवान् || १२ ||",
+          "sort_order": 12,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "asd",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "तब कुरुवंश के वयोवृद्ध परम प्रतापी एवं वृद्ध पितामह ने सिंह-गर्जना की सी ध्वनि करने वाले अपने शंख को उच्च स्वर से बजाया, जिससे दुर्योधन को हर्ष हुआ |",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-13",
+          "number": "13",
+          "text": "ततः शङ्खाश्र्च भेर्यश्र्च पणवानकगोमुखाः | सहसैवाभ्यहन्यन्त स शब्दस्तुमुलोSभवत् || १३ ||",
+          "sort_order": 13,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "तत्पश्चात् शंख, नगाड़े, बिगुल, तुरही तथा सींग सहसा एकसाथ बज उठे | वह समवेत स्वर अत्यन्त कोलाहलपूर्ण था |",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-14",
+          "number": "14",
+          "text": "ततः श्र्वेतैर्हयैर्युक्ते महति स्यन्दने स्थितौ | माधवः पाण्डवश्र्चैव दिव्यौ शङ्खौ प्रदध्मतुः || १४ ||",
+          "sort_order": 14,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "दूसरी ओर से श्र्वेत घोड़ों द्वारा खींचे जाने वाले विशाल रथ पर आसीन कृष्ण तथा अर्जुन ने अपने-अपने दिव्य शंख बजाये |",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-15",
+          "number": "15",
+          "text": "पाञ्चजन्यं हृषीकेशो देवदत्तं धनञ्जय | पौण्ड्रं दध्मौ महाशङ्खं भीमकर्मा वृकोदरः || १५ ||",
+          "sort_order": 15,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "भगवान् कृष्ण ने अपना पाञ्चजन्य शंख बजाया, अर्जुन ने देवदत्त शंख तथा अतिभोजी एवं अतिमानवीय कार्य करने वाले भीम ने पौण्ड्र नामक शंख बजाया |",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-16",
+          "number": "16",
+          "text": "अनन्तविजयं राजा कुन्तीपुत्रो युधिष्ठिरः | नकुलः सहदेवश्र्च सुघोषमणिपुष्पकौ || १६ ||",
+          "sort_order": 16,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "कुन्तीपुत्र राजा युधिष्ठिर ने अनन्तविजय नामक और नकुल तथा सहदेव ने सुघोष और मणिपुष्पक नामक शंख बजाये || १६ ||",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-17",
+          "number": "17",
+          "text": "काश्यश्र्च परमेष्वासः शिखण्डी च महारथः | धृष्टद्युम्नो विराटश्र्च सात्यकिश्र्चापराजितः || १७ ||",
+          "sort_order": 17,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "श्रेष्ठ धनुष वाले काशिराज और महारथी शिखंडी एवं धृष्टद्युम्न , राजा विराट और अजेय सात्यिकी ने अपने अपने शाख बजाए || १७ ||",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-18",
+          "number": "18",
+          "text": "द्रुपदो द्रौपदेयाश्र्च सर्वशः पृथिवीपते | सौभद्रश्र्च महाबाहुः शङ्खान्दध्मुः पृथक्पृथक् || १८ ||",
+          "sort_order": 18,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "राजा द्रुपद एवं द्रौपदी के पांचो पुत्र और बड़ी भुजावाले सुभद्रापुत्र अभिमन्यु - इन सभी ने , हे राजन ! सब और से अलग-अलग शंख बजाये || १८ ||",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-19",
+          "number": "19",
+          "text": "स घोषो धार्तराष्ट्राणां हृदयानि व्यदारयत् | नभश्र्च पृथिवीं चैव तुमुलोSभ्यनुनादयन् || १९ ||",
+          "sort_order": 19,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "इन विभिन्न शंखों की ध्वनि कोलाहलपूर्ण बन गई जो आकाश तथा पृथ्वी को शब्दायमान करती हुई धृतराष्ट्र के पुत्रों के हृदयों को विदीर्ण करने लगी",
+              "sort_order": 2
+            }
+          ]
+        }
+	
+      ]	     
+    },
+    {
+      "slug": "section-3-main",
+      "number": "3",
+      "title": "Main Passage",
+      "sort_order": 3,
+      "verses": [
+        {
+          "slug": "verse-20",
+          "number": "20",
+          "text": "अथ व्यवस्थितान्दृष्टवा धार्तराष्ट्रान्कपिध्वजः | प्रवृत्ते शस्त्रसम्पाते धनुरुद्यम्य पाण्डवः | हृषीकेशं तदा वाक्यमिदमाह महीपते || २० ||",
+          "sort_order": 20,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "उस समय हनुमान से अंकित ध्वजा लगे रथ पर आसीन पाण्डुपुत्र अर्जुन अपना धनुष उठा कर तीर चलाने के लिए उद्यत हुआ | हे राजन् ! धृतराष्ट्र के पुत्रों को व्यूह में खड़ा देखकर अर्जुन ने श्रीकृष्ण से ये वचन कहे |",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-21",
+          "number": "21",
+          "text": "सेनयोरुभयोर्मध्ये रथं स्थाप्य मेSच्युत | यावदेतान्निरिक्षेSहं योद्धुकामानवस्थितान् || २१ || कैर्मया सह योद्ध व्यमस्मिन्रणसमुद्यमे || २२ ||",
+          "sort_order": 21,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "अर्जुन ने कहा - हे अच्युत! कृपा करके मेरा रथ दोनों सेनाओं के बीच में ले चलें जिससे मैं यहाँ युद्ध की अभिलाषा रखने वालों को और शस्त्रों कि इस महान परीक्षा में, जिनसे मुझे संघर्ष करना है, उन्हें देख सकूँ |",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-22",
+          "number": "22",
+          "text": "सेनयोरुभयोर्मध्ये रथं स्थाप्य मेSच्युत | यावदेतान्निरिक्षेSहं योद्धुकामानवस्थितान् || २१ || कैर्मया सह योद्ध व्यमस्मिन्रणसमुद्यमे || २२ ||",
+          "sort_order": 22,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "asd",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "अर्जुन ने कहा - हे अच्युत! कृपा करके मेरा रथ दोनों सेनाओं के बीच में ले चलें जिससे मैं यहाँ युद्ध की अभिलाषा रखने वालों को और शस्त्रों कि इस महान परीक्षा में, जिनसे मुझे संघर्ष करना है, उन्हें देख सकूँ |",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-23",
+          "number": "23",
+          "text": "योत्स्यमानानवेक्षेSहं य एतेSत्र समागताः | धार्तराष्ट्रस्य दुर्बुद्धेर्युद्धे प्रियचिकीर्षवः || २३ ||",
+          "sort_order": 23,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "मुझे उन लोगों को देखने दीजिये जो यहाँ पर धृतराष्ट्र के दुर्बुद्धि पुत्र (दुर्योधन) को प्रसन्न करने की इच्छा से लड़ने के लिए आये हुए हैं |",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-24",
+          "number": "24",
+          "text": "सञ्जय उवाच एवमुक्तो हृषीकेशो गुडाकेशेन भारत | सेनयोरुभयोर्मध्ये स्थापयित्वा रथोत्तमम् || २४ ||",
+          "sort_order": 24,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "संजय ने कहा - हे भरतवंशी! अर्जुन द्वारा इस प्रकार सम्बोधित किये जाने पर भगवान् कृष्ण ने दोनों दलों के बीच में उस उत्तम रथ को लाकर खड़ा कर दिया |",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-25",
+          "number": "25",
+          "text": "भीष्मद्रोणप्रमुखतः सर्वेषां च महीक्षिताम् | उवाच पार्थ पश्यैतान्समवेतान्कुरुनिति || २५ ||",
+          "sort_order": 25,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "भीष्म, द्रोण तथा विश्र्व भर के अन्य समस्त राजाओं के सामने भगवान् ने कहा कि हे पार्थ! यहाँ पर एकत्र सारे कुरुओं को देखो |",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-26",
+          "number": "26",
+          "text": "तत्रापश्यत्स्थितान्पार्थः पितॄनथ पितामहान् | आचार्यान्मातुलान्भ्रातॄन्पुत्रान्पौत्रान्सखींस्तथा || २६ ||",
+          "sort_order": 26,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "अर्जुन ने वहाँ पर दोनों पक्षों की सेनाओं के मध्य में अपने चाचा-ताउओं, पितामहों, गुरुओं, मामाओं, भाइयों, पुत्रों, पौत्रों को देखा| मित्रों, ससुरों और शुभचिन्तकों को भी देखा |",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-27",
+          "number": "27",
+          "text": "श्र्वश्रुरान्सुहृदश्र्चैव सेनयोरुभयोरपि | तान्समीक्ष्य स कौन्तेयः सर्वान्बन्धूनवस्थितान् || २७ ||",
+          "sort_order": 27,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "कुन्तीपुत्र अर्जुन ने मित्रों, सुहृदो , ससुरो  तथा सेना सहित उपस्थित उन सभी बंधुओ को देखकर शोक से भर गया |",
+              "sort_order": 2
+            }
+          ]
+        }
+      ]	     
+    },
+    {
+      "slug": "section-4-main",
+      "number": "4",
+      "title": "Main Passage",
+      "sort_order": 4,
+      "verses": [
+        {
+          "slug": "verse-28",
+          "number": "28",
+          "text": "कृपया परयाविष्टो विषीदन्निदमब्रवीत् | दृष्ट्वेमं स्वजनं कृष्ण युयुत्सुं समुपस्थितम् || २८ || ",
+          "sort_order": 28,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "युद्ध की इच्छा से उपस्थित इन सभी स्वजनों को देखकर अर्जुन ने दया , करुणा से भरकर शोकपूर्वक यह शब्द कहे |",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-29",
+          "number": "29",
+          "text": "सीदन्ति मम गात्राणि मुखं च परिश्रुष्यति | वेपथुश्र्च शरीरे मे रोमहर्षश्र्च जायते || २९ ||",
+          "sort_order": 29,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "अर्जुन ने कहा - मेरे शरीर के शिथिल हो रहे हैं , मेरा मुह सूख रहा हैं | मेरे शरीर में कंप और रोमांच हो रहा हैं |",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-30",
+          "number": "30",
+          "text": "गाण्डीवं स्रंसते हस्तात्त्वक्चैव परिदह्यते | न च शक्नोम्यवस्थातुं भ्रमतीव च मे मनः ||| ३० ||",
+          "sort_order": 30,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "हाथ से गांडीव धनुष गिर रहा हैं और त्वचा भी बहुत जल रही हैं तथा मन भ्रमित-सा हो रहा हैं इसलिए मैं खडा रहने को भी समर्थ नहीं हूँ |",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-31",
+          "number": "31",
+          "text": "निमित्तानि च पश्यामि विपरीतानि केशव | न च श्रेयोSनुपश्यामि हत्वा स्वजनमाहवे || ३१ ||",
+          "sort_order": 31,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "हे केशव ! मैं लक्षणों को भी विपरीत देख रहा हूँ तथा युद्ध में स्वजनसमुदाय को मारकर कल्याण भी नहीं देखता |",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-32",
+          "number": "32",
+          "text": "न काड्क्षे विजयं कृष्ण न च राज्यं सुखानि च | किं नो राज्येन गोविन्द किं भोगैर्जीवितेन वा ||| ३२ ||",
+          "sort_order": 32,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "हे कृष्ण ! मैं न तो विजय चाहता हूँ और न राज्य तथा सुखो को ही | हे गोविन्द ! हमें ऐसे राज्य से क्या प्रयोजन हैं अथवा ऐसे भोगो से और जीवन से भी क्या लाभ हैं ?",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-33",
+          "number": "33",
+          "text": "येषामर्थे काड्क्षितं नो राज्यं भोगाः सुखानि च | त इमेSवस्थिता युद्धे प्राणांस्त्यक्त्वा धनानि च || ३३ ||",
+          "sort_order": 33,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "हमें जिनके लिये राज्य, भोग और सुखादि अभीष्ट हैं , वे ही ये सब धन और जीवन की आशा को त्यागकर युद्ध में खड़े हैं |",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-34",
+          "number": "34",
+          "text": "आचार्याः पितरः पुत्रास्तथैव च पितामहाः | मातुलाः श्र्वश्रुराः पौत्राः श्यालाः सम्बन्धिनस्तथा || ३४ ||",
+          "sort_order": 34,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "गुरुजन, ताऊ-चाचे, लड़के और उसी प्रकार दादे, मामे, ससुर, पौत्र, साले तथा और भी सम्बन्धी लोग हैं || ३४ ||",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-35",
+          "number": "35",
+          "text": "एतान्न हन्तुमिच्छामि घ्नतोSपि मधुसूदन | अपि त्रैलोक्यराज्यस्य हेतोः किं नु महीकृते || ३५ ||",
+          "sort_order": 35,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "हे मधुसुदन! मुझे मरने पर भी अथवा तीनो लोको के राज्य के लिए भी मैं इन सबको नहीं मारना चाहता; फिर पृथ्वी के लिए तो कहना ही क्या हैं ? || ३५ ||",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-36",
+          "number": "36",
+          "text": "निहत्य धार्तराष्ट्रान्नः का प्रीति स्याज्जनार्दन | पापमेवाश्रयेदस्मान्हत्वैतानाततायिनः || ३६ ||",
+          "sort_order": 36,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "हे जनार्दन ! ध्रतराष्ट्र के पुत्रो को मारकर हमें क्या प्रसन्नता होगी ? इन आततायियो को मारकर तो हमें पाप ही लगेगा || ३६ ||",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-37",
+          "number": "37",
+          "text": "तस्मान्नार्हा वयं हन्तुं धार्तराष्ट्रान्सबान्धवान् | स्वजनं हि कथं हत्वा सुखिनः स्याम माधव || ३७ ||",
+          "sort_order": 37,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "अतएव हे माधव ! अपने ही बांधव ध्रतराष्ट्र के पुत्रो को मरने के लिये हम योग्य नहीं हैं; क्योकि अपने ही कुटुम्ब को मारकर हम कैसे सुखी होंगे ?",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-38",
+          "number": "38",
+          "text": "यद्यप्येते न पश्यति लोभोपहतचेतसः | कुलक्षयकृतं दोषं मित्रद्रोहे च पातकम् || ३८ ||",
+          "sort_order": 38,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "यद्यपि लोभ द्वारा भ्रष्टचित होने के कारण उत्पन्न दोषों से इनका कूल धर्म नष्ट हो चूका हैं और अपने ही मित्रो से विरोध करने में इन्हें पाप दिखाई नहीं देता || ३८ ||",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-39",
+          "number": "39",
+          "text": "कथं न ज्ञेयमस्माभिः पापादस्मान्निवर्तितुम् | कुलक्षयकृतं दोषं प्रपश्यद्भिर्जनार्दन || ३९ ||",
+          "sort_order": 39,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "परन्तु हे जनार्दन कूल धर्म के नाश से उत्त्पन्न दोषों को जानने वाले हम लोगो को इस पाप से हटने के लिए क्यों विचार नहीं करना चाहिए ? || ३९ ||",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-40",
+          "number": "40",
+          "text": "कुल क्षये प्रणश्यन्ति कुलधर्माः सनातनाः | धर्मे नष्टे कुलं कृत्स्नमधर्मोSभिभवत्युत || ४० ||",
+          "sort_order": 40,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "कुल के नाश से सनातन कुल-धर्म नष्ट हो जाते हैं, धर्म के नाश हो जाने पर सम्पूर्ण कुल में पाप भी बहुत फ़ैल जाता हैं || ४० ||",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-41",
+          "number": "41",
+          "text": "अधर्माभिभवात्कृष्ण प्रदुष्यन्ति कुलस्त्रियः | स्त्रीषु दुष्टासु वार्ष्णेय जायते वर्णसड्करः || ४१  ||",
+          "sort_order": 41,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "हे कृष्णा ! पाप के अधिक बढ़ जाने से कूल की स्त्रिया अत्यंत दूषित हो जाती हैं और हे वार्ष्णेय ! स्त्रियों के दूषित हो जाने पर अवांछित संताने उत्त्पन्न होती हैं ! || ४१ ||",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-42",
+          "number": "42",
+          "text": "सड्करो नरकायैव कुलघ्नानां कुलस्य च | पतन्ति पितरो ह्येषां लुप्तपिण्डोदकक्रियाः || ४२ ||",
+          "sort_order": 42,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "वर्णसंकर संताने कुलघातियो को और कुल को नरक में ले जाने के लिए पैदा होती हैं ! लुप्त हुए पिंड और जल की क्रिया वाले अर्थात श्राद्ध और तर्पण से वंचित इनके पितरलोग भी अधोगति को प्राप्त होते हैं || ४२ ||",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-43",
+          "number": "43",
+          "text": "दोषैरेतै कुलघ्नानां वर्णसड्करकारकै: | उत्साद्यन्ते जातिधर्माः कुलधर्माश्र्च शाश्र्वताः || ४३ ||",
+          "sort_order": 43,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "इन वर्णसंकर कारक दोषों से कुलघातियो के सनातन कुल-धर्म और जाति-धर्म नष्ट हो जाते हैं || ४३ ||",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-44",
+          "number": "44",
+          "text": "उत्सन्नकुलधर्माणां मनुष्याणां जनार्दन | नरके नियतं वासो भवतीत्यनुश्रुश्रुम || ४४ ||",
+          "sort_order": 44,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "हे जनार्दन ! जिनका कुल-धर्म नष्ट हो गया हैं, ऐसे मनुष्यों का अनिश्चित काल तक नरक में वास होता हैं, ऐसा हम सुनते आये हैं || ४४ ||",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-45",
+          "number": "45",
+          "text": "अहो बत महत्पापं कर्तुं व्यवसिता वयम् | यद्राज्यसुखलोभेन हन्तुं स्वजनमुद्यताः || ४५ ||",
+          "sort_order": 45,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "हाँ! शोक! हम लोग बुद्धिमान होकर भी महान पाप करने को तैयार हो गये हैं, जो राज्य और सुख के लोभ से स्वजनों को मारने के लिए उद्यत हो गए हैं || ४५ ||",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-46",
+          "number": "46",
+          "text": "यदि मामप्रतीकारमशस्त्रं शस्त्रपाणयः | धार्तराष्ट्रा रणे हन्युस्तन्मे क्षेमतरं भवेत् || ४६ ||",
+          "sort_order": 46,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "यदि मुझ शस्त्ररहित एवं सामना न करने वाले को हाथ में लिए हुए ध्रतराष्ट्र के पुत्र रण में मार डालें तो वह मरना भी मेरे लिए अधिक कल्याणकारी होगा || ४६ ||",
+              "sort_order": 2
+            }
+          ]
+        },
+	      {
+          "slug": "verse-47",
+          "number": "47",
+          "text": "सञ्जय उवाच - एवमुक्तवार्जुनः संख्ये रथोपस्थ उपाविशत् |विसृज्य सशरं चापं शोकसंविग्नमानसः || ४७ ||",
+          "sort_order": 47,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Dhritarashtra asks what happened at Kurukshetra.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "संजय बोले - रणभूमि में शोक से उद्विग्न मनवाले अर्जुन इस प्रकार कहकर बाणसहित धनुष को त्यागकर रथ के पिछले भाग में बैठ गए || ४७ ||",
+              "sort_order": 2
+            }
+          ]
+        }        
+      ]	     
     }
   ]
 }

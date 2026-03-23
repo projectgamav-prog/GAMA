@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "chapter": {
+    "slug": "chapter-3",
+    "number": "3",
+    "title": "सांख्य योग",
+    "sort_order": 3
+  },
+  "chapter-section": [
+    {
+      "slug": "section-1-main",
+      "number": "1",
+      "title": "Main Passage",
+      "sort_order": 1,
+      "verses": [
+        {
+          "slug": "verse-1",
+          "number": "1",
+          "text": "Your responsibility is in action alone, never in the fruits.",
+          "sort_order": 1,
+          "translations": [
+            {
+              "source_key": "dev-en",
+              "source_name": "Development English",
+              "language_code": "en",
+              "text": "Your responsibility is in action alone, never in its fruits.",
+              "sort_order": 1
+            },
+            {
+              "source_key": "dev-hi",
+              "source_name": "Development Hindi",
+              "language_code": "hi",
+              "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+              "sort_order": 2
+            }
+          ],
+          "commentaries": [
+            {
+              "source_key": "dev-commentary",
+              "source_name": "Development Notes",
+              "author_name": "Gama Editorial",
+              "language_code": "en",
+              "title": "Action without attachment",
+              "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+              "sort_order": 1
+            }
+          ]
+        }
+        
+      ]
+    }
+  ]
+}

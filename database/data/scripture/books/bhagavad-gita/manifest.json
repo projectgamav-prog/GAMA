@@ -23,6 +23,9 @@
         },
         {
           "path": "sections/main/chapters/chapter-02.json"
+        },
+        {
+          "path": "sections/main/chapters/chapter-03.json"
         }
       ]
     }
