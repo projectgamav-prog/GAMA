@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class DictionaryEntry extends Model
@@ -19,6 +21,7 @@ class DictionaryEntry extends Model
         'headword',
         'transliteration',
         'entry_type',
+        'root_entry_id',
         'root_headword',
         'short_meaning',
         'notes',
@@ -42,6 +45,22 @@ class DictionaryEntry extends Model
     public function scopePublished(Builder $query): Builder
     {
         return $query->where('is_published', true);
+    }
+
+    /**
+     * Get the linked root entry, when present.
+     */
+    public function rootEntry(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'root_entry_id');
+    }
+
+    /**
+     * Get entries that derive from this entry.
+     */
+    public function derivedEntries(): HasMany
+    {
+        return $this->hasMany(self::class, 'root_entry_id');
     }
 
     /**

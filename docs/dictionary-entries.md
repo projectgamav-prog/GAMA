@@ -10,6 +10,7 @@
 - `normalized_headword`: auto-generated search/deduplication form of `headword`.
 - `normalized_transliteration`: auto-generated search/deduplication form of `transliteration`.
 - `entry_type`: future-friendly classifier such as `word`, `root`, `name`, `compound`, or `phrase`.
+- `root_entry_id`: optional self-reference to another dictionary entry for future root or derivation linking.
 - `root_headword`: optional plain-text helper for root or related lemma notes.
 - `short_meaning`: optional one-line quick meaning.
 - `notes`: optional internal editorial or admin notes.
@@ -39,3 +40,5 @@ The v1 dictionary core intentionally does not yet include separate tables for:
 - `verse_dictionary_entries`
 
 Those are the recommended phase-2 extensions once the core entry layer is stable.
+
+`root_entry_id` gives v1 a minimal path toward word-family and derivation navigation without requiring those phase-2 tables yet.

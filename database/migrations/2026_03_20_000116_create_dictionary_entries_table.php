@@ -18,7 +18,12 @@ return new class extends Migration
             $table->string('transliteration')->nullable();
             $table->string('normalized_headword')->index();
             $table->string('normalized_transliteration')->nullable()->index();
-            $table->string('entry_type')->default('word');
+            $table->string('entry_type')->default('word')->index();
+            $table->foreignId('root_entry_id')
+                ->nullable()
+                ->constrained('dictionary_entries')
+                ->nullOnDelete()
+                ->index();
             $table->string('root_headword')->nullable();
             $table->string('short_meaning')->nullable();
             $table->text('notes')->nullable();
