@@ -10,49 +10,14 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import {
+    chapterLabel,
+    hidesSingleGenericSection,
+    isGenericSectionLabel,
+    sectionLabel,
+} from '@/lib/scripture';
 import ScriptureLayout from '@/layouts/scripture-layout';
 import type { BreadcrumbItem, ChapterShowProps } from '@/types';
-
-const chapterLabel = (number: string | null, title: string | null) => {
-    if (number && title) {
-        return `Chapter ${number}: ${title}`;
-    }
-
-    if (number) {
-        return `Chapter ${number}`;
-    }
-
-    return title ?? 'Chapter';
-};
-
-const sectionLabel = (number: string | null, title: string | null) => {
-    if (number && title) {
-        return `Section ${number}: ${title}`;
-    }
-
-    if (number) {
-        return `Section ${number}`;
-    }
-
-    return title ?? 'Section';
-};
-
-const normalizeSectionText = (value: string | null) =>
-    value?.trim().toLowerCase() ?? '';
-
-const isGenericSingleSectionLabel = (slug: string, title: string | null) => {
-    const normalizedSlug = normalizeSectionText(slug);
-    const normalizedTitle = normalizeSectionText(title);
-
-    return (
-        normalizedTitle === 'main' ||
-        normalizedTitle === 'main text' ||
-        normalizedTitle === 'main passage' ||
-        normalizedSlug === 'main' ||
-        normalizedSlug === 'main-text' ||
-        normalizedSlug.endsWith('-main')
-    );
-};
 
 export default function ChapterShow({
     book,
@@ -61,16 +26,14 @@ export default function ChapterShow({
     content_blocks,
     chapter_sections,
 }: ChapterShowProps) {
-    const hidesGenericBookSection = isGenericSingleSectionLabel(
+    const hidesGenericBookSection = isGenericSectionLabel(
         book_section.slug,
         book_section.title,
     );
     const hidesGenericChapterSection =
-        chapter_sections.length === 1 &&
-        isGenericSingleSectionLabel(
-            chapter_sections[0].slug,
-            chapter_sections[0].title,
-        );
+        hidesSingleGenericSection(chapter_sections);
+    const chapterTitle = chapterLabel(chapter.number, chapter.title);
+    const bookSectionTitle = sectionLabel(book_section.number, book_section.title);
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -78,18 +41,18 @@ export default function ChapterShow({
             href: book.href,
         },
         {
-            title: sectionLabel(book_section.number, book_section.title),
+            title: bookSectionTitle,
             href: book_section.href,
         },
         {
-            title: chapterLabel(chapter.number, chapter.title),
+            title: chapterTitle,
             href: chapter.href,
         },
     ];
 
     return (
         <ScriptureLayout
-            title={chapterLabel(chapter.number, chapter.title)}
+            title={chapterTitle}
             breadcrumbs={breadcrumbs}
         >
             <Card>
@@ -99,17 +62,12 @@ export default function ChapterShow({
                         <Badge variant="secondary">{book.title}</Badge>
                         {!hidesGenericBookSection && (
                             <Badge variant="secondary">
-                                {sectionLabel(
-                                    book_section.number,
-                                    book_section.title,
-                                )}
+                                {bookSectionTitle}
                             </Badge>
                         )}
                     </div>
                     <div className="space-y-2">
-                        <CardTitle className="text-3xl">
-                            {chapterLabel(chapter.number, chapter.title)}
-                        </CardTitle>
+                        <CardTitle className="text-3xl">{chapterTitle}</CardTitle>
                         <CardDescription className="text-base leading-7">
                             Read the chapter overview first, then open the
                             reader and continue in canonical order.

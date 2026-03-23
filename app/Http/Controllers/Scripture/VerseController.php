@@ -7,10 +7,8 @@ use App\Models\Book;
 use App\Models\BookSection;
 use App\Models\Chapter;
 use App\Models\ChapterSection;
-use App\Models\ContentBlock;
 use App\Models\Verse;
-use App\Models\VerseCommentary;
-use App\Models\VerseTranslation;
+use App\Support\Scripture\PublicScriptureData;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -25,13 +23,11 @@ class VerseController extends Controller
         Chapter $chapter,
         ChapterSection $chapterSection,
         Verse $verse,
+        PublicScriptureData $publicScriptureData,
     ): Response {
-        $bookHref = route('scripture.books.show', $book);
-        $bookSectionHref = $bookHref.'#section-'.$bookSection->slug;
-
         $verse->load([
-            'translations' => fn ($query) => $query->orderBy('sort_order'),
-            'commentaries' => fn ($query) => $query->orderBy('sort_order'),
+            'translations',
+            'commentaries',
         ]);
 
         $chapterSectionVerses = $chapterSection->verses()
@@ -42,60 +38,24 @@ class VerseController extends Controller
             fn (Verse $candidate): bool => (int) $candidate->getKey() === (int) $verse->getKey(),
         );
 
-        $versesHref = route('scripture.chapters.verses.index', [
-            'book' => $book,
-            'bookSection' => $bookSection,
-            'chapter' => $chapter,
-        ]);
-
         $contentBlocks = $verse->contentBlocks()
-            ->where('status', 'published')
-            ->orderBy('sort_order')
+            ->published()
             ->get();
 
         return Inertia::render('scripture/chapters/verses/show', [
-            'book' => [
-                'id' => $book->id,
-                'slug' => $book->slug,
-                'number' => $book->number,
-                'title' => $book->title,
-                'href' => $bookHref,
-            ],
-            'book_section' => [
-                'id' => $bookSection->id,
-                'slug' => $bookSection->slug,
-                'number' => $bookSection->number,
-                'title' => $bookSection->title,
-                'href' => $bookSectionHref,
-            ],
-            'chapter' => [
-                'id' => $chapter->id,
-                'slug' => $chapter->slug,
-                'number' => $chapter->number,
-                'title' => $chapter->title,
-                'href' => route('scripture.chapters.show', [
-                    'book' => $book,
-                    'bookSection' => $bookSection,
-                    'chapter' => $chapter,
-                ]),
-                'verses_href' => $versesHref,
-            ],
-            'chapter_section' => [
-                'id' => $chapterSection->id,
-                'slug' => $chapterSection->slug,
-                'number' => $chapterSection->number,
-                'title' => $chapterSection->title,
-                'href' => $versesHref.'#'.$chapterSection->slug,
-            ],
-            'verse' => [
-                'id' => $verse->id,
-                'slug' => $verse->slug,
-                'number' => $verse->number,
-                'text' => $verse->text,
-            ],
+            'book' => $publicScriptureData->book($book),
+            'book_section' => $publicScriptureData->bookSection($book, $bookSection),
+            'chapter' => $publicScriptureData->chapter($book, $bookSection, $chapter),
+            'chapter_section' => $publicScriptureData->chapterSection(
+                $book,
+                $bookSection,
+                $chapter,
+                $chapterSection,
+            ),
+            'verse' => $publicScriptureData->verse($verse),
             'previous_verse' => $currentVerseIndex === false
                 ? null
-                : $this->adjacentVerseData(
+                : $publicScriptureData->adjacentVerse(
                     $book,
                     $bookSection,
                     $chapter,
@@ -104,90 +64,16 @@ class VerseController extends Controller
                 ),
             'next_verse' => $currentVerseIndex === false
                 ? null
-                : $this->adjacentVerseData(
+                : $publicScriptureData->adjacentVerse(
                     $book,
                     $bookSection,
                     $chapter,
                     $chapterSection,
                     $chapterSectionVerses->get($currentVerseIndex + 1),
                 ),
-            'translations' => $verse->translations
-                ->map(fn (VerseTranslation $translation) => [
-                    'id' => $translation->id,
-                    'source_key' => $translation->source_key,
-                    'source_name' => $translation->source_name,
-                    'language_code' => $translation->language_code,
-                    'text' => $translation->text,
-                    'sort_order' => $translation->sort_order,
-                ])
-                ->values()
-                ->all(),
-            'commentaries' => $verse->commentaries
-                ->map(fn (VerseCommentary $commentary) => [
-                    'id' => $commentary->id,
-                    'source_key' => $commentary->source_key,
-                    'source_name' => $commentary->source_name,
-                    'author_name' => $commentary->author_name,
-                    'language_code' => $commentary->language_code,
-                    'title' => $commentary->title,
-                    'body' => $commentary->body,
-                    'sort_order' => $commentary->sort_order,
-                ])
-                ->values()
-                ->all(),
-            'content_blocks' => $contentBlocks
-                ->map(fn (ContentBlock $block) => $this->contentBlockData($block))
-                ->values()
-                ->all(),
+            'translations' => $publicScriptureData->translations($verse->translations),
+            'commentaries' => $publicScriptureData->commentaries($verse->commentaries),
+            'content_blocks' => $publicScriptureData->contentBlocks($contentBlocks),
         ]);
-    }
-
-    /**
-     * Transform a content block for public scripture pages.
-     *
-     * @return array<string, mixed>
-     */
-    private function contentBlockData(ContentBlock $block): array
-    {
-        return [
-            'id' => $block->id,
-            'region' => $block->region,
-            'block_type' => $block->block_type,
-            'title' => $block->title,
-            'body' => $block->body,
-            'data_json' => $block->data_json,
-            'sort_order' => $block->sort_order,
-        ];
-    }
-
-    /**
-     * Transform an adjacent verse into a navigation link payload.
-     *
-     * @return array<string, mixed>|null
-     */
-    private function adjacentVerseData(
-        Book $book,
-        BookSection $bookSection,
-        Chapter $chapter,
-        ChapterSection $chapterSection,
-        ?Verse $verse,
-    ): ?array {
-        if (! $verse instanceof Verse) {
-            return null;
-        }
-
-        return [
-            'id' => $verse->id,
-            'slug' => $verse->slug,
-            'number' => $verse->number,
-            'text' => $verse->text,
-            'href' => route('scripture.chapters.verses.show', [
-                'book' => $book,
-                'bookSection' => $bookSection,
-                'chapter' => $chapter,
-                'chapterSection' => $chapterSection,
-                'verse' => $verse,
-            ]),
-        ];
     }
 }

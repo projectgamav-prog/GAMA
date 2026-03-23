@@ -18,6 +18,13 @@ use Illuminate\Support\Facades\Validator;
 use JsonException;
 use RuntimeException;
 
+/**
+ * Imports the locked scripture JSON corpus into the relational schema.
+ *
+ * This class owns JSON authoring contract validation, canonical hierarchy
+ * upserts, and editorial child-record ordering while keeping the core
+ * scripture tree deterministic.
+ */
 class ScriptureJsonImporter
 {
     public const ROOT_MANIFEST_PATH = 'database/data/scripture/manifest.json';

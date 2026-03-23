@@ -10,11 +10,17 @@ use App\Models\Verse;
 use App\Models\VerseCardGroup;
 use Illuminate\Support\Collection;
 
+/**
+ * Builds the read-only chapter reader payload.
+ *
+ * Canonical verse order always wins. Presentation-only verse card groups are
+ * allowed to collapse contiguous verses into one card, but only when they stay
+ * inside a single chapter section. Invalid groups gracefully degrade to normal
+ * single-verse cards so public reading behavior remains stable.
+ */
 class BuildChapterVerseReaderData
 {
     /**
-     * Build chapter-section reading cards in canonical order.
-     *
      * @return array{
      *     reader_languages: list<string>,
      *     default_language: string|null,
@@ -23,6 +29,32 @@ class BuildChapterVerseReaderData
      */
     public function handle(Book $book, BookSection $bookSection, Chapter $chapter): array
     {
+        $this->loadReaderGraph($chapter);
+
+        $chapterSections = $chapter->chapterSections
+            ->map(fn (ChapterSection $section) => $this->buildSectionData(
+                $book,
+                $bookSection,
+                $chapter,
+                $section,
+            ))
+            ->values()
+            ->all();
+
+        $readerLanguages = $this->readerLanguages($chapterSections);
+
+        return [
+            'reader_languages' => $readerLanguages,
+            'default_language' => $readerLanguages[0] ?? null,
+            'chapter_sections' => $chapterSections,
+        ];
+    }
+
+    /**
+     * Load the canonical reader graph once so the remaining methods can stay pure.
+     */
+    private function loadReaderGraph(Chapter $chapter): void
+    {
         $chapter->load([
             'chapterSections' => fn ($query) => $query
                 ->inCanonicalOrder()
@@ -30,55 +62,16 @@ class BuildChapterVerseReaderData
                     'verses' => fn ($verseQuery) => $verseQuery
                         ->inCanonicalOrder()
                         ->with([
-                            'translations' => fn ($translationQuery) => $translationQuery->orderBy('sort_order'),
+                            'translations',
                             'verseCardGroupItem.verseCardGroup.items.verse',
                         ])
                         ->withCount([
                             'contentBlocks as published_video_blocks_count' => fn ($contentBlockQuery) => $contentBlockQuery
-                                ->where('status', 'published')
+                                ->published()
                                 ->where('block_type', 'video'),
                         ]),
                 ]),
         ]);
-
-        $hasEnglish = false;
-        $hasHindi = false;
-
-        $chapterSections = $chapter->chapterSections
-            ->map(function (ChapterSection $section) use (
-                $book,
-                $bookSection,
-                $chapter,
-                &$hasEnglish,
-                &$hasHindi,
-            ) {
-                $sectionData = $this->buildSectionData(
-                    $book,
-                    $bookSection,
-                    $chapter,
-                    $section,
-                );
-
-                foreach ($sectionData['cards'] as $card) {
-                    foreach ($card['verses'] as $verse) {
-                        $hasEnglish = $hasEnglish || $verse['translations']['en'] !== null;
-                        $hasHindi = $hasHindi || $verse['translations']['hi'] !== null;
-                    }
-                }
-
-                return $sectionData;
-            })
-            ->values()
-            ->all();
-
-        return [
-            'reader_languages' => array_values(array_filter([
-                $hasEnglish ? 'en' : null,
-                $hasHindi ? 'hi' : null,
-            ])),
-            'default_language' => $hasEnglish ? 'en' : ($hasHindi ? 'hi' : null),
-            'chapter_sections' => $chapterSections,
-        ];
     }
 
     /**
@@ -92,12 +85,31 @@ class BuildChapterVerseReaderData
         Chapter $chapter,
         ChapterSection $section,
     ): array {
+        return [
+            'id' => $section->id,
+            'slug' => $section->slug,
+            'number' => $section->number,
+            'title' => $section->title,
+            'cards' => $this->buildCards($book, $bookSection, $chapter, $section),
+        ];
+    }
+
+    /**
+     * Build cards for one chapter section in canonical verse order.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function buildCards(
+        Book $book,
+        BookSection $bookSection,
+        Chapter $chapter,
+        ChapterSection $section,
+    ): array {
         /** @var Collection<int, Verse> $sectionVerses */
         $sectionVerses = $section->verses->values();
 
         /** @var Collection<int, int> $versePositions */
         $versePositions = $sectionVerses
-            ->values()
             ->mapWithKeys(fn (Verse $verse, int $index) => [$verse->id => $index]);
 
         /** @var Collection<int, Verse> $versesById */
@@ -149,28 +161,17 @@ class BuildChapterVerseReaderData
             }
 
             $renderedGroupIds[] = $group->id;
-            $cards[] = [
-                'id' => 'group-'.$group->id,
-                'type' => 'group',
-                'label' => $this->groupCardLabel($groupVerses),
-                'verses' => $groupVerses
-                    ->map(fn (Verse $groupVerse) => $preparedVerses->get($groupVerse->id))
-                    ->values()
-                    ->all(),
-            ];
+            $cards[] = $this->groupCardData($group, $groupVerses, $preparedVerses);
         }
 
-        return [
-            'id' => $section->id,
-            'slug' => $section->slug,
-            'number' => $section->number,
-            'title' => $section->title,
-            'cards' => $cards,
-        ];
+        return $cards;
     }
 
     /**
      * Validate a helper-layer group against one chapter section.
+     *
+     * Reader groups are presentation sugar only. They must never bridge
+     * across chapter sections or skip verses inside a grouped range.
      *
      * @param  Collection<int, int>  $versePositions
      * @param  Collection<int, Verse>  $versesById
@@ -284,6 +285,55 @@ class BuildChapterVerseReaderData
                 $preparedVerses->get($verse->id),
             ],
         ];
+    }
+
+    /**
+     * Build a grouped-verse card from already-validated verses.
+     *
+     * @param  Collection<int, Verse>  $groupVerses
+     * @param  Collection<int, array<string, mixed>>  $preparedVerses
+     * @return array<string, mixed>
+     */
+    private function groupCardData(
+        VerseCardGroup $group,
+        Collection $groupVerses,
+        Collection $preparedVerses,
+    ): array {
+        return [
+            'id' => 'group-'.$group->id,
+            'type' => 'group',
+            'label' => $this->groupCardLabel($groupVerses),
+            'verses' => $groupVerses
+                ->map(fn (Verse $groupVerse) => $preparedVerses->get($groupVerse->id))
+                ->values()
+                ->all(),
+        ];
+    }
+
+    /**
+     * Detect which reader languages are actually available in the payload.
+     *
+     * @param  list<array<string, mixed>>  $chapterSections
+     * @return list<string>
+     */
+    private function readerLanguages(array $chapterSections): array
+    {
+        $hasEnglish = false;
+        $hasHindi = false;
+
+        foreach ($chapterSections as $section) {
+            foreach ($section['cards'] as $card) {
+                foreach ($card['verses'] as $verse) {
+                    $hasEnglish = $hasEnglish || $verse['translations']['en'] !== null;
+                    $hasHindi = $hasHindi || $verse['translations']['hi'] !== null;
+                }
+            }
+        }
+
+        return array_values(array_filter([
+            $hasEnglish ? 'en' : null,
+            $hasHindi ? 'hi' : null,
+        ]));
     }
 
     /**

@@ -4,6 +4,13 @@ namespace App\Support\Scripture;
 
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * Applies canonical ordering to scripture hierarchy queries.
+ *
+ * Canonical number fields are stored as strings, so this helper keeps nulls at
+ * the end, prefers real numeric values first, and always falls back to the
+ * primary key so adjacent navigation and pagination stay stable.
+ */
 class CanonicalScriptureOrder
 {
     public static function applyBookOrder(Builder $query): Builder

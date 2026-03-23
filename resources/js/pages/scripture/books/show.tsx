@@ -9,63 +9,21 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import {
+    chapterLabel,
+    hidesSingleGenericSection,
+    sectionAnchorId,
+    sectionLabel,
+} from '@/lib/scripture';
 import ScriptureLayout from '@/layouts/scripture-layout';
 import type { BookShowProps, BreadcrumbItem } from '@/types';
-
-const sectionLabel = (number: string | null, title: string | null) => {
-    if (number && title) {
-        return `Section ${number}: ${title}`;
-    }
-
-    if (number) {
-        return `Section ${number}`;
-    }
-
-    return title ?? 'Section';
-};
-
-const sectionAnchorId = (slug: string) => `section-${slug}`;
-
-const normalizeSectionText = (value: string | null) =>
-    value?.trim().toLowerCase() ?? '';
-
-const isGenericSingleSectionLabel = (slug: string, title: string | null) => {
-    const normalizedSlug = normalizeSectionText(slug);
-    const normalizedTitle = normalizeSectionText(title);
-
-    return (
-        normalizedTitle === 'main' ||
-        normalizedTitle === 'main text' ||
-        normalizedTitle === 'main passage' ||
-        normalizedSlug === 'main' ||
-        normalizedSlug === 'main-text' ||
-        normalizedSlug.endsWith('-main')
-    );
-};
-
-const chapterLabel = (number: string | null, title: string | null) => {
-    if (number && title) {
-        return `Chapter ${number}: ${title}`;
-    }
-
-    if (number) {
-        return `Chapter ${number}`;
-    }
-
-    return title ?? 'Chapter';
-};
 
 export default function BookShow({
     book,
     content_blocks,
     book_sections,
 }: BookShowProps) {
-    const hidesGenericSingleSection =
-        book_sections.length === 1 &&
-        isGenericSingleSectionLabel(
-            book_sections[0].slug,
-            book_sections[0].title,
-        );
+    const hidesGenericSingleSection = hidesSingleGenericSection(book_sections);
 
     const breadcrumbs: BreadcrumbItem[] = [
         {

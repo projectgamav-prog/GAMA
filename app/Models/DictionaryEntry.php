@@ -31,6 +31,10 @@ class DictionaryEntry extends Model
     protected static function booted(): void
     {
         static::saving(function (self $entry): void {
+            $entry->slug = trim($entry->slug);
+            $entry->headword = self::cleanStoredValue($entry->headword) ?? '';
+            $entry->transliteration = self::cleanStoredValue($entry->transliteration);
+            $entry->root_headword = self::cleanStoredValue($entry->root_headword);
             $entry->normalized_headword = self::normalizeForSearch($entry->headword) ?? '';
             $entry->normalized_transliteration = self::normalizeForSearch(
                 $entry->transliteration,
@@ -103,5 +107,16 @@ class DictionaryEntry extends Model
         }
 
         return $normalized === '' ? null : $normalized;
+    }
+
+    private static function cleanStoredValue(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $cleaned = Str::squish($value);
+
+        return $cleaned === '' ? null : $cleaned;
     }
 }

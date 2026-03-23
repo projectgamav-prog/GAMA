@@ -51,6 +51,8 @@ export type ScriptureVerse = {
     href?: string;
 };
 
+export type ScriptureReaderLanguage = 'en' | 'hi';
+
 export type ScriptureReaderVerse = {
     id: number;
     slug: string;
@@ -58,10 +60,7 @@ export type ScriptureReaderVerse = {
     text: string;
     explanation_href: string;
     video_href: string | null;
-    translations: {
-        en: string | null;
-        hi: string | null;
-    };
+    translations: Record<ScriptureReaderLanguage, string | null>;
 };
 
 export type ScriptureReaderCard = {
@@ -117,8 +116,8 @@ export type ChapterVersesIndexProps = {
     book: ScriptureBook;
     book_section: ScriptureBookSection;
     chapter: ScriptureChapter;
-    reader_languages: Array<'en' | 'hi'>;
-    default_language: 'en' | 'hi' | null;
+    reader_languages: ScriptureReaderLanguage[];
+    default_language: ScriptureReaderLanguage | null;
     chapter_sections: Array<
         ScriptureChapterSection & {
             cards: ScriptureReaderCard[];

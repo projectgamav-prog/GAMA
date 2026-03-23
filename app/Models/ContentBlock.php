@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -21,6 +22,14 @@ class ContentBlock extends Model
     public function parent(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    /**
+     * Scope a query to blocks that are safe for public scripture pages.
+     */
+    public function scopePublished(Builder $query): Builder
+    {
+        return $query->where('status', 'published');
     }
 
     /**

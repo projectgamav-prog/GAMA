@@ -17,57 +17,16 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import {
+    chapterLabel,
+    hidesSingleGenericSection,
+    isGenericSectionLabel,
+    languageLabel,
+    sectionLabel,
+    verseLabel,
+} from '@/lib/scripture';
 import ScriptureLayout from '@/layouts/scripture-layout';
 import type { BreadcrumbItem, ChapterVersesIndexProps } from '@/types';
-
-const chapterLabel = (number: string | null, title: string | null) => {
-    if (number && title) {
-        return `Chapter ${number}: ${title}`;
-    }
-
-    if (number) {
-        return `Chapter ${number}`;
-    }
-
-    return title ?? 'Chapter';
-};
-
-const sectionLabel = (number: string | null, title: string | null) => {
-    if (number && title) {
-        return `Section ${number}: ${title}`;
-    }
-
-    if (number) {
-        return `Section ${number}`;
-    }
-
-    return title ?? 'Section';
-};
-
-const normalizeSectionText = (value: string | null) =>
-    value?.trim().toLowerCase() ?? '';
-
-const isGenericSingleSectionLabel = (slug: string, title: string | null) => {
-    const normalizedSlug = normalizeSectionText(slug);
-    const normalizedTitle = normalizeSectionText(title);
-
-    return (
-        normalizedTitle === 'main' ||
-        normalizedTitle === 'main text' ||
-        normalizedTitle === 'main passage' ||
-        normalizedSlug === 'main' ||
-        normalizedSlug === 'main-text' ||
-        normalizedSlug.endsWith('-main')
-    );
-};
-
-const verseLabel = (number: string | null) => {
-    return number ? `Verse ${number}` : 'Verse';
-};
-
-const languageLabel = (language: 'en' | 'hi') => {
-    return language === 'hi' ? 'Hindi' : 'English';
-};
 
 export default function ChapterVersesIndex({
     book,
@@ -87,16 +46,14 @@ export default function ChapterVersesIndex({
         (sum, section) => sum + section.cards.length,
         0,
     );
-    const hidesGenericBookSection = isGenericSingleSectionLabel(
+    const hidesGenericBookSection = isGenericSectionLabel(
         book_section.slug,
         book_section.title,
     );
     const hidesGenericChapterSection =
-        chapter_sections.length === 1 &&
-        isGenericSingleSectionLabel(
-            chapter_sections[0].slug,
-            chapter_sections[0].title,
-        );
+        hidesSingleGenericSection(chapter_sections);
+    const chapterTitle = chapterLabel(chapter.number, chapter.title);
+    const bookSectionTitle = sectionLabel(book_section.number, book_section.title);
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -104,11 +61,11 @@ export default function ChapterVersesIndex({
             href: book.href,
         },
         {
-            title: sectionLabel(book_section.number, book_section.title),
+            title: bookSectionTitle,
             href: book_section.href,
         },
         {
-            title: chapterLabel(chapter.number, chapter.title),
+            title: chapterTitle,
             href: chapter.href,
         },
         {
@@ -119,7 +76,7 @@ export default function ChapterVersesIndex({
 
     return (
         <ScriptureLayout
-            title={`${chapterLabel(chapter.number, chapter.title)} Reader`}
+            title={`${chapterTitle} Reader`}
             breadcrumbs={breadcrumbs}
         >
             <Card>
@@ -129,10 +86,7 @@ export default function ChapterVersesIndex({
                         <Badge variant="secondary">{book.title}</Badge>
                         {!hidesGenericBookSection && (
                             <Badge variant="secondary">
-                                {sectionLabel(
-                                    book_section.number,
-                                    book_section.title,
-                                )}
+                                {bookSectionTitle}
                             </Badge>
                         )}
                         <Badge variant="secondary">
@@ -141,7 +95,7 @@ export default function ChapterVersesIndex({
                     </div>
                     <div className="space-y-2">
                         <CardTitle className="text-3xl">
-                            {chapterLabel(chapter.number, chapter.title)}
+                            {chapterTitle}
                         </CardTitle>
                         <CardDescription className="text-base leading-7">
                             Canonical verses are rendered in reading order,

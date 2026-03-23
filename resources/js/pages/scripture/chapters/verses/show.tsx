@@ -15,36 +15,9 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { chapterLabel, sectionLabel, verseLabel } from '@/lib/scripture';
 import ScriptureLayout from '@/layouts/scripture-layout';
 import type { BreadcrumbItem, VerseShowProps } from '@/types';
-
-const chapterLabel = (number: string | null, title: string | null) => {
-    if (number && title) {
-        return `Chapter ${number}: ${title}`;
-    }
-
-    if (number) {
-        return `Chapter ${number}`;
-    }
-
-    return title ?? 'Chapter';
-};
-
-const sectionLabel = (number: string | null, title: string | null) => {
-    if (number && title) {
-        return `Section ${number}: ${title}`;
-    }
-
-    if (number) {
-        return `Section ${number}`;
-    }
-
-    return title ?? 'Section';
-};
-
-const verseLabel = (number: string | null) => {
-    return number ? `Verse ${number}` : 'Verse';
-};
 
 export default function VerseShow({
     book,
@@ -58,32 +31,40 @@ export default function VerseShow({
     commentaries,
     content_blocks,
 }: VerseShowProps) {
+    const chapterTitle = chapterLabel(chapter.number, chapter.title);
+    const bookSectionTitle = sectionLabel(book_section.number, book_section.title);
+    const chapterSectionTitle = sectionLabel(
+        chapter_section.number,
+        chapter_section.title,
+    );
+    const verseTitle = verseLabel(verse.number);
+
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: book.title,
             href: book.href,
         },
         {
-            title: sectionLabel(book_section.number, book_section.title),
+            title: bookSectionTitle,
             href: book_section.href,
         },
         {
-            title: chapterLabel(chapter.number, chapter.title),
+            title: chapterTitle,
             href: chapter.href,
         },
         {
-            title: sectionLabel(chapter_section.number, chapter_section.title),
+            title: chapterSectionTitle,
             href: chapter_section.href,
         },
         {
-            title: verseLabel(verse.number),
+            title: verseTitle,
             href: chapter.href,
         },
     ];
 
     return (
         <ScriptureLayout
-            title={`${verseLabel(verse.number)} - ${chapterLabel(chapter.number, chapter.title)}`}
+            title={`${verseTitle} - ${chapterTitle}`}
             breadcrumbs={breadcrumbs}
         >
             <Card>
@@ -92,25 +73,17 @@ export default function VerseShow({
                         <Badge variant="outline">Verse Details</Badge>
                         <Badge variant="secondary">{book.title}</Badge>
                         <Badge variant="secondary">
-                            {sectionLabel(
-                                book_section.number,
-                                book_section.title,
-                            )}
+                            {bookSectionTitle}
                         </Badge>
                         <Badge variant="secondary">
-                            {sectionLabel(
-                                chapter_section.number,
-                                chapter_section.title,
-                            )}
+                            {chapterSectionTitle}
                         </Badge>
-                        <Badge variant="secondary">{verseLabel(verse.number)}</Badge>
+                        <Badge variant="secondary">{verseTitle}</Badge>
                     </div>
                     <div className="space-y-2">
-                        <CardTitle className="text-3xl">
-                            {verseLabel(verse.number)}
-                        </CardTitle>
+                        <CardTitle className="text-3xl">{verseTitle}</CardTitle>
                         <CardDescription className="text-base leading-7">
-                            {chapterLabel(chapter.number, chapter.title)}
+                            {chapterTitle}
                         </CardDescription>
                     </div>
                 </CardHeader>

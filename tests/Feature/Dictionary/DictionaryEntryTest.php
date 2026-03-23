@@ -11,18 +11,18 @@ test('a valid dictionary entry can be created with generated normalized fields',
     ]);
 
     $entry = DictionaryEntry::query()->create([
-        'slug' => 'dharma',
-        'headword' => "  \u{0927}\u{0930}\u{094D}\u{092E} \u{0965} ",
-        'transliteration' => ' Dharma - ',
+        'slug' => ' dharma ',
+        'headword' => "  \u{0927}\u{0930}\u{094D}\u{092E}   \u{0965} ",
+        'transliteration' => '  Dharma   -  ',
         'root_entry_id' => $rootEntry->id,
-        'root_headword' => "\u{0927}\u{0943}",
+        'root_headword' => "  \u{0927}\u{0943}  ",
         'short_meaning' => 'duty, law, order',
         'notes' => 'Seed entry for Sanskrit dictionary work.',
     ])->refresh();
 
     expect($entry->slug)->toBe('dharma');
-    expect($entry->headword)->toBe("  \u{0927}\u{0930}\u{094D}\u{092E} \u{0965} ");
-    expect($entry->transliteration)->toBe(' Dharma - ');
+    expect($entry->headword)->toBe("\u{0927}\u{0930}\u{094D}\u{092E} \u{0965}");
+    expect($entry->transliteration)->toBe('Dharma -');
     expect($entry->normalized_headword)->toBe("\u{0927}\u{0930}\u{094D}\u{092E}");
     expect($entry->normalized_transliteration)->toBe('dharma');
     expect($entry->entry_type)->toBe('word');
@@ -88,10 +88,13 @@ test('nullable root relation and transliteration remain null when omitted', func
     $entry = DictionaryEntry::query()->create([
         'slug' => 'moksha',
         'headword' => "\u{092E}\u{094B}\u{0915}\u{094D}\u{0937}",
-        'transliteration' => null,
+        'transliteration' => '   ',
         'root_entry_id' => null,
+        'root_headword' => '   ',
     ])->refresh();
 
     expect($entry->normalized_transliteration)->toBeNull();
+    expect($entry->transliteration)->toBeNull();
+    expect($entry->root_headword)->toBeNull();
     expect($entry->rootEntry)->toBeNull();
 });
