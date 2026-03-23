@@ -32,16 +32,36 @@ function withMutatedScriptureJson(string $path, callable $mutate, callable $asse
 }
 
 test('valid book manifest with section imports successfully', function () {
+    $rootManifest = scriptureJsonFixture('database/data/scripture/manifest.json');
     $manifest = scriptureJsonFixture('database/data/scripture/books/bhagavad-gita/manifest.json');
 
+    expect($rootManifest['books'][0])->toHaveKey('number');
     expect($manifest)->toHaveKey('section');
     expect($manifest)->not->toHaveKey('sections');
+    expect($manifest['book'])->toHaveKey('number');
     expect($manifest['section'])->toBeArray();
 
     app(ScriptureJsonImporter::class)->import('bhagavad-gita');
 
     expect(Book::query()->where('slug', 'bhagavad-gita')->exists())->toBeTrue();
+    expect(Book::query()->where('slug', 'bhagavad-gita')->value('number'))->toBe('1');
     expect(BookSection::query()->where('slug', 'main')->exists())->toBeTrue();
+});
+
+test('book import safely falls back to the root manifest number when book number is omitted', function () {
+    withMutatedScriptureJson(
+        'database/data/scripture/books/bhagavad-gita/manifest.json',
+        function (array $manifest): array {
+            unset($manifest['book']['number']);
+
+            return $manifest;
+        },
+        function (): void {
+            app(ScriptureJsonImporter::class)->import('bhagavad-gita');
+
+            expect(Book::query()->where('slug', 'bhagavad-gita')->value('number'))->toBe('1');
+        },
+    );
 });
 
 test('valid chapter file with chapter-section imports successfully', function () {

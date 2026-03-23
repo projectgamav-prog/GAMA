@@ -43,7 +43,11 @@ Required keys:
 - `path`
 - `enabled`
 
-Books render in the canonical order defined by this root manifest array.
+Optional book entry keys:
+
+- `number`
+
+Books render in canonical order by `number`, then `id`.
 
 ## Categories Manifest
 
@@ -73,6 +77,7 @@ Required keys:
 
 Optional book keys:
 
+- `book.number`
 - `book.description`
 
 Each `section` item must be an array item with:

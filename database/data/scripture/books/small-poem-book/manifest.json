@@ -2,6 +2,7 @@
     "schema_version": 1,
     "book": {
         "slug": "small-poem-book",
+        "number": "4",
         "title": "Small Poem Book",
         "description": "A one-chapter poem-like sample that still uses verse rows."
     },

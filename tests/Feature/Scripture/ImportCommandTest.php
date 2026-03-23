@@ -16,6 +16,8 @@ test('scripture import command imports all enabled books from the corpus manifes
         ->assertExitCode(0);
 
     expect(Book::query()->count())->toBe(6);
+    expect(Book::query()->where('slug', 'bhagavad-gita')->value('number'))->toBe('1');
+    expect(Book::query()->where('slug', 'sectioned-demo-book')->value('number'))->toBe('6');
     expect(BookCategory::query()->count())->toBe(6);
     expect(DB::table('book_category_assignments')->count())->toBe(13);
     expect(Book::query()->where('slug', 'ramcharitmanas')->exists())->toBeTrue();
@@ -36,6 +38,7 @@ test('scripture import command imports one book by slug', function () {
     expect(VerseCommentary::query()->count())->toBe(34);
     expect(BookCategory::query()->pluck('slug')->sort()->values()->all())
         ->toBe(['gita', 'philosophy', 'scripture']);
+    expect(Book::query()->firstOrFail()->number)->toBe('1');
     expect(Book::query()->firstOrFail()->categories()->pluck('slug')->sort()->values()->all())
         ->toBe(['gita', 'philosophy', 'scripture']);
 });

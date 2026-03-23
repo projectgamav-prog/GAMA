@@ -62,7 +62,7 @@ class Book extends Model
     }
 
     /**
-     * Scope a query to canonical book order from the root manifest.
+     * Scope a query to canonical book order by number, then id.
      */
     public function scopeInCanonicalOrder(Builder $query): Builder
     {

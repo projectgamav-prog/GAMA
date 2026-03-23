@@ -3,31 +3,37 @@
   "books": [
     {
       "slug": "bhagavad-gita",
+      "number": "1",
       "path": "books/bhagavad-gita/manifest.json",
       "enabled": true
     },
     {
       "slug": "ramcharitmanas",
+      "number": "2",
       "path": "books/ramcharitmanas/manifest.json",
       "enabled": true
     },
     {
       "slug": "kabir-dohe",
+      "number": "3",
       "path": "books/kabir-dohe/manifest.json",
       "enabled": true
     },
     {
       "slug": "small-poem-book",
+      "number": "4",
       "path": "books/small-poem-book/manifest.json",
       "enabled": true
     },
     {
       "slug": "wisdom-sutras",
+      "number": "5",
       "path": "books/wisdom-sutras/manifest.json",
       "enabled": true
     },
     {
       "slug": "sectioned-demo-book",
+      "number": "6",
       "path": "books/sectioned-demo-book/manifest.json",
       "enabled": true
     }

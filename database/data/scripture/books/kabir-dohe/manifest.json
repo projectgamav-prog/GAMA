@@ -2,6 +2,7 @@
     "schema_version": 1,
     "book": {
         "slug": "kabir-dohe",
+        "number": "3",
         "title": "Kabir Dohe",
         "description": "Short doha-style sample dataset."
     },

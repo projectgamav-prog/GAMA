@@ -2,6 +2,7 @@
     "schema_version": 1,
     "book": {
         "slug": "ramcharitmanas",
+        "number": "2",
         "title": "Ramcharitmanas",
         "description": "Small sectioned sample dataset for the Ramayana."
     },

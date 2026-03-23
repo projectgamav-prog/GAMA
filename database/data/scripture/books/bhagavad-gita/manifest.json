@@ -2,6 +2,7 @@
     "schema_version": 1,
     "book": {
         "slug": "bhagavad-gita",
+        "number": "1",
         "title": "Bhagavad Gita",
         "description": "Small canonical sample dataset for the Bhagavad Gita."
     },

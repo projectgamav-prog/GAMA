@@ -162,8 +162,27 @@ class ScriptureJsonImporter
             ));
         }
 
+        $entryNumber = $entry['number'] ?? null;
+        $manifestNumber = $manifest['book']['number'] ?? null;
+
+        if (
+            $entryNumber !== null
+            && $manifestNumber !== null
+            && $entryNumber !== $manifestNumber
+        ) {
+            throw new RuntimeException(sprintf(
+                'Book manifest [%s] number [%s] does not match root manifest number [%s].',
+                $manifestPath,
+                $manifestNumber,
+                $entryNumber,
+            ));
+        }
+
         return [
-            'book' => $manifest['book'],
+            'book' => [
+                ...$manifest['book'],
+                'number' => $manifestNumber ?? $entryNumber,
+            ],
             'categories' => array_values($manifest['categories']),
             'sections' => array_map(
                 fn (array $section): array => [
@@ -386,6 +405,7 @@ class ScriptureJsonImporter
                 'schema_version' => ['required', 'integer'],
                 'books' => ['required', 'array', 'min:1'],
                 'books.*.slug' => ['required', 'string'],
+                'books.*.number' => ['nullable', 'string'],
                 'books.*.path' => ['required', 'string'],
                 'books.*.enabled' => ['required', 'boolean'],
             ],
@@ -437,6 +457,7 @@ class ScriptureJsonImporter
                 'schema_version' => ['required', 'integer'],
                 'book' => ['required', 'array'],
                 'book.slug' => ['required', 'string'],
+                'book.number' => ['nullable', 'string'],
                 'book.title' => ['required', 'string'],
                 'book.description' => ['nullable', 'string'],
                 'categories' => ['required', 'array'],
@@ -680,6 +701,7 @@ class ScriptureJsonImporter
     {
         return [
             'slug' => $record['slug'],
+            'number' => $record['number'] ?? null,
             'title' => $record['title'],
             'description' => $record['description'] ?? null,
         ];

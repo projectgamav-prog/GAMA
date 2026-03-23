@@ -3,42 +3,12 @@
 namespace App\Support\Scripture;
 
 use Illuminate\Database\Eloquent\Builder;
-use JsonException;
-use RuntimeException;
 
 class CanonicalScriptureOrder
 {
-    /**
-     * @var list<string>|null
-     */
-    private static ?array $bookSlugs = null;
-
     public static function applyBookOrder(Builder $query): Builder
     {
-        $bookSlugs = self::bookSlugs();
-        $slugColumn = $query->getModel()->qualifyColumn('slug');
-        $keyColumn = $query->getModel()->qualifyColumn($query->getModel()->getKeyName());
-
-        if ($bookSlugs === []) {
-            return $query->orderBy($keyColumn);
-        }
-
-        $cases = array_map(
-            fn (int $index): string => sprintf('WHEN ? THEN %d', $index),
-            array_keys($bookSlugs),
-        );
-
-        return $query
-            ->orderByRaw(
-                sprintf(
-                    'CASE %s %s ELSE %d END',
-                    $slugColumn,
-                    implode(' ', $cases),
-                    count($bookSlugs),
-                ),
-                $bookSlugs,
-            )
-            ->orderBy($keyColumn);
+        return self::applyNumberOrder($query);
     }
 
     public static function applyNumberOrder(Builder $query, string $column = 'number'): Builder
@@ -72,41 +42,5 @@ class CanonicalScriptureOrder
         return $query
             ->orderBy($qualifiedColumn)
             ->orderBy($keyColumn);
-    }
-
-    /**
-     * @return list<string>
-     */
-    private static function bookSlugs(): array
-    {
-        if (self::$bookSlugs !== null) {
-            return self::$bookSlugs;
-        }
-
-        $contents = file_get_contents(base_path(ScriptureJsonImporter::ROOT_MANIFEST_PATH));
-
-        if ($contents === false) {
-            throw new RuntimeException('Unable to read the scripture corpus manifest.');
-        }
-
-        try {
-            $payload = json_decode($contents, true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $jsonException) {
-            throw new RuntimeException(
-                'Unable to decode the scripture corpus manifest.',
-                previous: $jsonException,
-            );
-        }
-
-        if (! is_array($payload) || ! is_array($payload['books'] ?? null)) {
-            throw new RuntimeException('The scripture corpus manifest is malformed.');
-        }
-
-        self::$bookSlugs = array_values(array_map(
-            fn (array $book): string => $book['slug'],
-            $payload['books'],
-        ));
-
-        return self::$bookSlugs;
     }
 }

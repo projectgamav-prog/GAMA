@@ -2,6 +2,7 @@
     "schema_version": 1,
     "book": {
         "slug": "wisdom-sutras",
+        "number": "5",
         "title": "Wisdom Sutras",
         "description": "A simple non-sectioned book with explicit chapter sections."
     },

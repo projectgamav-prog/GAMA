@@ -2,6 +2,7 @@
     "schema_version": 1,
     "book": {
         "slug": "sectioned-demo-book",
+        "number": "6",
         "title": "Sectioned Demo Book",
         "description": "A compact example with explicit section manifests and chapter sections."
     },

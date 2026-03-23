@@ -11,6 +11,7 @@ export type ScriptureContentBlock = {
 export type ScriptureBook = {
     id: number;
     slug: string;
+    number: string | null;
     title: string;
     description?: string | null;
     href: string;

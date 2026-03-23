@@ -26,6 +26,7 @@ class BookController extends Controller
                 ->map(fn (Book $book) => [
                     'id' => $book->id,
                     'slug' => $book->slug,
+                    'number' => $book->number,
                     'title' => $book->title,
                     'description' => $book->description,
                     'href' => route('scripture.books.show', $book),
@@ -59,6 +60,7 @@ class BookController extends Controller
             'book' => [
                 'id' => $book->id,
                 'slug' => $book->slug,
+                'number' => $book->number,
                 'title' => $book->title,
                 'description' => $book->description,
                 'href' => $bookHref,

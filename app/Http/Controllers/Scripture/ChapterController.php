@@ -41,6 +41,7 @@ class ChapterController extends Controller
             'book' => [
                 'id' => $book->id,
                 'slug' => $book->slug,
+                'number' => $book->number,
                 'title' => $book->title,
                 'href' => $bookHref,
             ],

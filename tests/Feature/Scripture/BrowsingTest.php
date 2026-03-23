@@ -39,6 +39,12 @@ beforeEach(function () {
 
 test('books page lists available public scripture books', function () {
     app(ScriptureJsonImporter::class)->import('ramcharitmanas');
+    $ramcharitmanas = Book::query()
+        ->where('slug', 'ramcharitmanas')
+        ->firstOrFail();
+
+    $this->book->update(['number' => '2']);
+    $ramcharitmanas->update(['number' => '1']);
 
     $response = $this->get(route('scripture.books.index'));
 
@@ -47,12 +53,14 @@ test('books page lists available public scripture books', function () {
         ->assertInertia(fn (Assert $page) => $page
             ->component('scripture/books/index')
             ->has('books', 2)
-            ->where('books.0.slug', 'bhagavad-gita')
-            ->where('books.0.href', route('scripture.books.show', $this->book))
-            ->where('books.1.slug', 'ramcharitmanas')
+            ->where('books.0.slug', 'ramcharitmanas')
+            ->where('books.0.number', '1')
+            ->where('books.0.href', route('scripture.books.show', $ramcharitmanas))
+            ->where('books.1.slug', 'bhagavad-gita')
+            ->where('books.1.number', '2')
             ->where(
                 'books.1.href',
-                route('scripture.books.show', Book::query()->where('slug', 'ramcharitmanas')->firstOrFail()),
+                route('scripture.books.show', $this->book),
             ),
         );
 });
@@ -64,6 +72,7 @@ test('book page is displayed for scripture browsing', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('scripture/books/show')
+            ->where('book.number', '1')
             ->where('book.title', 'Bhagavad Gita')
             ->has('content_blocks', 2)
             ->has('book_sections', 1)
@@ -282,6 +291,7 @@ test('multi-section books browse through the same public canonical flow', functi
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('scripture/books/show')
+            ->where('book.number', '2')
             ->where('book.title', 'Ramcharitmanas')
             ->has('book_sections', 2)
             ->where('book_sections.0.slug', 'bala-kanda')
