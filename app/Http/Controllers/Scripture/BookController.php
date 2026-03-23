@@ -18,8 +18,7 @@ class BookController extends Controller
     public function index(): Response
     {
         $books = Book::query()
-            ->orderBy('sort_order')
-            ->orderBy('title')
+            ->inCanonicalOrder()
             ->get();
 
         return Inertia::render('scripture/books/index', [
@@ -29,7 +28,6 @@ class BookController extends Controller
                     'slug' => $book->slug,
                     'title' => $book->title,
                     'description' => $book->description,
-                    'sort_order' => $book->sort_order,
                     'href' => route('scripture.books.show', $book),
                 ])
                 ->values()
@@ -46,9 +44,9 @@ class BookController extends Controller
 
         $book->load([
             'bookSections' => fn ($query) => $query
-                ->orderBy('sort_order')
+                ->inCanonicalOrder()
                 ->with([
-                    'chapters' => fn ($chapterQuery) => $chapterQuery->orderBy('sort_order'),
+                    'chapters' => fn ($chapterQuery) => $chapterQuery->inCanonicalOrder(),
                 ]),
         ]);
 
@@ -63,7 +61,6 @@ class BookController extends Controller
                 'slug' => $book->slug,
                 'title' => $book->title,
                 'description' => $book->description,
-                'sort_order' => $book->sort_order,
                 'href' => $bookHref,
             ],
             'content_blocks' => $contentBlocks
@@ -76,7 +73,6 @@ class BookController extends Controller
                     'slug' => $section->slug,
                     'number' => $section->number,
                     'title' => $section->title,
-                    'sort_order' => $section->sort_order,
                     'href' => $bookHref.'#section-'.$section->slug,
                     'chapters' => $section->chapters
                         ->map(fn (Chapter $chapter) => [
@@ -84,7 +80,6 @@ class BookController extends Controller
                             'slug' => $chapter->slug,
                             'number' => $chapter->number,
                             'title' => $chapter->title,
-                            'sort_order' => $chapter->sort_order,
                             'href' => route('scripture.chapters.show', [
                                 'book' => $book,
                                 'bookSection' => $section,

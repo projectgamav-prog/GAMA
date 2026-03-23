@@ -40,6 +40,6 @@ class VerseCardGroup extends Model
     {
         return $this->belongsToMany(Verse::class, 'verse_card_group_items')
             ->withTimestamps()
-            ->orderBy('sort_order');
+            ->inCanonicalOrder();
     }
 }

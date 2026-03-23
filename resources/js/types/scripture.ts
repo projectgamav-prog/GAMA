@@ -13,7 +13,6 @@ export type ScriptureBook = {
     slug: string;
     title: string;
     description?: string | null;
-    sort_order: number;
     href: string;
 };
 
@@ -22,7 +21,6 @@ export type ScriptureBookSection = {
     slug: string;
     number: string | null;
     title: string | null;
-    sort_order: number;
     href: string;
 };
 
@@ -31,7 +29,6 @@ export type ScriptureChapter = {
     slug: string;
     number: string | null;
     title: string | null;
-    sort_order: number;
     href: string;
     verses_href?: string;
 };
@@ -41,7 +38,6 @@ export type ScriptureChapterSection = {
     slug: string;
     number: string | null;
     title: string | null;
-    sort_order: number;
     verses_count?: number;
     href?: string;
 };
@@ -51,7 +47,6 @@ export type ScriptureVerse = {
     slug: string;
     number: string | null;
     text: string;
-    sort_order: number;
     href?: string;
 };
 

@@ -45,17 +45,19 @@ test('valid book manifest with section imports successfully', function () {
 });
 
 test('valid chapter file with chapter-section imports successfully', function () {
-    $chapter = scriptureJsonFixture('database/data/scripture/books/bhagavad-gita/sections/main/chapters/chapter-01.json');
+    $path = 'database/data/scripture/books/bhagavad-gita/sections/main/chapters/chapter-01.json';
+    $chapter = scriptureJsonFixture($path);
+    $expectedCounts = app(ScriptureJsonImporter::class)->import($path, true)['counts'];
 
     expect($chapter)->toHaveKey('chapter-section');
     expect($chapter)->not->toHaveKey('chapter-sections');
     expect($chapter['chapter-section'])->toBeArray();
 
-    app(ScriptureJsonImporter::class)->import('database/data/scripture/books/bhagavad-gita/sections/main/chapters/chapter-01.json');
+    app(ScriptureJsonImporter::class)->import($path);
 
     expect(Chapter::query()->where('slug', 'chapter-1')->exists())->toBeTrue();
-    expect(ChapterSection::query()->count())->toBe(1);
-    expect(Verse::query()->count())->toBe(2);
+    expect(ChapterSection::query()->count())->toBe($expectedCounts['chapter_sections']);
+    expect(Verse::query()->count())->toBe($expectedCounts['verses']);
 });
 
 test('old key sections is rejected', function () {

@@ -25,10 +25,10 @@ class BuildChapterVerseReaderData
     {
         $chapter->load([
             'chapterSections' => fn ($query) => $query
-                ->orderBy('sort_order')
+                ->inCanonicalOrder()
                 ->with([
                     'verses' => fn ($verseQuery) => $verseQuery
-                        ->orderBy('sort_order')
+                        ->inCanonicalOrder()
                         ->with([
                             'translations' => fn ($translationQuery) => $translationQuery->orderBy('sort_order'),
                             'verseCardGroupItem.verseCardGroup.items.verse',
@@ -165,7 +165,6 @@ class BuildChapterVerseReaderData
             'slug' => $section->slug,
             'number' => $section->number,
             'title' => $section->title,
-            'sort_order' => $section->sort_order,
             'cards' => $cards,
         ];
     }

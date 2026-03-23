@@ -1,38 +1,35 @@
 {
-  "schema_version": 1,
-  "book": {
-    "slug": "ramcharitmanas",
-    "title": "Ramcharitmanas",
-    "description": "Small sectioned sample dataset for the Ramayana.",
-    "sort_order": 2
-  },
-  "categories": [
-    "epic",
-    "itihasa",
-    "scripture"
-  ],
-  "section": [
-    {
-      "slug": "bala-kanda",
-      "number": "1",
-      "title": "Bala Kanda",
-      "sort_order": 1,
-      "chapters": [
-        {
-          "path": "sections/bala-kanda/chapters/chapter-01.json"
-        }
-      ]
+    "schema_version": 1,
+    "book": {
+        "slug": "ramcharitmanas",
+        "title": "Ramcharitmanas",
+        "description": "Small sectioned sample dataset for the Ramayana."
     },
-    {
-      "slug": "ayodhya-kanda",
-      "number": "2",
-      "title": "Ayodhya Kanda",
-      "sort_order": 2,
-      "chapters": [
+    "categories": [
+        "epic",
+        "itihasa",
+        "scripture"
+    ],
+    "section": [
         {
-          "path": "sections/ayodhya-kanda/chapters/chapter-01.json"
+            "slug": "bala-kanda",
+            "number": "1",
+            "title": "Bala Kanda",
+            "chapters": [
+                {
+                    "path": "sections/bala-kanda/chapters/chapter-01.json"
+                }
+            ]
+        },
+        {
+            "slug": "ayodhya-kanda",
+            "number": "2",
+            "title": "Ayodhya Kanda",
+            "chapters": [
+                {
+                    "path": "sections/ayodhya-kanda/chapters/chapter-01.json"
+                }
+            ]
         }
-      ]
-    }
-  ]
+    ]
 }

@@ -17,11 +17,9 @@ return new class extends Migration
             $table->string('slug');
             $table->string('number')->nullable();
             $table->string('title')->nullable();
-            $table->unsignedInteger('sort_order')->default(0);
             $table->timestamps();
 
             $table->unique(['book_section_id', 'slug'], 'chapters_section_slug_uniq');
-            $table->index(['book_section_id', 'sort_order'], 'chapters_section_sort_idx');
         });
     }
 

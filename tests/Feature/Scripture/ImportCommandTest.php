@@ -8,6 +8,7 @@ use App\Models\ChapterSection;
 use App\Models\Verse;
 use App\Models\VerseCommentary;
 use App\Models\VerseTranslation;
+use App\Support\Scripture\ScriptureJsonImporter;
 use Illuminate\Support\Facades\DB;
 
 test('scripture import command imports all enabled books from the corpus manifest', function () {
@@ -17,7 +18,7 @@ test('scripture import command imports all enabled books from the corpus manifes
     expect(Book::query()->count())->toBe(6);
     expect(BookCategory::query()->count())->toBe(6);
     expect(DB::table('book_category_assignments')->count())->toBe(13);
-    expect(Book::query()->where('slug', 'ramayana')->exists())->toBeTrue();
+    expect(Book::query()->where('slug', 'ramcharitmanas')->exists())->toBeTrue();
     expect(Book::query()->where('slug', 'sectioned-demo-book')->exists())->toBeTrue();
 });
 
@@ -28,11 +29,11 @@ test('scripture import command imports one book by slug', function () {
 
     expect(Book::query()->count())->toBe(1);
     expect(BookSection::query()->count())->toBe(1);
-    expect(Chapter::query()->count())->toBe(2);
-    expect(ChapterSection::query()->count())->toBe(2);
-    expect(Verse::query()->count())->toBe(4);
-    expect(VerseTranslation::query()->count())->toBe(7);
-    expect(VerseCommentary::query()->count())->toBe(1);
+    expect(Chapter::query()->count())->toBe(3);
+    expect(ChapterSection::query()->count())->toBe(10);
+    expect(Verse::query()->count())->toBe(90);
+    expect(VerseTranslation::query()->count())->toBe(180);
+    expect(VerseCommentary::query()->count())->toBe(34);
     expect(BookCategory::query()->pluck('slug')->sort()->values()->all())
         ->toBe(['gita', 'philosophy', 'scripture']);
     expect(Book::query()->firstOrFail()->categories()->pluck('slug')->sort()->values()->all())
@@ -40,8 +41,11 @@ test('scripture import command imports one book by slug', function () {
 });
 
 test('scripture import command imports one declared chapter file by path', function () {
+    $targetPath = 'database/data/scripture/books/bhagavad-gita/sections/main/chapters/chapter-01.json';
+    $expectedCounts = app(ScriptureJsonImporter::class)->import($targetPath, true)['counts'];
+
     $this->artisan('scripture:import', [
-        'target' => 'database/data/scripture/books/bhagavad-gita/sections/main/chapters/chapter-01.json',
+        'target' => $targetPath,
     ])->assertExitCode(0);
 
     expect(Book::query()->count())->toBe(1);
@@ -49,8 +53,8 @@ test('scripture import command imports one declared chapter file by path', funct
     expect(Chapter::query()->count())->toBe(1);
     expect(Chapter::query()->where('slug', 'chapter-1')->exists())->toBeTrue();
     expect(Chapter::query()->where('slug', 'chapter-2')->exists())->toBeFalse();
-    expect(ChapterSection::query()->count())->toBe(1);
-    expect(Verse::query()->count())->toBe(2);
+    expect(ChapterSection::query()->count())->toBe($expectedCounts['chapter_sections']);
+    expect(Verse::query()->count())->toBe($expectedCounts['verses']);
 });
 
 test('scripture import command dry run validates without writing to the database', function () {

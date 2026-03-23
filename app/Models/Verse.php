@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Support\Scripture\CanonicalScriptureOrder;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -75,14 +77,10 @@ class Verse extends Model
     }
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Scope a query to canonical verse order.
      */
-    protected function casts(): array
+    public function scopeInCanonicalOrder(Builder $query): Builder
     {
-        return [
-            'sort_order' => 'integer',
-        ];
+        return CanonicalScriptureOrder::applyNumberOrder($query);
     }
 }

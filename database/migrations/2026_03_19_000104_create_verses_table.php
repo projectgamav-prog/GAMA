@@ -17,11 +17,9 @@ return new class extends Migration
             $table->string('slug');
             $table->string('number')->nullable();
             $table->longText('text');
-            $table->unsignedInteger('sort_order')->default(0);
             $table->timestamps();
 
             $table->unique(['chapter_section_id', 'slug'], 'verses_section_slug_uniq');
-            $table->index(['chapter_section_id', 'sort_order'], 'verses_section_sort_idx');
         });
     }
 

@@ -29,22 +29,22 @@ class BhagavadGitaDevelopmentSeeder extends Seeder
             ->where('slug', 'chapter-1')
             ->firstOrFail()
             ->chapterSections()
-            ->where('slug', 'chapter-1-main')
+            ->where('slug', 'section-4-main')
             ->firstOrFail();
 
         $chapterTwoSection = $bookSection->chapters()
             ->where('slug', 'chapter-2')
             ->firstOrFail()
             ->chapterSections()
-            ->where('slug', 'chapter-2-main')
+            ->where('slug', 'section-1-main')
             ->firstOrFail();
 
         $verseOneTwentyEight = $chapterOneSection->verses()
             ->where('slug', 'verse-28')
             ->firstOrFail();
 
-        $verseTwoFortySeven = $chapterTwoSection->verses()
-            ->where('slug', 'verse-47')
+        $verseTwoOne = $chapterTwoSection->verses()
+            ->where('slug', 'verse-1')
             ->firstOrFail();
 
         $topic = Topic::query()->updateOrCreate(
@@ -130,8 +130,8 @@ class BhagavadGitaDevelopmentSeeder extends Seeder
 
         $topic->outgoingEntityRelations()->updateOrCreate(
             [
-                'target_type' => $verseTwoFortySeven->getMorphClass(),
-                'target_id' => $verseTwoFortySeven->getKey(),
+                'target_type' => $verseTwoOne->getMorphClass(),
+                'target_id' => $verseTwoOne->getKey(),
                 'relation_type' => 'explains',
             ],
             [

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Support\Scripture\CanonicalScriptureOrder;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -22,7 +24,7 @@ class Book extends Model
      */
     public function bookSections(): HasMany
     {
-        return $this->hasMany(BookSection::class)->orderBy('sort_order');
+        return $this->hasMany(BookSection::class)->inCanonicalOrder();
     }
 
     /**
@@ -60,14 +62,10 @@ class Book extends Model
     }
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Scope a query to canonical book order from the root manifest.
      */
-    protected function casts(): array
+    public function scopeInCanonicalOrder(Builder $query): Builder
     {
-        return [
-            'sort_order' => 'integer',
-        ];
+        return CanonicalScriptureOrder::applyBookOrder($query);
     }
 }

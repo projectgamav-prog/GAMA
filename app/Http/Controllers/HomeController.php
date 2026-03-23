@@ -15,8 +15,7 @@ class HomeController extends Controller
     public function __invoke(): Response
     {
         $featuredBook = Book::query()
-            ->orderBy('sort_order')
-            ->orderBy('id')
+            ->inCanonicalOrder()
             ->first();
 
         return Inertia::render('home', [

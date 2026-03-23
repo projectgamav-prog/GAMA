@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Book;
-use App\Models\Verse;
 use App\Support\Scripture\ScriptureJsonImporter;
 use Database\Seeders\BhagavadGitaDevelopmentSeeder;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -18,10 +17,28 @@ beforeEach(function () {
     $this->bookSection = $this->book->bookSections()
         ->where('slug', 'main')
         ->firstOrFail();
+
+    $this->chapter = $this->bookSection->chapters()
+        ->where('slug', 'chapter-2')
+        ->firstOrFail();
+
+    $this->chapterSection = $this->chapter->chapterSections()
+        ->inCanonicalOrder()
+        ->firstOrFail();
+
+    $sectionVerses = $this->chapterSection->verses()
+        ->inCanonicalOrder()
+        ->get()
+        ->values();
+
+    $this->firstVerse = $sectionVerses[0];
+    $this->secondVerse = $sectionVerses[1];
+    $this->penultimateVerse = $sectionVerses[$sectionVerses->count() - 2];
+    $this->lastVerse = $sectionVerses[$sectionVerses->count() - 1];
 });
 
 test('books page lists available public scripture books', function () {
-    app(ScriptureJsonImporter::class)->import('ramayana');
+    app(ScriptureJsonImporter::class)->import('ramcharitmanas');
 
     $response = $this->get(route('scripture.books.index'));
 
@@ -32,10 +49,10 @@ test('books page lists available public scripture books', function () {
             ->has('books', 2)
             ->where('books.0.slug', 'bhagavad-gita')
             ->where('books.0.href', route('scripture.books.show', $this->book))
-            ->where('books.1.slug', 'ramayana')
+            ->where('books.1.slug', 'ramcharitmanas')
             ->where(
                 'books.1.href',
-                route('scripture.books.show', Book::query()->where('slug', 'ramayana')->firstOrFail()),
+                route('scripture.books.show', Book::query()->where('slug', 'ramcharitmanas')->firstOrFail()),
             ),
         );
 });
@@ -54,52 +71,44 @@ test('book page is displayed for scripture browsing', function () {
                 'book_sections.0.href',
                 route('scripture.books.show', $this->book).'#section-main',
             )
-            ->has('book_sections.0.chapters', 2),
+            ->has('book_sections.0.chapters', 3),
         );
 });
 
 test('chapter page is displayed and supports zero published content blocks', function () {
-    $chapter = $this->bookSection->chapters()
-        ->where('slug', 'chapter-2')
-        ->firstOrFail();
-
     $response = $this->get(route('scripture.chapters.show', [
         'book' => $this->book,
         'bookSection' => $this->bookSection,
-        'chapter' => $chapter,
+        'chapter' => $this->chapter,
     ]));
 
     $response
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('scripture/chapters/show')
-            ->where('chapter.title', 'Sankhya Yoga')
+            ->where('chapter.title', $this->chapter->title)
             ->where(
                 'book_section.href',
                 route('scripture.books.show', $this->book).'#section-main',
             )
             ->where('content_blocks', [])
-            ->has('chapter_sections', 1)
-            ->where('chapter_sections.0.verses_count', 2),
+            ->has('chapter_sections', $this->chapter->chapterSections()->count())
+            ->where('chapter_sections.0.verses_count', $this->chapterSection->verses()->count()),
         );
 });
 
 test('chapter verse reader page is displayed in canonical order', function () {
-    $chapter = $this->bookSection->chapters()
-        ->where('slug', 'chapter-2')
-        ->firstOrFail();
-
     $response = $this->get(route('scripture.chapters.verses.index', [
         'book' => $this->book,
         'bookSection' => $this->bookSection,
-        'chapter' => $chapter,
+        'chapter' => $this->chapter,
     ]));
 
     $response
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('scripture/chapters/verses/index')
-            ->where('chapter.number', '2')
+            ->where('chapter.number', $this->chapter->number)
             ->where(
                 'book_section.href',
                 route('scripture.books.show', $this->book).'#section-main',
@@ -107,38 +116,26 @@ test('chapter verse reader page is displayed in canonical order', function () {
             ->where('default_language', 'en')
             ->where('reader_languages.0', 'en')
             ->where('reader_languages.1', 'hi')
-            ->has('chapter_sections', 1)
-            ->has('chapter_sections.0.cards', 2)
+            ->has('chapter_sections', $this->chapter->chapterSections()->count())
+            ->where('chapter_sections.0.slug', $this->chapterSection->slug)
             ->where('chapter_sections.0.cards.0.type', 'single')
-            ->where('chapter_sections.0.cards.0.verses.0.number', '47')
+            ->where('chapter_sections.0.cards.0.verses.0.number', $this->firstVerse->number)
             ->where(
                 'chapter_sections.0.cards.0.verses.0.explanation_href',
                 route('scripture.chapters.verses.show', [
                     'book' => $this->book,
                     'bookSection' => $this->bookSection,
-                    'chapter' => $chapter,
-                    'chapterSection' => $chapter->chapterSections()->where('slug', 'chapter-2-main')->firstOrFail(),
-                    'verse' => Verse::query()->where('slug', 'verse-47')->firstOrFail(),
+                    'chapter' => $this->chapter,
+                    'chapterSection' => $this->chapterSection,
+                    'verse' => $this->firstVerse,
                 ]),
             )
-            ->where('chapter_sections.0.cards.1.verses.0.number', '48'),
+            ->where('chapter_sections.0.cards.1.verses.0.number', $this->secondVerse->number),
         );
 });
 
 test('verse detail page is displayed with translations commentaries and published verse blocks', function () {
-    $chapter = $this->bookSection->chapters()
-        ->where('slug', 'chapter-2')
-        ->firstOrFail();
-
-    $chapterSection = $chapter->chapterSections()
-        ->where('slug', 'chapter-2-main')
-        ->firstOrFail();
-
-    $verse = $chapterSection->verses()
-        ->where('slug', 'verse-47')
-        ->firstOrFail();
-
-    $verse->contentBlocks()->create([
+    $this->firstVerse->contentBlocks()->create([
         'region' => 'study',
         'block_type' => 'text',
         'title' => 'Published verse note',
@@ -148,7 +145,7 @@ test('verse detail page is displayed with translations commentaries and publishe
         'status' => 'published',
     ]);
 
-    $verse->contentBlocks()->create([
+    $this->firstVerse->contentBlocks()->create([
         'region' => 'study',
         'block_type' => 'text',
         'title' => 'Draft verse note',
@@ -161,23 +158,23 @@ test('verse detail page is displayed with translations commentaries and publishe
     $response = $this->get(route('scripture.chapters.verses.show', [
         'book' => $this->book,
         'bookSection' => $this->bookSection,
-        'chapter' => $chapter,
-        'chapterSection' => $chapterSection,
-        'verse' => $verse,
+        'chapter' => $this->chapter,
+        'chapterSection' => $this->chapterSection,
+        'verse' => $this->firstVerse,
     ]));
 
     $response
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('scripture/chapters/verses/show')
-            ->where('verse.number', '47')
+            ->where('verse.number', $this->firstVerse->number)
             ->where(
                 'book_section.href',
                 route('scripture.books.show', $this->book).'#section-main',
             )
-            ->where('chapter_section.slug', 'chapter-2-main')
+            ->where('chapter_section.slug', $this->chapterSection->slug)
             ->where('previous_verse', null)
-            ->where('next_verse.number', '48')
+            ->where('next_verse.number', $this->secondVerse->number)
             ->has('translations', 2)
             ->where('translations.0.language_code', 'en')
             ->where('translations.1.language_code', 'hi')
@@ -189,42 +186,26 @@ test('verse detail page is displayed with translations commentaries and publishe
 });
 
 test('verse detail page includes adjacent verse navigation inside the current chapter section', function () {
-    $chapter = $this->bookSection->chapters()
-        ->where('slug', 'chapter-2')
-        ->firstOrFail();
-
-    $chapterSection = $chapter->chapterSections()
-        ->where('slug', 'chapter-2-main')
-        ->firstOrFail();
-
-    $firstVerse = $chapterSection->verses()
-        ->where('slug', 'verse-47')
-        ->firstOrFail();
-
-    $lastVerse = $chapterSection->verses()
-        ->where('slug', 'verse-48')
-        ->firstOrFail();
-
     $this->get(route('scripture.chapters.verses.show', [
         'book' => $this->book,
         'bookSection' => $this->bookSection,
-        'chapter' => $chapter,
-        'chapterSection' => $chapterSection,
-        'verse' => $firstVerse,
+        'chapter' => $this->chapter,
+        'chapterSection' => $this->chapterSection,
+        'verse' => $this->firstVerse,
     ]))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('scripture/chapters/verses/show')
             ->where('previous_verse', null)
-            ->where('next_verse.number', '48')
+            ->where('next_verse.number', $this->secondVerse->number)
             ->where(
                 'next_verse.href',
                 route('scripture.chapters.verses.show', [
                     'book' => $this->book,
                     'bookSection' => $this->bookSection,
-                    'chapter' => $chapter,
-                    'chapterSection' => $chapterSection,
-                    'verse' => $lastVerse,
+                    'chapter' => $this->chapter,
+                    'chapterSection' => $this->chapterSection,
+                    'verse' => $this->secondVerse,
                 ]),
             ),
         );
@@ -232,61 +213,53 @@ test('verse detail page includes adjacent verse navigation inside the current ch
     $this->get(route('scripture.chapters.verses.show', [
         'book' => $this->book,
         'bookSection' => $this->bookSection,
-        'chapter' => $chapter,
-        'chapterSection' => $chapterSection,
-        'verse' => $lastVerse,
+        'chapter' => $this->chapter,
+        'chapterSection' => $this->chapterSection,
+        'verse' => $this->lastVerse,
     ]))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('scripture/chapters/verses/show')
             ->where('next_verse', null)
-            ->where('previous_verse.number', '47')
+            ->where('previous_verse.number', $this->penultimateVerse->number)
             ->where(
                 'previous_verse.href',
                 route('scripture.chapters.verses.show', [
                     'book' => $this->book,
                     'bookSection' => $this->bookSection,
-                    'chapter' => $chapter,
-                    'chapterSection' => $chapterSection,
-                    'verse' => $firstVerse,
+                    'chapter' => $this->chapter,
+                    'chapterSection' => $this->chapterSection,
+                    'verse' => $this->penultimateVerse,
                 ]),
             ),
         );
 });
 
 test('verse detail page returns 404 for a mismatched canonical chain', function () {
-    $chapter = $this->bookSection->chapters()
-        ->where('slug', 'chapter-2')
-        ->firstOrFail();
-
-    $chapterSection = $chapter->chapterSections()
-        ->where('slug', 'chapter-2-main')
-        ->firstOrFail();
-
     $wrongVerse = $this->bookSection->chapters()
         ->where('slug', 'chapter-1')
         ->firstOrFail()
         ->chapterSections()
-        ->where('slug', 'chapter-1-main')
+        ->inCanonicalOrder()
         ->firstOrFail()
         ->verses()
-        ->where('slug', 'verse-1')
+        ->where('slug', 'verse-11')
         ->firstOrFail();
 
     $this->get(route('scripture.chapters.verses.show', [
         'book' => $this->book,
         'bookSection' => $this->bookSection,
-        'chapter' => $chapter,
-        'chapterSection' => $chapterSection,
+        'chapter' => $this->chapter,
+        'chapterSection' => $this->chapterSection,
         'verse' => $wrongVerse,
     ]))->assertNotFound();
 });
 
 test('multi-section books browse through the same public canonical flow', function () {
-    app(ScriptureJsonImporter::class)->import('ramayana');
+    app(ScriptureJsonImporter::class)->import('ramcharitmanas');
 
     $book = Book::query()
-        ->where('slug', 'ramayana')
+        ->where('slug', 'ramcharitmanas')
         ->firstOrFail();
 
     $bookSection = $book->bookSections()
@@ -309,7 +282,7 @@ test('multi-section books browse through the same public canonical flow', functi
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('scripture/books/show')
-            ->where('book.title', 'Ramayana')
+            ->where('book.title', 'Ramcharitmanas')
             ->has('book_sections', 2)
             ->where('book_sections.0.slug', 'bala-kanda')
             ->where(

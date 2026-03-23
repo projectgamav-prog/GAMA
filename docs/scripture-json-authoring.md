@@ -43,6 +43,8 @@ Required keys:
 - `path`
 - `enabled`
 
+Books render in the canonical order defined by this root manifest array.
+
 ## Categories Manifest
 
 Required keys:
@@ -72,7 +74,6 @@ Required keys:
 Optional book keys:
 
 - `book.description`
-- `book.sort_order`
 
 Each `section` item must be an array item with:
 
@@ -83,7 +84,8 @@ Each `section` item must be an array item with:
 Optional section keys:
 
 - `number`
-- `sort_order`
+
+Sections render in canonical order by `number`, then `id`.
 
 Each `chapters` item must be an object with:
 
@@ -112,7 +114,8 @@ Optional chapter keys:
 
 - `chapter.number`
 - `chapter.title`
-- `chapter.sort_order`
+
+Chapters render in canonical order by `chapter.number`, then `id`.
 
 Each `chapter-section` item must be an array item with:
 
@@ -123,16 +126,18 @@ Each `chapter-section` item must be an array item with:
 Optional chapter-section keys:
 
 - `number`
-- `sort_order`
+
+Chapter sections render in canonical order by `number`, then `id`.
 
 Each verse item continues to use the canonical verse fields:
 
 - `slug`
 - `number`
 - `text`
-- `sort_order`
 - `translations`
 - `commentaries`
+
+Verses render in canonical order by `number`, then `id`.
 
 Rules:
 

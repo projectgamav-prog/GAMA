@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->unsignedInteger('sort_order')->default(0)->index();
             $table->timestamps();
         });
     }

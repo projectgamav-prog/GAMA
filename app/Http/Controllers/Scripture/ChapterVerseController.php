@@ -36,7 +36,6 @@ class ChapterVerseController extends Controller
                 'id' => $book->id,
                 'slug' => $book->slug,
                 'title' => $book->title,
-                'sort_order' => $book->sort_order,
                 'href' => $bookHref,
             ],
             'book_section' => [
@@ -44,7 +43,6 @@ class ChapterVerseController extends Controller
                 'slug' => $bookSection->slug,
                 'number' => $bookSection->number,
                 'title' => $bookSection->title,
-                'sort_order' => $bookSection->sort_order,
                 'href' => $bookSectionHref,
             ],
             'chapter' => [
@@ -52,7 +50,6 @@ class ChapterVerseController extends Controller
                 'slug' => $chapter->slug,
                 'number' => $chapter->number,
                 'title' => $chapter->title,
-                'sort_order' => $chapter->sort_order,
                 'href' => route('scripture.chapters.show', [
                     'book' => $book,
                     'bookSection' => $bookSection,

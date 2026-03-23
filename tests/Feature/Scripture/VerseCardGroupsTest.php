@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Book;
-use App\Models\Verse;
 use Database\Seeders\BhagavadGitaDevelopmentSeeder;
 use Illuminate\Database\QueryException;
 
@@ -16,51 +15,55 @@ beforeEach(function () {
         ->where('slug', 'main')
         ->firstOrFail();
 
-    $this->chapter = $this->bookSection->chapters()
-        ->where('slug', 'chapter-2')
-        ->firstOrFail();
+    $this->chapter = $this->bookSection->chapters()->create([
+        'slug' => 'verse-card-group-test',
+        'number' => '99',
+        'title' => 'Verse Card Group Test',
+    ]);
 
-    $this->chapterSection = $this->chapter->chapterSections()
-        ->where('slug', 'chapter-2-main')
-        ->firstOrFail();
+    $this->chapterSection = $this->chapter->chapterSections()->create([
+        'slug' => 'verse-card-group-test-main',
+        'number' => '1',
+        'title' => 'Verse Card Group Test Main',
+    ]);
+
+    $this->firstVerse = $this->chapterSection->verses()->create([
+        'slug' => 'verse-1',
+        'number' => '1',
+        'text' => 'Verse card group test verse 1.',
+    ]);
+
+    $this->secondVerse = $this->chapterSection->verses()->create([
+        'slug' => 'verse-2',
+        'number' => '2',
+        'text' => 'Verse card group test verse 2.',
+    ]);
 });
 
 test('chapter sections can own presentation-only verse card groups', function () {
-    $verseFortySeven = $this->chapterSection->verses()
-        ->where('slug', 'verse-47')
-        ->firstOrFail();
-
-    $verseFortyEight = $this->chapterSection->verses()
-        ->where('slug', 'verse-48')
-        ->firstOrFail();
-
     $group = $this->chapterSection->verseCardGroups()->create([
         'title' => 'Karma Yoga Group',
         'description' => 'Verses rendered together inside one verse card.',
     ]);
 
     $group->items()->create([
-        'verse_id' => $verseFortyEight->id,
+        'verse_id' => $this->secondVerse->id,
     ]);
 
     $group->items()->create([
-        'verse_id' => $verseFortySeven->id,
+        'verse_id' => $this->firstVerse->id,
     ]);
 
     $group->load('verses', 'items.verse');
-    $verseFortySeven->load('verseCardGroupItem');
+    $this->firstVerse->load('verseCardGroupItem');
 
     expect($this->chapterSection->verseCardGroups()->count())->toBe(1);
-    expect($group->verses->pluck('number')->all())->toBe(['47', '48']);
-    expect($verseFortySeven->verseCardGroupItem)->not->toBeNull();
-    expect($verseFortySeven->verseCardGroupItem->verse_card_group_id)->toBe($group->id);
+    expect($group->verses->pluck('number')->all())->toBe(['1', '2']);
+    expect($this->firstVerse->verseCardGroupItem)->not->toBeNull();
+    expect($this->firstVerse->verseCardGroupItem->verse_card_group_id)->toBe($group->id);
 });
 
 test('a verse can belong to at most one verse card group', function () {
-    $verse = $this->chapterSection->verses()
-        ->where('slug', 'verse-47')
-        ->firstOrFail();
-
     $firstGroup = $this->chapterSection->verseCardGroups()->create([
         'title' => 'First Group',
     ]);
@@ -70,10 +73,10 @@ test('a verse can belong to at most one verse card group', function () {
     ]);
 
     $firstGroup->items()->create([
-        'verse_id' => $verse->id,
+        'verse_id' => $this->firstVerse->id,
     ]);
 
     expect(fn () => $secondGroup->items()->create([
-        'verse_id' => $verse->id,
+        'verse_id' => $this->firstVerse->id,
     ]))->toThrow(QueryException::class);
 });

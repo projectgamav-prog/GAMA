@@ -171,7 +171,6 @@ class ScriptureJsonImporter
                         'slug' => $section['slug'],
                         'number' => $section['number'] ?? null,
                         'title' => $section['title'],
-                        'sort_order' => $section['sort_order'] ?? 0,
                     ],
                     'chapters' => $this->normalizeChapterReferences(
                         $section['chapters'],
@@ -326,25 +325,25 @@ class ScriptureJsonImporter
         );
         $changes['chapters'][$state]++;
 
-        foreach ($payload['chapter-section'] as $index => $chapterSectionRecord) {
+        foreach ($payload['chapter-section'] as $chapterSectionRecord) {
             [$chapterSection, $state] = $this->upsert(
                 ChapterSection::query(),
                 [
                     'chapter_id' => $chapter->getKey(),
                     'slug' => $chapterSectionRecord['slug'],
                 ],
-                $this->chapterSectionValues($chapter->getKey(), $chapterSectionRecord, $index),
+                $this->chapterSectionValues($chapter->getKey(), $chapterSectionRecord),
             );
             $changes['chapter_sections'][$state]++;
 
-            foreach ($chapterSectionRecord['verses'] as $verseIndex => $verseRecord) {
+            foreach ($chapterSectionRecord['verses'] as $verseRecord) {
                 [$verse, $state] = $this->upsert(
                     Verse::query(),
                     [
                         'chapter_section_id' => $chapterSection->getKey(),
                         'slug' => $verseRecord['slug'],
                     ],
-                    $this->verseValues($chapterSection->getKey(), $verseRecord, $verseIndex),
+                    $this->verseValues($chapterSection->getKey(), $verseRecord),
                 );
                 $changes['verses'][$state]++;
 
@@ -440,14 +439,12 @@ class ScriptureJsonImporter
                 'book.slug' => ['required', 'string'],
                 'book.title' => ['required', 'string'],
                 'book.description' => ['nullable', 'string'],
-                'book.sort_order' => ['nullable', 'integer'],
                 'categories' => ['required', 'array'],
                 'categories.*' => ['required', 'string'],
                 'section' => ['required', 'array', 'min:1'],
                 'section.*.slug' => ['required', 'string'],
                 'section.*.number' => ['nullable', 'string'],
                 'section.*.title' => ['required', 'string'],
-                'section.*.sort_order' => ['nullable', 'integer'],
                 'section.*.chapters' => ['required', 'array', 'min:1'],
                 'section.*.chapters.*.path' => ['required', 'string'],
             ],
@@ -477,12 +474,10 @@ class ScriptureJsonImporter
                     'chapter.slug' => ['required', 'string'],
                     'chapter.number' => ['nullable', 'string'],
                     'chapter.title' => ['nullable', 'string'],
-                    'chapter.sort_order' => ['nullable', 'integer'],
                     'chapter-section' => ['required', 'array', 'min:1'],
                     'chapter-section.*.slug' => ['required', 'string'],
                     'chapter-section.*.number' => ['nullable', 'string'],
                     'chapter-section.*.title' => ['required', 'string'],
-                    'chapter-section.*.sort_order' => ['nullable', 'integer'],
                     'chapter-section.*.verses' => ['required', 'array', 'min:1'],
                 ],
                 $this->verseRules('chapter-section.*.verses.*.'),
@@ -505,7 +500,6 @@ class ScriptureJsonImporter
             $prefix.'slug' => ['required', 'string'],
             $prefix.'number' => ['nullable', 'string'],
             $prefix.'text' => ['required', 'string'],
-            $prefix.'sort_order' => ['nullable', 'integer'],
             $prefix.'translations' => ['sometimes', 'array'],
             $prefix.'translations.*.source_key' => ['required', 'string'],
             $prefix.'translations.*.source_name' => ['required', 'string'],
@@ -688,7 +682,6 @@ class ScriptureJsonImporter
             'slug' => $record['slug'],
             'title' => $record['title'],
             'description' => $record['description'] ?? null,
-            'sort_order' => $record['sort_order'] ?? 0,
         ];
     }
 
@@ -709,7 +702,6 @@ class ScriptureJsonImporter
             'slug' => $record['slug'],
             'number' => $record['number'] ?? null,
             'title' => $record['title'] ?? null,
-            'sort_order' => $record['sort_order'] ?? 0,
         ];
     }
 
@@ -720,29 +712,26 @@ class ScriptureJsonImporter
             'slug' => $record['slug'],
             'number' => $record['number'] ?? null,
             'title' => $record['title'] ?? null,
-            'sort_order' => $record['sort_order'] ?? 0,
         ];
     }
 
-    private function chapterSectionValues(int $chapterId, array $record, int $index): array
+    private function chapterSectionValues(int $chapterId, array $record): array
     {
         return [
             'chapter_id' => $chapterId,
             'slug' => $record['slug'],
             'number' => $record['number'] ?? null,
             'title' => $record['title'],
-            'sort_order' => $record['sort_order'] ?? ($index + 1),
         ];
     }
 
-    private function verseValues(int $chapterSectionId, array $record, int $index): array
+    private function verseValues(int $chapterSectionId, array $record): array
     {
         return [
             'chapter_section_id' => $chapterSectionId,
             'slug' => $record['slug'],
             'number' => $record['number'] ?? null,
             'text' => $record['text'],
-            'sort_order' => $record['sort_order'] ?? ($index + 1),
         ];
     }
 

@@ -1,26 +1,24 @@
 {
-  "schema_version": 1,
-  "book": {
-    "slug": "wisdom-sutras",
-    "title": "Wisdom Sutras",
-    "description": "A simple non-sectioned book with explicit chapter sections.",
-    "sort_order": 5
-  },
-  "categories": [
-    "philosophy",
-    "scripture"
-  ],
-  "section": [
-    {
-      "slug": "main",
-      "number": "1",
-      "title": "Main",
-      "sort_order": 1,
-      "chapters": [
+    "schema_version": 1,
+    "book": {
+        "slug": "wisdom-sutras",
+        "title": "Wisdom Sutras",
+        "description": "A simple non-sectioned book with explicit chapter sections."
+    },
+    "categories": [
+        "philosophy",
+        "scripture"
+    ],
+    "section": [
         {
-          "path": "sections/main/chapters/chapter-01.json"
+            "slug": "main",
+            "number": "1",
+            "title": "Main",
+            "chapters": [
+                {
+                    "path": "sections/main/chapters/chapter-01.json"
+                }
+            ]
         }
-      ]
-    }
-  ]
+    ]
 }

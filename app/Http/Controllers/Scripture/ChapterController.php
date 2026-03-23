@@ -28,7 +28,7 @@ class ChapterController extends Controller
 
         $chapterSections = $chapter->chapterSections()
             ->withCount('verses')
-            ->orderBy('sort_order')
+            ->inCanonicalOrder()
             ->get();
 
         $versesHref = route('scripture.chapters.verses.index', [
@@ -42,7 +42,6 @@ class ChapterController extends Controller
                 'id' => $book->id,
                 'slug' => $book->slug,
                 'title' => $book->title,
-                'sort_order' => $book->sort_order,
                 'href' => $bookHref,
             ],
             'book_section' => [
@@ -50,7 +49,6 @@ class ChapterController extends Controller
                 'slug' => $bookSection->slug,
                 'number' => $bookSection->number,
                 'title' => $bookSection->title,
-                'sort_order' => $bookSection->sort_order,
                 'href' => $bookSectionHref,
             ],
             'chapter' => [
@@ -58,7 +56,6 @@ class ChapterController extends Controller
                 'slug' => $chapter->slug,
                 'number' => $chapter->number,
                 'title' => $chapter->title,
-                'sort_order' => $chapter->sort_order,
                 'href' => route('scripture.chapters.show', [
                     'book' => $book,
                     'bookSection' => $bookSection,
@@ -76,7 +73,6 @@ class ChapterController extends Controller
                     'slug' => $section->slug,
                     'number' => $section->number,
                     'title' => $section->title,
-                    'sort_order' => $section->sort_order,
                     'verses_count' => $section->verses_count,
                     'href' => $versesHref.'#'.$section->slug,
                 ])

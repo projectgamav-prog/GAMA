@@ -1,37 +1,34 @@
 {
-  "schema_version": 1,
-  "book": {
-    "slug": "sectioned-demo-book",
-    "title": "Sectioned Demo Book",
-    "description": "A compact example with explicit section manifests and chapter sections.",
-    "sort_order": 6
-  },
-  "categories": [
-    "scripture",
-    "poetry"
-  ],
-  "section": [
-    {
-      "slug": "part-one",
-      "number": "1",
-      "title": "Part One",
-      "sort_order": 1,
-      "chapters": [
-        {
-          "path": "sections/part-one/chapters/chapter-01.json"
-        }
-      ]
+    "schema_version": 1,
+    "book": {
+        "slug": "sectioned-demo-book",
+        "title": "Sectioned Demo Book",
+        "description": "A compact example with explicit section manifests and chapter sections."
     },
-    {
-      "slug": "part-two",
-      "number": "2",
-      "title": "Part Two",
-      "sort_order": 2,
-      "chapters": [
+    "categories": [
+        "scripture",
+        "poetry"
+    ],
+    "section": [
         {
-          "path": "sections/part-two/chapters/chapter-01.json"
+            "slug": "part-one",
+            "number": "1",
+            "title": "Part One",
+            "chapters": [
+                {
+                    "path": "sections/part-one/chapters/chapter-01.json"
+                }
+            ]
+        },
+        {
+            "slug": "part-two",
+            "number": "2",
+            "title": "Part Two",
+            "chapters": [
+                {
+                    "path": "sections/part-two/chapters/chapter-01.json"
+                }
+            ]
         }
-      ]
-    }
-  ]
+    ]
 }

@@ -1,26 +1,24 @@
 {
-  "schema_version": 1,
-  "book": {
-    "slug": "kabir-dohe",
-    "title": "Kabir Dohe",
-    "description": "Short doha-style sample dataset.",
-    "sort_order": 3
-  },
-  "categories": [
-    "poetry",
-    "philosophy"
-  ],
-  "section": [
-    {
-      "slug": "main",
-      "number": "1",
-      "title": "Main",
-      "sort_order": 1,
-      "chapters": [
+    "schema_version": 1,
+    "book": {
+        "slug": "kabir-dohe",
+        "title": "Kabir Dohe",
+        "description": "Short doha-style sample dataset."
+    },
+    "categories": [
+        "poetry",
+        "philosophy"
+    ],
+    "section": [
         {
-          "path": "sections/main/chapters/chapter-01.json"
+            "slug": "main",
+            "number": "1",
+            "title": "Main",
+            "chapters": [
+                {
+                    "path": "sections/main/chapters/chapter-01.json"
+                }
+            ]
         }
-      ]
-    }
-  ]
+    ]
 }

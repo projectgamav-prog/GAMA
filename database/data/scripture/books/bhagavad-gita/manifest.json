@@ -1,33 +1,31 @@
 {
-  "schema_version": 1,
-  "book": {
-    "slug": "bhagavad-gita",
-    "title": "Bhagavad Gita",
-    "description": "Small canonical sample dataset for the Bhagavad Gita.",
-    "sort_order": 1
-  },
-  "categories": [
-    "gita",
-    "philosophy",
-    "scripture"
-  ],
-  "section": [
-    {
-      "slug": "main",
-      "number": "1",
-      "title": "Main",
-      "sort_order": 1,
-      "chapters": [
+    "schema_version": 1,
+    "book": {
+        "slug": "bhagavad-gita",
+        "title": "Bhagavad Gita",
+        "description": "Small canonical sample dataset for the Bhagavad Gita."
+    },
+    "categories": [
+        "gita",
+        "philosophy",
+        "scripture"
+    ],
+    "section": [
         {
-          "path": "sections/main/chapters/chapter-01.json"
-        },
-        {
-          "path": "sections/main/chapters/chapter-02.json"
-        },
-        {
-          "path": "sections/main/chapters/chapter-03.json"
+            "slug": "main",
+            "number": "1",
+            "title": "Main",
+            "chapters": [
+                {
+                    "path": "sections/main/chapters/chapter-01.json"
+                },
+                {
+                    "path": "sections/main/chapters/chapter-02.json"
+                },
+                {
+                    "path": "sections/main/chapters/chapter-03.json"
+                }
+            ]
         }
-      ]
-    }
-  ]
+    ]
 }

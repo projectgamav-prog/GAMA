@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Support\Scripture\CanonicalScriptureOrder;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -30,7 +32,7 @@ class Chapter extends Model
      */
     public function chapterSections(): HasMany
     {
-        return $this->hasMany(ChapterSection::class)->orderBy('sort_order');
+        return $this->hasMany(ChapterSection::class)->inCanonicalOrder();
     }
 
     /**
@@ -58,14 +60,10 @@ class Chapter extends Model
     }
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Scope a query to canonical chapter order.
      */
-    protected function casts(): array
+    public function scopeInCanonicalOrder(Builder $query): Builder
     {
-        return [
-            'sort_order' => 'integer',
-        ];
+        return CanonicalScriptureOrder::applyNumberOrder($query);
     }
 }
