@@ -511,6 +511,8 @@ class ScriptureJsonImporter
             array_map(fn (array $section): string => $section['slug'], $payload['chapter-section']),
             sprintf('chapter dataset [%s] chapter-section slugs', $path),
         );
+        $this->assertUniqueVerseSlugsWithinChapterSections($payload['chapter-section'], $path);
+        $this->assertUniqueVerseNumbersWithinChapterSections($payload['chapter-section'], $path);
 
         return $payload;
     }
@@ -676,6 +678,77 @@ class ScriptureJsonImporter
         }
 
         throw new RuntimeException(sprintf('Duplicate values are not allowed in %s.', $label));
+    }
+
+    private function assertUniqueVerseSlugsWithinChapterSections(array $sections, string $path): void
+    {
+        foreach ($sections as $section) {
+            $duplicates = $this->duplicateValues(
+                array_map(
+                    fn (array $verse): string => $verse['slug'],
+                    $section['verses'] ?? [],
+                ),
+            );
+
+            if ($duplicates === []) {
+                continue;
+            }
+
+            throw new RuntimeException(sprintf(
+                'Duplicate verse slugs are not allowed in chapter dataset [%s] chapter-section [%s]: %s.',
+                $path,
+                $section['slug'],
+                implode(', ', array_map(
+                    fn (string $value): string => sprintf('[%s]', $value),
+                    $duplicates,
+                )),
+            ));
+        }
+    }
+
+    private function assertUniqueVerseNumbersWithinChapterSections(array $sections, string $path): void
+    {
+        foreach ($sections as $section) {
+            $duplicates = $this->duplicateValues(array_values(array_filter(
+                array_map(
+                    fn (array $verse): ?string => $verse['number'] ?? null,
+                    $section['verses'] ?? [],
+                ),
+                fn (?string $value): bool => $value !== null,
+            )));
+
+            if ($duplicates === []) {
+                continue;
+            }
+
+            throw new RuntimeException(sprintf(
+                'Duplicate verse numbers are not allowed in chapter dataset [%s] chapter-section [%s]: %s.',
+                $path,
+                $section['slug'],
+                implode(', ', array_map(
+                    fn (string $value): string => sprintf('[%s]', $value),
+                    $duplicates,
+                )),
+            ));
+        }
+    }
+
+    /**
+     * @param  list<string>  $values
+     * @return list<string>
+     */
+    private function duplicateValues(array $values): array
+    {
+        $counts = [];
+
+        foreach ($values as $value) {
+            $counts[$value] = ($counts[$value] ?? 0) + 1;
+        }
+
+        return array_values(array_keys(array_filter(
+            $counts,
+            fn (int $count): bool => $count > 1,
+        )));
     }
 
     private function syncBookCategories(Book $book, array $categoryIds, array &$changes): void

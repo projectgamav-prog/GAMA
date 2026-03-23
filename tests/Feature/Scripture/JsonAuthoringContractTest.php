@@ -147,3 +147,49 @@ test('non-array chapter-section is rejected', function () {
         },
     );
 });
+
+test('duplicate verse slugs within a chapter-section are rejected', function () {
+    withMutatedScriptureJson(
+        'database/data/scripture/books/bhagavad-gita/sections/main/chapters/chapter-01.json',
+        function (array $chapter): array {
+            $chapter['chapter-section'][0]['verses'][1]['slug'] = $chapter['chapter-section'][0]['verses'][0]['slug'];
+
+            return $chapter;
+        },
+        function (): void {
+            expect(fn () => app(ScriptureJsonImporter::class)->import('database/data/scripture/books/bhagavad-gita/sections/main/chapters/chapter-01.json'))
+                ->toThrow(
+                    RuntimeException::class,
+                    'Duplicate verse slugs are not allowed in chapter dataset',
+                );
+
+            expect(Book::query()->count())->toBe(0);
+            expect(Chapter::query()->count())->toBe(0);
+            expect(ChapterSection::query()->count())->toBe(0);
+            expect(Verse::query()->count())->toBe(0);
+        },
+    );
+});
+
+test('duplicate verse numbers within a chapter-section are rejected', function () {
+    withMutatedScriptureJson(
+        'database/data/scripture/books/bhagavad-gita/sections/main/chapters/chapter-01.json',
+        function (array $chapter): array {
+            $chapter['chapter-section'][0]['verses'][1]['number'] = $chapter['chapter-section'][0]['verses'][0]['number'];
+
+            return $chapter;
+        },
+        function (): void {
+            expect(fn () => app(ScriptureJsonImporter::class)->import('database/data/scripture/books/bhagavad-gita/sections/main/chapters/chapter-01.json'))
+                ->toThrow(
+                    RuntimeException::class,
+                    'Duplicate verse numbers are not allowed in chapter dataset',
+                );
+
+            expect(Book::query()->count())->toBe(0);
+            expect(Chapter::query()->count())->toBe(0);
+            expect(ChapterSection::query()->count())->toBe(0);
+            expect(Verse::query()->count())->toBe(0);
+        },
+    );
+});

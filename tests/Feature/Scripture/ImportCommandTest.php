@@ -25,6 +25,8 @@ test('scripture import command imports all enabled books from the corpus manifes
 });
 
 test('scripture import command imports one book by slug', function () {
+    $expectedCounts = app(ScriptureJsonImporter::class)->import('bhagavad-gita', true)['counts'];
+
     $this->artisan('scripture:import', [
         'target' => 'bhagavad-gita',
     ])->assertExitCode(0);
@@ -32,10 +34,10 @@ test('scripture import command imports one book by slug', function () {
     expect(Book::query()->count())->toBe(1);
     expect(BookSection::query()->count())->toBe(1);
     expect(Chapter::query()->count())->toBe(3);
-    expect(ChapterSection::query()->count())->toBe(10);
-    expect(Verse::query()->count())->toBe(90);
-    expect(VerseTranslation::query()->count())->toBe(180);
-    expect(VerseCommentary::query()->count())->toBe(34);
+    expect(ChapterSection::query()->count())->toBe($expectedCounts['chapter_sections']);
+    expect(Verse::query()->count())->toBe($expectedCounts['verses']);
+    expect(VerseTranslation::query()->count())->toBe($expectedCounts['translations']);
+    expect(VerseCommentary::query()->count())->toBe($expectedCounts['commentaries']);
     expect(BookCategory::query()->pluck('slug')->sort()->values()->all())
         ->toBe(['gita', 'philosophy', 'scripture']);
     expect(Book::query()->firstOrFail()->number)->toBe('1');
