@@ -33,7 +33,7 @@ test('scripture import command imports one book by slug', function () {
 
     expect(Book::query()->count())->toBe(1);
     expect(BookSection::query()->count())->toBe(1);
-    expect(Chapter::query()->count())->toBe(3);
+    expect(Chapter::query()->count())->toBe($expectedCounts['chapters']);
     expect(ChapterSection::query()->count())->toBe($expectedCounts['chapter_sections']);
     expect(Verse::query()->count())->toBe($expectedCounts['verses']);
     expect(VerseTranslation::query()->count())->toBe($expectedCounts['translations']);

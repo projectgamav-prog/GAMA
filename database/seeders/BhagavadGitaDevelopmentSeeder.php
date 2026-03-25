@@ -36,7 +36,7 @@ class BhagavadGitaDevelopmentSeeder extends Seeder
             ->where('slug', 'chapter-2')
             ->firstOrFail()
             ->chapterSections()
-            ->where('slug', 'section-1-main')
+            ->where('slug', 'section-1')
             ->firstOrFail();
 
         $verseOneTwentyEight = $chapterOneSection->verses()

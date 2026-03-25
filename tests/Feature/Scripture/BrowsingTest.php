@@ -80,7 +80,7 @@ test('book page is displayed for scripture browsing', function () {
                 'book_sections.0.href',
                 route('scripture.books.show', $this->book).'#section-main',
             )
-            ->has('book_sections.0.chapters', 3),
+            ->has('book_sections.0.chapters', $this->bookSection->chapters()->count()),
         );
 });
 
