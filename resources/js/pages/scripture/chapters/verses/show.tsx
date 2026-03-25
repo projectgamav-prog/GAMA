@@ -3,7 +3,11 @@ import {
     ArrowLeft,
     ArrowRight,
     BookOpenText,
+    Headphones,
     MessageSquareQuote,
+    Sparkles,
+    Tag,
+    Users,
 } from 'lucide-react';
 import { ContentBlockRenderer } from '@/components/scripture/content-block-renderer';
 import { Badge } from '@/components/ui/badge';
@@ -29,6 +33,11 @@ export default function VerseShow({
     next_verse,
     translations,
     commentaries,
+    verse_meta,
+    dictionary_terms,
+    recitations,
+    topics,
+    characters,
     content_blocks,
 }: VerseShowProps) {
     const chapterTitle = chapterLabel(chapter.number, chapter.title);
@@ -61,6 +70,34 @@ export default function VerseShow({
             href: chapter.href,
         },
     ];
+    const metaBadges = [
+        verse_meta?.is_featured ? 'Featured' : null,
+        verse_meta?.difficulty_level ?? null,
+        verse_meta?.teaching_mode ?? null,
+        verse_meta?.narrative_phase ?? null,
+        verse_meta?.scene_location ?? null,
+        verse_meta && verse_meta.memorization_priority > 0
+            ? `Memorization ${verse_meta.memorization_priority}`
+            : null,
+    ].filter((value): value is string => value !== null);
+    const hasVerseMeta = verse_meta !== null
+        && (metaBadges.length > 0 || verse_meta.summary_short !== null);
+
+    const formatDuration = (durationSeconds: number | null): string | null => {
+        if (durationSeconds === null || durationSeconds < 0) {
+            return null;
+        }
+
+        const hours = Math.floor(durationSeconds / 3600);
+        const minutes = Math.floor((durationSeconds % 3600) / 60);
+        const seconds = durationSeconds % 60;
+
+        if (hours > 0) {
+            return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        return `${minutes}:${String(seconds).padStart(2, '0')}`;
+    };
 
     return (
         <ScriptureLayout
@@ -130,6 +167,194 @@ export default function VerseShow({
                     <p className="text-lg leading-9">{verse.text}</p>
                 </CardContent>
             </Card>
+
+            {hasVerseMeta && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-xl">
+                            <Sparkles className="size-5" />
+                            Verse Study Notes
+                        </CardTitle>
+                        <CardDescription>
+                            Compact study metadata attached to this verse.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {metaBadges.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                                {metaBadges.map((item) => (
+                                    <Badge key={item} variant="outline">
+                                        {item}
+                                    </Badge>
+                                ))}
+                            </div>
+                        )}
+                        {verse_meta?.summary_short && (
+                            <p className="text-sm leading-7 text-muted-foreground">
+                                {verse_meta.summary_short}
+                            </p>
+                        )}
+                    </CardContent>
+                </Card>
+            )}
+
+            {dictionary_terms.length > 0 && (
+                <section className="space-y-4">
+                    <div className="space-y-1">
+                        <h2 className="text-xl font-semibold">Dictionary Terms</h2>
+                        <p className="text-sm text-muted-foreground">
+                            Linked study terms related to this verse.
+                        </p>
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                        {dictionary_terms.map((term) => (
+                            <Card key={term.id} className="min-w-48 flex-1">
+                                <CardContent className="space-y-3 py-4">
+                                    <div className="space-y-1">
+                                        <p className="font-medium leading-none">
+                                            {term.dictionary_entry?.headword ??
+                                                term.matched_text ??
+                                                'Untitled term'}
+                                        </p>
+                                        {term.dictionary_entry?.transliteration && (
+                                            <p className="text-sm text-muted-foreground">
+                                                {term.dictionary_entry.transliteration}
+                                            </p>
+                                        )}
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {term.language_code && (
+                                            <Badge variant="outline">
+                                                {term.language_code}
+                                            </Badge>
+                                        )}
+                                        <Badge variant="secondary">
+                                            {term.match_type}
+                                        </Badge>
+                                    </div>
+                                    {term.dictionary_entry?.short_meaning && (
+                                        <p className="text-sm text-muted-foreground">
+                                            {term.dictionary_entry.short_meaning}
+                                        </p>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {recitations.length > 0 && (
+                <section className="space-y-4">
+                    <div className="space-y-1">
+                        <h2 className="text-xl font-semibold">Recitations</h2>
+                        <p className="text-sm text-muted-foreground">
+                            Available verse audio and listening variants.
+                        </p>
+                    </div>
+                    <div className="space-y-3">
+                        {recitations.map((recitation) => {
+                            const mediaHref =
+                                recitation.media?.url ?? recitation.media?.path ?? null;
+                            const durationLabel = formatDuration(
+                                recitation.duration_seconds,
+                            );
+
+                            return (
+                                <Card key={recitation.id}>
+                                    <CardContent className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+                                        <div className="space-y-2">
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <Headphones className="size-4 text-muted-foreground" />
+                                                <span className="font-medium">
+                                                    {recitation.reciter_name}
+                                                </span>
+                                                {recitation.language_code && (
+                                                    <Badge variant="outline">
+                                                        {recitation.language_code}
+                                                    </Badge>
+                                                )}
+                                                {recitation.style && (
+                                                    <Badge variant="secondary">
+                                                        {recitation.style}
+                                                    </Badge>
+                                                )}
+                                                {durationLabel && (
+                                                    <Badge variant="outline">
+                                                        {durationLabel}
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                            {recitation.media?.title && (
+                                                <p className="text-sm text-muted-foreground">
+                                                    {recitation.media.title}
+                                                </p>
+                                            )}
+                                        </div>
+                                        {mediaHref && (
+                                            <Button asChild size="sm" variant="outline">
+                                                <a
+                                                    href={mediaHref}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                >
+                                                    Listen
+                                                </a>
+                                            </Button>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            );
+                        })}
+                    </div>
+                </section>
+            )}
+
+            {topics.length > 0 && (
+                <section className="space-y-4">
+                    <div className="space-y-1">
+                        <h2 className="text-xl font-semibold">Related Topics</h2>
+                        <p className="text-sm text-muted-foreground">
+                            Editorial topic links attached to this verse.
+                        </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {topics.map((assignment) => (
+                            <Badge
+                                key={assignment.id}
+                                variant="secondary"
+                                className="px-3 py-1"
+                            >
+                                <Tag className="size-3.5" />
+                                {assignment.topic?.name ?? 'Untitled topic'}
+                            </Badge>
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {characters.length > 0 && (
+                <section className="space-y-4">
+                    <div className="space-y-1">
+                        <h2 className="text-xl font-semibold">Related Characters</h2>
+                        <p className="text-sm text-muted-foreground">
+                            Characters directly associated with this verse.
+                        </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {characters.map((assignment) => (
+                            <Badge
+                                key={assignment.id}
+                                variant="outline"
+                                className="px-3 py-1"
+                            >
+                                <Users className="size-3.5" />
+                                {assignment.character?.name ?? 'Untitled character'}
+                            </Badge>
+                        ))}
+                    </div>
+                </section>
+            )}
 
             <section className="space-y-4">
                 <div className="space-y-1">

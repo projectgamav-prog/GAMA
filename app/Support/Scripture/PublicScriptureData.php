@@ -4,11 +4,20 @@ namespace App\Support\Scripture;
 
 use App\Models\Book;
 use App\Models\BookSection;
+use App\Models\Character;
+use App\Models\CharacterVerseAssignment;
 use App\Models\Chapter;
 use App\Models\ChapterSection;
 use App\Models\ContentBlock;
+use App\Models\DictionaryEntry;
+use App\Models\Media;
+use App\Models\Topic;
+use App\Models\TopicVerseAssignment;
 use App\Models\Verse;
+use App\Models\VerseDictionaryAssignment;
+use App\Models\VerseMeta;
 use App\Models\VerseCommentary;
+use App\Models\VerseRecitation;
 use App\Models\VerseTranslation;
 
 /**
@@ -243,6 +252,107 @@ class PublicScriptureData
     }
 
     /**
+     * @return array<string, mixed>|null
+     */
+    public function verseMeta(?VerseMeta $verseMeta): ?array
+    {
+        if (! $verseMeta instanceof VerseMeta) {
+            return null;
+        }
+
+        return [
+            'primary_speaker_character_id' => $verseMeta->primary_speaker_character_id,
+            'primary_listener_character_id' => $verseMeta->primary_listener_character_id,
+            'scene_location' => $verseMeta->scene_location,
+            'narrative_phase' => $verseMeta->narrative_phase,
+            'teaching_mode' => $verseMeta->teaching_mode,
+            'difficulty_level' => $verseMeta->difficulty_level,
+            'memorization_priority' => $verseMeta->memorization_priority,
+            'is_featured' => $verseMeta->is_featured,
+            'summary_short' => $verseMeta->summary_short,
+            'keywords_json' => $verseMeta->keywords_json,
+            'study_flags_json' => $verseMeta->study_flags_json,
+        ];
+    }
+
+    /**
+     * @param  iterable<int, VerseDictionaryAssignment>  $assignments
+     * @return list<array<string, mixed>>
+     */
+    public function dictionaryTerms(iterable $assignments): array
+    {
+        return collect($assignments)
+            ->map(fn (VerseDictionaryAssignment $assignment) => [
+                'id' => $assignment->id,
+                'matched_text' => $assignment->matched_text,
+                'matched_normalized_text' => $assignment->matched_normalized_text,
+                'match_type' => $assignment->match_type,
+                'language_code' => $assignment->language_code,
+                'sort_order' => $assignment->sort_order,
+                'dictionary_entry' => $this->dictionaryEntrySummary($assignment->dictionaryEntry),
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param  iterable<int, VerseRecitation>  $recitations
+     * @return list<array<string, mixed>>
+     */
+    public function recitations(iterable $recitations): array
+    {
+        return collect($recitations)
+            ->map(fn (VerseRecitation $recitation) => [
+                'id' => $recitation->id,
+                'reciter_name' => $recitation->reciter_name,
+                'reciter_slug' => $recitation->reciter_slug,
+                'language_code' => $recitation->language_code,
+                'style' => $recitation->style,
+                'duration_seconds' => $recitation->duration_seconds,
+                'sort_order' => $recitation->sort_order,
+                'media' => $this->mediaSummary($recitation->media),
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param  iterable<int, TopicVerseAssignment>  $assignments
+     * @return list<array<string, mixed>>
+     */
+    public function topics(iterable $assignments): array
+    {
+        return collect($assignments)
+            ->map(fn (TopicVerseAssignment $assignment) => [
+                'id' => $assignment->id,
+                'weight' => $assignment->weight === null ? null : (float) $assignment->weight,
+                'sort_order' => $assignment->sort_order,
+                'notes' => $assignment->notes,
+                'topic' => $this->topicSummary($assignment->topic),
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param  iterable<int, CharacterVerseAssignment>  $assignments
+     * @return list<array<string, mixed>>
+     */
+    public function characters(iterable $assignments): array
+    {
+        return collect($assignments)
+            ->map(fn (CharacterVerseAssignment $assignment) => [
+                'id' => $assignment->id,
+                'weight' => $assignment->weight === null ? null : (float) $assignment->weight,
+                'sort_order' => $assignment->sort_order,
+                'notes' => $assignment->notes,
+                'character' => $this->characterSummary($assignment->character),
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
      * @param  iterable<int, ContentBlock>  $blocks
      * @return list<array<string, mixed>>
      */
@@ -260,6 +370,73 @@ class PublicScriptureData
             ])
             ->values()
             ->all();
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function dictionaryEntrySummary(?DictionaryEntry $entry): ?array
+    {
+        if (! $entry instanceof DictionaryEntry) {
+            return null;
+        }
+
+        return [
+            'id' => $entry->id,
+            'slug' => $entry->slug,
+            'headword' => $entry->headword,
+            'transliteration' => $entry->transliteration,
+            'short_meaning' => $entry->short_meaning,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function mediaSummary(?Media $media): ?array
+    {
+        if (! $media instanceof Media) {
+            return null;
+        }
+
+        return [
+            'id' => $media->id,
+            'title' => $media->title,
+            'path' => $media->path,
+            'url' => $media->url,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function topicSummary(?Topic $topic): ?array
+    {
+        if (! $topic instanceof Topic) {
+            return null;
+        }
+
+        return [
+            'id' => $topic->id,
+            'slug' => $topic->slug,
+            'name' => $topic->name,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function characterSummary(?Character $character): ?array
+    {
+        if (! $character instanceof Character) {
+            return null;
+        }
+
+        return [
+            'id' => $character->id,
+            'slug' => $character->slug,
+            'name' => $character->name,
+        ];
     }
 
     private function bookHref(Book $book): string

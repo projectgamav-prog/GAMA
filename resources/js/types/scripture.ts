@@ -90,6 +90,84 @@ export type ScriptureVerseCommentary = {
     sort_order: number;
 };
 
+export type ScriptureVerseMeta = {
+    primary_speaker_character_id: number | null;
+    primary_listener_character_id: number | null;
+    scene_location: string | null;
+    narrative_phase: string | null;
+    teaching_mode: string | null;
+    difficulty_level: string | null;
+    memorization_priority: number;
+    is_featured: boolean;
+    summary_short: string | null;
+    keywords_json: unknown[] | null;
+    study_flags_json: unknown[] | null;
+};
+
+export type ScriptureDictionaryEntrySummary = {
+    id: number;
+    slug: string;
+    headword: string;
+    transliteration: string | null;
+    short_meaning: string | null;
+};
+
+export type ScriptureDictionaryTerm = {
+    id: number;
+    matched_text: string | null;
+    matched_normalized_text: string | null;
+    match_type: string;
+    language_code: string | null;
+    sort_order: number;
+    dictionary_entry: ScriptureDictionaryEntrySummary | null;
+};
+
+export type ScriptureMediaSummary = {
+    id: number;
+    title: string | null;
+    path: string | null;
+    url: string | null;
+};
+
+export type ScriptureVerseRecitation = {
+    id: number;
+    reciter_name: string;
+    reciter_slug: string | null;
+    language_code: string | null;
+    style: string | null;
+    duration_seconds: number | null;
+    sort_order: number;
+    media: ScriptureMediaSummary | null;
+};
+
+export type ScriptureTopicSummary = {
+    id: number;
+    slug: string;
+    name: string;
+};
+
+export type ScriptureVerseTopicAssignment = {
+    id: number;
+    weight: number | null;
+    sort_order: number;
+    notes: string | null;
+    topic: ScriptureTopicSummary | null;
+};
+
+export type ScriptureCharacterSummary = {
+    id: number;
+    slug: string;
+    name: string;
+};
+
+export type ScriptureVerseCharacterAssignment = {
+    id: number;
+    weight: number | null;
+    sort_order: number;
+    notes: string | null;
+    character: ScriptureCharacterSummary | null;
+};
+
 export type BookShowProps = {
     book: ScriptureBook;
     content_blocks: ScriptureContentBlock[];
@@ -137,5 +215,10 @@ export type VerseShowProps = {
     next_verse: (ScriptureVerse & { href: string }) | null;
     translations: ScriptureVerseTranslation[];
     commentaries: ScriptureVerseCommentary[];
+    verse_meta: ScriptureVerseMeta | null;
+    dictionary_terms: ScriptureDictionaryTerm[];
+    recitations: ScriptureVerseRecitation[];
+    topics: ScriptureVerseTopicAssignment[];
+    characters: ScriptureVerseCharacterAssignment[];
     content_blocks: ScriptureContentBlock[];
 };

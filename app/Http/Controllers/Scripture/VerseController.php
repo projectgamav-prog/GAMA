@@ -28,6 +28,11 @@ class VerseController extends Controller
         $verse->load([
             'translations',
             'commentaries',
+            'verseMeta',
+            'dictionaryAssignments.dictionaryEntry',
+            'recitations.media',
+            'topicAssignments.topic',
+            'characterAssignments.character',
         ]);
 
         $chapterSectionVerses = $chapterSection->verses()
@@ -73,6 +78,11 @@ class VerseController extends Controller
                 ),
             'translations' => $publicScriptureData->translations($verse->translations),
             'commentaries' => $publicScriptureData->commentaries($verse->commentaries),
+            'verse_meta' => $publicScriptureData->verseMeta($verse->verseMeta),
+            'dictionary_terms' => $publicScriptureData->dictionaryTerms($verse->dictionaryAssignments),
+            'recitations' => $publicScriptureData->recitations($verse->recitations),
+            'topics' => $publicScriptureData->topics($verse->topicAssignments),
+            'characters' => $publicScriptureData->characters($verse->characterAssignments),
             'content_blocks' => $publicScriptureData->contentBlocks($contentBlocks),
         ]);
     }
