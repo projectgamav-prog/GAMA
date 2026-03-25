@@ -1,0 +1,966 @@
+{
+    "schema_version": 1,
+    "chapter": {
+        "slug": "chapter-5",
+        "number": "5",
+        "title": "ज्ञान योग"
+    },
+    "chapter-section": [
+        {
+            "slug": "section-1",
+            "number": "1",
+            "title": "Main Passage",
+            "verses": [
+                {
+                    "slug": "verse-1",
+                    "number": "1",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-2",
+                    "number": "2",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-3",
+                    "number": "3",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-4",
+                    "number": "4",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-5",
+                    "number": "5",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-6",
+                    "number": "6",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                }        
+            ]
+        },
+        {
+            "slug": "section-2",
+            "number": "2",
+            "title": "Main Passage",
+            "verses": [
+                {
+                    "slug": "verse-7",
+                    "number": "7",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-8",
+                    "number": "8",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-9",
+                    "number": "9",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-10",
+                    "number": "10",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-11",
+                    "number": "11",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-12",
+                    "number": "12",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "slug": "section-3",
+            "number": "3",
+            "title": "Main Passage",
+            "verses": [
+                {
+                    "slug": "verse-13",
+                    "number": "13",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-14",
+                    "number": "14",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-15",
+                    "number": "15",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-16",
+                    "number": "16",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-17",
+                    "number": "17",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-18",
+                    "number": "18",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-19",
+                    "number": "19",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-20",
+                    "number": "20",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-21",
+                    "number": "21",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-22",
+                    "number": "22",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-23",
+                    "number": "23",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                }    
+            ]
+        },
+        {
+            "slug": "section-4",
+            "number": "4",
+            "title": "Main Passage",
+            "verses": [
+                {
+                    "slug": "verse-24",
+                    "number": "24",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-25",
+                    "number": "25",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-26",
+                    "number": "26",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-27",
+                    "number": "27",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-28",
+                    "number": "28",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-29",
+                    "number": "29",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

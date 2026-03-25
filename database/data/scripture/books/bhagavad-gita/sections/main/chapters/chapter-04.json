@@ -1,9 +1,9 @@
 {
     "schema_version": 1,
     "chapter": {
-        "slug": "chapter-3",
-        "number": "3",
-        "title": "ज्ञान योग "
+        "slug": "chapter-4",
+        "number": "4",
+        "title": "ज्ञान योग"
     },
     "chapter-section": [
         {
@@ -14,7 +14,7 @@
                 {
                     "slug": "verse-1",
                     "number": "1",
-                    "text": "सञ्जय उवाच | तं तथा कृपयाविष्टमश्रुपूर्णाकुलेक्षणम् | विषीदन्तमिदं वाक्यमुवाच मधुसूदन: || 1||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -27,7 +27,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "संजय ने कहा-करुणा से अभिभूत, मन से शोकाकुल और अश्रुओं से भरे नेत्रों वाले अर्जुन को देख कर श्रीकृष्ण ने निम्नवर्णित शब्द कहे।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -46,7 +46,7 @@
                 {
                     "slug": "verse-2",
                     "number": "2",
-                    "text": "श्रीभगवानुवाच | कुतस्त्वा कश्मलमिदं विषमे समुपस्थितम् | अनार्यजुष्टमस्वर्ग्यमकीर्तिकरमर्जुन || 2||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -59,7 +59,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "परमात्मा श्रीकृष्ण ने कहाः मेरे प्रिय अर्जुन! इस संकट की घड़ी में तुम्हारे भीतर यह विमोह कैसे उत्पन्न हुआ? यह सम्माननीय लोगों के अनुकूल नहीं है। इससे उच्च लोकों की प्राप्ति नहीं होती अपितु अपयश प्राप्त होता है।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -78,7 +78,7 @@
                 {
                     "slug": "verse-3",
                     "number": "3",
-                    "text": "क्लैब्यं मा स्म गम: पार्थ नैतत्त्वय्युपपद्यते | क्षुद्रं हृदयदौर्बल्यं त्यक्त्वोत्तिष्ठ परन्तप || 3||, .",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -91,7 +91,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "हे पार्थ! अपने भीतर इस प्रकार की नपुंसकता का भाव लाना तुम्हें शोभा नहीं देता। हे शत्रु विजेता! हृदय की तुच्छ दुर्बलता का त्याग करो और युद्ध के लिए तैयार हो जाओ।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -110,7 +110,7 @@
                 {
                     "slug": "verse-4",
                     "number": "4",
-                    "text": "अर्जुन उवाच | कथं भीष्ममहं सङ्ख्ये द्रोणं च मधुसूदन | षुभि: प्रतियोत्स्यामि पूजार्हावरिसूदन || 4||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -123,7 +123,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "अर्जुन ने कहा-हे मधुसूदन! हे शत्रुओं के दमनकर्ता! मैं युद्धभूमि में कैसे भीष्म और द्रोणाचार्य जैसे महापुरुषों पर बाण चला सकता हूँ जो मेरे लिए परम पूजनीय है।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -142,7 +142,7 @@
                 {
                     "slug": "verse-5",
                     "number": "5",
-                    "text": "गुरूनहत्वा हि महानुभावान् श्रेयो भोक्तुं भैक्ष्यमपीह लोके | हत्वार्थकामांस्तु गुरूनिहैव भुञ्जीय भोगान् रुधिरप्रदिग्धान् || 5||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -155,7 +155,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "ऐसे आदरणीय महापुरुष जो मेरे गुरुजन हैं, को मारकर सुखपूर्वक जीवन व्यतीत करने की अपेक्षा तो भीख मांगकर इस संसार में जीवन निर्वाह करना अधिक श्रेयस्कर है। यदि हम उन्हें मारते हैं तो उसके परिणामस्वरूप हम जिस सम्पत्ति और सुखों का भोग करेंगे वे रक्तरंजित होंगे।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -174,7 +174,7 @@
                 {
                     "slug": "verse-6",
                     "number": "6",
-                    "text": "न चैतद्विद्म: कतरन्नो गरीयो यद्वा जयेम यदि वा नो जयेयु: | यानेव हत्वा न जिजीविषाम स्तेऽवस्थिता: प्रमुखे धार्तराष्ट्रा: || 6||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -187,7 +187,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "हम यह भी नहीं जानते कि इस युद्ध का परिणाम हमारे लिए किस प्रकार से श्रेयस्कर होगा। उन पर विजय पाकर या उनसे पराजित होकर। यद्यपि उन्होंने धृतराष्ट्र का पक्ष लिया है और अब वे युद्धभूमि में हमारे सम्मुख खड़े हैं तथापि उनको मारकर हमारी जीवित रहने की कोई इच्छा नहीं होगी।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -206,7 +206,7 @@
                 {
                     "slug": "verse-7",
                     "number": "7",
-                    "text": "कार्पण्यदोषोपहतस्वभाव: पृच्छामि त्वां धर्मसम्मूढचेता: | यच्छ्रेय: स्यान्निश्चितं ब्रूहि तन्मे शिष्यस्तेऽहं शाधि मां त्वां प्रपन्नम् || 7||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -219,7 +219,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "मैं किंकर्तव्यविमूढ़ हो गया हूँ और गहन चिन्ता में डूब कर कायरता दिखा रहा हूँ। मैं आपका शिष्य हूँ और आपके शरणागत हूँ। कृपया मुझे निश्चय ही यह उपदेश दें कि मेरा हित किसमें है।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -238,7 +238,7 @@
                 {
                     "slug": "verse-8",
                     "number": "8",
-                    "text": "न हि प्रपश्यामि ममापनुद्याद् यच्छोकमुच्छोषणमिन्द्रियाणाम् | अवाप्य भूमावसपत्नमृद्धं राज्यं सुराणामपि चाधिपत्यम् || 8||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -251,7 +251,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "मुझे ऐसा कोई उपाय नहीं सूझता जो मेरी इन्द्रियों को सुखाने वाले इस शोक को दूर कर सके। यदि मैं धन सम्पदा से भरपूर इस पृथ्वी पर निष्कंटक राज्य प्राप्त कर लेता हूँ या देवताओं जैसा प्रभुत्व प्राप्त कर लेता हूँ तब भी मैं इस शोक को दूर करने में समर्थ नहीं हो पाऊँगा।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -266,19 +266,11 @@
                             "sort_order": 1
                         }
                     ]
-                }
-                
-            ]
-        },
-        {
-            "slug": "section-2",
-            "number": "2",
-            "title": "Main Passage",
-            "verses": [
+                },
                 {
                     "slug": "verse-9",
                     "number": "9",
-                    "text": "सञ्जय उवाच | वमुक्त्वा हृषीकेशं गुडाकेश: परन्तप | न योत्स्य इति गोविन्दमुक्त्वा तूष्णीं बभूव ह || 9||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -291,7 +283,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "संजय ने कहा-ऐसा कहने के पश्चात् 'गुडाकेश' तथा शत्रुओं का दमन करने वाला अर्जुन ने 'हृषीकेश' कृष्ण से कहा, हे गोविन्द! मैं युद्ध नहीं करूँगा और शांत हो गया।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -310,7 +302,7 @@
                 {
                     "slug": "verse-10",
                     "number": "10",
-                    "text": "तमुवाच हृषीकेश: प्रहसन्निव भारत | सेनयोरुभयोर्मध्ये विषीदन्तमिदं वच: || 10||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -323,7 +315,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "सृष्टि के आरम्भ में ब्रह्मा ने मानव जाति को उनके नियत कर्तव्यों सहित जन्म दिया और कहा “इन यज्ञों का विधिपूर्वक अनुष्ठान करने पर तुम्हें सुख समृद्धि प्राप्त होगी और इनसे तुम्हें सभी वांछित वस्तुएँ प्राप्त होंगी।”",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -342,7 +334,7 @@
                 {
                     "slug": "verse-11",
                     "number": "11",
-                    "text": "देवान्भावयतानेन ते देवा भावयन्तु व: | परस्परं भावयन्त: श्रेय: परमवाप्स्यथ || 11||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -355,7 +347,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "तुम्हारे द्वारा सम्पन्न किए गए यज्ञों से देवता प्रसन्न होंगे तथा मनुष्यों और देवताओं के इस संबंध के परिणामस्वरूप सभी को सुख समृद्धि प्राप्त होगी।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -374,7 +366,7 @@
                 {
                     "slug": "verse-12",
                     "number": "12",
-                    "text": "इष्टान्भोगान्हि वो देवा दास्यन्ते यज्ञभाविता: | तैर्दत्तानप्रदायैभ्यो यो भुङ्क्ते स्तेन एव स: || 12||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -387,7 +379,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "तुम्हारे द्वारा सम्पन्न यज्ञों से प्रसन्न होकर देवता जीवन निर्वाह के लिए वांछित वस्तुएँ प्रदान करेंगे किन्तु जो प्राप्त वस्तुओं को उनको अर्पित किए बिना भोगते हैं, वे वास्तव में चोर हैं।Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -406,7 +398,7 @@
                 {
                     "slug": "verse-13",
                     "number": "13",
-                    "text": "यज्ञशिष्टाशिन: सन्तो मुच्यन्ते सर्वकिल्बिषै: | भुञ्जते ते त्वघं पापा ये पचन्त्यात्मकारणात् || 13||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -419,7 +411,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "आध्यात्मिक मनोवत्ति वाले जो लोग यज्ञ में अर्पित करने के पश्चात् भोजन ग्रहण करते हैं, वे सभी प्रकार के पापों से मुक्त हो जाते हैं किन्तु जो अपनी इन्द्रिय तृप्ति के लिए भोजन बनाते हैं, वे वास्तव में पाप अर्जित करते हैं।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -438,7 +430,7 @@
                 {
                     "slug": "verse-14",
                     "number": "14",
-                    "text": "अन्नाद्भवन्ति भूतानि पर्जन्यादन्नसम्भव: | यज्ञाद्भवति पर्जन्यो यज्ञ: कर्मसमुद्भव: || 14||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -451,7 +443,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "सभी लोग अन्न पर निर्भर हैं और अन्न वर्षा से उत्पन्न होता है, वर्षा यज्ञ का अनुष्ठान करने से होती है और यज्ञ निर्धारित कर्मों का पालन करने से सम्पन्न होता है।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -470,7 +462,7 @@
                 {
                     "slug": "verse-15",
                     "number": "15",
-                    "text": "कर्म ब्रह्मोद्भवं विद्धि ब्रह्माक्षरसमुद्भवम् | तस्मात्सर्वगतं ब्रह्म नित्यं यज्ञे प्रतिष्ठितम् || 15||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -483,7 +475,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "वेदों में सभी जीवों के लिए कर्म निश्चित किए गए हैं और वेद परब्रह्म भगवान से प्रकट हुए हैं। परिणामस्वरूप सर्वव्यापक भगवान सभी यज्ञ कर्मों में नित्य व्याप्त रहते हैं।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -502,7 +494,7 @@
                 {
                     "slug": "verse-16",
                     "number": "16",
-                    "text": "एवं प्रवर्तितं चक्रं नानुवर्तयतीह य: | अघायुरिन्द्रियारामो मोघं पार्थ स जीवति || 16||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -515,7 +507,238 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "हे पार्थ! जो मनुष्य वेदों द्वारा स्थापित यज्ञ कर्म के इस चक्र का पालन नहीं करते, वे पाप अर्जित करते हैं, वे केवल अपनी इन्द्रियों की तृप्ति के लिए जीवित रहते हैं, वास्तव में उनका जीवन व्यर्थ ही है।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-17",
+                    "number": "17",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-18",
+                    "number": "18",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "slug": "section-2",
+            "number": "2",
+            "title": "Main Passage",
+            "verses": [
+                {
+                    "slug": "verse-19",
+                    "number": "19",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-20",
+                    "number": "20",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-21",
+                    "number": "21",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-22",
+                    "number": "22",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
+                            "sort_order": 2
+                        }
+                    ],
+                    "commentaries": [
+                        {
+                            "source_key": "dev-commentary",
+                            "source_name": "Development Notes",
+                            "author_name": "Gama Editorial",
+                            "language_code": "en",
+                            "title": "Action without attachment",
+                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
+                            "sort_order": 1
+                        }
+                    ]
+                },
+                {
+                    "slug": "verse-23",
+                    "number": "23",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
+                    "translations": [
+                        {
+                            "source_key": "dev-en",
+                            "source_name": "Development English",
+                            "language_code": "en",
+                            "text": "Your responsibility is in action alone, never in its fruits.",
+                            "sort_order": 1
+                        },
+                        {
+                            "source_key": "dev-hi",
+                            "source_name": "Development Hindi",
+                            "language_code": "hi",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -538,236 +761,10 @@
             "number": "3",
             "title": "Main Passage",
             "verses": [
-                
-                {
-                    "slug": "verse-17",
-                    "number": "17",
-                    "text": "यस्त्वात्मरतिरेव स्यादात्मतृप्तश्च मानव: | आत्मन्येव च सन्तुष्टस्तस्य कार्यं न विद्यते || 17||",
-                    "translations": [
-                        {
-                            "source_key": "dev-en",
-                            "source_name": "Development English",
-                            "language_code": "en",
-                            "text": "Your responsibility is in action alone, never in its fruits.",
-                            "sort_order": 1
-                        },
-                        {
-                            "source_key": "dev-hi",
-                            "source_name": "Development Hindi",
-                            "language_code": "hi",
-                            "text": "लेकिन जो मनुष्य आत्मानंद में स्थित रहते हैं तथा जो प्रबुद्ध और अपने में ही तुष्ट होते हैं, उनके लिए कोई नियत कर्त्तव्य नहीं होता।",
-                            "sort_order": 2
-                        }
-                    ],
-                    "commentaries": [
-                        {
-                            "source_key": "dev-commentary",
-                            "source_name": "Development Notes",
-                            "author_name": "Gama Editorial",
-                            "language_code": "en",
-                            "title": "Action without attachment",
-                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
-                            "sort_order": 1
-                        }
-                    ]
-                },
-                {
-                    "slug": "verse-18",
-                    "number": "18",
-                    "text": "नैव तस्य कृतेनार्थो नाकृतेनेह कश्चन | न चास्य सर्वभूतेषु कश्चिदर्थव्यपाश्रय: || 18||",
-                    "translations": [
-                        {
-                            "source_key": "dev-en",
-                            "source_name": "Development English",
-                            "language_code": "en",
-                            "text": "Your responsibility is in action alone, never in its fruits.",
-                            "sort_order": 1
-                        },
-                        {
-                            "source_key": "dev-hi",
-                            "source_name": "Development Hindi",
-                            "language_code": "hi",
-                            "text": "ऐसी मुक्त आत्माओं को अपने कर्तव्य का पालन करने या उनसे विमुख होने से कुछ पाना या खोना नहीं होता और न ही उन्हें अपनी निजी आवश्यकताओं की पूर्ति के लिए अन्य जीवों पर निर्भर रहने की आवश्यकता होती है।",
-                            "sort_order": 2
-                        }
-                    ],
-                    "commentaries": [
-                        {
-                            "source_key": "dev-commentary",
-                            "source_name": "Development Notes",
-                            "author_name": "Gama Editorial",
-                            "language_code": "en",
-                            "title": "Action without attachment",
-                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
-                            "sort_order": 1
-                        }
-                    ]
-                },
-                {
-                    "slug": "verse-19",
-                    "number": "19",
-                    "text": "तस्मादसक्त: सततं कार्यं कर्म समाचर | असक्तो ह्याचरन्कर्म परमाप्नोति पूरुष: || 19||", 
-                    "translations": [    
-                        {
-                            "source_key": "dev-en",
-                            "source_name": "Development English",
-                            "language_code": "en",
-                            "text": "Your responsibility is in action alone, never in its fruits.",
-                            "sort_order": 1
-                        },
-                        {
-                            "source_key": "dev-hi",
-                            "source_name": "Development Hindi",
-                            "language_code": "hi",
-                            "text": "अतः आसक्ति का त्याग कर अपने कार्य को फल की आसक्ति के बिना करने से ही किसी को परमात्मा की प्राप्ति होती है।",
-                            "sort_order": 2
-                        }
-                    ],
-                    "commentaries": [
-                        {
-                            "source_key": "dev-commentary",
-                            "source_name": "Development Notes",
-                            "author_name": "Gama Editorial",
-                            "language_code": "en",
-                            "title": "Action without attachment",
-                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
-                            "sort_order": 1
-                        }
-                        
-                    ]
-                },
-                {
-                    "slug": "verse-20",
-                    "number": "20",
-                    "text": "कर्मणैव हि संसिद्धिमास्थिता जनकादय: | लोकसंग्रहमेवापि सम्पश्यन्कर्तुमर्हसि || 20||",
-                    "translations": [
-                        {
-                            "source_key": "dev-en",
-                            "source_name": "Development English",
-                            "language_code": "en",
-                            "text": "Your responsibility is in action alone, never in its fruits.",
-                            "sort_order": 1
-                        },
-                        {
-                            "source_key": "dev-hi",
-                            "source_name": "Development Hindi",
-                            "language_code": "hi",
-                            "text": "राजा जनक और अन्य महापुरुषों ने अपने नियत कर्मों का पालन करते हुए सिद्धि प्राप्त की थी इसलिए तुम्हें भी अपने कर्तव्यों का निर्वहन करते हुए समाज के कल्याण के लिए अनुकरणीय उदाहरण प्रस्तुत करना चाहिए।",
-                            "sort_order": 2
-                        }
-                    ],
-                    "commentaries": [
-                        {
-                            "source_key": "dev-commentary",
-                            "source_name": "Development Notes",
-                            "author_name": "Gama Editorial",
-                            "language_code": "en",
-                            "title": "Action without attachment",
-                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
-                            "sort_order": 1
-                        }
-                    ]
-                },
-                {
-                    "slug": "verse-21",
-                    "number": "21",
-                    "text": "कर्मणैव हि संसिद्धिमास्थिता जनकादय: | लोकसंग्रहमेवापि सम्पश्यन्कर्तुमर्हसि || 20||",
-                    "translations": [
-                        {
-                            "source_key": "dev-en",
-                            "source_name": "Development English",
-                            "language_code": "en",
-                            "text": "Your responsibility is in action alone, never in its fruits.",
-                            "sort_order": 1
-                        },
-                        {
-                            "source_key": "dev-hi",
-                            "source_name": "Development Hindi",
-                            "language_code": "hi",
-                            "text": "राजा जनक और अन्य महापुरुषों ने अपने नियत कर्मों का पालन करते हुए सिद्धि प्राप्त की थी इसलिए तुम्हें भी अपने कर्तव्यों का निर्वहन करते हुए समाज के कल्याण के लिए अनुकरणीय उदाहरण प्रस्तुत करना चाहिए। महापुरुष जो भी कर्म करते हैं, सामान्य जन उनका पालन करते हैं, वे जो भी आदर्श स्थापित करते हैं, सारा संसार उनका अनुसरण करता है।",
-                            "sort_order": 2
-                        }
-                    ],
-                    "commentaries": [
-                        {
-                            "source_key": "dev-commentary",
-                            "source_name": "Development Notes",
-                            "author_name": "Gama Editorial",
-                            "language_code": "en",
-                            "title": "Action without attachment",
-                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
-                            "sort_order": 1
-                        }
-                    ]
-                },
-                {
-                    "slug": "verse-22",
-                    "number": "22",
-                    "text": "यद्यदाचरति श्रेष्ठस्तत्तदेवेतरो जन: | स यत्प्रमाणं कुरुते लोकस्तदनुवर्तते || 21||",
-                    "translations": [
-                        {
-                            "source_key": "dev-en",
-                            "source_name": "Development English",
-                            "language_code": "en",
-                            "text": "Your responsibility is in action alone, never in its fruits.",
-                            "sort_order": 1
-                        },
-                        {
-                            "source_key": "dev-hi",
-                            "source_name": "Development Hindi",
-                            "language_code": "hi",
-                            "text": "राजा जनक और अन्य महापुरुषों ने अपने नियत कर्मों का पालन करते हुए सिद्धि प्राप्त की थी इसलिए तुम्हें भी अपने कर्तव्यों का निर्वहन करते हुए समाज के कल्याण के लिए अनुकरणीय उदाहरण प्रस्तुत करना चाहिए। महापुरुष जो भी कर्म करते हैं, सामान्य जन उनका पालन करते हैं, वे जो भी आदर्श स्थापित करते हैं, सारा संसार उनका अनुसरण करता है।",
-                            "sort_order": 2
-                        }
-                    ],
-                    "commentaries": [
-                        {
-                            "source_key": "dev-commentary",
-                            "source_name": "Development Notes",
-                            "author_name": "Gama Editorial",
-                            "language_code": "en",
-                            "title": "Action without attachment",
-                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
-                            "sort_order": 1
-                        }
-                    ]
-                },
-                {
-                    "slug": "verse-23",
-                    "number": "23",
-                    "text": "यदि ह्यहं न वर्तेयं जातु कर्मण्यतन्द्रित: | मम वर्त्मानुवर्तन्ते मनुष्या: पार्थ सर्वश: || 23||",
-                    "translations": [
-                        {
-                            "source_key": "dev-en",
-                            "source_name": "Development English",
-                            "language_code": "en",
-                            "text": "Your responsibility is in action alone, never in its fruits.",
-                            "sort_order": 1
-                        },
-                        {
-                            "source_key": "dev-hi",
-                            "source_name": "Development Hindi",
-                            "language_code": "hi",
-                            "text": "यदि मैं सावधानीपूर्वक नियत कर्म नहीं करता तो हे पार्थ! सभी लोगों ने निश्चित रूप से सभी प्रकार से मेरे मार्ग का ही अनुसरण किया होता।",
-                            "sort_order": 2
-                        }
-                    ],
-                    "commentaries": [
-                        {
-                            "source_key": "dev-commentary",
-                            "source_name": "Development Notes",
-                            "author_name": "Gama Editorial",
-                            "language_code": "en",
-                            "title": "Action without attachment",
-                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
-                            "sort_order": 1
-                        }
-                    ]
-                },
                 {
                     "slug": "verse-24",
                     "number": "24",
-                    "text": "उत्सीदेयुरिमे लोका न कुर्यां कर्म चेदहम् | सङ्करस्य च कर्ता स्यामुपहन्यामिमा: प्रजा: || 24||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -780,7 +777,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "यदि मैं अपने निर्धारित कर्म को नहीं करता तब ये सभी लोक नष्ट हो जाते और मैं संसार में उत्पन्न होने वाली अराजकता के लिए उत्तरदायी होता और इस प्रकार से मानव जाति की शांति का विनाश करने वाला कहलाता।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -795,19 +792,11 @@
                             "sort_order": 1
                         }
                     ]
-                }
-                
-            ]
-        },
-        {
-            "slug": "section-4",
-            "number": "4",
-            "title": "Main Passage",
-            "verses": [
+                },
                 {
                     "slug": "verse-25",
                     "number": "25",
-                    "text": "सक्ता: कर्मण्यविद्वांसो यथा कुर्वन्ति भारत | कुर्याद्विद्वांस्तथासक्तश्चिकीर्षुर्लोकसंग्रहम् || 25||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -820,7 +809,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "हे भरतवंशी! जैसे अज्ञानी लोग फल की आसक्ति से कर्म करते हैं, उसी प्रकार बुद्धिमान मनुष्यों को लोगों को उचित मार्ग की ओर चलने के लिए प्रेरित करने हेतु अनासक्त रहकर कर्म करना चाहिए।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -839,7 +828,7 @@
                 {
                     "slug": "verse-26",
                     "number": "26",
-                    "text": "न बुद्धिभेदं जनयेदज्ञानां कर्मसङ्गिनाम् | जोषयेत्सर्वकर्माणि विद्वान्युक्त: समाचरन् || 26||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -852,7 +841,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "ज्ञानवान मनुष्यों को चाहिए कि वे अज्ञानी लोगों को जिनकी आसक्ति सकाम कर्म करने में रहती है, उन्हें कर्म करने से रोक कर उनकी बुद्धि में संशय उत्पन्न न करें अपितु स्वयं ज्ञानयुक्त होकर अपने कार्य करते हुए उन अज्ञानी लोगों को भी अपने नियत कर्म करने के लिए प्रेरित करना चाहिए।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -871,7 +860,7 @@
                 {
                     "slug": "verse-27",
                     "number": "27",
-                    "text": "प्रकृते: क्रियमाणानि गुणै: कर्माणि सर्वश: | अहङ्कारविमूढात्मा कर्ताहमिति मन्यते || 27||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -884,7 +873,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "जीवात्मा देह के मिथ्या ज्ञान के कारण स्वयं को अपने सभी कर्मों का कर्ता समझती है।यद्यपि विश्व के सभी कार्य प्रकृति के तीन गुणों के अन्तर्गत सम्पन्न होते हैं लेकिन अहंकारवश जीवात्मा स्वयं को अपने सभी कर्मों का कर्ता समझती है।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -903,7 +892,7 @@
                 {
                     "slug": "verse-28",
                     "number": "28",
-                    "text": "तत्त्ववित्तु महाबाहो गुणकर्मविभागयो: | गुणा गुणेषु वर्तन्त इति मत्वा न सज्जते || 28||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -916,7 +905,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "हे महाबाहु अर्जुन! तत्त्वज्ञानी आत्मा को गुणों और कर्मों से भिन्न रूप में पहचानते हैं वे समझते हैं कि 'इन्द्रिय, मन, आदि के रूप में केवल गुण ही हैं जो इन्द्रिय विषयों, (गुणेषु) में संचालित होते हैं। इसलिए वे उनमें नहीं फंसते।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -935,7 +924,7 @@
                 {
                     "slug": "verse-29",
                     "number": "29",
-                    "text": "प्रकृतेर्गुणसम्मूढा: सज्जन्ते गुणकर्मसु | तानकृत्स्नविदो मन्दान्कृत्स्नविन्न विचालयेत् || 29||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -948,7 +937,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "जो मनुष्य प्रकृति के गुणों के प्रभाव से मोहित हो जाते हैं वे फल प्राप्ति की कामना के साथ अपने कर्म करते हैं लेकिन बुद्धिमान पुरुष जो इस परम सत्य को जानते हैं, उन्हें ऐसे अज्ञानी लोगों को विचलित नहीं करना चाहिए।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -967,7 +956,7 @@
                 {
                     "slug": "verse-30",
                     "number": "30",
-                    "text": "मयि सर्वाणि कर्माणि संन्यस्याध्यात्मचेतसा | निराशीर्निर्ममो भूत्वा युध्यस्व विगतज्वर: || 30||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -980,7 +969,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "अपने समस्त कर्मों को मुझको अर्पित करके और परमात्मा के रूप में निरन्तर मेरा ध्यान करते हुए कामना और स्वार्थ से रहित होकर अपने सन्तापों को त्याग कर युद्ध करो।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -999,7 +988,7 @@
                 {
                     "slug": "verse-31",
                     "number": "31",
-                    "text": "ये मे मतमिदं नित्यमनुतिष्ठन्ति मानवा: | श्रद्धावन्तोऽनसूयन्तो मुच्यन्ते तेऽपि कर्मभि: || 31||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -1012,7 +1001,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "जो मनुष्य अगाध श्रद्धा के साथ मेरे इन उपदेशों का पालन करते हैं और दोष दृष्टि से परे रहते हैं, वे भी कर्म के बंधनों से मुक्त हो जाते हैं।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -1031,7 +1020,7 @@
                 {
                     "slug": "verse-32",
                     "number": "32",
-                    "text": "ये त्वेतदभ्यसूयन्तो नानुतिष्ठन्ति मे मतम् | सर्वज्ञानविमूढांस्तान्विद्धि नष्टानचेतस: || 32||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -1044,7 +1033,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "किन्तु जो मेरे उपदेशों में दोष ढूंढते हैं, वे ज्ञान से वंचित और विवेकहीन होते हैं, इन सिद्धान्तों की उपेक्षा करने से वे अपने विनाश का कारण बनते हैं।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -1059,11 +1048,18 @@
                             "sort_order": 1
                         }
                     ]
-                },
+                }
+            ]
+        },
+        {
+            "slug": "section-4",
+            "number": "4",
+            "title": "Main Passage",
+            "verses": [
                 {
                     "slug": "verse-33",
                     "number": "33",
-                    "text": "सदृशं चेष्टते स्वस्या: प्रकृतेर्ज्ञानवानपि | प्रकृतिं यान्ति भूतानि निग्रह: किं करिष्यति || 33||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -1076,7 +1072,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "बुद्धिमान लोग भी अपनी प्रकृति के अनुसार ही कार्य करते हैं क्योंकि सभी जीव अपनी स्वाभाविक प्रवृत्ति से प्रेरित होते हैं। दमन से क्या प्राप्त हो सकता है?",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -1095,7 +1091,7 @@
                 {
                     "slug": "verse-34",
                     "number": "34",
-                    "text": "इन्द्रियस्येन्द्रियस्यार्थे रागद्वेषौ व्यवस्थितौ | तयोर्न वशमागच्छेत्तौ ह्यस्य परिपन्थिनौ || 34||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -1108,7 +1104,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "इन्द्रियों का इन्द्रिय विषयों के साथ स्वाभाविक रूप से राग और द्वेष होता है किन्तु मनुष्य को इनके वशीभूत नहीं होना चाहिए क्योंकि ये आत्म कल्याण के मार्ग के अवरोधक और शत्रु हैं।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -1123,20 +1119,11 @@
                             "sort_order": 1
                         }
                     ]
-                }
-                
-            ]
-            
-        },
-        {
-            "slug": "section-5",
-            "number": "5",
-            "title": "Main Passage",
-            "verses": [
+                },
                 {
                     "slug": "verse-35",
                     "number": "35",
-                    "text": "श्रेयान्स्वधर्मो विगुण: परधर्मात्स्वनुष्ठितात् | स्वधर्मे निधनं श्रेय: परधर्मो भयावह: || 35||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -1149,7 +1136,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "अपने धर्म को दोष युक्त सम्पन्न करना किसी अन्य के धर्म को समुचित ढंग से सम्पन्न करने से कहीं अधिक श्रेष्ठ होता है। वास्तव में अपने कर्तव्य का पालन करते हुए मर जाना दूसरों के कर्तव्य का अनुसरण करने से श्रेयस्कर होता है। दूसरे के धर्म का पालन भययुक्त है।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -1168,7 +1155,7 @@
                 {
                     "slug": "verse-36",
                     "number": "36",
-                    "text": "अर्जुन उवाच | अथ केन प्रयुक्तोऽयं पापं चरति पूरुष: | अनिच्छन्नपि वार्ष्णेय बलादिव नियोजित: || 36||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -1181,7 +1168,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "अर्जुन ने कहा! हे वृष्णिवंशी, श्रीकृष्ण! इच्छा न होते हुए भी मनुष्य पापजन्य कर्मों की ओर क्यों प्रवृत्त होता है। ऐसा प्रतीत होता है कि उसे बलपूर्वक पाप कर्मों में लगाया जाता है।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -1200,7 +1187,7 @@
                 {
                     "slug": "verse-37",
                     "number": "37",
-                    "text": "श्रीभगवानुवाच | काम एष क्रोध एष रजोगुणसमुद्भव: || महाशनो महापाप्मा विद्ध्येनमिह वैरिणम् || 37||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -1213,7 +1200,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "परमात्मा श्रीकृष्ण कहते हैं- काम वासना जो रजोगुण से उत्पन्न होती है और बाद में क्रोध का रूप धारण कर लेती है, इसे पाप के रूप में संसार का सर्वभक्षी शत्रु समझो।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -1232,7 +1219,7 @@
                 {
                     "slug": "verse-38",
                     "number": "38",
-                    "text": "धूमेनाव्रियते वह्निर्यथादर्शो मलेन च | यथोल्बेनावृतो गर्भस्तथा तेनेदमावृतम् || 38||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -1245,7 +1232,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "जैसे अग्नि धुएँ से ढकी रहती है, दर्पण धूल से आवृत रहता है तथा भ्रूण गर्भाशय से अप्रकट रहता है, उसी प्रकार से कामनाओं के कारण मनुष्य के ज्ञान पर आवरण पड़ा रहता है।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -1264,7 +1251,7 @@
                 {
                     "slug": "verse-39",
                     "number": "39",
-                    "text": "आवृतं ज्ञानमेतेन ज्ञानिनो नित्यवैरिणा | कामरूपेण कौन्तेय दुष्पूरेणानलेन च || 39||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -1277,7 +1264,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "हे कुन्ती पुत्र! इस प्रकार ज्ञानी पुरुष का ज्ञान भी अतृप्त कामना रूपी शत्रु से आच्छादित रहता है जो कभी संतुष्ट नहीं होता और अग्नि के समान जलता रहता है।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -1296,7 +1283,7 @@
                 {
                     "slug": "verse-40",
                     "number": "40",
-                    "text": "इन्द्रियाणि मनो बुद्धिरस्याधिष्ठानमुच्यते | एतैर्विमोहयत्येष ज्ञानमावृत्य देहिनम् || 40||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -1309,7 +1296,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "इन्द्रिय, मन और बुद्धि को कामना का अधिष्ठान कहा जाता है जिनके द्वारा यह मनुष्य के ज्ञान को आच्छादित कर लेती है और देहधारियों को मोहित करती है।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -1328,7 +1315,7 @@
                 {
                     "slug": "verse-41",
                     "number": "41",
-                    "text": "तस्मात्त्वमिन्द्रियाण्यादौ नियम्य भरतर्षभ | पाप्मानं प्रजहि ह्येनं ज्ञानविज्ञाननाशनम् || 41||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -1341,7 +1328,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": " इसलिए हे भरतवंशियों में श्रेष्ठ! प्रारम्भ से ही इन इन्द्रियों को नियंत्रण में रखकर कामना रूपी शत्रु का वध कर डालो जो पाप का मूर्तरूप तथा ज्ञान और आत्मबोध का विनाशक है।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -1360,7 +1347,7 @@
                 {
                     "slug": "verse-42",
                     "number": "42",
-                    "text": "इन्द्रियाणि पराण्याहुरिन्द्रियेभ्य: परं मन: | मनसस्तु परा बुद्धिर्यो बुद्धे: परतस्तु स: || 42||",
+                    "text": "Your responsibility is in action alone, never in the fruits.",
                     "translations": [
                         {
                             "source_key": "dev-en",
@@ -1373,39 +1360,7 @@
                             "source_key": "dev-hi",
                             "source_name": "Development Hindi",
                             "language_code": "hi",
-                            "text": "इन्द्रियाँ स्थूल शरीर से श्रेष्ठ हैं और इन्द्रियों से उत्तम मन, मन से श्रेष्ठ बुद्धि और आत्मा बुद्धि से भी परे है।",
-                            "sort_order": 2
-                        }
-                    ],
-                    "commentaries": [
-                        {
-                            "source_key": "dev-commentary",
-                            "source_name": "Development Notes",
-                            "author_name": "Gama Editorial",
-                            "language_code": "en",
-                            "title": "Action without attachment",
-                            "body": "This verse frames disciplined action as the path forward: act fully, but do not let the outcome become the basis of identity or paralysis.",
-                            "sort_order": 1
-                        }
-                    ]
-                },
-                {
-                    "slug": "verse-43",
-                    "number": "43",
-                    "text": "एवं बुद्धे: परं बुद्ध्वा संस्तभ्यात्मानमात्मना | जहि शत्रुं महाबाहो कामरूपं दुरासदम् || 43||",
-                    "translations": [
-                        {
-                            "source_key": "dev-en",
-                            "source_name": "Development English",
-                            "language_code": "en",
-                            "text": "Your responsibility is in action alone, never in its fruits.",
-                            "sort_order": 1
-                        },
-                        {
-                            "source_key": "dev-hi",
-                            "source_name": "Development Hindi",
-                            "language_code": "hi",
-                            "text": "इस प्रकार हे महाबाहु! आत्मा को बुद्धि से श्रेष्ठ जानकर अपनी इन्द्रिय, मन और बुद्धि पर संयम रखो और आत्मज्ञान द्वारा कामरूपी दुर्जेय शत्रु का दमन करो।",
+                            "text": "Tumhara adhikar keval karm par hai, uske phal par nahin.",
                             "sort_order": 2
                         }
                     ],
@@ -1422,17 +1377,6 @@
                     ]
                 }
             ]
-        }            
+        }
     ]
 }
-
-
-
-
-
-
-
-
-
-
-                

@@ -25,6 +25,24 @@
                 },
                 {
                     "path": "sections/main/chapters/chapter-03.json"
+                },
+                {
+                    "path": "sections/main/chapters/chapter-04.json"
+                },
+                {
+                    "path": "sections/main/chapters/chapter-05.json"
+                },
+                {
+                    "path": "sections/main/chapters/chapter-06.json"
+                },
+                {
+                    "path": "sections/main/chapters/chapter-07.json"
+                },
+                {
+                    "path": "sections/main/chapters/chapter-08.json"
+                },
+                {
+                    "path": "sections/main/chapters/chapter-09.json"
                 }
             ]
         }
