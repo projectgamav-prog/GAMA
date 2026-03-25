@@ -1,0 +1,43 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('verse_recitations', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('verse_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('media_id')->constrained()->cascadeOnDelete();
+            $table->string('reciter_name');
+            $table->string('reciter_slug')->nullable();
+            $table->string('language_code', 16)->nullable();
+            $table->string('style')->nullable();
+            $table->unsignedInteger('duration_seconds')->nullable();
+            $table->unsignedInteger('sort_order')->default(0);
+            $table->string('status')->default('published');
+            $table->json('meta_json')->nullable();
+            $table->timestamps();
+
+            $table->unique(['verse_id', 'media_id'], 'verse_recitations_verse_media_unique');
+            $table->index(['verse_id', 'sort_order'], 'verse_recitations_verse_sort_idx');
+            $table->index('reciter_slug', 'verse_recitations_reciter_slug_idx');
+            $table->index('status', 'verse_recitations_status_idx');
+            $table->index(['verse_id', 'status'], 'verse_recitations_verse_status_idx');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('verse_recitations');
+    }
+};
