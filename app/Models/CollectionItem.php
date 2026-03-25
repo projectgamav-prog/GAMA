@@ -5,8 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-class VerseTranslation extends Model
+class CollectionItem extends Model
 {
     use HasFactory;
 
@@ -16,19 +17,19 @@ class VerseTranslation extends Model
     protected $guarded = [];
 
     /**
-     * Get the verse that owns the translation.
+     * Get the collection that owns the item row.
      */
-    public function verse(): BelongsTo
+    public function collection(): BelongsTo
     {
-        return $this->belongsTo(Verse::class);
+        return $this->belongsTo(Collection::class);
     }
 
     /**
-     * Get the normalized source metadata for the translation.
+     * Get the item linked by this collection row.
      */
-    public function translationSource(): BelongsTo
+    public function item(): MorphTo
     {
-        return $this->belongsTo(TranslationSource::class);
+        return $this->morphTo();
     }
 
     /**
@@ -39,6 +40,7 @@ class VerseTranslation extends Model
     protected function casts(): array
     {
         return [
+            'meta_json' => 'array',
             'sort_order' => 'integer',
         ];
     }

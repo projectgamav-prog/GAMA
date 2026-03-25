@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Topic extends Model
@@ -14,6 +15,14 @@ class Topic extends Model
      * @var list<string>
      */
     protected $guarded = [];
+
+    /**
+     * Get verse assignments linked to the topic.
+     */
+    public function verseAssignments(): HasMany
+    {
+        return $this->hasMany(TopicVerseAssignment::class)->orderBy('sort_order');
+    }
 
     /**
      * Get editorial blocks attached to the topic page.

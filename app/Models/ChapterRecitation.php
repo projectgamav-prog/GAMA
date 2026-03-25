@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class VerseTranslation extends Model
+class ChapterRecitation extends Model
 {
     use HasFactory;
 
@@ -16,19 +16,19 @@ class VerseTranslation extends Model
     protected $guarded = [];
 
     /**
-     * Get the verse that owns the translation.
+     * Get the chapter that owns the recitation.
      */
-    public function verse(): BelongsTo
+    public function chapter(): BelongsTo
     {
-        return $this->belongsTo(Verse::class);
+        return $this->belongsTo(Chapter::class);
     }
 
     /**
-     * Get the normalized source metadata for the translation.
+     * Get the media record for the recitation.
      */
-    public function translationSource(): BelongsTo
+    public function media(): BelongsTo
     {
-        return $this->belongsTo(TranslationSource::class);
+        return $this->belongsTo(Media::class);
     }
 
     /**
@@ -39,6 +39,8 @@ class VerseTranslation extends Model
     protected function casts(): array
     {
         return [
+            'duration_seconds' => 'integer',
+            'meta_json' => 'array',
             'sort_order' => 'integer',
         ];
     }

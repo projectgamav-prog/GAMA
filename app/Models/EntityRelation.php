@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class EntityRelation extends Model
@@ -29,6 +30,14 @@ class EntityRelation extends Model
     public function target(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    /**
+     * Get the normalized relation type for the link.
+     */
+    public function relationType(): BelongsTo
+    {
+        return $this->belongsTo(RelationType::class);
     }
 
     /**

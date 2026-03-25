@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class VerseTranslation extends Model
+class CommentarySource extends Model
 {
     use HasFactory;
 
@@ -16,19 +16,11 @@ class VerseTranslation extends Model
     protected $guarded = [];
 
     /**
-     * Get the verse that owns the translation.
+     * Get verse commentaries from this source.
      */
-    public function verse(): BelongsTo
+    public function verseCommentaries(): HasMany
     {
-        return $this->belongsTo(Verse::class);
-    }
-
-    /**
-     * Get the normalized source metadata for the translation.
-     */
-    public function translationSource(): BelongsTo
-    {
-        return $this->belongsTo(TranslationSource::class);
+        return $this->hasMany(VerseCommentary::class, 'commentary_source_id')->orderBy('sort_order');
     }
 
     /**
@@ -39,6 +31,7 @@ class VerseTranslation extends Model
     protected function casts(): array
     {
         return [
+            'is_published' => 'boolean',
             'sort_order' => 'integer',
         ];
     }

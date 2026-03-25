@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class VerseTranslation extends Model
+class CharacterVerseAssignment extends Model
 {
     use HasFactory;
 
@@ -16,19 +16,19 @@ class VerseTranslation extends Model
     protected $guarded = [];
 
     /**
-     * Get the verse that owns the translation.
+     * Get the character linked by this assignment.
+     */
+    public function character(): BelongsTo
+    {
+        return $this->belongsTo(Character::class);
+    }
+
+    /**
+     * Get the verse linked by this assignment.
      */
     public function verse(): BelongsTo
     {
         return $this->belongsTo(Verse::class);
-    }
-
-    /**
-     * Get the normalized source metadata for the translation.
-     */
-    public function translationSource(): BelongsTo
-    {
-        return $this->belongsTo(TranslationSource::class);
     }
 
     /**
@@ -40,6 +40,7 @@ class VerseTranslation extends Model
     {
         return [
             'sort_order' => 'integer',
+            'weight' => 'decimal:3',
         ];
     }
 }

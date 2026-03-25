@@ -24,6 +24,14 @@ class VerseCommentary extends Model
     }
 
     /**
+     * Get the normalized source metadata for the commentary.
+     */
+    public function commentarySource(): BelongsTo
+    {
+        return $this->belongsTo(CommentarySource::class);
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

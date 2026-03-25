@@ -36,6 +36,14 @@ class Chapter extends Model
     }
 
     /**
+     * Get recitations linked to the chapter.
+     */
+    public function recitations(): HasMany
+    {
+        return $this->hasMany(ChapterRecitation::class)->orderBy('sort_order');
+    }
+
+    /**
      * Get editorial blocks attached to the chapter.
      */
     public function contentBlocks(): MorphMany

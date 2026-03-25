@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Character extends Model
@@ -14,6 +15,30 @@ class Character extends Model
      * @var list<string>
      */
     protected $guarded = [];
+
+    /**
+     * Get verse metadata where the character is the primary speaker.
+     */
+    public function spokenVerseMeta(): HasMany
+    {
+        return $this->hasMany(VerseMeta::class, 'primary_speaker_character_id');
+    }
+
+    /**
+     * Get verse metadata where the character is the primary listener.
+     */
+    public function heardVerseMeta(): HasMany
+    {
+        return $this->hasMany(VerseMeta::class, 'primary_listener_character_id');
+    }
+
+    /**
+     * Get direct verse assignments linked to the character.
+     */
+    public function verseAssignments(): HasMany
+    {
+        return $this->hasMany(CharacterVerseAssignment::class)->orderBy('sort_order');
+    }
 
     /**
      * Get editorial blocks attached to the character page.

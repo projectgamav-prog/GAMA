@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class VerseTranslation extends Model
+class VerseDictionaryAssignment extends Model
 {
     use HasFactory;
 
@@ -16,7 +16,7 @@ class VerseTranslation extends Model
     protected $guarded = [];
 
     /**
-     * Get the verse that owns the translation.
+     * Get the verse linked by this assignment.
      */
     public function verse(): BelongsTo
     {
@@ -24,11 +24,11 @@ class VerseTranslation extends Model
     }
 
     /**
-     * Get the normalized source metadata for the translation.
+     * Get the dictionary entry linked by this assignment.
      */
-    public function translationSource(): BelongsTo
+    public function dictionaryEntry(): BelongsTo
     {
-        return $this->belongsTo(TranslationSource::class);
+        return $this->belongsTo(DictionaryEntry::class);
     }
 
     /**
@@ -39,6 +39,7 @@ class VerseTranslation extends Model
     protected function casts(): array
     {
         return [
+            'meta_json' => 'array',
             'sort_order' => 'integer',
         ];
     }

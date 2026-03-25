@@ -45,6 +45,46 @@ class Verse extends Model
     }
 
     /**
+     * Get structured metadata for the verse.
+     */
+    public function verseMeta(): HasOne
+    {
+        return $this->hasOne(VerseMeta::class);
+    }
+
+    /**
+     * Get dictionary entries linked to the verse.
+     */
+    public function dictionaryAssignments(): HasMany
+    {
+        return $this->hasMany(VerseDictionaryAssignment::class)->orderBy('sort_order');
+    }
+
+    /**
+     * Get recitations linked to the verse.
+     */
+    public function recitations(): HasMany
+    {
+        return $this->hasMany(VerseRecitation::class)->orderBy('sort_order');
+    }
+
+    /**
+     * Get topic assignments linked to the verse.
+     */
+    public function topicAssignments(): HasMany
+    {
+        return $this->hasMany(TopicVerseAssignment::class)->orderBy('sort_order');
+    }
+
+    /**
+     * Get character assignments linked to the verse.
+     */
+    public function characterAssignments(): HasMany
+    {
+        return $this->hasMany(CharacterVerseAssignment::class)->orderBy('sort_order');
+    }
+
+    /**
      * Get the presentation-only card group membership row for the verse.
      */
     public function verseCardGroupItem(): HasOne

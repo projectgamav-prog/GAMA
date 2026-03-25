@@ -68,6 +68,14 @@ class DictionaryEntry extends Model
     }
 
     /**
+     * Get verse assignments linked to this dictionary entry.
+     */
+    public function verseAssignments(): HasMany
+    {
+        return $this->hasMany(VerseDictionaryAssignment::class)->orderBy('sort_order');
+    }
+
+    /**
      * Scope a query to dictionary ordering by normalized headword.
      */
     public function scopeOrdered(Builder $query): Builder

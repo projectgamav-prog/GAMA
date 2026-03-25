@@ -5,8 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class VerseTranslation extends Model
+class Collection extends Model
 {
     use HasFactory;
 
@@ -16,19 +17,19 @@ class VerseTranslation extends Model
     protected $guarded = [];
 
     /**
-     * Get the verse that owns the translation.
+     * Get the cover media for the collection.
      */
-    public function verse(): BelongsTo
+    public function coverMedia(): BelongsTo
     {
-        return $this->belongsTo(Verse::class);
+        return $this->belongsTo(Media::class, 'cover_media_id');
     }
 
     /**
-     * Get the normalized source metadata for the translation.
+     * Get the ordered items inside the collection.
      */
-    public function translationSource(): BelongsTo
+    public function items(): HasMany
     {
-        return $this->belongsTo(TranslationSource::class);
+        return $this->hasMany(CollectionItem::class)->orderBy('sort_order');
     }
 
     /**
@@ -39,6 +40,7 @@ class VerseTranslation extends Model
     protected function casts(): array
     {
         return [
+            'meta_json' => 'array',
             'sort_order' => 'integer',
         ];
     }
