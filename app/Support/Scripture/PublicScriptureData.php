@@ -52,6 +52,8 @@ class PublicScriptureData
             'title' => $book->title,
             'description' => $book->description,
             'href' => $this->bookHref($book),
+            'overview_href' => $this->bookOverviewHref($book),
+            'overview_video' => $this->overviewVideo($book),
         ];
     }
 
@@ -296,6 +298,228 @@ class PublicScriptureData
     }
 
     /**
+     * @return array<string, mixed>
+     */
+    public function dictionaryEntry(DictionaryEntry $entry): array
+    {
+        return [
+            'id' => $entry->id,
+            'slug' => $entry->slug,
+            'headword' => $entry->headword,
+            'transliteration' => $entry->transliteration,
+            'root_headword' => $entry->rootEntry?->headword ?? $entry->root_headword,
+            'meaning' => $entry->short_meaning,
+            'explanation' => $entry->notes,
+            'entry_type' => $entry->entry_type,
+            'href' => $this->dictionaryEntryHref($entry),
+        ];
+    }
+
+    /**
+     * @param  iterable<int, DictionaryEntry>  $entries
+     * @return list<array<string, mixed>>
+     */
+    public function dictionaryEntries(iterable $entries): array
+    {
+        return collect($entries)
+            ->map(fn (DictionaryEntry $entry) => [
+                'id' => $entry->id,
+                'slug' => $entry->slug,
+                'headword' => $entry->headword,
+                'transliteration' => $entry->transliteration,
+                'root_headword' => $entry->rootEntry?->headword ?? $entry->root_headword,
+                'short_meaning' => $entry->short_meaning,
+                'href' => $this->dictionaryEntryHref($entry),
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function topic(Topic $topic): array
+    {
+        return [
+            'id' => $topic->id,
+            'slug' => $topic->slug,
+            'name' => $topic->name,
+            'description' => $topic->description,
+            'href' => $this->topicHref($topic),
+        ];
+    }
+
+    /**
+     * @param  iterable<int, Topic>  $topics
+     * @return list<array<string, mixed>>
+     */
+    public function topicEntries(iterable $topics): array
+    {
+        return collect($topics)
+            ->map(fn (Topic $topic) => [
+                'id' => $topic->id,
+                'slug' => $topic->slug,
+                'name' => $topic->name,
+                'description' => $topic->description,
+                'href' => $this->topicHref($topic),
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function character(Character $character): array
+    {
+        return [
+            'id' => $character->id,
+            'slug' => $character->slug,
+            'name' => $character->name,
+            'description' => $character->description,
+            'href' => $this->characterHref($character),
+        ];
+    }
+
+    /**
+     * @param  iterable<int, Character>  $characters
+     * @return list<array<string, mixed>>
+     */
+    public function characterEntries(iterable $characters): array
+    {
+        return collect($characters)
+            ->map(fn (Character $character) => [
+                'id' => $character->id,
+                'slug' => $character->slug,
+                'name' => $character->name,
+                'description' => $character->description,
+                'href' => $this->characterHref($character),
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param  iterable<int, VerseDictionaryAssignment>  $assignments
+     * @return list<array<string, mixed>>
+     */
+    public function dictionaryEntryRelatedVerses(iterable $assignments): array
+    {
+        $relatedVerses = [];
+        $seenVerseIds = [];
+
+        foreach ($assignments as $assignment) {
+            if (! $assignment instanceof VerseDictionaryAssignment) {
+                continue;
+            }
+
+            $verse = $assignment->verse;
+            $chapterSection = $verse?->chapterSection;
+            $chapter = $chapterSection?->chapter;
+            $bookSection = $chapter?->bookSection;
+            $book = $bookSection?->book;
+
+            if (! $verse instanceof Verse
+                || ! $chapterSection instanceof ChapterSection
+                || ! $chapter instanceof Chapter
+                || ! $bookSection instanceof BookSection
+                || ! $book instanceof Book) {
+                continue;
+            }
+
+            $verseId = (int) $verse->getKey();
+
+            if (isset($seenVerseIds[$verseId])) {
+                continue;
+            }
+
+            $seenVerseIds[$verseId] = true;
+
+            $relatedVerses[] = [
+                ...$this->relatedVersePayload(
+                    $book,
+                    $bookSection,
+                    $chapter,
+                    $chapterSection,
+                    $verse,
+                ),
+            ];
+        }
+
+        return $relatedVerses;
+    }
+
+    /**
+     * @param  iterable<int, TopicVerseAssignment>  $assignments
+     * @return list<array<string, mixed>>
+     */
+    public function topicRelatedVerses(iterable $assignments): array
+    {
+        return collect($assignments)
+            ->map(function (TopicVerseAssignment $assignment): ?array {
+                $verse = $assignment->verse;
+                $chapterSection = $verse?->chapterSection;
+                $chapter = $chapterSection?->chapter;
+                $bookSection = $chapter?->bookSection;
+                $book = $bookSection?->book;
+
+                if (! $verse instanceof Verse
+                    || ! $chapterSection instanceof ChapterSection
+                    || ! $chapter instanceof Chapter
+                    || ! $bookSection instanceof BookSection
+                    || ! $book instanceof Book) {
+                    return null;
+                }
+
+                return $this->relatedVersePayload(
+                    $book,
+                    $bookSection,
+                    $chapter,
+                    $chapterSection,
+                    $verse,
+                );
+            })
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param  iterable<int, CharacterVerseAssignment>  $assignments
+     * @return list<array<string, mixed>>
+     */
+    public function characterRelatedVerses(iterable $assignments): array
+    {
+        return collect($assignments)
+            ->map(function (CharacterVerseAssignment $assignment): ?array {
+                $verse = $assignment->verse;
+                $chapterSection = $verse?->chapterSection;
+                $chapter = $chapterSection?->chapter;
+                $bookSection = $chapter?->bookSection;
+                $book = $bookSection?->book;
+
+                if (! $verse instanceof Verse
+                    || ! $chapterSection instanceof ChapterSection
+                    || ! $chapter instanceof Chapter
+                    || ! $bookSection instanceof BookSection
+                    || ! $book instanceof Book) {
+                    return null;
+                }
+
+                return $this->relatedVersePayload(
+                    $book,
+                    $bookSection,
+                    $chapter,
+                    $chapterSection,
+                    $verse,
+                );
+            })
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    /**
      * @param  iterable<int, VerseRecitation>  $recitations
      * @return list<array<string, mixed>>
      */
@@ -359,17 +583,53 @@ class PublicScriptureData
     public function contentBlocks(iterable $blocks): array
     {
         return collect($blocks)
-            ->map(fn (ContentBlock $block) => [
-                'id' => $block->id,
-                'region' => $block->region,
-                'block_type' => $block->block_type,
-                'title' => $block->title,
-                'body' => $block->body,
-                'data_json' => $block->data_json,
-                'sort_order' => $block->sort_order,
-            ])
+            ->map(fn (ContentBlock $block) => $this->contentBlock($block))
             ->values()
             ->all();
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function overviewVideo(Book $book): ?array
+    {
+        if (! $book->relationLoaded('contentBlocks')) {
+            return null;
+        }
+
+        $videoBlocks = collect($book->contentBlocks)
+            ->filter(fn (mixed $block) => $block instanceof ContentBlock
+                && $block->block_type === 'video'
+                && filled(data_get($block->data_json, 'url')))
+            ->values();
+
+        $videoBlock = $videoBlocks->firstWhere('region', 'overview');
+
+        if (! $videoBlock instanceof ContentBlock) {
+            $videoBlock = $videoBlocks->first();
+        }
+
+        if (! $videoBlock instanceof ContentBlock) {
+            return null;
+        }
+
+        return $this->contentBlock($videoBlock);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function contentBlock(ContentBlock $block): array
+    {
+        return [
+            'id' => $block->id,
+            'region' => $block->region,
+            'block_type' => $block->block_type,
+            'title' => $block->title,
+            'body' => $block->body,
+            'data_json' => $block->data_json,
+            'sort_order' => $block->sort_order,
+        ];
     }
 
     /**
@@ -387,6 +647,7 @@ class PublicScriptureData
             'headword' => $entry->headword,
             'transliteration' => $entry->transliteration,
             'short_meaning' => $entry->short_meaning,
+            'href' => $this->dictionaryEntryHref($entry),
         ];
     }
 
@@ -420,6 +681,7 @@ class PublicScriptureData
             'id' => $topic->id,
             'slug' => $topic->slug,
             'name' => $topic->name,
+            'href' => $this->topicHref($topic),
         ];
     }
 
@@ -436,12 +698,33 @@ class PublicScriptureData
             'id' => $character->id,
             'slug' => $character->slug,
             'name' => $character->name,
+            'href' => $this->characterHref($character),
         ];
     }
 
     private function bookHref(Book $book): string
     {
         return route('scripture.books.show', $book);
+    }
+
+    private function bookOverviewHref(Book $book): string
+    {
+        return route('scripture.books.overview', $book);
+    }
+
+    private function dictionaryEntryHref(DictionaryEntry $entry): string
+    {
+        return route('scripture.dictionary.show', $entry);
+    }
+
+    private function topicHref(Topic $topic): string
+    {
+        return route('scripture.topics.show', $topic);
+    }
+
+    private function characterHref(Character $character): string
+    {
+        return route('scripture.characters.show', $character);
     }
 
     private function bookSectionHref(Book $book, BookSection $section): string
@@ -490,5 +773,32 @@ class PublicScriptureData
             'chapterSection' => $chapterSection,
             'verse' => $verse,
         ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function relatedVersePayload(
+        Book $book,
+        BookSection $bookSection,
+        Chapter $chapter,
+        ChapterSection $chapterSection,
+        Verse $verse,
+    ): array {
+        return [
+            'id' => $verse->id,
+            'slug' => $verse->slug,
+            'number' => $verse->number,
+            'chapter_slug' => $chapter->slug,
+            'chapter_number' => $chapter->number,
+            'book_slug' => $book->slug,
+            'href' => $this->verseHref(
+                $book,
+                $bookSection,
+                $chapter,
+                $chapterSection,
+                $verse,
+            ),
+        ];
     }
 }

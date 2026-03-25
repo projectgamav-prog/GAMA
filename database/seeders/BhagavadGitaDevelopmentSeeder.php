@@ -93,6 +93,23 @@ class BhagavadGitaDevelopmentSeeder extends Seeder
             ],
         );
 
+        $book->contentBlocks()->updateOrCreate(
+            [
+                'region' => 'overview',
+                'block_type' => 'video',
+                'title' => 'Bhagavad Gita Overview',
+            ],
+            [
+                'body' => 'Development placeholder video overview for the Bhagavad Gita library card.',
+                'data_json' => [
+                    'url' => 'https://example.test/assets/bhagavad-gita-overview.mp4',
+                    'poster' => 'https://example.test/assets/bhagavad-gita-overview-poster.jpg',
+                ],
+                'sort_order' => 3,
+                'status' => 'published',
+            ],
+        );
+
         $topic->contentBlocks()->updateOrCreate(
             [
                 'region' => 'hero',

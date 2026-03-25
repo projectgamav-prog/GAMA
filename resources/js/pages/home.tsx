@@ -1,6 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { dashboard, login, register } from '@/routes';
+import { index as scriptureBooksIndex } from '@/routes/scripture/books';
 
 type HomeProps = {
     canRegister: boolean;
@@ -84,6 +85,12 @@ export default function Home({ canRegister, featured_book }: HomeProps) {
                                         Scripture Coming Soon
                                     </Button>
                                 )}
+
+                                <Button asChild size="lg" variant="outline">
+                                    <Link href={scriptureBooksIndex()}>
+                                        Browse Scripture Library
+                                    </Link>
+                                </Button>
 
                                 {auth.user ? (
                                     <Button asChild size="lg" variant="outline">

@@ -15,6 +15,8 @@ export type ScriptureBook = {
     title: string;
     description?: string | null;
     href: string;
+    overview_href: string;
+    overview_video?: ScriptureContentBlock | null;
 };
 
 export type ScriptureBookSection = {
@@ -110,7 +112,42 @@ export type ScriptureDictionaryEntrySummary = {
     headword: string;
     transliteration: string | null;
     short_meaning: string | null;
+    href: string;
 };
+
+export type ScriptureDictionaryEntry = {
+    id: number;
+    slug: string;
+    headword: string;
+    transliteration: string | null;
+    root_headword: string | null;
+    meaning: string | null;
+    explanation: string | null;
+    entry_type: string | null;
+    href: string;
+};
+
+export type ScriptureDictionaryIndexEntry = {
+    id: number;
+    slug: string;
+    headword: string;
+    transliteration: string | null;
+    root_headword: string | null;
+    short_meaning: string | null;
+    href: string;
+};
+
+export type ScriptureRelatedVerse = {
+    id: number;
+    slug: string;
+    number: string | null;
+    chapter_slug: string;
+    chapter_number: string | null;
+    book_slug: string;
+    href: string;
+};
+
+export type ScriptureDictionaryRelatedVerse = ScriptureRelatedVerse;
 
 export type ScriptureDictionaryTerm = {
     id: number;
@@ -144,6 +181,23 @@ export type ScriptureTopicSummary = {
     id: number;
     slug: string;
     name: string;
+    href: string;
+};
+
+export type ScriptureTopic = {
+    id: number;
+    slug: string;
+    name: string;
+    description: string | null;
+    href: string;
+};
+
+export type ScriptureTopicIndexEntry = {
+    id: number;
+    slug: string;
+    name: string;
+    description: string | null;
+    href: string;
 };
 
 export type ScriptureVerseTopicAssignment = {
@@ -158,6 +212,23 @@ export type ScriptureCharacterSummary = {
     id: number;
     slug: string;
     name: string;
+    href: string;
+};
+
+export type ScriptureCharacter = {
+    id: number;
+    slug: string;
+    name: string;
+    description: string | null;
+    href: string;
+};
+
+export type ScriptureCharacterIndexEntry = {
+    id: number;
+    slug: string;
+    name: string;
+    description: string | null;
+    href: string;
 };
 
 export type ScriptureVerseCharacterAssignment = {
@@ -178,8 +249,42 @@ export type BookShowProps = {
     >;
 };
 
+export type BookOverviewProps = {
+    book: ScriptureBook;
+    content_blocks: ScriptureContentBlock[];
+};
+
 export type BooksIndexProps = {
     books: ScriptureBook[];
+};
+
+export type DictionaryIndexProps = {
+    dictionary_entries: ScriptureDictionaryIndexEntry[];
+};
+
+export type DictionaryEntryShowProps = {
+    dictionary_entry: ScriptureDictionaryEntry;
+    related_verses: ScriptureRelatedVerse[];
+};
+
+export type TopicsIndexProps = {
+    topics: ScriptureTopicIndexEntry[];
+};
+
+export type TopicShowProps = {
+    topic: ScriptureTopic;
+    related_verses: ScriptureRelatedVerse[];
+    content_blocks: ScriptureContentBlock[];
+};
+
+export type CharactersIndexProps = {
+    characters: ScriptureCharacterIndexEntry[];
+};
+
+export type CharacterShowProps = {
+    character: ScriptureCharacter;
+    related_verses: ScriptureRelatedVerse[];
+    content_blocks: ScriptureContentBlock[];
 };
 
 export type ChapterShowProps = {

@@ -16,11 +16,32 @@ class BookController extends Controller
     public function index(PublicScriptureData $publicScriptureData): Response
     {
         $books = Book::query()
+            ->with([
+                'contentBlocks' => fn ($query) => $query
+                    ->published()
+                    ->where('block_type', 'video')
+                    ->orderBy('sort_order'),
+            ])
             ->inCanonicalOrder()
             ->get();
 
         return Inertia::render('scripture/books/index', [
             'books' => $publicScriptureData->books($books),
+        ]);
+    }
+
+    /**
+     * Display a dedicated public overview page for the book.
+     */
+    public function overview(Book $book, PublicScriptureData $publicScriptureData): Response
+    {
+        $contentBlocks = $book->contentBlocks()
+            ->published()
+            ->get();
+
+        return Inertia::render('scripture/books/overview', [
+            'book' => $publicScriptureData->book($book),
+            'content_blocks' => $publicScriptureData->contentBlocks($contentBlocks),
         ]);
     }
 
