@@ -11,14 +11,36 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('verse_commentaries', function (Blueprint $table) {
-            $table->foreignId('commentary_source_id')
-                ->nullable()
-                ->after('source_name')
-                ->constrained('commentary_sources')
-                ->nullOnDelete()
-                ->index();
-        });
+        if (! Schema::hasColumn('verse_commentaries', 'commentary_source_id')) {
+            Schema::table('verse_commentaries', function (Blueprint $table) {
+                $table->foreignId('commentary_source_id')
+                    ->nullable()
+                    ->after('source_name');
+            });
+        }
+
+        if (! Schema::hasIndex('verse_commentaries', 'verse_commentaries_commentary_source_id_idx')) {
+            Schema::table('verse_commentaries', function (Blueprint $table) {
+                $table->index(
+                    'commentary_source_id',
+                    'verse_commentaries_commentary_source_id_idx',
+                );
+            });
+        }
+
+        $hasForeignKey = collect(Schema::getForeignKeys('verse_commentaries'))
+            ->contains(
+                fn (array $foreignKey): bool => $foreignKey['name'] === 'verse_commentaries_commentary_source_id_fk',
+            );
+
+        if (! $hasForeignKey) {
+            Schema::table('verse_commentaries', function (Blueprint $table) {
+                $table->foreign(
+                    'commentary_source_id',
+                    'verse_commentaries_commentary_source_id_fk',
+                )->references('id')->on('commentary_sources')->nullOnDelete();
+            });
+        }
     }
 
     /**
@@ -26,10 +48,27 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('verse_commentaries', function (Blueprint $table) {
-            $table->dropForeign(['commentary_source_id']);
-            $table->dropIndex(['commentary_source_id']);
-            $table->dropColumn('commentary_source_id');
-        });
+        $hasForeignKey = collect(Schema::getForeignKeys('verse_commentaries'))
+            ->contains(
+                fn (array $foreignKey): bool => $foreignKey['name'] === 'verse_commentaries_commentary_source_id_fk',
+            );
+
+        if ($hasForeignKey) {
+            Schema::table('verse_commentaries', function (Blueprint $table) {
+                $table->dropForeign('verse_commentaries_commentary_source_id_fk');
+            });
+        }
+
+        if (Schema::hasIndex('verse_commentaries', 'verse_commentaries_commentary_source_id_idx')) {
+            Schema::table('verse_commentaries', function (Blueprint $table) {
+                $table->dropIndex('verse_commentaries_commentary_source_id_idx');
+            });
+        }
+
+        if (Schema::hasColumn('verse_commentaries', 'commentary_source_id')) {
+            Schema::table('verse_commentaries', function (Blueprint $table) {
+                $table->dropColumn('commentary_source_id');
+            });
+        }
     }
 };

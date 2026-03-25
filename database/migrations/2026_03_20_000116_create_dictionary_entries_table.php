@@ -19,11 +19,15 @@ return new class extends Migration
             $table->string('normalized_headword')->index();
             $table->string('normalized_transliteration')->nullable()->index();
             $table->string('entry_type')->default('word')->index();
-            $table->foreignId('root_entry_id')
-                ->nullable()
-                ->constrained('dictionary_entries')
-                ->nullOnDelete()
-                ->index();
+            $table->foreignId('root_entry_id')->nullable();
+            $table->index(
+                'root_entry_id',
+                'dictionary_entries_root_entry_id_idx',
+            );
+            $table->foreign(
+                'root_entry_id',
+                'dictionary_entries_root_entry_id_fk',
+            )->references('id')->on('dictionary_entries')->nullOnDelete();
             $table->string('root_headword')->nullable();
             $table->string('short_meaning')->nullable();
             $table->text('notes')->nullable();
