@@ -1,5 +1,8 @@
 import { ContentBlockRenderer } from '@/components/scripture/content-block-renderer';
-import type { ScriptureContentBlock } from '@/types/scripture';
+import type {
+    ScriptureContentBlock,
+    ScriptureEntityRegionInput,
+} from '@/types/scripture';
 import { ScriptureSection } from './scripture-section';
 
 type Props = {
@@ -7,6 +10,7 @@ type Props = {
     description: string;
     blocks: ScriptureContentBlock[];
     id?: string;
+    entityMeta?: ScriptureEntityRegionInput;
 };
 
 export function ScriptureContentBlocksSection({
@@ -14,13 +18,19 @@ export function ScriptureContentBlocksSection({
     description,
     blocks,
     id,
+    entityMeta,
 }: Props) {
     if (blocks.length === 0) {
         return null;
     }
 
     return (
-        <ScriptureSection id={id} title={title} description={description}>
+        <ScriptureSection
+            id={id}
+            title={title}
+            description={description}
+            entityMeta={entityMeta}
+        >
             <div className="space-y-4">
                 {blocks.map((block) => (
                     <ContentBlockRenderer key={block.id} block={block} />

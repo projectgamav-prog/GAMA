@@ -1,6 +1,8 @@
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { cn } from '@/lib/utils';
+import type { ScriptureEntityRegionInput } from '@/types/scripture';
 
 type Props = {
     title: ReactNode;
@@ -10,6 +12,7 @@ type Props = {
     children: ReactNode;
     id?: string;
     className?: string;
+    entityMeta?: ScriptureEntityRegionInput;
 };
 
 export function ScriptureSection({
@@ -20,8 +23,9 @@ export function ScriptureSection({
     children,
     id,
     className,
+    entityMeta,
 }: Props) {
-    return (
+    const section = (
         <section id={id} className={cn('space-y-4', className)}>
             <div
                 className={
@@ -54,5 +58,15 @@ export function ScriptureSection({
 
             {children}
         </section>
+    );
+
+    if (!entityMeta) {
+        return section;
+    }
+
+    return (
+        <ScriptureEntityRegion meta={entityMeta} asChild>
+            {section}
+        </ScriptureEntityRegion>
     );
 }

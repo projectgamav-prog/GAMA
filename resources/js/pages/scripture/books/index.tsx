@@ -6,6 +6,7 @@ import {
     CirclePlay,
 } from 'lucide-react';
 import { useState } from 'react';
+import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
 import { Badge } from '@/components/ui/badge';
@@ -50,95 +51,106 @@ function BookCard({ book }: { book: ScriptureBook }) {
         overviewVideo?.block_type === 'video' && videoUrl !== null;
 
     return (
-        <Card className="flex h-full flex-col">
-            <CardHeader className="space-y-3">
-                <div className="w-fit rounded-md bg-primary/10 p-2 text-primary">
-                    <BookOpenText className="size-4" />
-                </div>
-                <div className="space-y-2">
-                    <CardTitle>{book.title}</CardTitle>
-                    {book.description && (
-                        <CardDescription className="line-clamp-3 leading-6">
-                            {book.description}
-                        </CardDescription>
-                    )}
-                </div>
-            </CardHeader>
+        <ScriptureEntityRegion
+            meta={{
+                entityType: 'book',
+                entityId: book.id,
+                entityLabel: book.title,
+                region: 'browse_card',
+                capabilityHint: 'navigation',
+            }}
+            asChild
+        >
+            <Card className="flex h-full flex-col">
+                <CardHeader className="space-y-3">
+                    <div className="w-fit rounded-md bg-primary/10 p-2 text-primary">
+                        <BookOpenText className="size-4" />
+                    </div>
+                    <div className="space-y-2">
+                        <CardTitle>{book.title}</CardTitle>
+                        {book.description && (
+                            <CardDescription className="line-clamp-3 leading-6">
+                                {book.description}
+                            </CardDescription>
+                        )}
+                    </div>
+                </CardHeader>
 
-            <CardContent className="flex-1">
-                {hasOverviewVideo && overviewVideo && (
-                    <Collapsible
-                        open={isOverviewOpen}
-                        onOpenChange={setIsOverviewOpen}
-                        className="space-y-3"
-                    >
-                        <CollapsibleTrigger asChild>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className="w-full justify-between"
-                            >
-                                <span className="inline-flex items-center gap-2">
-                                    <CirclePlay className="size-4" />
-                                    {isOverviewOpen
-                                        ? 'Hide Overview'
-                                        : 'Watch Overview'}
-                                </span>
-                                <ChevronDown
-                                    className={cn(
-                                        'size-4 transition-transform',
-                                        isOverviewOpen && 'rotate-180',
+                <CardContent className="flex-1">
+                    {hasOverviewVideo && overviewVideo && (
+                        <Collapsible
+                            open={isOverviewOpen}
+                            onOpenChange={setIsOverviewOpen}
+                            className="space-y-3"
+                        >
+                            <CollapsibleTrigger asChild>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="w-full justify-between"
+                                >
+                                    <span className="inline-flex items-center gap-2">
+                                        <CirclePlay className="size-4" />
+                                        {isOverviewOpen
+                                            ? 'Hide Overview'
+                                            : 'Watch Overview'}
+                                    </span>
+                                    <ChevronDown
+                                        className={cn(
+                                            'size-4 transition-transform',
+                                            isOverviewOpen && 'rotate-180',
+                                        )}
+                                    />
+                                </Button>
+                            </CollapsibleTrigger>
+
+                            <CollapsibleContent className="rounded-xl border border-border/70 bg-muted/30 p-3">
+                                <div className="space-y-3">
+                                    <video
+                                        controls
+                                        preload="none"
+                                        className="aspect-video w-full rounded-lg border bg-black"
+                                        poster={videoPoster ?? undefined}
+                                        src={videoUrl}
+                                    />
+
+                                    {(overviewVideo.title ||
+                                        overviewVideo.body) && (
+                                        <div className="space-y-1">
+                                            {overviewVideo.title && (
+                                                <p className="text-sm font-medium">
+                                                    {overviewVideo.title}
+                                                </p>
+                                            )}
+                                            {overviewVideo.body && (
+                                                <p className="text-sm leading-6 text-muted-foreground">
+                                                    {overviewVideo.body}
+                                                </p>
+                                            )}
+                                        </div>
                                     )}
-                                />
-                            </Button>
-                        </CollapsibleTrigger>
+                                </div>
+                            </CollapsibleContent>
+                        </Collapsible>
+                    )}
+                </CardContent>
 
-                        <CollapsibleContent className="rounded-xl border border-border/70 bg-muted/30 p-3">
-                            <div className="space-y-3">
-                                <video
-                                    controls
-                                    preload="none"
-                                    className="aspect-video w-full rounded-lg border bg-black"
-                                    poster={videoPoster ?? undefined}
-                                    src={videoUrl}
-                                />
+                <CardFooter className="flex flex-wrap items-center gap-3">
+                    <Button asChild variant="outline" size="sm">
+                        <Link href={book.overview_href}>Read Overview</Link>
+                    </Button>
 
-                                {(overviewVideo.title ||
-                                    overviewVideo.body) && (
-                                    <div className="space-y-1">
-                                        {overviewVideo.title && (
-                                            <p className="text-sm font-medium">
-                                                {overviewVideo.title}
-                                            </p>
-                                        )}
-                                        {overviewVideo.body && (
-                                            <p className="text-sm leading-6 text-muted-foreground">
-                                                {overviewVideo.body}
-                                            </p>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        </CollapsibleContent>
-                    </Collapsible>
-                )}
-            </CardContent>
-
-            <CardFooter className="flex flex-wrap items-center gap-3">
-                <Button asChild variant="outline" size="sm">
-                    <Link href={book.overview_href}>Read Overview</Link>
-                </Button>
-
-                <Link
-                    href={book.href}
-                    className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
-                >
-                    Open Book
-                    <ArrowRight className="size-4" />
-                </Link>
-            </CardFooter>
-        </Card>
+                    <Link
+                        href={book.href}
+                        className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+                    >
+                        Open Book
+                        <ArrowRight className="size-4" />
+                    </Link>
+                </CardFooter>
+            </Card>
+        </ScriptureEntityRegion>
     );
 }
 

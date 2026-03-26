@@ -1,6 +1,8 @@
 import { Link } from '@inertiajs/react';
 import type { InertiaLinkProps } from '@inertiajs/react';
 import type { ReactNode } from 'react';
+import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
+import type { ScriptureEntityRegionInput } from '@/types/scripture';
 
 type Props = {
     href: NonNullable<InertiaLinkProps['href']>;
@@ -9,6 +11,7 @@ type Props = {
     meta?: ReactNode;
     ctaLabel: ReactNode;
     titleClassName?: string;
+    entityMeta?: ScriptureEntityRegionInput;
 };
 
 export function ScriptureLinkCard({
@@ -18,8 +21,9 @@ export function ScriptureLinkCard({
     meta,
     ctaLabel,
     titleClassName,
+    entityMeta,
 }: Props) {
-    return (
+    const card = (
         <Link
             href={href}
             className="block rounded-lg border bg-card p-4 transition-colors hover:border-primary"
@@ -45,5 +49,15 @@ export function ScriptureLinkCard({
                 </span>
             </div>
         </Link>
+    );
+
+    if (!entityMeta) {
+        return card;
+    }
+
+    return (
+        <ScriptureEntityRegion meta={entityMeta} asChild>
+            {card}
+        </ScriptureEntityRegion>
     );
 }

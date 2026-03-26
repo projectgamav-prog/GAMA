@@ -47,6 +47,13 @@ export default function CharactersIndex({ characters }: CharactersIndexProps) {
                                 description={character.description ?? undefined}
                                 ctaLabel="Open character"
                                 titleClassName="text-lg font-semibold"
+                                entityMeta={{
+                                    entityType: 'character',
+                                    entityId: character.id,
+                                    entityLabel: character.name,
+                                    region: 'browse_card',
+                                    capabilityHint: 'navigation',
+                                }}
                             />
                         ))}
                     </div>

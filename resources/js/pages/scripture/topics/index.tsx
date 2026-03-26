@@ -45,6 +45,13 @@ export default function TopicsIndex({ topics }: TopicsIndexProps) {
                                 description={topic.description ?? undefined}
                                 ctaLabel="Open topic"
                                 titleClassName="text-lg font-semibold"
+                                entityMeta={{
+                                    entityType: 'topic',
+                                    entityId: topic.id,
+                                    entityLabel: topic.name,
+                                    region: 'browse_card',
+                                    capabilityHint: 'navigation',
+                                }}
                             />
                         ))}
                     </div>

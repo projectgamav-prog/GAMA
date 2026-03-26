@@ -66,6 +66,13 @@ export default function DictionaryIndex({
                                 description={entry.short_meaning ?? undefined}
                                 ctaLabel="Open entry"
                                 titleClassName="text-lg font-semibold"
+                                entityMeta={{
+                                    entityType: 'dictionary_entry',
+                                    entityId: entry.id,
+                                    entityLabel: entry.headword,
+                                    region: 'browse_card',
+                                    capabilityHint: 'navigation',
+                                }}
                             />
                         ))}
                     </div>

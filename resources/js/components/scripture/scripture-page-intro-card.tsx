@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import {
     Card,
     CardContent,
@@ -7,6 +8,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import type { ScriptureEntityRegionInput } from '@/types/scripture';
 
 type Props = {
     badges?: ReactNode;
@@ -16,6 +18,7 @@ type Props = {
     className?: string;
     contentClassName?: string;
     titleClassName?: string;
+    entityMeta?: ScriptureEntityRegionInput;
 };
 
 export function ScripturePageIntroCard({
@@ -26,8 +29,9 @@ export function ScripturePageIntroCard({
     className,
     contentClassName,
     titleClassName,
+    entityMeta,
 }: Props) {
-    return (
+    const card = (
         <Card className={className}>
             <CardHeader className="gap-4">
                 {badges && (
@@ -54,5 +58,15 @@ export function ScripturePageIntroCard({
                 </CardContent>
             )}
         </Card>
+    );
+
+    if (!entityMeta) {
+        return card;
+    }
+
+    return (
+        <ScriptureEntityRegion meta={entityMeta} asChild>
+            {card}
+        </ScriptureEntityRegion>
     );
 }

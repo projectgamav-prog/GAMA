@@ -26,6 +26,13 @@ export default function DictionaryEntryShow({
             breadcrumbs={breadcrumbs}
         >
             <ScripturePageIntroCard
+                entityMeta={{
+                    entityType: 'dictionary_entry',
+                    entityId: dictionary_entry.id,
+                    entityLabel: dictionary_entry.headword,
+                    region: 'page_intro',
+                    capabilityHint: 'intro',
+                }}
                 badges={
                     <>
                         <Badge variant="outline">Dictionary Entry</Badge>
@@ -60,6 +67,13 @@ export default function DictionaryEntryShow({
                 title="Meaning"
                 description="Primary public meaning attached to this term."
                 body={dictionary_entry.meaning}
+                entityMeta={{
+                    entityType: 'dictionary_entry',
+                    entityId: dictionary_entry.id,
+                    entityLabel: dictionary_entry.headword,
+                    region: 'meaning',
+                    capabilityHint: 'copy',
+                }}
             />
 
             <ScriptureCopySection
@@ -67,12 +81,26 @@ export default function DictionaryEntryShow({
                 description="Additional editorial notes published for this entry."
                 body={dictionary_entry.explanation}
                 preserveWhitespace
+                entityMeta={{
+                    entityType: 'dictionary_entry',
+                    entityId: dictionary_entry.id,
+                    entityLabel: dictionary_entry.headword,
+                    region: 'explanation',
+                    capabilityHint: 'copy',
+                }}
             />
 
             <ScriptureRelatedVersesSection
                 verses={related_verses}
                 description="Verses where this dictionary term appears in the study companion data."
                 emptyDescription="This term is public, but no verse dictionary assignments are currently available for it."
+                entityMeta={{
+                    entityType: 'dictionary_entry',
+                    entityId: dictionary_entry.id,
+                    entityLabel: dictionary_entry.headword,
+                    region: 'related_verses',
+                    capabilityHint: 'relationships',
+                }}
             />
         </ScriptureLayout>
     );

@@ -8,6 +8,43 @@ export type ScriptureContentBlock = {
     sort_order: number;
 };
 
+export type ScriptureEntityType =
+    | 'book'
+    | 'book_section'
+    | 'chapter'
+    | 'chapter_section'
+    | 'verse'
+    | 'verse_translation'
+    | 'verse_commentary'
+    | 'content_block'
+    | 'topic'
+    | 'character'
+    | 'dictionary_entry'
+    | 'verse_dictionary_term'
+    | 'verse_recitation'
+    | 'verse_topic_assignment'
+    | 'verse_character_assignment';
+
+export type ScriptureEntityRegionInput = {
+    entityType: ScriptureEntityType;
+    entityId: number | string;
+    entityLabel?: string | null;
+    parentEntityType?: ScriptureEntityType;
+    parentEntityId?: number | string | null;
+    region: string;
+    capabilityHint?: string | null;
+};
+
+export type ScriptureEntityRegionMeta = {
+    entityType: ScriptureEntityType;
+    entityId: string;
+    entityLabel?: string;
+    parentEntityType?: ScriptureEntityType;
+    parentEntityId?: string;
+    region: string;
+    capabilityHint?: string;
+};
+
 export type ScriptureBook = {
     id: number;
     slug: string;

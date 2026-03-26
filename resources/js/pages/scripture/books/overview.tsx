@@ -34,6 +34,13 @@ export default function BookOverview({
             breadcrumbs={breadcrumbs}
         >
             <ScripturePageIntroCard
+                entityMeta={{
+                    entityType: 'book',
+                    entityId: book.id,
+                    entityLabel: book.title,
+                    region: 'page_intro',
+                    capabilityHint: 'intro',
+                }}
                 badges={
                     <>
                         <Badge variant="outline">Overview</Badge>
@@ -65,6 +72,13 @@ export default function BookOverview({
                     title="Overview Content"
                     description="Curated book-level content published through the existing content block system."
                     blocks={content_blocks}
+                    entityMeta={{
+                        entityType: 'book',
+                        entityId: book.id,
+                        entityLabel: book.title,
+                        region: 'content_blocks',
+                        capabilityHint: 'content_blocks',
+                    }}
                 />
             ) : (
                 <ScriptureEmptyState
