@@ -1,15 +1,15 @@
 import { Link } from '@inertiajs/react';
 import { BookOpenText } from 'lucide-react';
-import { useState } from 'react';
 import { ScriptureAdminRegionToolbar } from '@/components/scripture/scripture-admin-region-toolbar';
 import { ScriptureAdminVisibilityToggle } from '@/components/scripture/scripture-admin-visibility-toggle';
 import { ScriptureBookAdminEditSheet } from '@/components/scripture/scripture-book-admin-edit-sheet';
-import type { ScriptureBookAdminEditSession } from '@/components/scripture/scripture-book-admin-edit-sheet';
+import { BookPublicMediaSection } from '@/components/scripture/book-public-media-section';
 import { ScriptureContentBlocksSection } from '@/components/scripture/scripture-content-blocks-section';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
 import { Badge } from '@/components/ui/badge';
+import { useBookAdminEditSession } from '@/hooks/use-book-admin-edit-session';
 import {
     Card,
     CardContent,
@@ -24,13 +24,7 @@ import {
     sectionAnchorId,
     sectionLabel,
 } from '@/lib/scripture';
-import type {
-    BookShowProps,
-    BreadcrumbItem,
-    ScriptureAdminRegionConfig,
-    ScriptureContentBlock,
-    ScriptureEntityRegionMeta,
-} from '@/types';
+import type { BookShowProps, BreadcrumbItem } from '@/types';
 
 export default function BookShow({
     book,
@@ -38,86 +32,25 @@ export default function BookShow({
     admin,
     book_sections,
 }: BookShowProps) {
-    const [editSession, setEditSession] =
-        useState<ScriptureBookAdminEditSession | null>(null);
     const hidesGenericSingleSection = hidesSingleGenericSection(book_sections);
     const bookEntity = {
         entityType: 'book' as const,
         entityId: book.id,
         entityLabel: book.title,
     };
-    const detailsConfig: ScriptureAdminRegionConfig | null = admin
-        ? {
-              supportsEdit: true,
-              supportsFullEdit: true,
-              editTarget: 'entity_details',
-              contextualEditHref: admin.details_update_href,
-              fullEditHref: `${admin.full_edit_href}#details-editor`,
-          }
-        : null;
-    const openDetailsEditor = (
-        meta: ScriptureEntityRegionMeta,
-        config: ScriptureAdminRegionConfig,
-    ) => {
-        if (!config.contextualEditHref) {
-            return;
-        }
-
-        setEditSession({
-            kind: 'entity_details',
-            meta,
-            updateHref: config.contextualEditHref,
-            fullEditHref: config.fullEditHref ?? admin?.full_edit_href ?? '#',
-            bookTitle: book.title,
-            bookDescription: book.description ?? null,
-            values: {
-                description: book.description ?? '',
-            },
-        });
-    };
-    const getContentBlockConfig = (
-        block: ScriptureContentBlock,
-    ): ScriptureAdminRegionConfig | null => {
-        const updateHref = admin?.content_block_update_hrefs[String(block.id)];
-
-        if (!updateHref || !admin) {
-            return null;
-        }
-
-        return {
-            supportsEdit: true,
-            supportsFullEdit: true,
-            editTarget: 'content_block',
-            contextualEditHref: updateHref,
-            fullEditHref: `${admin.full_edit_href}#block-${block.id}`,
-        };
-    };
-    const openContentBlockEditor = (
-        meta: ScriptureEntityRegionMeta,
-        block: ScriptureContentBlock,
-        config: ScriptureAdminRegionConfig,
-    ) => {
-        if (!config.contextualEditHref) {
-            return;
-        }
-
-        setEditSession({
-            kind: 'content_block',
-            meta,
-            updateHref: config.contextualEditHref,
-            fullEditHref: config.fullEditHref ?? admin?.full_edit_href ?? '#',
-            bookTitle: book.title,
-            block,
-            values: {
-                block_type: block.block_type as 'text' | 'quote',
-                title: block.title ?? '',
-                body: block.body ?? '',
-                region: block.region,
-                sort_order: block.sort_order,
-                status: 'published',
-            },
-        });
-    };
+    const {
+        editSession,
+        closeEditSession,
+        detailsConfig,
+        contentBlocksMeta,
+        getContentBlockConfig,
+        openDetailsEditor,
+        openContentBlockEditor,
+        openContentBlockCreator,
+    } = useBookAdminEditSession({
+        book,
+        admin,
+    });
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -158,10 +91,21 @@ export default function BookShow({
                 }
             />
 
+            <BookPublicMediaSection book={book} admin={admin} />
+
             <ScriptureContentBlocksSection
                 title="Reading Notes"
                 description="Published study content attached to this book."
                 blocks={content_blocks}
+                onInsertBlock={
+                    admin
+                        ? (insertion) =>
+                              openContentBlockCreator(
+                                  contentBlocksMeta,
+                                  insertion,
+                              )
+                        : undefined
+                }
                 renderBlockHeaderAction={(block) => {
                     const config = getContentBlockConfig(block);
 
@@ -183,9 +127,8 @@ export default function BookShow({
                     );
                 }}
                 entityMeta={{
-                    ...bookEntity,
-                    region: 'content_blocks',
-                    capabilityHint: 'content_blocks',
+                    ...contentBlocksMeta,
+                    entityId: book.id,
                 }}
             />
 
@@ -293,7 +236,7 @@ export default function BookShow({
                 session={editSession}
                 onOpenChange={(open) => {
                     if (!open) {
-                        setEditSession(null);
+                        closeEditSession();
                     }
                 }}
             />

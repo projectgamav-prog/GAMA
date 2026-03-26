@@ -1,8 +1,13 @@
 import { Link, useForm } from '@inertiajs/react';
-import { Plus, SquareArrowOutUpRight } from 'lucide-react';
+import { SquareArrowOutUpRight } from 'lucide-react';
 import InputError from '@/components/input-error';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
+import {
+    CreateVerseContentBlockCard,
+    ProtectedVerseContentBlockCard,
+    VerseContentBlockEditorCard,
+} from '@/components/scripture/verse-admin-content-block-cards';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,11 +25,7 @@ import { Textarea } from '@/components/ui/textarea';
 import ScriptureLayout from '@/layouts/scripture-layout';
 import { chapterLabel, sectionLabel, verseLabel } from '@/lib/scripture';
 import { formatAdminList, parseAdminList } from '@/lib/scripture-admin';
-import type {
-    BreadcrumbItem,
-    ScriptureAdminContentBlock,
-    VerseFullEditProps,
-} from '@/types';
+import type { BreadcrumbItem, VerseFullEditProps } from '@/types';
 
 type VerseMetaEditorFormData = {
     summary_short: string;
@@ -37,16 +38,6 @@ type VerseMetaEditorFormData = {
     keywords_text: string;
     study_flags_text: string;
 };
-
-type CreateContentBlockFormData = {
-    title: string;
-    body: string;
-    region: string;
-    sort_order: string;
-    status: 'draft' | 'published';
-};
-
-type UpdateContentBlockFormData = CreateContentBlockFormData;
 
 function VerseMetaEditorCard({
     updateHref,
@@ -120,7 +111,10 @@ function VerseMetaEditorCard({
                             id="scene_location"
                             value={form.data.scene_location}
                             onChange={(event) =>
-                                form.setData('scene_location', event.target.value)
+                                form.setData(
+                                    'scene_location',
+                                    event.target.value,
+                                )
                             }
                             placeholder="Kurukshetra"
                         />
@@ -128,14 +122,15 @@ function VerseMetaEditorCard({
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="narrative_phase">
-                            Narrative phase
-                        </Label>
+                        <Label htmlFor="narrative_phase">Narrative phase</Label>
                         <Input
                             id="narrative_phase"
                             value={form.data.narrative_phase}
                             onChange={(event) =>
-                                form.setData('narrative_phase', event.target.value)
+                                form.setData(
+                                    'narrative_phase',
+                                    event.target.value,
+                                )
                             }
                             placeholder="Opening tension"
                         />
@@ -148,7 +143,10 @@ function VerseMetaEditorCard({
                             id="teaching_mode"
                             value={form.data.teaching_mode}
                             onChange={(event) =>
-                                form.setData('teaching_mode', event.target.value)
+                                form.setData(
+                                    'teaching_mode',
+                                    event.target.value,
+                                )
                             }
                             placeholder="Dialogue"
                         />
@@ -219,7 +217,10 @@ function VerseMetaEditorCard({
                             id="keywords_text"
                             value={form.data.keywords_text}
                             onChange={(event) =>
-                                form.setData('keywords_text', event.target.value)
+                                form.setData(
+                                    'keywords_text',
+                                    event.target.value,
+                                )
                             }
                             rows={4}
                             placeholder="karma, dharma, discipline"
@@ -228,9 +229,7 @@ function VerseMetaEditorCard({
                             Separate items with commas or new lines.
                         </p>
                         <InputError
-                            message={
-                                errors.keywords ?? errors.keywords_text
-                            }
+                            message={errors.keywords ?? errors.keywords_text}
                         />
                     </div>
 
@@ -276,300 +275,21 @@ function VerseMetaEditorCard({
     );
 }
 
-function CreateVerseNoteCard({
-    storeHref,
-    nextSortOrder,
-}: {
-    storeHref: string;
-    nextSortOrder: number;
-}) {
-    const form = useForm<CreateContentBlockFormData>({
-        title: '',
-        body: '',
-        region: 'study',
-        sort_order: String(nextSortOrder),
-        status: 'draft',
-    });
-
-    const submit = () => {
-        form.transform((data) => ({
-            title: data.title,
-            body: data.body,
-            region: data.region,
-            sort_order: Number(data.sort_order),
-            status: data.status,
-        }));
-
-        form.post(storeHref, {
-            preserveScroll: true,
-            preserveState: false,
-            onSuccess: () =>
-                form.reset('title', 'body', 'region', 'status'),
-        });
-    };
-
-    return (
-        <Card>
-            <CardHeader className="gap-3">
-                <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant="outline">Add note block</Badge>
-                    <Badge variant="secondary">Text only</Badge>
-                </div>
-                <CardTitle>Create Verse Note</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-5">
-                <div className="grid gap-2">
-                    <Label htmlFor="new_block_title">Title</Label>
-                    <Input
-                        id="new_block_title"
-                        value={form.data.title}
-                        onChange={(event) =>
-                            form.setData('title', event.target.value)
-                        }
-                        placeholder="Editorial note title"
-                    />
-                    <InputError message={form.errors.title} />
-                </div>
-
-                <div className="grid gap-2">
-                    <Label htmlFor="new_block_body">Body</Label>
-                    <Textarea
-                        id="new_block_body"
-                        value={form.data.body}
-                        onChange={(event) =>
-                            form.setData('body', event.target.value)
-                        }
-                        rows={6}
-                        placeholder="Write the note copy for this verse."
-                    />
-                    <InputError message={form.errors.body} />
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-3">
-                    <div className="grid gap-2">
-                        <Label htmlFor="new_block_region">Region</Label>
-                        <Input
-                            id="new_block_region"
-                            value={form.data.region}
-                            onChange={(event) =>
-                                form.setData('region', event.target.value)
-                            }
-                        />
-                        <InputError message={form.errors.region} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label htmlFor="new_block_sort_order">
-                            Sort order
-                        </Label>
-                        <Input
-                            id="new_block_sort_order"
-                            type="number"
-                            min={0}
-                            value={form.data.sort_order}
-                            onChange={(event) =>
-                                form.setData('sort_order', event.target.value)
-                            }
-                        />
-                        <InputError message={form.errors.sort_order} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label>Status</Label>
-                        <Select
-                            value={form.data.status}
-                            onValueChange={(value) =>
-                                form.setData(
-                                    'status',
-                                    value as 'draft' | 'published',
-                                )
-                            }
-                        >
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Choose status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="draft">Draft</SelectItem>
-                                <SelectItem value="published">
-                                    Published
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <InputError message={form.errors.status} />
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                    <Button
-                        type="button"
-                        onClick={submit}
-                        disabled={form.processing}
-                    >
-                        <Plus className="size-4" />
-                        Add note block
-                    </Button>
-                    {form.recentlySuccessful && (
-                        <p className="text-sm text-muted-foreground">
-                            Note block added.
-                        </p>
-                    )}
-                </div>
-            </CardContent>
-        </Card>
-    );
-}
-
-function VerseContentBlockEditorCard({
-    block,
-}: {
-    block: ScriptureAdminContentBlock;
-}) {
-    const form = useForm<UpdateContentBlockFormData>({
-        title: block.title ?? '',
-        body: block.body ?? '',
-        region: block.region,
-        sort_order: String(block.sort_order),
-        status: block.status,
-    });
-
-    const submit = () => {
-        form.transform((data) => ({
-            title: data.title,
-            body: data.body,
-            region: data.region,
-            sort_order: Number(data.sort_order),
-            status: data.status,
-        }));
-
-        form.patch(block.update_href, {
-            preserveScroll: true,
-        });
-    };
-
-    return (
-        <Card id={`block-${block.id}`}>
-            <CardHeader className="gap-3">
-                <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant="outline">{block.region}</Badge>
-                    <Badge variant="secondary">{block.block_type}</Badge>
-                    <Badge variant="outline">{block.status}</Badge>
-                </div>
-                <CardTitle>
-                    {block.title ?? `Block ${block.id}`}
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-5">
-                <div className="grid gap-2">
-                    <Label htmlFor={`block_title_${block.id}`}>Title</Label>
-                    <Input
-                        id={`block_title_${block.id}`}
-                        value={form.data.title}
-                        onChange={(event) =>
-                            form.setData('title', event.target.value)
-                        }
-                        placeholder="Block title"
-                    />
-                    <InputError message={form.errors.title} />
-                </div>
-
-                <div className="grid gap-2">
-                    <Label htmlFor={`block_body_${block.id}`}>Body</Label>
-                    <Textarea
-                        id={`block_body_${block.id}`}
-                        value={form.data.body}
-                        onChange={(event) =>
-                            form.setData('body', event.target.value)
-                        }
-                        rows={7}
-                        placeholder="Block body"
-                    />
-                    <InputError message={form.errors.body} />
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-3">
-                    <div className="grid gap-2">
-                        <Label htmlFor={`block_region_${block.id}`}>
-                            Region
-                        </Label>
-                        <Input
-                            id={`block_region_${block.id}`}
-                            value={form.data.region}
-                            onChange={(event) =>
-                                form.setData('region', event.target.value)
-                            }
-                        />
-                        <InputError message={form.errors.region} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label htmlFor={`block_sort_order_${block.id}`}>
-                            Sort order
-                        </Label>
-                        <Input
-                            id={`block_sort_order_${block.id}`}
-                            type="number"
-                            min={0}
-                            value={form.data.sort_order}
-                            onChange={(event) =>
-                                form.setData('sort_order', event.target.value)
-                            }
-                        />
-                        <InputError message={form.errors.sort_order} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label>Status</Label>
-                        <Select
-                            value={form.data.status}
-                            onValueChange={(value) =>
-                                form.setData(
-                                    'status',
-                                    value as 'draft' | 'published',
-                                )
-                            }
-                        >
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Choose status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="draft">Draft</SelectItem>
-                                <SelectItem value="published">
-                                    Published
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <InputError message={form.errors.status} />
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                    <Button
-                        type="button"
-                        onClick={submit}
-                        disabled={form.processing}
-                    >
-                        Save block
-                    </Button>
-                    {form.recentlySuccessful && (
-                        <p className="text-sm text-muted-foreground">Saved.</p>
-                    )}
-                </div>
-            </CardContent>
-        </Card>
-    );
-}
-
 export default function VerseFullEdit({
     book,
     book_section,
     chapter,
     chapter_section,
     verse,
+    admin_entity,
     verse_meta,
     admin_meta_update_href,
     admin_content_block_store_href,
+    next_content_block_sort_order,
     admin_content_blocks,
+    protected_content_blocks,
 }: VerseFullEditProps) {
+    const fields = admin_entity.fields;
     const chapterTitle = chapterLabel(chapter.number, chapter.title);
     const bookSectionTitle = sectionLabel(
         book_section.number,
@@ -602,11 +322,6 @@ export default function VerseFullEdit({
             href: verse.admin_full_edit_href,
         },
     ];
-    const nextSortOrder =
-        admin_content_blocks.length === 0
-            ? 1
-            : Math.max(...admin_content_blocks.map((block) => block.sort_order)) +
-              1;
 
     return (
         <ScriptureLayout
@@ -659,20 +374,41 @@ export default function VerseFullEdit({
                 title="Note Blocks"
                 description="Manage verse-owned note blocks, including drafts that stay hidden from the public page."
                 action={
-                    <Badge variant="outline">
-                        {admin_content_blocks.length} block
-                        {admin_content_blocks.length === 1 ? '' : 's'}
-                    </Badge>
+                    <div className="flex flex-wrap gap-2">
+                        <Badge variant="outline">
+                            {admin_content_blocks.length} editable
+                        </Badge>
+                        <Badge variant="outline">
+                            {protected_content_blocks.length} protected
+                        </Badge>
+                    </div>
                 }
             >
                 <div className="space-y-4">
-                    <CreateVerseNoteCard
+                    <CreateVerseContentBlockCard
                         storeHref={admin_content_block_store_href}
-                        nextSortOrder={nextSortOrder}
+                        nextSortOrder={next_content_block_sort_order}
+                        titleField={fields.content_block_title}
+                        bodyField={fields.content_block_body}
+                        regionField={fields.content_block_region}
+                        sortOrderField={fields.content_block_sort_order}
+                        statusField={fields.content_block_status}
                     />
 
                     {admin_content_blocks.map((block) => (
                         <VerseContentBlockEditorCard
+                            key={block.id}
+                            block={block}
+                            titleField={fields.content_block_title}
+                            bodyField={fields.content_block_body}
+                            regionField={fields.content_block_region}
+                            sortOrderField={fields.content_block_sort_order}
+                            statusField={fields.content_block_status}
+                        />
+                    ))}
+
+                    {protected_content_blocks.map((block) => (
+                        <ProtectedVerseContentBlockCard
                             key={block.id}
                             block={block}
                         />

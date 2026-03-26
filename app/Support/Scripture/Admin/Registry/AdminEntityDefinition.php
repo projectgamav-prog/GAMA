@@ -53,6 +53,8 @@ readonly class AdminEntityDefinition
      */
     public function toArray(): array
     {
+        $methodCatalog = new AdminEntityMethodCatalog($this);
+
         return [
             'key' => $this->key,
             'label' => $this->label,
@@ -66,6 +68,8 @@ readonly class AdminEntityDefinition
                 ])
                 ->all(),
             'field_groups' => $this->fieldGroupsToArray(),
+            'methods' => $methodCatalog->methodsToArray(),
+            'methods_by_mode' => $methodCatalog->methodsByModeToArray(),
             'regions' => collect($this->regions)
                 ->map(fn (AdminRegionDefinition $region) => $region->toArray($this->fields))
                 ->values()

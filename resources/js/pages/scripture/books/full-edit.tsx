@@ -1,7 +1,15 @@
 import { Link, useForm } from '@inertiajs/react';
 import { ShieldAlert, SquareArrowOutUpRight } from 'lucide-react';
-import { CreateBookContentBlockCard, BookContentBlockEditorCard, ProtectedContentBlockCard } from '@/components/scripture/book-admin-content-block-cards';
-import { CreateBookMediaAssignmentCard, BookMediaAssignmentEditorCard } from '@/components/scripture/book-admin-media-assignment-cards';
+import {
+    CreateBookContentBlockCard,
+    BookContentBlockEditorCard,
+    ProtectedContentBlockCard,
+} from '@/components/scripture/book-admin-content-block-cards';
+import {
+    CreateBookMediaAssignmentCard,
+    BookMediaAssignmentEditorCard,
+} from '@/components/scripture/book-admin-media-assignment-cards';
+import { ScriptureAdminMethodFamilyGrid } from '@/components/scripture/scripture-admin-method-family-grid';
 import { BookAdminSourceLabel } from '@/components/scripture/book-admin-source-label';
 import { ScriptureAdminFieldMeta } from '@/components/scripture/scripture-admin-field-meta';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
@@ -11,6 +19,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { scriptureAdminStartCase } from '@/lib/scripture-admin-field-display';
+import { getBookMediaSlotOptions } from '@/lib/book-media-slot-meta';
 import ScriptureLayout from '@/layouts/scripture-layout';
 import type {
     BookFullEditProps,
@@ -43,7 +53,7 @@ function BookDescriptionEditorCard({
                     <Badge variant="outline">Editorial</Badge>
                     <Badge variant="secondary">Contextual + full</Badge>
                 </div>
-                <CardTitle>Book Description</CardTitle>
+                <CardTitle>Public Description</CardTitle>
             </CardHeader>
             <CardContent className="space-y-5">
                 <div className="grid gap-2">
@@ -98,6 +108,10 @@ export default function BookFullEdit({
     available_media,
 }: BookFullEditProps) {
     const fields = admin_entity.fields;
+    const registeredFields = Object.values(fields);
+    const mediaSlotGuide = getBookMediaSlotOptions(
+        fields.media_assignment_role.options,
+    );
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: book.title,
@@ -139,7 +153,7 @@ export default function BookFullEdit({
                         </Button>
                     </>
                 }
-                contentClassName="space-y-5"
+                contentClassName="grid gap-4 xl:grid-cols-[1.2fr_0.9fr]"
             >
                 <div className="rounded-2xl border border-border/70 bg-muted/20 px-5 py-5 sm:px-6 sm:py-6">
                     <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
@@ -152,16 +166,42 @@ export default function BookFullEdit({
                         identity.
                     </p>
                 </div>
+                <div className="rounded-2xl border border-border/70 bg-muted/20 px-5 py-5 sm:px-6 sm:py-6">
+                    <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
+                        Reference entity
+                    </p>
+                    <p className="mt-4 text-sm leading-7 text-muted-foreground">
+                        {admin_entity.notes}
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                        <Badge variant="outline">
+                            {registeredFields.length} registered fields
+                        </Badge>
+                        <Badge variant="outline">
+                            {admin_entity.regions.length} registered regions
+                        </Badge>
+                        <Badge variant="outline">3 edit layers</Badge>
+                    </div>
+                </div>
             </ScripturePageIntroCard>
 
             <ScriptureSection
                 title="Edit Layers"
-                description="The Book entity is registered across three intentional edit layers."
+                description="Book is the reference entity for contextual, full editorial, and canonical protected separation."
             >
                 <div className="grid gap-4 lg:grid-cols-3">
                     {(['contextual', 'full', 'canonical'] as const).map(
                         (modeKey) => {
                             const mode = admin_entity.edit_modes[modeKey];
+                            const fieldCount = registeredFields.filter(
+                                (field) => field.edit_modes.includes(modeKey),
+                            ).length;
+                            const regionCount = admin_entity.regions.filter(
+                                (region) =>
+                                    region.supported_modes.includes(modeKey),
+                            ).length;
+                            const methodCount =
+                                admin_entity.methods_by_mode[modeKey].length;
 
                             return (
                                 <Card key={mode.key}>
@@ -176,6 +216,17 @@ export default function BookFullEdit({
                                     <CardContent className="space-y-3 text-sm leading-6 text-muted-foreground">
                                         <p>{mode.description}</p>
                                         {mode.warning && <p>{mode.warning}</p>}
+                                        <div className="flex flex-wrap gap-2 pt-1">
+                                            <Badge variant="outline">
+                                                {fieldCount} fields
+                                            </Badge>
+                                            <Badge variant="outline">
+                                                {regionCount} regions
+                                            </Badge>
+                                            <Badge variant="outline">
+                                                {methodCount} methods
+                                            </Badge>
+                                        </div>
                                     </CardContent>
                                 </Card>
                             );
@@ -185,8 +236,43 @@ export default function BookFullEdit({
             </ScriptureSection>
 
             <ScriptureSection
-                title="Book Identity"
-                description="Canonical/core fields stay separated from editorial changes and remain read-only in this phase."
+                title="Shared Method Layer"
+                description="These registry-compiled methods are the reusable CMS engine Book now exposes as the first proof entity."
+            >
+                <div className="space-y-6">
+                    {(['contextual', 'full', 'canonical'] as const).map(
+                        (modeKey) => (
+                            <div key={modeKey} className="space-y-4">
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <Badge variant="secondary">
+                                        {admin_entity.edit_modes[modeKey].label}
+                                    </Badge>
+                                    <Badge variant="outline">
+                                        {
+                                            admin_entity.methods_by_mode[
+                                                modeKey
+                                            ].length
+                                        }{' '}
+                                        methods
+                                    </Badge>
+                                </div>
+                                <ScriptureAdminMethodFamilyGrid
+                                    methods={
+                                        admin_entity.methods_by_mode[modeKey]
+                                    }
+                                    fields={fields}
+                                    emptyMessage="No shared methods are registered for this edit layer yet."
+                                />
+                            </div>
+                        ),
+                    )}
+                </div>
+            </ScriptureSection>
+
+            <ScriptureSection
+                title="Canonical Identity"
+                description="Protected core identity and browse anchors stay visible here for reference, but remain outside routine editorial editing."
+                action={<Badge variant="outline">3 protected fields</Badge>}
             >
                 <div className="grid gap-4 lg:grid-cols-3">
                     {admin_entity.field_groups.identity.map((field) => (
@@ -202,7 +288,7 @@ export default function BookFullEdit({
                                     {field.key === 'canonical_slug'
                                         ? book.slug
                                         : field.key === 'canonical_number'
-                                          ? book.number ?? 'Unnumbered'
+                                          ? (book.number ?? 'Unnumbered')
                                           : book.title}
                                 </div>
                             </CardContent>
@@ -212,8 +298,9 @@ export default function BookFullEdit({
             </ScriptureSection>
 
             <ScriptureSection
-                title="Editorial Fields"
-                description="Registered book-level editorial fields that are safe for contextual and full editing."
+                title="Page Intro Copy"
+                description="Registered editorial copy for the shared public page intro region on the Book overview and show pages."
+                action={<Badge variant="outline">page_intro</Badge>}
             >
                 <BookDescriptionEditorCard
                     bookDescription={book.description}
@@ -223,12 +310,18 @@ export default function BookFullEdit({
             </ScriptureSection>
 
             <ScriptureSection
-                title="Content Blocks"
-                description="Registered book-owned editorial blocks. Legacy or unregistered block types remain visible but protected."
+                id="content-blocks"
+                title="Editorial Block Regions"
+                description="Structured long-form Book copy lives here. Use registered regions intentionally, and keep video out of raw content blocks."
                 action={
-                    <Badge variant="outline">
-                        {admin_content_blocks.length} editable
-                    </Badge>
+                    <div className="flex flex-wrap gap-2">
+                        <Badge variant="outline">
+                            {admin_content_blocks.length} editable
+                        </Badge>
+                        <Badge variant="outline">
+                            {protected_content_blocks.length} protected
+                        </Badge>
+                    </div>
                 }
             >
                 <div className="space-y-4">
@@ -266,10 +359,44 @@ export default function BookFullEdit({
             </ScriptureSection>
 
             <ScriptureSection
-                title="Media Slots"
-                description="Structured media attachments are managed through registered slots instead of raw database discovery."
+                id="media-slots"
+                title="Public Media Slots"
+                description="Registered slots make Book media behavior explicit across library cards, overview pages, and supporting media cards."
+                action={
+                    <Badge variant="outline">
+                        {admin_media_assignments.length} assignments
+                    </Badge>
+                }
             >
                 <div className="space-y-4">
+                    <div className="grid gap-4 lg:grid-cols-3">
+                        {mediaSlotGuide.map((slot) => (
+                            <Card key={slot.role}>
+                                <CardHeader className="gap-3">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <Badge variant="secondary">
+                                            {slot.label}
+                                        </Badge>
+                                        <Badge
+                                            variant="outline"
+                                            className="font-mono text-[11px]"
+                                        >
+                                            {slot.role}
+                                        </Badge>
+                                    </div>
+                                    <CardTitle className="text-base">
+                                        {slot.label}
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-sm leading-6 text-muted-foreground">
+                                        {slot.description}
+                                    </p>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+
                     <CreateBookMediaAssignmentCard
                         storeHref={admin_media_assignment_store_href}
                         nextSortOrder={next_media_assignment_sort_order}
@@ -289,7 +416,9 @@ export default function BookFullEdit({
                             mediaField={fields.media_assignment_media_id}
                             roleField={fields.media_assignment_role}
                             titleField={fields.media_assignment_title_override}
-                            captionField={fields.media_assignment_caption_override}
+                            captionField={
+                                fields.media_assignment_caption_override
+                            }
                             sortOrderField={fields.media_assignment_sort_order}
                             statusField={fields.media_assignment_status}
                             availableMedia={available_media}
@@ -299,88 +428,130 @@ export default function BookFullEdit({
             </ScriptureSection>
 
             <ScriptureSection
-                title="Public Region Map"
-                description="Only registered public regions participate in contextual, full, or canonical workflows."
+                title="Registered Region Contract"
+                description="These regions define what each edit layer can touch, what surface each region serves, and where Book content is allowed to live."
             >
                 <div className="space-y-4">
-                    {admin_entity.regions.map((region: ScriptureRegisteredAdminRegion) => (
-                        <Card key={region.key}>
-                            <CardHeader className="gap-3">
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <Badge variant="outline">{region.surface}</Badge>
-                                    {region.capability_hint && (
-                                        <Badge variant="secondary">
-                                            {region.capability_hint}
+                    {admin_entity.regions.map(
+                        (region: ScriptureRegisteredAdminRegion) => (
+                            <Card key={region.key}>
+                                <CardHeader className="gap-3">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <Badge
+                                            variant="outline"
+                                            className="font-mono text-[11px]"
+                                        >
+                                            {region.key}
                                         </Badge>
-                                    )}
-                                </div>
-                                <CardTitle>{region.label}</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <p className="text-sm leading-6 text-muted-foreground">
-                                    {region.description}
-                                </p>
-                                {region.help_text && (
+                                        <Badge variant="outline">
+                                            {region.surface}
+                                        </Badge>
+                                    </div>
+                                    <CardTitle>{region.label}</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
                                     <p className="text-sm leading-6 text-muted-foreground">
-                                        {region.help_text}
+                                        {region.description}
                                     </p>
-                                )}
-                                <div className="grid gap-4 lg:grid-cols-3">
-                                    <div className="space-y-3">
-                                        <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-                                            Contextual
-                                        </p>
-                                        {region.contextual_fields.length > 0 ? (
-                                            region.contextual_fields.map((field) => (
-                                                <ScriptureAdminFieldMeta
-                                                    key={`${region.key}-${field.key}-contextual`}
-                                                    field={field}
-                                                />
-                                            ))
-                                        ) : (
-                                            <p className="text-sm text-muted-foreground">
-                                                No contextual fields registered.
-                                            </p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {region.supported_modes.map((mode) => (
+                                            <Badge
+                                                key={mode}
+                                                variant="secondary"
+                                            >
+                                                {
+                                                    admin_entity.edit_modes[
+                                                        mode
+                                                    ].label
+                                                }
+                                            </Badge>
+                                        ))}
+                                        {region.method_families.map(
+                                            (family) => (
+                                                <Badge
+                                                    key={`${region.key}-${family}`}
+                                                    variant="outline"
+                                                >
+                                                    {scriptureAdminStartCase(
+                                                        family,
+                                                    )}
+                                                </Badge>
+                                            ),
                                         )}
                                     </div>
-                                    <div className="space-y-3">
-                                        <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-                                            Full editorial
+                                    {region.help_text && (
+                                        <p className="text-sm leading-6 text-muted-foreground">
+                                            {region.help_text}
                                         </p>
-                                        {region.full_fields.length > 0 ? (
-                                            region.full_fields.map((field) => (
-                                                <ScriptureAdminFieldMeta
-                                                    key={`${region.key}-${field.key}-full`}
-                                                    field={field}
-                                                />
-                                            ))
-                                        ) : (
-                                            <p className="text-sm text-muted-foreground">
-                                                No full-editor fields registered.
+                                    )}
+                                    <div className="grid gap-4 lg:grid-cols-3">
+                                        <div className="space-y-3">
+                                            <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+                                                Contextual
                                             </p>
-                                        )}
-                                    </div>
-                                    <div className="space-y-3">
-                                        <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-                                            Canonical protected
-                                        </p>
-                                        {region.canonical_fields.length > 0 ? (
-                                            region.canonical_fields.map((field) => (
-                                                <ScriptureAdminFieldMeta
-                                                    key={`${region.key}-${field.key}-canonical`}
-                                                    field={field}
-                                                />
-                                            ))
-                                        ) : (
-                                            <p className="text-sm text-muted-foreground">
-                                                No canonical fields registered.
+                                            {region.contextual_fields.length >
+                                            0 ? (
+                                                region.contextual_fields.map(
+                                                    (field) => (
+                                                        <ScriptureAdminFieldMeta
+                                                            key={`${region.key}-${field.key}-contextual`}
+                                                            field={field}
+                                                        />
+                                                    ),
+                                                )
+                                            ) : (
+                                                <p className="text-sm text-muted-foreground">
+                                                    This region is not editable
+                                                    in contextual mode.
+                                                </p>
+                                            )}
+                                        </div>
+                                        <div className="space-y-3">
+                                            <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+                                                Full editorial
                                             </p>
-                                        )}
+                                            {region.full_fields.length > 0 ? (
+                                                region.full_fields.map(
+                                                    (field) => (
+                                                        <ScriptureAdminFieldMeta
+                                                            key={`${region.key}-${field.key}-full`}
+                                                            field={field}
+                                                        />
+                                                    ),
+                                                )
+                                            ) : (
+                                                <p className="text-sm text-muted-foreground">
+                                                    This region is not editable
+                                                    in full editorial mode.
+                                                </p>
+                                            )}
+                                        </div>
+                                        <div className="space-y-3">
+                                            <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+                                                Canonical protected
+                                            </p>
+                                            {region.canonical_fields.length >
+                                            0 ? (
+                                                region.canonical_fields.map(
+                                                    (field) => (
+                                                        <ScriptureAdminFieldMeta
+                                                            key={`${region.key}-${field.key}-canonical`}
+                                                            field={field}
+                                                        />
+                                                    ),
+                                                )
+                                            ) : (
+                                                <p className="text-sm text-muted-foreground">
+                                                    This region is not editable
+                                                    in canonical mode.
+                                                </p>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
+                                </CardContent>
+                            </Card>
+                        ),
+                    )}
                 </div>
             </ScriptureSection>
         </ScriptureLayout>

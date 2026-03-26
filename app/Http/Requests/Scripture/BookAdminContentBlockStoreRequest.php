@@ -2,9 +2,14 @@
 
 namespace App\Http\Requests\Scripture;
 
+use App\Models\Book;
+use App\Models\ContentBlock;
+use App\Support\Scripture\Admin\BookAdminRouteContext;
+use App\Support\Scripture\Admin\BookContentBlockSchema;
 use App\Support\Scripture\Admin\Registry\AdminEntityRegistry;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 class BookAdminContentBlockStoreRequest extends FormRequest
 {
@@ -25,14 +30,109 @@ class BookAdminContentBlockStoreRequest extends FormRequest
     {
         $definition = app(AdminEntityRegistry::class)
             ->definition('book');
+        $sortOrderRules = array_values(array_filter(
+            $definition->field('content_block_sort_order')->validationRules(),
+            fn (string $rule) => $rule !== 'required',
+        ));
 
         return [
             'block_type' => $definition->field('content_block_type')->validationRules(),
             'title' => $definition->field('content_block_title')->validationRules(),
             'body' => $definition->field('content_block_body')->validationRules(),
             'region' => $definition->field('content_block_region')->validationRules(),
-            'sort_order' => $definition->field('content_block_sort_order')->validationRules(),
+            'sort_order' => ['nullable', ...$sortOrderRules],
             'status' => $definition->field('content_block_status')->validationRules(),
+            'insertion_mode' => ['nullable', 'string', 'in:'.implode(',', BookContentBlockSchema::insertionModes())],
+            'relative_block_id' => ['nullable', 'integer'],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator): void {
+            $insertionMode = $this->nullableString(
+                $this->input('insertion_mode'),
+            );
+            $relativeBlockId = $this->input('relative_block_id');
+            $hasExplicitSortOrder = $this->hasExplicitSortOrder();
+
+            if ($insertionMode === null) {
+                if (! $hasExplicitSortOrder) {
+                    $validator->errors()->add(
+                        'sort_order',
+                        'Sort order is required when no insertion point is provided.',
+                    );
+                }
+
+                return;
+            }
+
+            if (in_array($insertionMode, ['before', 'after'], true)) {
+                if (! is_numeric($relativeBlockId)) {
+                    $validator->errors()->add(
+                        'relative_block_id',
+                        'A reference block is required for this insertion point.',
+                    );
+
+                    return;
+                }
+
+                $relativeBlock = ContentBlock::query()->find(
+                    (int) $relativeBlockId,
+                );
+
+                if (! $relativeBlock instanceof ContentBlock
+                    || ! $this->bookAdminRouteContext()->isContextualInsertionAnchor($relativeBlock)) {
+                    $validator->errors()->add(
+                        'relative_block_id',
+                        'The selected insertion anchor is not available on this Book page.',
+                    );
+                }
+
+                return;
+            }
+
+            if (in_array($insertionMode, ['start', 'end'], true)
+                && $this->nullableString($relativeBlockId) !== null) {
+                $validator->errors()->add(
+                    'relative_block_id',
+                    'A reference block is not used for start or end insertion.',
+                );
+            }
+        });
+    }
+
+    private function hasExplicitSortOrder(): bool
+    {
+        $sortOrder = $this->input('sort_order');
+
+        return $sortOrder !== null && $sortOrder !== '';
+    }
+
+    private function bookAdminRouteContext(): BookAdminRouteContext
+    {
+        return new BookAdminRouteContext($this->book());
+    }
+
+    private function book(): Book
+    {
+        $book = $this->route('book');
+
+        if (! $book instanceof Book) {
+            throw new \RuntimeException('The Book route parameter is missing.');
+        }
+
+        return $book;
+    }
+
+    private function nullableString(mixed $value): ?string
+    {
+        if (! is_string($value) && ! is_numeric($value)) {
+            return null;
+        }
+
+        $trimmed = trim((string) $value);
+
+        return $trimmed === '' ? null : $trimmed;
     }
 }

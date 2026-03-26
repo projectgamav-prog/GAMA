@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { ShieldAlert, SquareArrowOutUpRight } from 'lucide-react';
+import { ScriptureAdminMethodFamilyGrid } from '@/components/scripture/scripture-admin-method-family-grid';
 import { ScriptureAdminFieldMeta } from '@/components/scripture/scripture-admin-field-meta';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
@@ -22,8 +23,12 @@ export default function BookCanonicalEdit({
     admin_entity,
 }: BookCanonicalEditProps) {
     const canonicalFields = admin_entity.field_groups.identity;
+    const canonicalMethods = admin_entity.methods_by_mode.canonical;
     const fieldValues = CANONICAL_FIELD_VALUES(book);
     const canonicalMode = admin_entity.edit_modes.canonical;
+    const canonicalBrowseRegion = admin_entity.regions.find(
+        (region) => region.key === 'canonical_browse',
+    );
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: book.title,
@@ -48,7 +53,7 @@ export default function BookCanonicalEdit({
                     </>
                 }
                 title={`Canonical protected edit: ${book.title}`}
-                description="This workflow is reserved for canonical/core book data. In the current phase, those fields remain intentionally read-only."
+                description="This workflow is reserved for canonical book identity and protected browse structure. In the current phase, those fields remain intentionally read-only."
                 headerAction={
                     <Button asChild variant="outline" size="sm">
                         <Link href={book.admin_full_edit_href}>
@@ -70,14 +75,19 @@ export default function BookCanonicalEdit({
                                     {canonicalMode.warning}
                                 </p>
                             )}
+                            {canonicalBrowseRegion && (
+                                <p className="text-sm leading-6">
+                                    {canonicalBrowseRegion.description}
+                                </p>
+                            )}
                         </div>
                     </div>
                 </div>
             </ScripturePageIntroCard>
 
             <ScriptureSection
-                title="Protected Fields"
-                description="These fields are registered as canonical/core sources and are intentionally separated from normal editorial forms."
+                title="Protected Identity Fields"
+                description="These fields define Book identity and stay explicitly separated from editorial forms."
             >
                 <div className="grid gap-4 lg:grid-cols-3">
                     {canonicalFields.map((field) => (
@@ -96,7 +106,7 @@ export default function BookCanonicalEdit({
                                     <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
                                         Current value
                                     </p>
-                                    <p className="mt-3 break-words text-sm leading-7 text-foreground">
+                                    <p className="mt-3 text-sm leading-7 break-words text-foreground">
                                         {fieldValues[field.key] ?? 'Not set'}
                                     </p>
                                 </div>
@@ -105,6 +115,61 @@ export default function BookCanonicalEdit({
                     ))}
                 </div>
             </ScriptureSection>
+
+            <ScriptureSection
+                title="Canonical Method Layer"
+                description="These shared methods are attached from the registered Book schema and define what the protected canonical workflow is allowed to expose."
+            >
+                <ScriptureAdminMethodFamilyGrid
+                    methods={canonicalMethods}
+                    fields={admin_entity.fields}
+                    emptyMessage="No canonical shared methods are registered yet."
+                />
+            </ScriptureSection>
+
+            {canonicalBrowseRegion && (
+                <ScriptureSection
+                    title="Canonical Browse Structure"
+                    description="Browse hierarchy behavior is documented here and kept outside contextual or editorial workflows."
+                >
+                    <Card>
+                        <CardHeader className="gap-3">
+                            <div className="flex flex-wrap items-center gap-2">
+                                <Badge
+                                    variant="outline"
+                                    className="font-mono text-[11px]"
+                                >
+                                    {canonicalBrowseRegion.key}
+                                </Badge>
+                                <Badge variant="outline">
+                                    {canonicalBrowseRegion.surface}
+                                </Badge>
+                                {canonicalBrowseRegion.supported_modes.map(
+                                    (mode) => (
+                                        <Badge key={mode} variant="secondary">
+                                            {
+                                                admin_entity.edit_modes[mode]
+                                                    .label
+                                            }
+                                        </Badge>
+                                    ),
+                                )}
+                            </div>
+                            <CardTitle>{canonicalBrowseRegion.label}</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <p className="text-sm leading-6 text-muted-foreground">
+                                {canonicalBrowseRegion.description}
+                            </p>
+                            {canonicalBrowseRegion.help_text && (
+                                <p className="text-sm leading-6 text-muted-foreground">
+                                    {canonicalBrowseRegion.help_text}
+                                </p>
+                            )}
+                        </CardContent>
+                    </Card>
+                </ScriptureSection>
+            )}
         </ScriptureLayout>
     );
 }

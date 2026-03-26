@@ -292,12 +292,15 @@ test('authorized editors can manage verse note blocks while public verse page st
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('scripture/chapters/verses/full-edit')
+            ->where('admin_entity.key', 'verse')
+            ->where('next_content_block_sort_order', 4)
             ->has('admin_content_blocks', 3)
             ->where('admin_content_blocks.0.title', 'Published verse note')
             ->where('admin_content_blocks.1.title', 'Updated draft verse note')
             ->where('admin_content_blocks.1.status', 'draft')
             ->where('admin_content_blocks.2.title', 'Fresh draft note')
-            ->where('admin_content_blocks.2.status', 'draft'),
+            ->where('admin_content_blocks.2.status', 'draft')
+            ->where('protected_content_blocks', []),
         );
 
     $this->get($this->verseShowRoute)
@@ -385,7 +388,13 @@ test('phase one content block editing is limited to verse owned text notes', fun
         ->assertInertia(fn (Assert $page) => $page
             ->has('admin_content_blocks', 1)
             ->where('admin_content_blocks.0.title', 'Editable text note')
-            ->where('admin_content_blocks.0.block_type', 'text'),
+            ->where('admin_content_blocks.0.block_type', 'text')
+            ->has('protected_content_blocks', 1)
+            ->where('protected_content_blocks.0.title', 'Protected video block')
+            ->where(
+                'protected_content_blocks.0.protection_reason',
+                'Only verse-owned text note blocks are editable in this phase.',
+            ),
         );
 
     $this->actingAs($editor)
@@ -403,4 +412,69 @@ test('phase one content block editing is limited to verse owned text notes', fun
 
     expect(ContentBlock::query()->findOrFail($videoBlock->id)->title)
         ->toBe('Protected video block');
+});
+
+test('verse note creation uses shared ordering when sort order inserts before existing notes', function () {
+    $editor = User::query()->where('email', 'editor3@example.com')->firstOrFail();
+
+    $this->firstVerse->contentBlocks()->create([
+        'region' => 'study',
+        'block_type' => 'text',
+        'title' => 'Existing first note',
+        'body' => 'First note body.',
+        'data_json' => null,
+        'sort_order' => 1,
+        'status' => 'published',
+    ]);
+
+    $this->firstVerse->contentBlocks()->create([
+        'region' => 'study',
+        'block_type' => 'text',
+        'title' => 'Existing second note',
+        'body' => 'Second note body.',
+        'data_json' => null,
+        'sort_order' => 2,
+        'status' => 'draft',
+    ]);
+
+    $this->actingAs($editor)
+        ->from($this->fullEditRoute)
+        ->post($this->contentBlockStoreRoute, [
+            'title' => 'Inserted first note',
+            'body' => 'Inserted ahead of the existing notes.',
+            'region' => 'study',
+            'sort_order' => 1,
+            'status' => 'draft',
+        ])
+        ->assertRedirect($this->fullEditRoute);
+
+    $orderedTitles = $this->firstVerse->fresh()
+        ->contentBlocks()
+        ->orderBy('sort_order')
+        ->orderBy('id')
+        ->pluck('title')
+        ->all();
+    $orderedSortOrders = $this->firstVerse->fresh()
+        ->contentBlocks()
+        ->orderBy('sort_order')
+        ->orderBy('id')
+        ->pluck('sort_order')
+        ->all();
+
+    expect($orderedTitles)->toBe([
+        'Inserted first note',
+        'Existing first note',
+        'Existing second note',
+    ]);
+    expect($orderedSortOrders)->toBe([1, 2, 3]);
+
+    $this->actingAs($editor)
+        ->get($this->fullEditRoute)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('next_content_block_sort_order', 4)
+            ->where('admin_content_blocks.0.title', 'Inserted first note')
+            ->where('admin_content_blocks.1.title', 'Existing first note')
+            ->where('admin_content_blocks.2.title', 'Existing second note'),
+        );
 });

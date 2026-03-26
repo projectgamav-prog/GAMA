@@ -8,6 +8,7 @@ use App\Models\ContentBlock;
 use App\Models\Media;
 use App\Models\MediaAssignment;
 use App\Support\Scripture\Admin\BookAdminRouteContext;
+use App\Support\Scripture\Admin\RegisteredContentBlockData;
 use App\Support\Scripture\Admin\Registry\AdminEntityRegistry;
 use App\Support\Scripture\PublicScriptureData;
 use Inertia\Inertia;
@@ -41,9 +42,9 @@ class BookFullEditController extends Controller
         $protectedContentBlocks = $contentBlocks
             ->reject(fn (ContentBlock $block) => $adminRouteContext->isEditableContentBlock($block))
             ->values();
-        $nextContentBlockSortOrder = $contentBlocks->isEmpty()
-            ? 1
-            : ((int) $contentBlocks->max('sort_order')) + 1;
+        $nextContentBlockSortOrder = RegisteredContentBlockData::nextSortOrder(
+            $contentBlocks,
+        );
         $nextMediaAssignmentSortOrder = $mediaAssignments->isEmpty()
             ? 1
             : ((int) $mediaAssignments->max('sort_order')) + 1;
@@ -63,30 +64,16 @@ class BookFullEditController extends Controller
             'next_content_block_sort_order' => $nextContentBlockSortOrder,
             'next_media_assignment_sort_order' => $nextMediaAssignmentSortOrder,
             'admin_content_blocks' => $editableContentBlocks
-                ->map(fn (ContentBlock $block) => [
-                    'id' => $block->id,
-                    'region' => $block->region,
-                    'block_type' => $block->block_type,
-                    'title' => $block->title,
-                    'body' => $block->body,
-                    'data_json' => $block->data_json,
-                    'sort_order' => $block->sort_order,
-                    'status' => $block->status,
-                    'update_href' => $adminRouteContext->contentBlockUpdateHref($block),
-                ])
+                ->map(fn (ContentBlock $block) => RegisteredContentBlockData::editor(
+                    $block,
+                    $adminRouteContext->contentBlockUpdateHref($block),
+                ))
                 ->all(),
             'protected_content_blocks' => $protectedContentBlocks
-                ->map(fn (ContentBlock $block) => [
-                    'id' => $block->id,
-                    'region' => $block->region,
-                    'block_type' => $block->block_type,
-                    'title' => $block->title,
-                    'body' => $block->body,
-                    'data_json' => $block->data_json,
-                    'sort_order' => $block->sort_order,
-                    'status' => $block->status,
-                    'protection_reason' => 'This block type is not registered for editorial editing in the Book admin framework.',
-                ])
+                ->map(fn (ContentBlock $block) => RegisteredContentBlockData::protected(
+                    $block,
+                    'This block type is not registered for editorial editing in the Book admin framework.',
+                ))
                 ->values()
                 ->all(),
             'admin_media_assignments' => $mediaAssignments

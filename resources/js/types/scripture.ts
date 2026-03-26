@@ -8,6 +8,19 @@ export type ScriptureContentBlock = {
     sort_order: number;
 };
 
+export type ScriptureContentBlockInsertionMode =
+    | 'start'
+    | 'before'
+    | 'after'
+    | 'end';
+
+export type ScriptureContentBlockInsertionPoint = {
+    insertion_mode: ScriptureContentBlockInsertionMode;
+    relative_block_id: number | null;
+    suggested_region: string | null;
+    label: string;
+};
+
 export type ScriptureAdminEditTarget =
     | 'verse_meta'
     | 'entity_details'
@@ -15,17 +28,11 @@ export type ScriptureAdminEditTarget =
 
 export type ScriptureAdminEditMode = 'contextual' | 'full' | 'canonical';
 
-export type ScriptureAdminEditModeStatus =
-    | 'active'
-    | 'planned'
-    | 'disabled';
+export type ScriptureAdminEditModeStatus = 'active' | 'planned' | 'disabled';
 
 export type ScriptureAdminFieldClassification = 'canonical' | 'editorial';
 
-export type ScriptureAdminFieldGroup =
-    | 'identity'
-    | 'editorial'
-    | 'supporting';
+export type ScriptureAdminFieldGroup = 'identity' | 'editorial' | 'supporting';
 
 export type ScriptureRegisteredAdminMode = {
     key: ScriptureAdminEditMode;
@@ -50,6 +57,37 @@ export type ScriptureRegisteredAdminField = {
     visibility_rule: string | null;
 };
 
+export type ScriptureRegisteredAdminMethodFamily =
+    | 'text_field_edit'
+    | 'long_text_edit'
+    | 'number_field_edit'
+    | 'choice_field_edit'
+    | 'toggle_field_edit'
+    | 'relation_field_edit'
+    | 'canonical_display'
+    | 'content_block_create'
+    | 'content_block_edit'
+    | 'ordered_insertion'
+    | 'reorder'
+    | 'media_slot_edit';
+
+export type ScriptureRegisteredAdminMethod = {
+    key: string;
+    family: ScriptureRegisteredAdminMethodFamily;
+    family_label: string;
+    family_description: string;
+    label: string;
+    description: string;
+    scope: 'field' | 'region';
+    edit_modes: ScriptureAdminEditMode[];
+    field_keys: string[];
+    region_key: string | null;
+    surface: string | null;
+    capability_hint: string | null;
+    ui_hint: string | null;
+    content_aware: boolean;
+};
+
 export type ScriptureRegisteredAdminRegion = {
     key: string;
     label: string;
@@ -62,6 +100,7 @@ export type ScriptureRegisteredAdminRegion = {
     supported_modes: ScriptureAdminEditMode[];
     capability_hint: string | null;
     help_text: string | null;
+    method_families: ScriptureRegisteredAdminMethodFamily[];
     fields: ScriptureRegisteredAdminField[];
     contextual_fields: ScriptureRegisteredAdminField[];
     full_fields: ScriptureRegisteredAdminField[];
@@ -76,7 +115,15 @@ export type ScriptureRegisteredAdminEntity = {
     edit_modes: Record<ScriptureAdminEditMode, ScriptureRegisteredAdminMode>;
     notes: string | null;
     fields: Record<string, ScriptureRegisteredAdminField>;
-    field_groups: Record<ScriptureAdminFieldGroup, ScriptureRegisteredAdminField[]>;
+    field_groups: Record<
+        ScriptureAdminFieldGroup,
+        ScriptureRegisteredAdminField[]
+    >;
+    methods: ScriptureRegisteredAdminMethod[];
+    methods_by_mode: Record<
+        ScriptureAdminEditMode,
+        ScriptureRegisteredAdminMethod[]
+    >;
     regions: ScriptureRegisteredAdminRegion[];
 };
 
@@ -104,6 +151,9 @@ export type ScriptureBookAdmin = {
     details_update_href: string;
     full_edit_href: string;
     canonical_edit_href: string;
+    content_block_store_href: string;
+    content_block_types: string[];
+    content_block_regions: string[];
     content_block_update_hrefs: Record<string, string>;
 };
 
@@ -197,7 +247,31 @@ export type ScriptureBook = {
     description?: string | null;
     href: string;
     overview_href: string;
-    overview_video?: ScriptureContentBlock | null;
+    media_slots: ScriptureBookMediaSlots;
+};
+
+export type ScriptureBookMedia = {
+    id: number | null;
+    media_type: string;
+    title: string | null;
+    alt_text: string | null;
+    caption: string | null;
+    url: string | null;
+    path: string | null;
+    poster_url: string | null;
+};
+
+export type ScriptureBookMediaSlot = {
+    role: string;
+    title: string | null;
+    caption: string | null;
+    media: ScriptureBookMedia;
+};
+
+export type ScriptureBookMediaSlots = {
+    overview_video: ScriptureBookMediaSlot | null;
+    hero_media: ScriptureBookMediaSlot | null;
+    supporting_media: ScriptureBookMediaSlot[];
 };
 
 export type ScriptureBookSection = {
@@ -525,10 +599,13 @@ export type VerseFullEditProps = {
     verse: (ScriptureVerse & { href: string }) & {
         admin_full_edit_href: string;
     };
+    admin_entity: ScriptureRegisteredAdminEntity;
     verse_meta: ScriptureVerseMeta | null;
     admin_meta_update_href: string;
     admin_content_block_store_href: string;
+    next_content_block_sort_order: number;
     admin_content_blocks: ScriptureAdminContentBlock[];
+    protected_content_blocks: ScriptureProtectedAdminContentBlock[];
 };
 
 export type TopicFullEditProps = {

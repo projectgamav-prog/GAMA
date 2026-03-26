@@ -3,6 +3,7 @@
 use App\Models\Book;
 use App\Models\Character;
 use App\Models\DictionaryEntry;
+use App\Models\Media;
 use App\Models\Topic;
 use App\Support\Scripture\ScriptureJsonImporter;
 use Database\Seeders\BhagavadGitaDevelopmentSeeder;
@@ -45,9 +46,65 @@ test('books page lists available public scripture books', function () {
     $ramcharitmanas = Book::query()
         ->where('slug', 'ramcharitmanas')
         ->firstOrFail();
+    $emptyBook = Book::query()->create([
+        'slug' => 'empty-book',
+        'number' => '1',
+        'title' => 'Empty Book',
+        'description' => 'Book without any assigned public media.',
+    ]);
 
-    $this->book->update(['number' => '2']);
-    $ramcharitmanas->update(['number' => '1']);
+    $overviewVideo = Media::query()->create([
+        'media_type' => 'video',
+        'title' => 'Ram Overview Video',
+        'url' => 'https://example.test/assets/ram-overview.mp4',
+        'meta_json' => [
+            'poster' => 'https://example.test/assets/ram-overview-poster.jpg',
+        ],
+        'sort_order' => 1,
+    ]);
+    $heroMedia = Media::query()->create([
+        'media_type' => 'image',
+        'title' => 'Ram Hero Illustration',
+        'alt_text' => 'Ram hero illustration',
+        'caption' => 'Hero artwork attached through a registered slot.',
+        'url' => 'https://example.test/assets/ram-hero.jpg',
+        'sort_order' => 2,
+    ]);
+    $supportingMedia = Media::query()->create([
+        'media_type' => 'video',
+        'title' => 'Ram Supporting Clip',
+        'caption' => 'Supporting clip for the Ramcharitmanas overview.',
+        'url' => 'https://example.test/assets/ram-supporting.mp4',
+        'sort_order' => 3,
+    ]);
+
+    $ramcharitmanas->mediaAssignments()->create([
+        'media_id' => $overviewVideo->id,
+        'role' => 'overview_video',
+        'title_override' => 'Ram Overview Slot',
+        'caption_override' => 'Registered overview video for Ramcharitmanas.',
+        'sort_order' => 1,
+        'status' => 'published',
+    ]);
+    $ramcharitmanas->mediaAssignments()->create([
+        'media_id' => $heroMedia->id,
+        'role' => 'hero_media',
+        'title_override' => 'Ram Hero Slot',
+        'caption_override' => 'Registered hero image for Ramcharitmanas.',
+        'sort_order' => 2,
+        'status' => 'published',
+    ]);
+    $ramcharitmanas->mediaAssignments()->create([
+        'media_id' => $supportingMedia->id,
+        'role' => 'supporting_media',
+        'title_override' => 'Ram Supporting Slot',
+        'caption_override' => 'Registered supporting media for Ramcharitmanas.',
+        'sort_order' => 3,
+        'status' => 'published',
+    ]);
+
+    $ramcharitmanas->update(['number' => '2']);
+    $this->book->update(['number' => '3']);
 
     $response = $this->get(route('scripture.books.index'));
 
@@ -55,23 +112,55 @@ test('books page lists available public scripture books', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('scripture/books/index')
-            ->has('books', 2)
-            ->where('books.0.slug', 'ramcharitmanas')
+            ->has('books', 3)
+            ->where('books.0.slug', 'empty-book')
             ->where('books.0.number', '1')
-            ->where('books.0.overview_href', route('scripture.books.overview', $ramcharitmanas))
-            ->where('books.0.overview_video', null)
-            ->where('books.0.href', route('scripture.books.show', $ramcharitmanas))
-            ->where('books.1.slug', 'bhagavad-gita')
+            ->where('books.0.overview_href', route('scripture.books.overview', $emptyBook))
+            ->where('books.0.media_slots.overview_video', null)
+            ->where('books.0.media_slots.hero_media', null)
+            ->where('books.0.media_slots.supporting_media', [])
+            ->missing('books.0.overview_video')
+            ->where('books.0.href', route('scripture.books.show', $emptyBook))
+            ->where('books.1.slug', 'ramcharitmanas')
             ->where('books.1.number', '2')
-            ->where('books.1.overview_href', route('scripture.books.overview', $this->book))
-            ->where('books.1.overview_video.block_type', 'video')
-            ->where('books.1.overview_video.title', 'Bhagavad Gita Overview')
+            ->where('books.1.overview_href', route('scripture.books.overview', $ramcharitmanas))
+            ->where('books.1.media_slots.overview_video.title', 'Ram Overview Slot')
             ->where(
-                'books.1.overview_video.data_json.url',
-                'https://example.test/assets/bhagavad-gita-overview.mp4',
+                'books.1.media_slots.overview_video.caption',
+                'Registered overview video for Ramcharitmanas.',
             )
             ->where(
-                'books.1.href',
+                'books.1.media_slots.overview_video.media.url',
+                'https://example.test/assets/ram-overview.mp4',
+            )
+            ->where(
+                'books.1.media_slots.overview_video.media.poster_url',
+                'https://example.test/assets/ram-overview-poster.jpg',
+            )
+            ->where('books.1.media_slots.hero_media.title', 'Ram Hero Slot')
+            ->where(
+                'books.1.media_slots.hero_media.media.url',
+                'https://example.test/assets/ram-hero.jpg',
+            )
+            ->has('books.1.media_slots.supporting_media', 1)
+            ->where(
+                'books.1.media_slots.supporting_media.0.media.url',
+                'https://example.test/assets/ram-supporting.mp4',
+            )
+            ->where('books.1.href', route('scripture.books.show', $ramcharitmanas))
+            ->where('books.2.slug', 'bhagavad-gita')
+            ->where('books.2.number', '3')
+            ->where('books.2.overview_href', route('scripture.books.overview', $this->book))
+            ->where('books.2.media_slots.overview_video.role', 'overview_video')
+            ->where('books.2.media_slots.overview_video.title', 'Bhagavad Gita Overview')
+            ->where(
+                'books.2.media_slots.overview_video.media.url',
+                'https://example.test/assets/bhagavad-gita-overview.mp4',
+            )
+            ->where('books.2.media_slots.hero_media', null)
+            ->where('books.2.media_slots.supporting_media', [])
+            ->where(
+                'books.2.href',
                 route('scripture.books.show', $this->book),
             ),
         );
@@ -88,11 +177,17 @@ test('book overview page renders published editorial content separately from can
             ->where('book.title', 'Bhagavad Gita')
             ->where('book.href', route('scripture.books.show', $this->book))
             ->where('book.overview_href', route('scripture.books.overview', $this->book))
-            ->has('content_blocks', 3)
+            ->where('book.media_slots.overview_video.title', 'Bhagavad Gita Overview')
+            ->where(
+                'book.media_slots.overview_video.media.url',
+                'https://example.test/assets/bhagavad-gita-overview.mp4',
+            )
+            ->where('book.media_slots.hero_media', null)
+            ->where('book.media_slots.supporting_media', [])
+            ->has('content_blocks', 2)
             ->where('content_blocks.0.region', 'overview')
             ->where('content_blocks.0.block_type', 'text')
-            ->where('content_blocks.1.block_type', 'quote')
-            ->where('content_blocks.2.block_type', 'video'),
+            ->where('content_blocks.1.block_type', 'quote'),
         );
 });
 
@@ -105,13 +200,120 @@ test('book page is displayed for scripture browsing', function () {
             ->component('scripture/books/show')
             ->where('book.number', '1')
             ->where('book.title', 'Bhagavad Gita')
-            ->has('content_blocks', 3)
+            ->where('book.media_slots.overview_video.title', 'Bhagavad Gita Overview')
+            ->where(
+                'book.media_slots.overview_video.media.url',
+                'https://example.test/assets/bhagavad-gita-overview.mp4',
+            )
+            ->has('content_blocks', 2)
             ->has('book_sections', 1)
             ->where(
                 'book_sections.0.href',
                 route('scripture.books.show', $this->book).'#section-main',
             )
             ->has('book_sections.0.chapters', $this->bookSection->chapters()->count()),
+        );
+});
+
+test('book overview and browse pages share the same registered media slot payload for non gita books', function () {
+    app(ScriptureJsonImporter::class)->import('ramcharitmanas');
+
+    $book = Book::query()
+        ->where('slug', 'ramcharitmanas')
+        ->firstOrFail();
+
+    $overviewVideo = Media::query()->create([
+        'media_type' => 'video',
+        'title' => 'Ram Overview Video',
+        'url' => 'https://example.test/assets/ram-overview-shared.mp4',
+        'sort_order' => 1,
+    ]);
+    $heroMedia = Media::query()->create([
+        'media_type' => 'image',
+        'title' => 'Ram Shared Hero',
+        'alt_text' => 'Shared hero image',
+        'url' => 'https://example.test/assets/ram-hero-shared.jpg',
+        'sort_order' => 2,
+    ]);
+    $supportingMedia = Media::query()->create([
+        'media_type' => 'video',
+        'title' => 'Ram Shared Supporting',
+        'url' => 'https://example.test/assets/ram-supporting-shared.mp4',
+        'sort_order' => 3,
+    ]);
+
+    $book->mediaAssignments()->create([
+        'media_id' => $overviewVideo->id,
+        'role' => 'overview_video',
+        'title_override' => 'Shared overview slot',
+        'caption_override' => 'Overview video attached through Book media assignments.',
+        'sort_order' => 1,
+        'status' => 'published',
+    ]);
+    $book->mediaAssignments()->create([
+        'media_id' => $heroMedia->id,
+        'role' => 'hero_media',
+        'title_override' => 'Shared hero slot',
+        'caption_override' => 'Hero media attached through Book media assignments.',
+        'sort_order' => 2,
+        'status' => 'published',
+    ]);
+    $book->mediaAssignments()->create([
+        'media_id' => $supportingMedia->id,
+        'role' => 'supporting_media',
+        'title_override' => 'Shared supporting slot',
+        'caption_override' => 'Supporting media attached through Book media assignments.',
+        'sort_order' => 3,
+        'status' => 'published',
+    ]);
+
+    $overviewResponse = $this->get(route('scripture.books.overview', $book));
+
+    $overviewResponse
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('scripture/books/overview')
+            ->where('book.slug', 'ramcharitmanas')
+            ->where('book.media_slots.overview_video.title', 'Shared overview slot')
+            ->where(
+                'book.media_slots.overview_video.media.url',
+                'https://example.test/assets/ram-overview-shared.mp4',
+            )
+            ->where('book.media_slots.hero_media.title', 'Shared hero slot')
+            ->where(
+                'book.media_slots.hero_media.media.url',
+                'https://example.test/assets/ram-hero-shared.jpg',
+            )
+            ->has('book.media_slots.supporting_media', 1)
+            ->where(
+                'book.media_slots.supporting_media.0.media.url',
+                'https://example.test/assets/ram-supporting-shared.mp4',
+            )
+            ->where('content_blocks', []),
+        );
+
+    $showResponse = $this->get(route('scripture.books.show', $book));
+
+    $showResponse
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('scripture/books/show')
+            ->where('book.slug', 'ramcharitmanas')
+            ->where('book.media_slots.overview_video.title', 'Shared overview slot')
+            ->where(
+                'book.media_slots.overview_video.media.url',
+                'https://example.test/assets/ram-overview-shared.mp4',
+            )
+            ->where('book.media_slots.hero_media.title', 'Shared hero slot')
+            ->where(
+                'book.media_slots.hero_media.media.url',
+                'https://example.test/assets/ram-hero-shared.jpg',
+            )
+            ->has('book.media_slots.supporting_media', 1)
+            ->where(
+                'book.media_slots.supporting_media.0.media.url',
+                'https://example.test/assets/ram-supporting-shared.mp4',
+            ),
         );
 });
 

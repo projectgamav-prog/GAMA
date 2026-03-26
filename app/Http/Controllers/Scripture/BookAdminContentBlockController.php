@@ -8,6 +8,8 @@ use App\Http\Requests\Scripture\BookAdminContentBlockUpdateRequest;
 use App\Models\Book;
 use App\Models\ContentBlock;
 use App\Support\Scripture\Admin\BookAdminRouteContext;
+use App\Support\Scripture\Admin\BookContentBlockOrdering;
+use App\Support\Scripture\Admin\RegisteredContentBlock;
 use Illuminate\Http\RedirectResponse;
 
 class BookAdminContentBlockController extends Controller
@@ -18,9 +20,29 @@ class BookAdminContentBlockController extends Controller
     public function store(
         BookAdminContentBlockStoreRequest $request,
         Book $book,
+        BookContentBlockOrdering $ordering,
     ): RedirectResponse {
-        $book->contentBlocks()->create(
-            $this->attributes($request->validated(), includeDataJson: true),
+        $validated = $request->validated();
+        $adminRouteContext = new BookAdminRouteContext($book);
+        $relativeBlockId = $validated['relative_block_id'] ?? null;
+        $relativeBlock = is_numeric($relativeBlockId)
+            ? ContentBlock::query()->find((int) $relativeBlockId)
+            : null;
+
+        if ($relativeBlock instanceof ContentBlock) {
+            $adminRouteContext->abortUnlessContextualInsertionAnchor($relativeBlock);
+        }
+
+        $ordering->create(
+            $book,
+            RegisteredContentBlock::createAttributes(
+                $validated,
+                includeDataJson: true,
+            ),
+            insertionMode: $this->nullableString(
+                $validated['insertion_mode'] ?? null,
+            ),
+            relativeBlock: $relativeBlock,
         );
 
         return redirect()->back(status: 303);
@@ -39,32 +61,10 @@ class BookAdminContentBlockController extends Controller
         $adminRouteContext->abortUnlessEditableContentBlock($contentBlock);
 
         $contentBlock->update(
-            $this->attributes($request->validated()),
+            RegisteredContentBlock::updateAttributes($request->validated()),
         );
 
         return redirect()->back(status: 303);
-    }
-
-    /**
-     * @param  array<string, mixed>  $validated
-     * @return array<string, mixed>
-     */
-    private function attributes(array $validated, bool $includeDataJson = false): array
-    {
-        $attributes = [
-            'region' => trim((string) $validated['region']),
-            'block_type' => trim((string) $validated['block_type']),
-            'title' => $this->nullableString($validated['title'] ?? null),
-            'body' => trim((string) $validated['body']),
-            'sort_order' => $validated['sort_order'],
-            'status' => $validated['status'],
-        ];
-
-        if ($includeDataJson) {
-            $attributes['data_json'] = null;
-        }
-
-        return $attributes;
     }
 
     private function nullableString(mixed $value): ?string

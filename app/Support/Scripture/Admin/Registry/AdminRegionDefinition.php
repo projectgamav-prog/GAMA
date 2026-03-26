@@ -9,6 +9,7 @@ readonly class AdminRegionDefinition
      * @param  list<string>  $contextualFieldKeys
      * @param  list<string>  $fullFieldKeys
      * @param  list<string>  $canonicalFieldKeys
+     * @param  list<AdminRegionMethodDefinition>  $methods
      */
     public function __construct(
         public string $key,
@@ -21,7 +22,16 @@ readonly class AdminRegionDefinition
         public array $canonicalFieldKeys = [],
         public ?string $capabilityHint = null,
         public ?string $helpText = null,
-    ) {}
+        public array $methods = [],
+    ) {
+        foreach ($this->methods as $method) {
+            if (! $method instanceof AdminRegionMethodDefinition) {
+                throw new \InvalidArgumentException(
+                    "Admin region [{$this->key}] received an invalid region method registration.",
+                );
+            }
+        }
+    }
 
     /**
      * @param  array<string, AdminFieldDefinition>  $fieldMap
@@ -41,6 +51,10 @@ readonly class AdminRegionDefinition
             'supported_modes' => $this->supportedModes(),
             'capability_hint' => $this->capabilityHint,
             'help_text' => $this->helpText,
+            'method_families' => collect($this->methods)
+                ->map(fn (AdminRegionMethodDefinition $method) => $method->family)
+                ->values()
+                ->all(),
             'fields' => $this->resolveFields($fieldMap, $this->fieldKeys),
             'contextual_fields' => $this->resolveFields($fieldMap, $this->contextualFieldKeys),
             'full_fields' => $this->resolveFields($fieldMap, $this->fullFieldKeys),

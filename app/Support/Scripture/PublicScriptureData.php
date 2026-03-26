@@ -4,19 +4,20 @@ namespace App\Support\Scripture;
 
 use App\Models\Book;
 use App\Models\BookSection;
-use App\Models\Character;
-use App\Models\CharacterVerseAssignment;
 use App\Models\Chapter;
 use App\Models\ChapterSection;
+use App\Models\Character;
+use App\Models\CharacterVerseAssignment;
 use App\Models\ContentBlock;
 use App\Models\DictionaryEntry;
 use App\Models\Media;
+use App\Models\MediaAssignment;
 use App\Models\Topic;
 use App\Models\TopicVerseAssignment;
 use App\Models\Verse;
+use App\Models\VerseCommentary;
 use App\Models\VerseDictionaryAssignment;
 use App\Models\VerseMeta;
-use App\Models\VerseCommentary;
 use App\Models\VerseRecitation;
 use App\Models\VerseTranslation;
 
@@ -53,7 +54,7 @@ class PublicScriptureData
             'description' => $book->description,
             'href' => $this->bookHref($book),
             'overview_href' => $this->bookOverviewHref($book),
-            'overview_video' => $this->overviewVideo($book),
+            'media_slots' => $this->bookMediaSlots($book),
         ];
     }
 
@@ -591,7 +592,107 @@ class PublicScriptureData
     /**
      * @return array<string, mixed>|null
      */
-    private function overviewVideo(Book $book): ?array
+    private function bookMediaSlots(Book $book): array
+    {
+        $mediaAssignments = collect(
+            $book->relationLoaded('mediaAssignments')
+                ? $book->mediaAssignments
+                : [],
+        )
+            ->filter(fn (mixed $assignment) => $assignment instanceof MediaAssignment
+                && $assignment->status === 'published')
+            ->values();
+
+        $overviewAssignments = $mediaAssignments
+            ->filter(fn (MediaAssignment $assignment) => $assignment->role === 'overview_video')
+            ->values();
+
+        return [
+            'overview_video' => $this->firstBookMediaSlot(
+                $overviewAssignments,
+                requireMediaType: 'video',
+            ) ?? ($overviewAssignments->isEmpty()
+                ? $this->legacyOverviewVideoSlot($book)
+                : null),
+            'hero_media' => $this->firstBookMediaSlot(
+                $mediaAssignments
+                    ->filter(fn (MediaAssignment $assignment) => $assignment->role === 'hero_media')
+                    ->values(),
+            ),
+            'supporting_media' => $this->bookMediaSlotCollection(
+                $mediaAssignments
+                    ->filter(fn (MediaAssignment $assignment) => $assignment->role === 'supporting_media')
+                    ->values(),
+            ),
+        ];
+    }
+
+    /**
+     * @param  iterable<int, MediaAssignment>  $assignments
+     * @return array<string, mixed>|null
+     */
+    private function firstBookMediaSlot(
+        iterable $assignments,
+        ?string $requireMediaType = null,
+    ): ?array {
+        return collect($assignments)
+            ->map(fn (MediaAssignment $assignment) => $this->bookMediaSlot(
+                $assignment,
+                requireMediaType: $requireMediaType,
+            ))
+            ->first(fn (?array $slot) => $slot !== null);
+    }
+
+    /**
+     * @param  iterable<int, MediaAssignment>  $assignments
+     * @return list<array<string, mixed>>
+     */
+    private function bookMediaSlotCollection(iterable $assignments): array
+    {
+        return collect($assignments)
+            ->map(fn (MediaAssignment $assignment) => $this->bookMediaSlot($assignment))
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function bookMediaSlot(
+        MediaAssignment $assignment,
+        ?string $requireMediaType = null,
+    ): ?array {
+        $media = $assignment->relationLoaded('media')
+            ? $assignment->media
+            : null;
+
+        if (! $media instanceof Media) {
+            return null;
+        }
+
+        if ($requireMediaType !== null && $media->media_type !== $requireMediaType) {
+            return null;
+        }
+
+        $mediaPayload = $this->bookMedia($media);
+
+        if (! filled($mediaPayload['url']) && ! filled($mediaPayload['path'])) {
+            return null;
+        }
+
+        return [
+            'role' => $assignment->role,
+            'title' => $assignment->title_override ?? $media->title,
+            'caption' => $assignment->caption_override ?? $media->caption,
+            'media' => $mediaPayload,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function legacyOverviewVideoSlot(Book $book): ?array
     {
         if (! $book->relationLoaded('contentBlocks')) {
             return null;
@@ -599,6 +700,7 @@ class PublicScriptureData
 
         $videoBlocks = collect($book->contentBlocks)
             ->filter(fn (mixed $block) => $block instanceof ContentBlock
+                && $block->status === 'published'
                 && $block->block_type === 'video'
                 && filled(data_get($block->data_json, 'url')))
             ->values();
@@ -613,7 +715,21 @@ class PublicScriptureData
             return null;
         }
 
-        return $this->contentBlock($videoBlock);
+        return [
+            'role' => 'overview_video',
+            'title' => $videoBlock->title,
+            'caption' => $videoBlock->body ?? data_get($videoBlock->data_json, 'caption'),
+            'media' => [
+                'id' => null,
+                'media_type' => 'video',
+                'title' => $videoBlock->title,
+                'alt_text' => null,
+                'caption' => data_get($videoBlock->data_json, 'caption') ?? $videoBlock->body,
+                'url' => data_get($videoBlock->data_json, 'url'),
+                'path' => null,
+                'poster_url' => data_get($videoBlock->data_json, 'poster'),
+            ],
+        ];
     }
 
     /**
@@ -665,6 +781,23 @@ class PublicScriptureData
             'title' => $media->title,
             'path' => $media->path,
             'url' => $media->url,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function bookMedia(Media $media): array
+    {
+        return [
+            'id' => $media->id,
+            'media_type' => $media->media_type,
+            'title' => $media->title,
+            'alt_text' => $media->alt_text,
+            'caption' => $media->caption,
+            'url' => $media->url,
+            'path' => $media->path,
+            'poster_url' => data_get($media->meta_json, 'poster'),
         ];
     }
 

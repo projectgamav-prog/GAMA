@@ -12,8 +12,7 @@ class EditableTextNoteBlock
      */
     public static function owns(Model $owner, ContentBlock $contentBlock): bool
     {
-        return $contentBlock->parent_type === $owner->getMorphClass()
-            && (int) $contentBlock->parent_id === (int) $owner->getKey();
+        return RegisteredContentBlock::owns($owner, $contentBlock);
     }
 
     /**
@@ -21,8 +20,11 @@ class EditableTextNoteBlock
      */
     public static function isEditableFor(Model $owner, ContentBlock $contentBlock): bool
     {
-        return self::owns($owner, $contentBlock)
-            && $contentBlock->block_type === 'text';
+        return RegisteredContentBlock::isEditableFor(
+            $owner,
+            $contentBlock,
+            ['text'],
+        );
     }
 
     /**
@@ -32,7 +34,11 @@ class EditableTextNoteBlock
         Model $owner,
         ContentBlock $contentBlock,
     ): void {
-        abort_unless(self::isEditableFor($owner, $contentBlock), 404);
+        RegisteredContentBlock::abortUnlessEditableFor(
+            $owner,
+            $contentBlock,
+            ['text'],
+        );
     }
 
     /**
@@ -43,15 +49,11 @@ class EditableTextNoteBlock
      */
     public static function createAttributes(array $validated): array
     {
-        return [
-            'region' => trim((string) $validated['region']),
-            'block_type' => 'text',
-            'title' => self::nullableString($validated['title'] ?? null),
-            'body' => trim((string) $validated['body']),
-            'data_json' => null,
-            'sort_order' => $validated['sort_order'],
-            'status' => $validated['status'],
-        ];
+        return RegisteredContentBlock::createAttributes(
+            $validated,
+            forcedBlockType: 'text',
+            includeDataJson: true,
+        );
     }
 
     /**
@@ -62,23 +64,9 @@ class EditableTextNoteBlock
      */
     public static function updateAttributes(array $validated): array
     {
-        return [
-            'region' => trim((string) $validated['region']),
-            'title' => self::nullableString($validated['title'] ?? null),
-            'body' => trim((string) $validated['body']),
-            'sort_order' => $validated['sort_order'],
-            'status' => $validated['status'],
-        ];
-    }
-
-    private static function nullableString(mixed $value): ?string
-    {
-        if (! is_string($value)) {
-            return null;
-        }
-
-        $trimmed = trim($value);
-
-        return $trimmed === '' ? null : $trimmed;
+        return RegisteredContentBlock::updateAttributes(
+            $validated,
+            allowBlockTypeUpdate: false,
+        );
     }
 }

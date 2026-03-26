@@ -139,6 +139,9 @@ test('authorized editors can toggle protected admin visibility and receive regis
             ->where('admin.details_update_href', $this->detailsUpdateRoute)
             ->where('admin.full_edit_href', $this->fullEditRoute)
             ->where('admin.canonical_edit_href', $this->canonicalEditRoute)
+            ->where('admin.content_block_store_href', $this->contentBlockStoreRoute)
+            ->where('admin.content_block_types', ['text', 'quote'])
+            ->where('admin.content_block_regions', ['overview', 'highlights'])
             ->where(
                 "admin.content_block_update_hrefs.{$textBlock->id}",
                 route('scripture.books.admin.content-blocks.update', [
@@ -163,6 +166,9 @@ test('authorized editors can toggle protected admin visibility and receive regis
         ->assertInertia(fn (Assert $page) => $page
             ->where('admin.full_edit_href', $this->fullEditRoute)
             ->where('admin.canonical_edit_href', $this->canonicalEditRoute)
+            ->where('admin.content_block_store_href', $this->contentBlockStoreRoute)
+            ->where('admin.content_block_types', ['text', 'quote'])
+            ->where('admin.content_block_regions', ['overview', 'highlights'])
             ->where(
                 "admin.content_block_update_hrefs.{$quoteBlock->id}",
                 route('scripture.books.admin.content-blocks.update', [
@@ -293,6 +299,19 @@ test('authorized editors can manage registered book content blocks while unregis
             ->component('scripture/books/full-edit')
             ->where('admin_entity.primary_table', 'books')
             ->where('admin_entity.edit_modes.canonical.status', 'active')
+            ->where('admin_entity.regions.1.key', 'content_blocks')
+            ->where('admin_entity.regions.1.method_families', [
+                'content_block_create',
+                'content_block_edit',
+                'ordered_insertion',
+                'reorder',
+            ])
+            ->where('admin_entity.regions.3.key', 'media_slots')
+            ->where('admin_entity.regions.3.method_families', [
+                'media_slot_edit',
+            ])
+            ->has('admin_entity.methods_by_mode.contextual', 7)
+            ->has('admin_entity.methods_by_mode.full', 18)
             ->has('admin_content_blocks', 2)
             ->where('admin_content_blocks.0.title', 'Updated published book note')
             ->where('admin_content_blocks.1.title', 'Fresh draft quote')
@@ -304,14 +323,145 @@ test('authorized editors can manage registered book content blocks while unregis
     $this->get($showRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->has('content_blocks', 2)
+            ->has('content_blocks', 1)
             ->where('content_blocks.0.title', 'Updated published book note')
-            ->where('content_blocks.1.title', 'Protected legacy video'),
+            ->where('book.media_slots.overview_video.title', 'Protected legacy video')
+            ->where(
+                'book.media_slots.overview_video.media.url',
+                'https://example.test/book-video.mp4',
+            ),
         );
 
     expect($newQuote->status)->toBe('draft');
     expect(ContentBlock::query()->findOrFail($videoBlock->id)->title)
         ->toBe('Protected legacy video');
+});
+
+test('authorized editors can create book content blocks at contextual insertion points', function () {
+    $editor = User::query()->where('email', 'editor3@example.com')->firstOrFail();
+
+    $book = Book::query()->create([
+        'slug' => 'book-inline-insertions',
+        'number' => '100',
+        'title' => 'Book Inline Insertions',
+        'description' => 'Book used for contextual insertion ordering tests.',
+    ]);
+
+    $showRoute = route('scripture.books.show', $book);
+    $storeRoute = route('scripture.books.admin.content-blocks.store', $book);
+
+    $firstBlock = $book->contentBlocks()->create([
+        'region' => 'overview',
+        'block_type' => 'text',
+        'title' => 'First published note',
+        'body' => 'First note body.',
+        'data_json' => null,
+        'sort_order' => 10,
+        'status' => 'published',
+    ]);
+
+    $videoBlock = $book->contentBlocks()->create([
+        'region' => 'overview',
+        'block_type' => 'video',
+        'title' => 'Hidden video note',
+        'body' => 'Legacy video block that should stay outside the inline flow.',
+        'data_json' => ['url' => 'https://example.test/hidden-video.mp4'],
+        'sort_order' => 20,
+        'status' => 'published',
+    ]);
+
+    $lastBlock = $book->contentBlocks()->create([
+        'region' => 'highlights',
+        'block_type' => 'quote',
+        'title' => 'Last published quote',
+        'body' => 'Last quote body.',
+        'data_json' => null,
+        'sort_order' => 30,
+        'status' => 'published',
+    ]);
+
+    $this->actingAs($editor)
+        ->from($showRoute)
+        ->post($storeRoute, [
+            'block_type' => 'text',
+            'title' => 'Inserted at start',
+            'body' => 'Placed before the first public block.',
+            'region' => 'overview',
+            'status' => 'published',
+            'insertion_mode' => 'start',
+        ])
+        ->assertRedirect($showRoute);
+
+    $this->actingAs($editor)
+        ->from($showRoute)
+        ->post($storeRoute, [
+            'block_type' => 'quote',
+            'title' => 'Inserted between blocks',
+            'body' => 'Placed between the first and last visible blocks.',
+            'region' => 'overview',
+            'status' => 'published',
+            'insertion_mode' => 'after',
+            'relative_block_id' => $firstBlock->id,
+        ])
+        ->assertRedirect($showRoute);
+
+    $this->actingAs($editor)
+        ->from($showRoute)
+        ->post($storeRoute, [
+            'block_type' => 'text',
+            'title' => 'Inserted at end',
+            'body' => 'Placed after the last visible block.',
+            'region' => 'highlights',
+            'status' => 'published',
+            'insertion_mode' => 'end',
+        ])
+        ->assertRedirect($showRoute);
+
+    expect(
+        $book->contentBlocks()
+            ->orderBy('sort_order')
+            ->pluck('sort_order')
+            ->all(),
+    )->toBe([1, 2, 3, 4, 5, 6]);
+
+    expect(
+        $book->contentBlocks()
+            ->published()
+            ->where('block_type', '!=', 'video')
+            ->orderBy('sort_order')
+            ->pluck('title')
+            ->all(),
+    )->toBe([
+        'Inserted at start',
+        'First published note',
+        'Inserted between blocks',
+        'Last published quote',
+        'Inserted at end',
+    ]);
+
+    expect(ContentBlock::query()->findOrFail($videoBlock->id)->sort_order)
+        ->toBe(4);
+
+    $this->actingAs($editor)
+        ->withCookie(AdminContext::VISIBILITY_COOKIE, '1')
+        ->get($showRoute)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('content_blocks.0.title', 'Inserted at start')
+            ->where('content_blocks.1.title', 'First published note')
+            ->where('content_blocks.2.title', 'Inserted between blocks')
+            ->where('content_blocks.3.title', 'Last published quote')
+            ->where('content_blocks.4.title', 'Inserted at end')
+            ->where(
+                "admin.content_block_update_hrefs.{$firstBlock->id}",
+                route('scripture.books.admin.content-blocks.update', [
+                    'book' => $book,
+                    'contentBlock' => $firstBlock,
+                ]),
+            ),
+        );
+
+    expect($lastBlock->fresh()->sort_order)->toBe(5);
 });
 
 test('authorized editors can manage book media assignments and access canonical protected book identity view', function () {
@@ -404,6 +554,9 @@ test('authorized editors can manage book media assignments and access canonical 
             ->component('scripture/books/canonical-edit')
             ->where('admin_entity.edit_modes.canonical.status', 'active')
             ->has('admin_entity.field_groups.identity', 3)
+            ->has('admin_entity.methods_by_mode.canonical', 4)
+            ->where('admin_entity.methods_by_mode.canonical.0.family', 'canonical_display')
+            ->where('admin_entity.methods_by_mode.canonical.3.label', 'Canonical browse structure display')
             ->where('book.slug', 'book-media-admin')
             ->where('book.title', 'Book Media Admin'),
         );

@@ -8,11 +8,6 @@ use App\Models\MediaAssignment;
 
 class BookAdminRouteContext
 {
-    /**
-     * @var list<string>
-     */
-    private array $editableContentBlockTypes = ['text', 'quote'];
-
     public function __construct(
         private readonly Book $book,
     ) {}
@@ -65,6 +60,22 @@ class BookAdminRouteContext
         ]));
     }
 
+    /**
+     * @return list<string>
+     */
+    public function editableContentBlockTypes(): array
+    {
+        return BookContentBlockSchema::editableTypes();
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function creatableContentBlockRegions(): array
+    {
+        return BookContentBlockSchema::creatableRegions();
+    }
+
     public function mediaAssignmentStoreHref(): string
     {
         return route('scripture.books.admin.media-assignments.store', $this->routeParameters());
@@ -79,19 +90,43 @@ class BookAdminRouteContext
 
     public function ownsContentBlock(ContentBlock $contentBlock): bool
     {
-        return $contentBlock->parent_type === $this->book->getMorphClass()
-            && (int) $contentBlock->parent_id === (int) $this->book->getKey();
+        return RegisteredContentBlock::owns($this->book, $contentBlock);
     }
 
     public function isEditableContentBlock(ContentBlock $contentBlock): bool
     {
-        return $this->ownsContentBlock($contentBlock)
-            && in_array($contentBlock->block_type, $this->editableContentBlockTypes, true);
+        return RegisteredContentBlock::isEditableFor(
+            $this->book,
+            $contentBlock,
+            $this->editableContentBlockTypes(),
+        );
     }
 
     public function abortUnlessEditableContentBlock(ContentBlock $contentBlock): void
     {
-        abort_unless($this->isEditableContentBlock($contentBlock), 404);
+        RegisteredContentBlock::abortUnlessEditableFor(
+            $this->book,
+            $contentBlock,
+            $this->editableContentBlockTypes(),
+        );
+    }
+
+    public function isContextualInsertionAnchor(ContentBlock $contentBlock): bool
+    {
+        return RegisteredContentBlock::isInsertionAnchorFor(
+            $this->book,
+            $contentBlock,
+            $this->editableContentBlockTypes(),
+        );
+    }
+
+    public function abortUnlessContextualInsertionAnchor(ContentBlock $contentBlock): void
+    {
+        RegisteredContentBlock::abortUnlessInsertionAnchorFor(
+            $this->book,
+            $contentBlock,
+            $this->editableContentBlockTypes(),
+        );
     }
 
     public function ownsMediaAssignment(MediaAssignment $mediaAssignment): bool

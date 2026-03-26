@@ -80,4 +80,9 @@ class VerseAdminRouteContext
     {
         EditableTextNoteBlock::abortUnlessEditableFor($this->verse, $contentBlock);
     }
+
+    public function contentBlockProtectionReason(): string
+    {
+        return 'Only verse-owned text note blocks are editable in this phase.';
+    }
 }

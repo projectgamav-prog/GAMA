@@ -14,6 +14,10 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { BookAdminSourceLabel } from '@/components/scripture/book-admin-source-label';
+import {
+    getBookMediaSlotMeta,
+    getBookMediaSlotOptions,
+} from '@/lib/book-media-slot-meta';
 import type {
     ScriptureAdminMediaAssignment,
     ScriptureAdminMediaSummary,
@@ -39,6 +43,24 @@ type SharedProps = {
     availableMedia: ScriptureAdminMediaSummary[];
 };
 
+function MediaSlotPurposeCard({ role }: { role: string }) {
+    const slot = getBookMediaSlotMeta(role);
+
+    return (
+        <div className="rounded-xl border border-border/70 bg-muted/20 px-4 py-4">
+            <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="secondary">{slot.label}</Badge>
+                <Badge variant="outline" className="font-mono text-[11px]">
+                    {role}
+                </Badge>
+            </div>
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                {slot.description}
+            </p>
+        </div>
+    );
+}
+
 export function CreateBookMediaAssignmentCard({
     storeHref,
     nextSortOrder,
@@ -53,6 +75,8 @@ export function CreateBookMediaAssignmentCard({
     storeHref: string;
     nextSortOrder: number;
 }) {
+    const slotOptions = getBookMediaSlotOptions(roleField.options);
+
     const form = useForm<MediaAssignmentFormData>({
         media_id: availableMedia[0] ? String(availableMedia[0].id) : '',
         role: roleField.options?.[0] ?? 'overview_video',
@@ -69,7 +93,7 @@ export function CreateBookMediaAssignmentCard({
                     <Badge variant="outline">Media slot</Badge>
                     <Badge variant="secondary">Supporting editorial</Badge>
                 </div>
-                <CardTitle>Attach Registered Media</CardTitle>
+                <CardTitle>Attach Media to a Registered Public Slot</CardTitle>
             </CardHeader>
             <CardContent className="space-y-5">
                 {availableMedia.length === 0 ? (
@@ -91,7 +115,10 @@ export function CreateBookMediaAssignmentCard({
                                         form.setData('media_id', value)
                                     }
                                 >
-                                    <SelectTrigger id="new_media_id" className="w-full">
+                                    <SelectTrigger
+                                        id="new_media_id"
+                                        className="w-full"
+                                    >
                                         <SelectValue placeholder="Choose media" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -121,13 +148,19 @@ export function CreateBookMediaAssignmentCard({
                                         form.setData('role', value)
                                     }
                                 >
-                                    <SelectTrigger id="new_media_role" className="w-full">
+                                    <SelectTrigger
+                                        id="new_media_role"
+                                        className="w-full"
+                                    >
                                         <SelectValue placeholder="Choose slot" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {(roleField.options ?? []).map((option) => (
-                                            <SelectItem key={option} value={option}>
-                                                {option}
+                                        {slotOptions.map((option) => (
+                                            <SelectItem
+                                                key={option.role}
+                                                value={option.role}
+                                            >
+                                                {option.label}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -135,6 +168,8 @@ export function CreateBookMediaAssignmentCard({
                                 <InputError message={form.errors.role} />
                             </div>
                         </div>
+
+                        <MediaSlotPurposeCard role={form.data.role} />
 
                         <div className="grid gap-4 md:grid-cols-2">
                             <div className="grid gap-2">
@@ -213,15 +248,23 @@ export function CreateBookMediaAssignmentCard({
                                     )
                                 }
                             >
-                                <SelectTrigger id="new_media_status" className="w-full">
+                                <SelectTrigger
+                                    id="new_media_status"
+                                    className="w-full"
+                                >
                                     <SelectValue placeholder="Choose status" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {(statusField.options ?? []).map((option) => (
-                                        <SelectItem key={option} value={option}>
-                                            {option}
-                                        </SelectItem>
-                                    ))}
+                                    {(statusField.options ?? []).map(
+                                        (option) => (
+                                            <SelectItem
+                                                key={option}
+                                                value={option}
+                                            >
+                                                {option}
+                                            </SelectItem>
+                                        ),
+                                    )}
                                 </SelectContent>
                             </Select>
                             <InputError message={form.errors.status} />
@@ -265,6 +308,9 @@ export function BookMediaAssignmentEditorCard({
 }: SharedProps & {
     assignment: ScriptureAdminMediaAssignment;
 }) {
+    const slotOptions = getBookMediaSlotOptions(roleField.options);
+    const assignmentSlot = getBookMediaSlotMeta(assignment.role);
+
     const form = useForm<MediaAssignmentFormData>({
         media_id: String(assignment.media_id),
         role: assignment.role,
@@ -278,7 +324,10 @@ export function BookMediaAssignmentEditorCard({
         <Card id={`media-assignment-${assignment.id}`}>
             <CardHeader className="gap-3">
                 <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant="outline">{assignment.role}</Badge>
+                    <Badge variant="secondary">{assignmentSlot.label}</Badge>
+                    <Badge variant="outline" className="font-mono text-[11px]">
+                        {assignment.role}
+                    </Badge>
                     <Badge variant="outline">{assignment.status}</Badge>
                     {assignment.media && (
                         <Badge variant="secondary">
@@ -287,7 +336,7 @@ export function BookMediaAssignmentEditorCard({
                     )}
                 </div>
                 <CardTitle>
-                    {assignment.media?.title ?? `Assignment ${assignment.id}`}
+                    {assignment.media?.title ?? `${assignmentSlot.label} slot`}
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-5">
@@ -350,9 +399,12 @@ export function BookMediaAssignmentEditorCard({
                                 <SelectValue placeholder="Choose slot" />
                             </SelectTrigger>
                             <SelectContent>
-                                {(roleField.options ?? []).map((option) => (
-                                    <SelectItem key={option} value={option}>
-                                        {option}
+                                {slotOptions.map((option) => (
+                                    <SelectItem
+                                        key={option.role}
+                                        value={option.role}
+                                    >
+                                        {option.label}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -360,6 +412,8 @@ export function BookMediaAssignmentEditorCard({
                         <InputError message={form.errors.role} />
                     </div>
                 </div>
+
+                <MediaSlotPurposeCard role={form.data.role} />
 
                 <div className="grid gap-4 md:grid-cols-2">
                     <div className="grid gap-2">
@@ -407,10 +461,7 @@ export function BookMediaAssignmentEditorCard({
                         id={`media_caption_override_${assignment.id}`}
                         value={form.data.caption_override}
                         onChange={(event) =>
-                            form.setData(
-                                'caption_override',
-                                event.target.value,
-                            )
+                            form.setData('caption_override', event.target.value)
                         }
                         rows={4}
                     />

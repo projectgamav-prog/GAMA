@@ -9,6 +9,8 @@ use App\Models\Chapter;
 use App\Models\ChapterSection;
 use App\Models\ContentBlock;
 use App\Models\Verse;
+use App\Support\Scripture\Admin\RegisteredContentBlockData;
+use App\Support\Scripture\Admin\Registry\AdminEntityRegistry;
 use App\Support\Scripture\Admin\VerseAdminRouteContext;
 use App\Support\Scripture\PublicScriptureData;
 use Inertia\Inertia;
@@ -26,10 +28,13 @@ class VerseFullEditController extends Controller
         ChapterSection $chapterSection,
         Verse $verse,
         PublicScriptureData $publicScriptureData,
+        AdminEntityRegistry $adminEntityRegistry,
     ): Response {
         $verse->load('verseMeta');
 
         $contentBlocks = $verse->contentBlocks()
+            ->orderBy('sort_order')
+            ->orderBy('id')
             ->get();
         $adminRouteContext = new VerseAdminRouteContext(
             $book,
@@ -40,6 +45,9 @@ class VerseFullEditController extends Controller
         );
         $editableNoteBlocks = $contentBlocks
             ->filter(fn (ContentBlock $block) => $adminRouteContext->isEditableNoteBlock($block))
+            ->values();
+        $protectedContentBlocks = $contentBlocks
+            ->reject(fn (ContentBlock $block) => $adminRouteContext->isEditableNoteBlock($block))
             ->values();
 
         return Inertia::render('scripture/chapters/verses/full-edit', [
@@ -59,21 +67,25 @@ class VerseFullEditController extends Controller
                 ),
                 'admin_full_edit_href' => $adminRouteContext->fullEditHref(),
             ],
+            'admin_entity' => $adminEntityRegistry->definition('verse')->toArray(),
             'verse_meta' => $publicScriptureData->verseMeta($verse->verseMeta),
             'admin_meta_update_href' => $adminRouteContext->metaUpdateHref(),
             'admin_content_block_store_href' => $adminRouteContext->contentBlockStoreHref(),
+            'next_content_block_sort_order' => RegisteredContentBlockData::nextSortOrder(
+                $contentBlocks,
+            ),
             'admin_content_blocks' => $editableNoteBlocks
-                ->map(fn ($block) => [
-                    'id' => $block->id,
-                    'region' => $block->region,
-                    'block_type' => $block->block_type,
-                    'title' => $block->title,
-                    'body' => $block->body,
-                    'data_json' => $block->data_json,
-                    'sort_order' => $block->sort_order,
-                    'status' => $block->status,
-                    'update_href' => $adminRouteContext->contentBlockUpdateHref($block),
-                ])
+                ->map(fn (ContentBlock $block) => RegisteredContentBlockData::editor(
+                    $block,
+                    $adminRouteContext->contentBlockUpdateHref($block),
+                ))
+                ->values()
+                ->all(),
+            'protected_content_blocks' => $protectedContentBlocks
+                ->map(fn (ContentBlock $block) => RegisteredContentBlockData::protected(
+                    $block,
+                    $adminRouteContext->contentBlockProtectionReason(),
+                ))
                 ->values()
                 ->all(),
         ]);

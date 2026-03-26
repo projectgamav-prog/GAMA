@@ -1,11 +1,6 @@
 import { Link } from '@inertiajs/react';
-import {
-    ArrowRight,
-    BookOpenText,
-    ChevronDown,
-    CirclePlay,
-} from 'lucide-react';
-import { useState } from 'react';
+import { ArrowRight, BookOpenText } from 'lucide-react';
+import { BookOverviewVideoDisclosure } from '@/components/scripture/book-overview-video-disclosure';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
@@ -19,36 +14,11 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import {
-    Collapsible,
-    CollapsibleContent,
-    CollapsibleTrigger,
-} from '@/components/ui/collapsible';
 import ScriptureLayout from '@/layouts/scripture-layout';
-import { cn } from '@/lib/utils';
 import type { BooksIndexProps, BreadcrumbItem, ScriptureBook } from '@/types';
 
-const getDataValue = (
-    data: Record<string, unknown> | null | undefined,
-    key: string,
-): string | null => {
-    if (!data) {
-        return null;
-    }
-
-    const value = data[key];
-
-    return typeof value === 'string' && value.length > 0 ? value : null;
-};
-
 function BookCard({ book }: { book: ScriptureBook }) {
-    const [isOverviewOpen, setIsOverviewOpen] = useState(false);
-
-    const overviewVideo = book.overview_video;
-    const videoUrl = getDataValue(overviewVideo?.data_json, 'url');
-    const videoPoster = getDataValue(overviewVideo?.data_json, 'poster');
-    const hasOverviewVideo =
-        overviewVideo?.block_type === 'video' && videoUrl !== null;
+    const overviewVideo = book.media_slots.overview_video;
 
     return (
         <ScriptureEntityRegion
@@ -77,62 +47,8 @@ function BookCard({ book }: { book: ScriptureBook }) {
                 </CardHeader>
 
                 <CardContent className="flex-1">
-                    {hasOverviewVideo && overviewVideo && (
-                        <Collapsible
-                            open={isOverviewOpen}
-                            onOpenChange={setIsOverviewOpen}
-                            className="space-y-3"
-                        >
-                            <CollapsibleTrigger asChild>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    className="w-full justify-between"
-                                >
-                                    <span className="inline-flex items-center gap-2">
-                                        <CirclePlay className="size-4" />
-                                        {isOverviewOpen
-                                            ? 'Hide Overview'
-                                            : 'Watch Overview'}
-                                    </span>
-                                    <ChevronDown
-                                        className={cn(
-                                            'size-4 transition-transform',
-                                            isOverviewOpen && 'rotate-180',
-                                        )}
-                                    />
-                                </Button>
-                            </CollapsibleTrigger>
-
-                            <CollapsibleContent className="rounded-xl border border-border/70 bg-muted/30 p-3">
-                                <div className="space-y-3">
-                                    <video
-                                        controls
-                                        preload="none"
-                                        className="aspect-video w-full rounded-lg border bg-black"
-                                        poster={videoPoster ?? undefined}
-                                        src={videoUrl}
-                                    />
-
-                                    {(overviewVideo.title ||
-                                        overviewVideo.body) && (
-                                        <div className="space-y-1">
-                                            {overviewVideo.title && (
-                                                <p className="text-sm font-medium">
-                                                    {overviewVideo.title}
-                                                </p>
-                                            )}
-                                            {overviewVideo.body && (
-                                                <p className="text-sm leading-6 text-muted-foreground">
-                                                    {overviewVideo.body}
-                                                </p>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            </CollapsibleContent>
-                        </Collapsible>
+                    {overviewVideo && (
+                        <BookOverviewVideoDisclosure slot={overviewVideo} />
                     )}
                 </CardContent>
 

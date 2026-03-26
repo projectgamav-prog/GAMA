@@ -10,7 +10,6 @@ import type {
 } from '@/types';
 
 type SharedProps = {
-    blockTypeField: ScriptureRegisteredAdminField;
     titleField: ScriptureRegisteredAdminField;
     bodyField: ScriptureRegisteredAdminField;
     regionField: ScriptureRegisteredAdminField;
@@ -18,10 +17,9 @@ type SharedProps = {
     statusField: ScriptureRegisteredAdminField;
 };
 
-export function CreateBookContentBlockCard({
+export function CreateVerseContentBlockCard({
     storeHref,
     nextSortOrder,
-    blockTypeField,
     titleField,
     bodyField,
     regionField,
@@ -35,23 +33,23 @@ export function CreateBookContentBlockCard({
         <CreateScriptureAdminContentBlockCard
             storeHref={storeHref}
             nextSortOrder={nextSortOrder}
-            blockTypeField={blockTypeField}
+            fixedBlockType="text"
+            defaultRegion="study"
             titleField={titleField}
             bodyField={bodyField}
             regionField={regionField}
             sortOrderField={sortOrderField}
             statusField={statusField}
-            createBadgeLabel="Create block"
-            scopeBadgeLabel="Supporting editorial"
-            createTitle="Registered Book Content Block"
-            createActionLabel="Add content block"
+            createBadgeLabel="Add note block"
+            scopeBadgeLabel="Text only"
+            createTitle="Create Verse Note"
+            createActionLabel="Add note block"
         />
     );
 }
 
-export function BookContentBlockEditorCard({
+export function VerseContentBlockEditorCard({
     block,
-    blockTypeField,
     titleField,
     bodyField,
     regionField,
@@ -63,18 +61,21 @@ export function BookContentBlockEditorCard({
     return (
         <ScriptureAdminContentBlockEditorCard
             block={block}
-            blockTypeField={blockTypeField}
+            fixedBlockType="text"
             titleField={titleField}
             bodyField={bodyField}
             regionField={regionField}
             sortOrderField={sortOrderField}
             statusField={statusField}
             saveActionLabel="Save block"
+            editorTitle={(currentBlock) =>
+                currentBlock.title ?? `Verse note ${currentBlock.id}`
+            }
         />
     );
 }
 
-export function ProtectedContentBlockCard({
+export function ProtectedVerseContentBlockCard({
     block,
 }: {
     block: ScriptureProtectedAdminContentBlock;
