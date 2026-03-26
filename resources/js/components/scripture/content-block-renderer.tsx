@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { ScriptureContentBlock } from '@/types/scripture';
@@ -5,6 +6,7 @@ import { ScriptureEntityRegion } from './scripture-entity-region';
 
 type Props = {
     block: ScriptureContentBlock;
+    headerAction?: ReactNode;
 };
 
 const getDataValue = (
@@ -20,7 +22,7 @@ const getDataValue = (
     return typeof value === 'string' && value.length > 0 ? value : null;
 };
 
-export function ContentBlockRenderer({ block }: Props) {
+export function ContentBlockRenderer({ block, headerAction }: Props) {
     const mediaUrl = getDataValue(block.data_json, 'url');
     const altText = getDataValue(block.data_json, 'alt');
     const caption = getDataValue(block.data_json, 'caption');
@@ -38,9 +40,12 @@ export function ContentBlockRenderer({ block }: Props) {
             <ScriptureEntityRegion meta={entityMeta} asChild>
                 <Card className="border-l-4 border-l-primary">
                     <CardHeader className="gap-3">
-                        <div className="flex items-center gap-2">
-                            <Badge variant="outline">{block.region}</Badge>
-                            <Badge variant="secondary">Quote</Badge>
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="flex items-center gap-2">
+                                <Badge variant="outline">{block.region}</Badge>
+                                <Badge variant="secondary">Quote</Badge>
+                            </div>
+                            {headerAction}
                         </div>
                         {block.title && <CardTitle>{block.title}</CardTitle>}
                     </CardHeader>
@@ -61,9 +66,12 @@ export function ContentBlockRenderer({ block }: Props) {
             <ScriptureEntityRegion meta={entityMeta} asChild>
                 <Card>
                     <CardHeader className="gap-3">
-                        <div className="flex items-center gap-2">
-                            <Badge variant="outline">{block.region}</Badge>
-                            <Badge variant="secondary">Image</Badge>
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="flex items-center gap-2">
+                                <Badge variant="outline">{block.region}</Badge>
+                                <Badge variant="secondary">Image</Badge>
+                            </div>
+                            {headerAction}
                         </div>
                         {block.title && <CardTitle>{block.title}</CardTitle>}
                     </CardHeader>
@@ -91,9 +99,12 @@ export function ContentBlockRenderer({ block }: Props) {
             <ScriptureEntityRegion meta={entityMeta} asChild>
                 <Card>
                     <CardHeader className="gap-3">
-                        <div className="flex items-center gap-2">
-                            <Badge variant="outline">{block.region}</Badge>
-                            <Badge variant="secondary">Video</Badge>
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="flex items-center gap-2">
+                                <Badge variant="outline">{block.region}</Badge>
+                                <Badge variant="secondary">Video</Badge>
+                            </div>
+                            {headerAction}
                         </div>
                         {block.title && <CardTitle>{block.title}</CardTitle>}
                     </CardHeader>
@@ -121,9 +132,12 @@ export function ContentBlockRenderer({ block }: Props) {
         <ScriptureEntityRegion meta={entityMeta} asChild>
             <Card>
                 <CardHeader className="gap-3">
-                    <div className="flex items-center gap-2">
-                        <Badge variant="outline">{block.region}</Badge>
-                        <Badge variant="secondary">Text</Badge>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="flex items-center gap-2">
+                            <Badge variant="outline">{block.region}</Badge>
+                            <Badge variant="secondary">Text</Badge>
+                        </div>
+                        {headerAction}
                     </div>
                     {block.title && <CardTitle>{block.title}</CardTitle>}
                 </CardHeader>

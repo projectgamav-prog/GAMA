@@ -1,12 +1,17 @@
 <?php
 
+use App\Http\Controllers\Scripture\AdminContextVisibilityController;
 use App\Http\Controllers\Scripture\BookController;
 use App\Http\Controllers\Scripture\ChapterController;
 use App\Http\Controllers\Scripture\ChapterVerseController;
 use App\Http\Controllers\Scripture\CharacterController;
 use App\Http\Controllers\Scripture\DictionaryEntryController;
 use App\Http\Controllers\Scripture\TopicController;
+use App\Http\Controllers\Scripture\VerseAdminContentBlockController;
+use App\Http\Controllers\Scripture\VerseAdminMetaController;
+use App\Http\Controllers\Scripture\VerseFullEditController;
 use App\Http\Controllers\Scripture\VerseController;
+use App\Http\Middleware\EnsureCanAccessAdminContext;
 use Illuminate\Support\Facades\Route;
 
 Route::get('characters', [CharacterController::class, 'index'])
@@ -26,6 +31,14 @@ Route::get('topics', [TopicController::class, 'index'])
 
 Route::get('topics/{topic:slug}', [TopicController::class, 'show'])
     ->name('scripture.topics.show');
+
+Route::middleware(['auth', EnsureCanAccessAdminContext::class])
+    ->prefix('scripture/admin-context')
+    ->name('scripture.admin-context.')
+    ->group(function () {
+        Route::post('visibility', [AdminContextVisibilityController::class, 'update'])
+            ->name('visibility.update');
+    });
 
 Route::prefix('books')
     ->name('scripture.')
@@ -54,4 +67,25 @@ Route::prefix('books')
             '{book:slug}/sections/{bookSection:slug}/chapters/{chapter:slug}/sections/{chapterSection:slug}/verses/{verse:slug}',
             [VerseController::class, 'show'],
         )->name('chapters.verses.show');
+
+        Route::middleware(['auth', EnsureCanAccessAdminContext::class])
+            ->prefix(
+                '{book:slug}/sections/{bookSection:slug}/chapters/{chapter:slug}/sections/{chapterSection:slug}/verses/{verse:slug}/admin',
+            )
+            ->name('chapters.verses.admin.')
+            ->group(function () {
+                Route::get('full-edit', [VerseFullEditController::class, 'show'])
+                    ->name('full-edit');
+
+                Route::patch('meta', [VerseAdminMetaController::class, 'update'])
+                    ->name('meta.update');
+
+                Route::post('content-blocks', [VerseAdminContentBlockController::class, 'store'])
+                    ->name('content-blocks.store');
+
+                Route::patch(
+                    'content-blocks/{contentBlock}',
+                    [VerseAdminContentBlockController::class, 'update'],
+                )->name('content-blocks.update');
+            });
     });

@@ -1,6 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
-import { dashboard, login, register } from '@/routes';
+import { login, register } from '@/routes';
 import { index as scriptureBooksIndex } from '@/routes/scripture/books';
 
 type HomeProps = {
@@ -31,7 +31,9 @@ export default function Home({ canRegister, featured_book }: HomeProps) {
                         <nav className="flex flex-wrap items-center gap-2">
                             {auth.user ? (
                                 <Button asChild variant="outline">
-                                    <Link href={dashboard()}>Dashboard</Link>
+                                    <Link href={scriptureBooksIndex()}>
+                                        Browse Scripture
+                                    </Link>
                                 </Button>
                             ) : (
                                 <>
@@ -92,13 +94,7 @@ export default function Home({ canRegister, featured_book }: HomeProps) {
                                     </Link>
                                 </Button>
 
-                                {auth.user ? (
-                                    <Button asChild size="lg" variant="outline">
-                                        <Link href={dashboard()}>
-                                            Open Dashboard
-                                        </Link>
-                                    </Button>
-                                ) : (
+                                {!auth.user && (
                                     <Button asChild size="lg" variant="outline">
                                         <Link href={login()}>Sign In</Link>
                                     </Button>

@@ -10,11 +10,16 @@ import {
     Tag,
     Users,
 } from 'lucide-react';
+import { useState } from 'react';
 import { ScriptureActionRow } from '@/components/scripture/scripture-action-row';
+import { ScriptureAdminRegionToolbar } from '@/components/scripture/scripture-admin-region-toolbar';
+import { ScriptureAdminVisibilityToggle } from '@/components/scripture/scripture-admin-visibility-toggle';
 import { ScriptureContentBlocksSection } from '@/components/scripture/scripture-content-blocks-section';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
+import { ScriptureVerseAdminEditSheet } from '@/components/scripture/scripture-verse-admin-edit-sheet';
+import type { ScriptureVerseAdminEditSession } from '@/components/scripture/scripture-verse-admin-edit-sheet';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,8 +32,15 @@ import {
 import { Separator } from '@/components/ui/separator';
 import ScriptureLayout from '@/layouts/scripture-layout';
 import { chapterLabel, sectionLabel, verseLabel } from '@/lib/scripture';
+import { formatAdminList } from '@/lib/scripture-admin';
 import { cn } from '@/lib/utils';
-import type { BreadcrumbItem, VerseShowProps } from '@/types';
+import type {
+    BreadcrumbItem,
+    ScriptureAdminRegionConfig,
+    ScriptureContentBlock,
+    ScriptureEntityRegionMeta,
+    VerseShowProps,
+} from '@/types';
 
 const getStringList = (values: unknown[] | null): string[] => {
     if (!Array.isArray(values)) {
@@ -59,7 +71,10 @@ export default function VerseShow({
     topics,
     characters,
     content_blocks,
+    admin,
 }: VerseShowProps) {
+    const [editSession, setEditSession] =
+        useState<ScriptureVerseAdminEditSession | null>(null);
     const chapterTitle = chapterLabel(chapter.number, chapter.title);
     const bookSectionTitle = sectionLabel(
         book_section.number,
@@ -139,6 +154,83 @@ export default function VerseShow({
 
         return `${minutes}:${String(seconds).padStart(2, '0')}`;
     };
+    const verseMetaConfig: ScriptureAdminRegionConfig | null = admin
+        ? {
+              supportsEdit: true,
+              supportsFullEdit: true,
+              editTarget: 'verse_meta',
+              contextualEditHref: admin.meta_update_href,
+              fullEditHref: `${admin.full_edit_href}#meta-editor`,
+          }
+        : null;
+    const openVerseMetaEditor = (
+        meta: ScriptureEntityRegionMeta,
+        config: ScriptureAdminRegionConfig,
+    ) => {
+        if (!config.contextualEditHref) {
+            return;
+        }
+
+        setEditSession({
+            kind: 'verse_meta',
+            meta,
+            updateHref: config.contextualEditHref,
+            fullEditHref: config.fullEditHref ?? admin?.full_edit_href ?? '#',
+            verseTitle,
+            verseText: verse.text,
+            values: {
+                summary_short: verse_meta?.summary_short ?? '',
+                is_featured: verse_meta?.is_featured ?? false,
+                keywords_text: formatAdminList(verse_meta?.keywords_json ?? null),
+                study_flags_text: formatAdminList(
+                    verse_meta?.study_flags_json ?? null,
+                ),
+            },
+        });
+    };
+    const getContentBlockConfig = (
+        block: ScriptureContentBlock,
+    ): ScriptureAdminRegionConfig | null => {
+        const updateHref = admin?.content_block_update_hrefs[String(block.id)];
+
+        if (!updateHref || !admin) {
+            return null;
+        }
+
+        return {
+            supportsEdit: true,
+            supportsFullEdit: true,
+            editTarget: 'content_block',
+            contextualEditHref: updateHref,
+            fullEditHref: `${admin.full_edit_href}#block-${block.id}`,
+        };
+    };
+    const openContentBlockEditor = (
+        meta: ScriptureEntityRegionMeta,
+        block: ScriptureContentBlock,
+        config: ScriptureAdminRegionConfig,
+    ) => {
+        if (!config.contextualEditHref) {
+            return;
+        }
+
+        setEditSession({
+            kind: 'content_block',
+            meta,
+            updateHref: config.contextualEditHref,
+            fullEditHref: config.fullEditHref ?? admin?.full_edit_href ?? '#',
+            verseTitle,
+            verseText: verse.text,
+            block,
+            values: {
+                title: block.title ?? '',
+                body: block.body ?? '',
+                region: block.region,
+                sort_order: block.sort_order,
+                status: 'published',
+            },
+        });
+    };
 
     return (
         <ScriptureLayout
@@ -164,6 +256,17 @@ export default function VerseShow({
                 title={verseTitle}
                 titleClassName="text-3xl sm:text-4xl"
                 description={`${chapterTitle}. Read the canonical verse first, then move through translations, commentary, and attached study references in a calmer reading flow.`}
+                headerAction={
+                    <>
+                        <ScriptureAdminVisibilityToggle />
+                        {verseMetaConfig && (
+                            <ScriptureAdminRegionToolbar
+                                config={verseMetaConfig}
+                                onEdit={openVerseMetaEditor}
+                            />
+                        )}
+                    </>
+                }
                 contentClassName="space-y-6"
             >
                 <div className="rounded-2xl border border-border/70 bg-muted/20 px-5 py-5 sm:px-6 sm:py-6">
@@ -231,6 +334,16 @@ export default function VerseShow({
                             >
                                 <Card>
                                     <CardHeader className="gap-3">
+                                        {verseMetaConfig && (
+                                            <div className="flex justify-end">
+                                                <ScriptureAdminRegionToolbar
+                                                    config={verseMetaConfig}
+                                                    onEdit={
+                                                        openVerseMetaEditor
+                                                    }
+                                                />
+                                            </div>
+                                        )}
                                         <CardTitle className="flex items-center gap-2 text-xl">
                                             <Sparkles className="size-5" />
                                             Study Notes
@@ -883,10 +996,39 @@ export default function VerseShow({
                 title="Published Notes"
                 description="Published content blocks attached directly to this verse."
                 blocks={content_blocks}
+                renderBlockHeaderAction={(block) => {
+                    const config = getContentBlockConfig(block);
+
+                    if (config === null) {
+                        return null;
+                    }
+
+                    return (
+                        <ScriptureAdminRegionToolbar
+                            config={config}
+                            onEdit={(meta, regionConfig) =>
+                                openContentBlockEditor(
+                                    meta,
+                                    block,
+                                    regionConfig,
+                                )
+                            }
+                        />
+                    );
+                }}
                 entityMeta={{
                     ...verseEntity,
                     region: 'content_blocks',
                     capabilityHint: 'content_blocks',
+                }}
+            />
+
+            <ScriptureVerseAdminEditSheet
+                session={editSession}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setEditSession(null);
+                    }
                 }}
             />
         </ScriptureLayout>

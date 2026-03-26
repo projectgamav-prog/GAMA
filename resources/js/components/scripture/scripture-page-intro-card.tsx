@@ -15,6 +15,7 @@ type Props = {
     title: ReactNode;
     description?: ReactNode;
     children?: ReactNode;
+    headerAction?: ReactNode;
     className?: string;
     contentClassName?: string;
     titleClassName?: string;
@@ -26,6 +27,7 @@ export function ScripturePageIntroCard({
     title,
     description,
     children,
+    headerAction,
     className,
     contentClassName,
     titleClassName,
@@ -40,14 +42,28 @@ export function ScripturePageIntroCard({
                     </div>
                 )}
 
-                <div className="space-y-2">
-                    <CardTitle className={cn('text-3xl', titleClassName)}>
-                        {title}
-                    </CardTitle>
-                    {description && (
-                        <CardDescription className="max-w-3xl text-base leading-7">
-                            {description}
-                        </CardDescription>
+                <div
+                    className={
+                        headerAction
+                            ? 'flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between'
+                            : 'space-y-2'
+                    }
+                >
+                    <div className="space-y-2">
+                        <CardTitle className={cn('text-3xl', titleClassName)}>
+                            {title}
+                        </CardTitle>
+                        {description && (
+                            <CardDescription className="max-w-3xl text-base leading-7">
+                                {description}
+                            </CardDescription>
+                        )}
+                    </div>
+
+                    {headerAction && (
+                        <div className="flex flex-wrap items-center gap-2">
+                            {headerAction}
+                        </div>
                     )}
                 </div>
             </CardHeader>

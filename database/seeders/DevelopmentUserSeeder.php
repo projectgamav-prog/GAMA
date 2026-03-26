@@ -19,22 +19,21 @@ class DevelopmentUserSeeder extends Seeder
         $verifiedAt = CarbonImmutable::parse('2024-01-01 00:00:00', 'UTC');
 
         foreach ($this->users() as $attributes) {
-            $user = User::query()->firstOrNew(['email' => $attributes['email']]);
-
-            $user->name = $attributes['name'];
-            $user->email = $attributes['email'];
-            $user->email_verified_at = $verifiedAt;
-
-            if (! $user->exists || ! Hash::check(self::PASSWORD, (string) $user->password)) {
-                $user->password = self::PASSWORD;
-            }
-
-            $user->save();
+            User::query()->updateOrCreate(
+                ['email' => $attributes['email']],
+                [
+                    'name' => $attributes['name'],
+                    'email' => $attributes['email'],
+                    'email_verified_at' => $verifiedAt,
+                    'password' => Hash::make(self::PASSWORD),
+                    'can_access_admin_context' => $attributes['can_access_admin_context'],
+                ],
+            );
         }
     }
 
     /**
-     * @return list<array{name: string, email: string}>
+     * @return list<array{name: string, email: string, can_access_admin_context: bool}>
      */
     private function users(): array
     {
@@ -42,18 +41,22 @@ class DevelopmentUserSeeder extends Seeder
             [
                 'name' => 'Admin',
                 'email' => 'admin@example.com',
+                'can_access_admin_context' => true,
             ],
             [
                 'name' => 'Editor One',
                 'email' => 'editor1@example.com',
+                'can_access_admin_context' => true,
             ],
             [
                 'name' => 'Editor Two',
                 'email' => 'editor2@example.com',
+                'can_access_admin_context' => true,
             ],
             [
                 'name' => 'Editor Three',
                 'email' => 'editor3@example.com',
+                'can_access_admin_context' => true,
             ],
         ];
     }

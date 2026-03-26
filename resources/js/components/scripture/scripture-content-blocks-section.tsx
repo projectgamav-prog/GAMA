@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { ContentBlockRenderer } from '@/components/scripture/content-block-renderer';
 import type {
     ScriptureContentBlock,
@@ -11,6 +12,7 @@ type Props = {
     blocks: ScriptureContentBlock[];
     id?: string;
     entityMeta?: ScriptureEntityRegionInput;
+    renderBlockHeaderAction?: (block: ScriptureContentBlock) => ReactNode;
 };
 
 export function ScriptureContentBlocksSection({
@@ -19,6 +21,7 @@ export function ScriptureContentBlocksSection({
     blocks,
     id,
     entityMeta,
+    renderBlockHeaderAction,
 }: Props) {
     if (blocks.length === 0) {
         return null;
@@ -33,7 +36,11 @@ export function ScriptureContentBlocksSection({
         >
             <div className="space-y-4">
                 {blocks.map((block) => (
-                    <ContentBlockRenderer key={block.id} block={block} />
+                    <ContentBlockRenderer
+                        key={block.id}
+                        block={block}
+                        headerAction={renderBlockHeaderAction?.(block)}
+                    />
                 ))}
             </div>
         </ScriptureSection>

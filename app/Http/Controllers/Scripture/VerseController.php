@@ -8,7 +8,9 @@ use App\Models\BookSection;
 use App\Models\Chapter;
 use App\Models\ChapterSection;
 use App\Models\Verse;
+use App\Support\AdminContext\AdminContext;
 use App\Support\Scripture\PublicScriptureData;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -18,6 +20,7 @@ class VerseController extends Controller
      * Display a read-only scripture verse detail page.
      */
     public function show(
+        Request $request,
         Book $book,
         BookSection $bookSection,
         Chapter $chapter,
@@ -46,6 +49,8 @@ class VerseController extends Controller
         $contentBlocks = $verse->contentBlocks()
             ->published()
             ->get();
+
+        $adminVisibilityEnabled = AdminContext::isVisible($request);
 
         return Inertia::render('scripture/chapters/verses/show', [
             'book' => $publicScriptureData->book($book),
@@ -84,6 +89,36 @@ class VerseController extends Controller
             'topics' => $publicScriptureData->topics($verse->topicAssignments),
             'characters' => $publicScriptureData->characters($verse->characterAssignments),
             'content_blocks' => $publicScriptureData->contentBlocks($contentBlocks),
+            'admin' => $adminVisibilityEnabled
+                ? [
+                    'meta_update_href' => route('scripture.chapters.verses.admin.meta.update', [
+                        'book' => $book,
+                        'bookSection' => $bookSection,
+                        'chapter' => $chapter,
+                        'chapterSection' => $chapterSection,
+                        'verse' => $verse,
+                    ]),
+                    'full_edit_href' => route('scripture.chapters.verses.admin.full-edit', [
+                        'book' => $book,
+                        'bookSection' => $bookSection,
+                        'chapter' => $chapter,
+                        'chapterSection' => $chapterSection,
+                        'verse' => $verse,
+                    ]),
+                    'content_block_update_hrefs' => $contentBlocks
+                        ->mapWithKeys(fn ($block) => [
+                            (string) $block->id => route('scripture.chapters.verses.admin.content-blocks.update', [
+                                'book' => $book,
+                                'bookSection' => $bookSection,
+                                'chapter' => $chapter,
+                                'chapterSection' => $chapterSection,
+                                'verse' => $verse,
+                                'contentBlock' => $block,
+                            ]),
+                        ])
+                        ->all(),
+                ]
+                : null,
         ]);
     }
 }
