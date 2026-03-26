@@ -46,6 +46,14 @@ class Book extends Model
     }
 
     /**
+     * Get media assignments attached directly to the book.
+     */
+    public function mediaAssignments(): MorphMany
+    {
+        return $this->morphMany(MediaAssignment::class, 'assignable')->orderBy('sort_order');
+    }
+
+    /**
      * Get cross-links where the book is the source entity.
      */
     public function outgoingEntityRelations(): MorphMany

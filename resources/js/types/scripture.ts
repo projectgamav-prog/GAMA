@@ -13,6 +13,73 @@ export type ScriptureAdminEditTarget =
     | 'entity_details'
     | 'content_block';
 
+export type ScriptureAdminEditMode = 'contextual' | 'full' | 'canonical';
+
+export type ScriptureAdminEditModeStatus =
+    | 'active'
+    | 'planned'
+    | 'disabled';
+
+export type ScriptureAdminFieldClassification = 'canonical' | 'editorial';
+
+export type ScriptureAdminFieldGroup =
+    | 'identity'
+    | 'editorial'
+    | 'supporting';
+
+export type ScriptureRegisteredAdminMode = {
+    key: ScriptureAdminEditMode;
+    label: string;
+    status: ScriptureAdminEditModeStatus;
+    description: string;
+    warning: string | null;
+};
+
+export type ScriptureRegisteredAdminField = {
+    key: string;
+    label: string;
+    source: string;
+    type: string;
+    validation_rules: string[];
+    edit_modes: ScriptureAdminEditMode[];
+    classification: ScriptureAdminFieldClassification;
+    group: ScriptureAdminFieldGroup;
+    read_only: boolean;
+    options: string[] | null;
+    help_text: string | null;
+    visibility_rule: string | null;
+};
+
+export type ScriptureRegisteredAdminRegion = {
+    key: string;
+    label: string;
+    surface: string;
+    description: string;
+    field_keys: string[];
+    contextual_field_keys: string[];
+    full_field_keys: string[];
+    canonical_field_keys: string[];
+    supported_modes: ScriptureAdminEditMode[];
+    capability_hint: string | null;
+    help_text: string | null;
+    fields: ScriptureRegisteredAdminField[];
+    contextual_fields: ScriptureRegisteredAdminField[];
+    full_fields: ScriptureRegisteredAdminField[];
+    canonical_fields: ScriptureRegisteredAdminField[];
+};
+
+export type ScriptureRegisteredAdminEntity = {
+    key: string;
+    label: string;
+    primary_model: string;
+    primary_table: string;
+    edit_modes: Record<ScriptureAdminEditMode, ScriptureRegisteredAdminMode>;
+    notes: string | null;
+    fields: Record<string, ScriptureRegisteredAdminField>;
+    field_groups: Record<ScriptureAdminFieldGroup, ScriptureRegisteredAdminField[]>;
+    regions: ScriptureRegisteredAdminRegion[];
+};
+
 export type ScriptureAdminRegionConfig = {
     supportsEdit: boolean;
     supportsFullEdit: boolean;
@@ -33,6 +100,13 @@ export type ScriptureTopicAdmin = {
     content_block_update_hrefs: Record<string, string>;
 };
 
+export type ScriptureBookAdmin = {
+    details_update_href: string;
+    full_edit_href: string;
+    canonical_edit_href: string;
+    content_block_update_hrefs: Record<string, string>;
+};
+
 export type ScriptureCharacterAdmin = {
     details_update_href: string;
     full_edit_href: string;
@@ -49,6 +123,33 @@ export type ScriptureChapterAdmin = {
 export type ScriptureAdminContentBlock = ScriptureContentBlock & {
     status: 'draft' | 'published';
     update_href: string;
+};
+
+export type ScriptureProtectedAdminContentBlock = ScriptureContentBlock & {
+    status: 'draft' | 'published';
+    protection_reason: string;
+};
+
+export type ScriptureAdminMediaSummary = {
+    id: number;
+    media_type: string;
+    title: string | null;
+    alt_text: string | null;
+    caption: string | null;
+    url: string | null;
+    path: string | null;
+};
+
+export type ScriptureAdminMediaAssignment = {
+    id: number;
+    media_id: number;
+    role: string;
+    title_override: string | null;
+    caption_override: string | null;
+    sort_order: number;
+    status: 'draft' | 'published';
+    update_href: string;
+    media: ScriptureAdminMediaSummary | null;
 };
 
 export type ScriptureEntityType =
@@ -322,6 +423,7 @@ export type ScriptureVerseCharacterAssignment = {
 export type BookShowProps = {
     book: ScriptureBook;
     content_blocks: ScriptureContentBlock[];
+    admin?: ScriptureBookAdmin | null;
     book_sections: Array<
         ScriptureBookSection & {
             chapters: ScriptureChapter[];
@@ -332,6 +434,7 @@ export type BookShowProps = {
 export type BookOverviewProps = {
     book: ScriptureBook;
     content_blocks: ScriptureContentBlock[];
+    admin?: ScriptureBookAdmin | null;
 };
 
 export type BooksIndexProps = {
@@ -457,4 +560,29 @@ export type ChapterFullEditProps = {
     admin_content_block_store_href: string;
     next_content_block_sort_order: number;
     admin_content_blocks: ScriptureAdminContentBlock[];
+};
+
+export type BookFullEditProps = {
+    book: ScriptureBook & {
+        admin_full_edit_href: string;
+        admin_canonical_edit_href: string;
+    };
+    admin_entity: ScriptureRegisteredAdminEntity;
+    admin_details_update_href: string;
+    admin_content_block_store_href: string;
+    admin_media_assignment_store_href: string;
+    next_content_block_sort_order: number;
+    next_media_assignment_sort_order: number;
+    admin_content_blocks: ScriptureAdminContentBlock[];
+    protected_content_blocks: ScriptureProtectedAdminContentBlock[];
+    admin_media_assignments: ScriptureAdminMediaAssignment[];
+    available_media: ScriptureAdminMediaSummary[];
+};
+
+export type BookCanonicalEditProps = {
+    book: ScriptureBook & {
+        admin_full_edit_href: string;
+        admin_canonical_edit_href: string;
+    };
+    admin_entity: ScriptureRegisteredAdminEntity;
 };

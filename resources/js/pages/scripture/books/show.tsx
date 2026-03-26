@@ -1,5 +1,10 @@
 import { Link } from '@inertiajs/react';
 import { BookOpenText } from 'lucide-react';
+import { useState } from 'react';
+import { ScriptureAdminRegionToolbar } from '@/components/scripture/scripture-admin-region-toolbar';
+import { ScriptureAdminVisibilityToggle } from '@/components/scripture/scripture-admin-visibility-toggle';
+import { ScriptureBookAdminEditSheet } from '@/components/scripture/scripture-book-admin-edit-sheet';
+import type { ScriptureBookAdminEditSession } from '@/components/scripture/scripture-book-admin-edit-sheet';
 import { ScriptureContentBlocksSection } from '@/components/scripture/scripture-content-blocks-section';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
@@ -19,14 +24,100 @@ import {
     sectionAnchorId,
     sectionLabel,
 } from '@/lib/scripture';
-import type { BookShowProps, BreadcrumbItem } from '@/types';
+import type {
+    BookShowProps,
+    BreadcrumbItem,
+    ScriptureAdminRegionConfig,
+    ScriptureContentBlock,
+    ScriptureEntityRegionMeta,
+} from '@/types';
 
 export default function BookShow({
     book,
     content_blocks,
+    admin,
     book_sections,
 }: BookShowProps) {
+    const [editSession, setEditSession] =
+        useState<ScriptureBookAdminEditSession | null>(null);
     const hidesGenericSingleSection = hidesSingleGenericSection(book_sections);
+    const bookEntity = {
+        entityType: 'book' as const,
+        entityId: book.id,
+        entityLabel: book.title,
+    };
+    const detailsConfig: ScriptureAdminRegionConfig | null = admin
+        ? {
+              supportsEdit: true,
+              supportsFullEdit: true,
+              editTarget: 'entity_details',
+              contextualEditHref: admin.details_update_href,
+              fullEditHref: `${admin.full_edit_href}#details-editor`,
+          }
+        : null;
+    const openDetailsEditor = (
+        meta: ScriptureEntityRegionMeta,
+        config: ScriptureAdminRegionConfig,
+    ) => {
+        if (!config.contextualEditHref) {
+            return;
+        }
+
+        setEditSession({
+            kind: 'entity_details',
+            meta,
+            updateHref: config.contextualEditHref,
+            fullEditHref: config.fullEditHref ?? admin?.full_edit_href ?? '#',
+            bookTitle: book.title,
+            bookDescription: book.description ?? null,
+            values: {
+                description: book.description ?? '',
+            },
+        });
+    };
+    const getContentBlockConfig = (
+        block: ScriptureContentBlock,
+    ): ScriptureAdminRegionConfig | null => {
+        const updateHref = admin?.content_block_update_hrefs[String(block.id)];
+
+        if (!updateHref || !admin) {
+            return null;
+        }
+
+        return {
+            supportsEdit: true,
+            supportsFullEdit: true,
+            editTarget: 'content_block',
+            contextualEditHref: updateHref,
+            fullEditHref: `${admin.full_edit_href}#block-${block.id}`,
+        };
+    };
+    const openContentBlockEditor = (
+        meta: ScriptureEntityRegionMeta,
+        block: ScriptureContentBlock,
+        config: ScriptureAdminRegionConfig,
+    ) => {
+        if (!config.contextualEditHref) {
+            return;
+        }
+
+        setEditSession({
+            kind: 'content_block',
+            meta,
+            updateHref: config.contextualEditHref,
+            fullEditHref: config.fullEditHref ?? admin?.full_edit_href ?? '#',
+            bookTitle: book.title,
+            block,
+            values: {
+                block_type: block.block_type as 'text' | 'quote',
+                title: block.title ?? '',
+                body: block.body ?? '',
+                region: block.region,
+                sort_order: block.sort_order,
+                status: 'published',
+            },
+        });
+    };
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -39,9 +130,7 @@ export default function BookShow({
         <ScriptureLayout title={book.title} breadcrumbs={breadcrumbs}>
             <ScripturePageIntroCard
                 entityMeta={{
-                    entityType: 'book',
-                    entityId: book.id,
-                    entityLabel: book.title,
+                    ...bookEntity,
                     region: 'page_intro',
                     capabilityHint: 'intro',
                 }}
@@ -56,16 +145,45 @@ export default function BookShow({
                 }
                 title={book.title}
                 description={book.description ?? undefined}
+                headerAction={
+                    <>
+                        <ScriptureAdminVisibilityToggle />
+                        {detailsConfig && (
+                            <ScriptureAdminRegionToolbar
+                                config={detailsConfig}
+                                onEdit={openDetailsEditor}
+                            />
+                        )}
+                    </>
+                }
             />
 
             <ScriptureContentBlocksSection
                 title="Reading Notes"
                 description="Published study content attached to this book."
                 blocks={content_blocks}
+                renderBlockHeaderAction={(block) => {
+                    const config = getContentBlockConfig(block);
+
+                    if (config === null) {
+                        return null;
+                    }
+
+                    return (
+                        <ScriptureAdminRegionToolbar
+                            config={config}
+                            onEdit={(meta, regionConfig) =>
+                                openContentBlockEditor(
+                                    meta,
+                                    block,
+                                    regionConfig,
+                                )
+                            }
+                        />
+                    );
+                }}
                 entityMeta={{
-                    entityType: 'book',
-                    entityId: book.id,
-                    entityLabel: book.title,
+                    ...bookEntity,
                     region: 'content_blocks',
                     capabilityHint: 'content_blocks',
                 }}
@@ -170,6 +288,15 @@ export default function BookShow({
                     ))}
                 </div>
             </ScriptureSection>
+
+            <ScriptureBookAdminEditSheet
+                session={editSession}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setEditSession(null);
+                    }
+                }}
+            />
         </ScriptureLayout>
     );
 }

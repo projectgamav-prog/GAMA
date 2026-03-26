@@ -1,7 +1,12 @@
 <?php
 
 use App\Http\Controllers\Scripture\AdminContextVisibilityController;
+use App\Http\Controllers\Scripture\BookAdminContentBlockController;
+use App\Http\Controllers\Scripture\BookAdminDetailsController;
+use App\Http\Controllers\Scripture\BookAdminMediaAssignmentController;
+use App\Http\Controllers\Scripture\BookCanonicalEditController;
 use App\Http\Controllers\Scripture\BookController;
+use App\Http\Controllers\Scripture\BookFullEditController;
 use App\Http\Controllers\Scripture\ChapterAdminContentBlockController;
 use App\Http\Controllers\Scripture\ChapterController;
 use App\Http\Controllers\Scripture\ChapterFullEditController;
@@ -13,12 +18,12 @@ use App\Http\Controllers\Scripture\CharacterFullEditController;
 use App\Http\Controllers\Scripture\DictionaryEntryController;
 use App\Http\Controllers\Scripture\TopicAdminContentBlockController;
 use App\Http\Controllers\Scripture\TopicAdminDetailsController;
-use App\Http\Controllers\Scripture\TopicFullEditController;
 use App\Http\Controllers\Scripture\TopicController;
+use App\Http\Controllers\Scripture\TopicFullEditController;
 use App\Http\Controllers\Scripture\VerseAdminContentBlockController;
 use App\Http\Controllers\Scripture\VerseAdminMetaController;
-use App\Http\Controllers\Scripture\VerseFullEditController;
 use App\Http\Controllers\Scripture\VerseController;
+use App\Http\Controllers\Scripture\VerseFullEditController;
 use App\Http\Middleware\EnsureCanAccessAdminContext;
 use Illuminate\Support\Facades\Route;
 
@@ -98,6 +103,38 @@ Route::prefix('books')
 
         Route::get('{book:slug}', [BookController::class, 'show'])
             ->name('books.show');
+
+        Route::middleware(['auth', EnsureCanAccessAdminContext::class])
+            ->prefix('{book:slug}/admin')
+            ->name('books.admin.')
+            ->group(function () {
+                Route::get('full-edit', [BookFullEditController::class, 'show'])
+                    ->name('full-edit');
+
+                Route::get('canonical-edit', [BookCanonicalEditController::class, 'show'])
+                    ->name('canonical-edit');
+
+                Route::patch('details', [BookAdminDetailsController::class, 'update'])
+                    ->name('details.update');
+
+                Route::post('content-blocks', [BookAdminContentBlockController::class, 'store'])
+                    ->name('content-blocks.store');
+
+                Route::patch(
+                    'content-blocks/{contentBlock}',
+                    [BookAdminContentBlockController::class, 'update'],
+                )->name('content-blocks.update');
+
+                Route::post(
+                    'media-assignments',
+                    [BookAdminMediaAssignmentController::class, 'store'],
+                )->name('media-assignments.store');
+
+                Route::patch(
+                    'media-assignments/{mediaAssignment}',
+                    [BookAdminMediaAssignmentController::class, 'update'],
+                )->name('media-assignments.update');
+            });
 
         Route::get(
             '{book:slug}/sections/{bookSection:slug}/chapters/{chapter:slug}',
