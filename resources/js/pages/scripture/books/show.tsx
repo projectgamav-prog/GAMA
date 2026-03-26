@@ -1,6 +1,8 @@
 import { Link } from '@inertiajs/react';
 import { BookOpenText } from 'lucide-react';
-import { ContentBlockRenderer } from '@/components/scripture/content-block-renderer';
+import { ScriptureContentBlocksSection } from '@/components/scripture/scripture-content-blocks-section';
+import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
+import { ScriptureSection } from '@/components/scripture/scripture-section';
 import { Badge } from '@/components/ui/badge';
 import {
     Card,
@@ -9,13 +11,13 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import ScriptureLayout from '@/layouts/scripture-layout';
 import {
     chapterLabel,
     hidesSingleGenericSection,
     sectionAnchorId,
     sectionLabel,
 } from '@/lib/scripture';
-import ScriptureLayout from '@/layouts/scripture-layout';
 import type { BookShowProps, BreadcrumbItem } from '@/types';
 
 export default function BookShow({
@@ -34,58 +36,40 @@ export default function BookShow({
 
     return (
         <ScriptureLayout title={book.title} breadcrumbs={breadcrumbs}>
-            <Card>
-                <CardHeader className="gap-4">
-                    <div className="flex items-center gap-2">
+            <ScripturePageIntroCard
+                badges={
+                    <>
                         <Badge variant="outline">Book</Badge>
                         <Badge variant="secondary">
                             {book_sections.length} section
                             {book_sections.length === 1 ? '' : 's'}
                         </Badge>
-                    </div>
-                    <div className="space-y-2">
-                        <CardTitle className="text-3xl">{book.title}</CardTitle>
-                        {book.description && (
-                            <CardDescription className="max-w-3xl text-base leading-7">
-                                {book.description}
-                            </CardDescription>
-                        )}
-                    </div>
-                </CardHeader>
-            </Card>
+                    </>
+                }
+                title={book.title}
+                description={book.description ?? undefined}
+            />
 
-            {content_blocks.length > 0 && (
-                <section className="space-y-4">
-                    <div className="space-y-1">
-                        <h2 className="text-xl font-semibold">Reading Notes</h2>
-                        <p className="text-sm text-muted-foreground">
-                            Published study content attached to this book.
-                        </p>
-                    </div>
-                    <div className="space-y-4">
-                        {content_blocks.map((block) => (
-                            <ContentBlockRenderer
-                                key={block.id}
-                                block={block}
-                            />
-                        ))}
-                    </div>
-                </section>
-            )}
+            <ScriptureContentBlocksSection
+                title="Reading Notes"
+                description="Published study content attached to this book."
+                blocks={content_blocks}
+            />
 
-            <section className="space-y-4">
-                <div className="space-y-1">
-                    <h2 className="text-xl font-semibold">Canonical Browse</h2>
-                    <p className="text-sm text-muted-foreground">
-                        {hidesGenericSingleSection
-                            ? 'Browse this book chapter by chapter.'
-                            : 'Browse from the book into its canonical sections and chapters.'}
-                    </p>
-                </div>
-
+            <ScriptureSection
+                title="Canonical Browse"
+                description={
+                    hidesGenericSingleSection
+                        ? 'Browse this book chapter by chapter.'
+                        : 'Browse from the book into its canonical sections and chapters.'
+                }
+            >
                 <div className="space-y-4">
                     {book_sections.map((section) => (
-                        <Card key={section.id} id={sectionAnchorId(section.slug)}>
+                        <Card
+                            key={section.id}
+                            id={sectionAnchorId(section.slug)}
+                        >
                             <CardHeader>
                                 <CardTitle>
                                     {hidesGenericSingleSection
@@ -131,7 +115,7 @@ export default function BookShow({
                         </Card>
                     ))}
                 </div>
-            </section>
+            </ScriptureSection>
         </ScriptureLayout>
     );
 }

@@ -1,6 +1,13 @@
-import { useState } from 'react';
 import { Link } from '@inertiajs/react';
-import { ArrowRight, BookOpenText, ChevronDown, CirclePlay } from 'lucide-react';
+import {
+    ArrowRight,
+    BookOpenText,
+    ChevronDown,
+    CirclePlay,
+} from 'lucide-react';
+import { useState } from 'react';
+import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
+import { ScriptureSection } from '@/components/scripture/scripture-section';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,13 +23,9 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { cn } from '@/lib/utils';
 import ScriptureLayout from '@/layouts/scripture-layout';
-import type {
-    BooksIndexProps,
-    BreadcrumbItem,
-    ScriptureBook,
-} from '@/types';
+import { cn } from '@/lib/utils';
+import type { BooksIndexProps, BreadcrumbItem, ScriptureBook } from '@/types';
 
 const getDataValue = (
     data: Record<string, unknown> | null | undefined,
@@ -49,7 +52,7 @@ function BookCard({ book }: { book: ScriptureBook }) {
     return (
         <Card className="flex h-full flex-col">
             <CardHeader className="space-y-3">
-                <div className="rounded-md bg-primary/10 p-2 text-primary w-fit">
+                <div className="w-fit rounded-md bg-primary/10 p-2 text-primary">
                     <BookOpenText className="size-4" />
                 </div>
                 <div className="space-y-2">
@@ -101,7 +104,8 @@ function BookCard({ book }: { book: ScriptureBook }) {
                                     src={videoUrl}
                                 />
 
-                                {(overviewVideo.title || overviewVideo.body) && (
+                                {(overviewVideo.title ||
+                                    overviewVideo.body) && (
                                     <div className="space-y-1">
                                         {overviewVideo.title && (
                                             <p className="text-sm font-medium">
@@ -148,41 +152,29 @@ export default function BooksIndex({ books }: BooksIndexProps) {
 
     return (
         <ScriptureLayout title="Books" breadcrumbs={breadcrumbs}>
-            <Card>
-                <CardHeader className="gap-4">
-                    <div className="flex items-center gap-2">
+            <ScripturePageIntroCard
+                badges={
+                    <>
                         <Badge variant="outline">Library</Badge>
                         <Badge variant="secondary">
                             {books.length} book{books.length === 1 ? '' : 's'}
                         </Badge>
-                    </div>
-                    <div className="space-y-2">
-                        <CardTitle className="text-3xl">
-                            Scripture Library
-                        </CardTitle>
-                        <CardDescription className="max-w-3xl text-base leading-7">
-                            Browse the available books and enter each reading
-                            journey from its canonical book page.
-                        </CardDescription>
-                    </div>
-                </CardHeader>
-            </Card>
+                    </>
+                }
+                title="Scripture Library"
+                description="Browse the available books and enter each reading journey from its canonical book page."
+            />
 
-            <section className="space-y-4">
-                <div className="space-y-1">
-                    <h2 className="text-xl font-semibold">Available Books</h2>
-                    <p className="text-sm text-muted-foreground">
-                        Choose a book to open its overview, sections, and
-                        chapters.
-                    </p>
-                </div>
-
+            <ScriptureSection
+                title="Available Books"
+                description="Choose a book to open its overview, sections, and chapters."
+            >
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                     {books.map((book) => (
                         <BookCard key={book.id} book={book} />
                     ))}
                 </div>
-            </section>
+            </ScriptureSection>
         </ScriptureLayout>
     );
 }

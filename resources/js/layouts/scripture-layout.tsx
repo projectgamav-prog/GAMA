@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
 import { Head } from '@inertiajs/react';
+import type { ReactNode } from 'react';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import type { BreadcrumbItem } from '@/types';
 

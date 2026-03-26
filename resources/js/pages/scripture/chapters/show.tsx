@@ -1,5 +1,4 @@
 import { Link } from '@inertiajs/react';
-import { useState } from 'react';
 import {
     ArrowRight,
     BookOpenText,
@@ -7,24 +6,22 @@ import {
     ListTree,
     Rows3,
 } from 'lucide-react';
-import { ContentBlockRenderer } from '@/components/scripture/content-block-renderer';
+import { useState } from 'react';
+import { ScriptureActionRow } from '@/components/scripture/scripture-action-row';
+import { ScriptureContentBlocksSection } from '@/components/scripture/scripture-content-blocks-section';
+import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
+import { ScriptureSection } from '@/components/scripture/scripture-section';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import ScriptureLayout from '@/layouts/scripture-layout';
 import {
     chapterLabel,
     hidesSingleGenericSection,
     isGenericSectionLabel,
     sectionLabel,
 } from '@/lib/scripture';
-import ScriptureLayout from '@/layouts/scripture-layout';
 import type { BreadcrumbItem, ChapterShowProps } from '@/types';
 
 export default function ChapterShow({
@@ -42,7 +39,10 @@ export default function ChapterShow({
     const hidesGenericChapterSection =
         hidesSingleGenericSection(chapter_sections);
     const chapterTitle = chapterLabel(chapter.number, chapter.title);
-    const bookSectionTitle = sectionLabel(book_section.number, book_section.title);
+    const bookSectionTitle = sectionLabel(
+        book_section.number,
+        book_section.title,
+    );
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -60,13 +60,10 @@ export default function ChapterShow({
     ];
 
     return (
-        <ScriptureLayout
-            title={chapterTitle}
-            breadcrumbs={breadcrumbs}
-        >
-            <Card>
-                <CardHeader className="gap-4">
-                    <div className="flex flex-wrap items-center gap-2">
+        <ScriptureLayout title={chapterTitle} breadcrumbs={breadcrumbs}>
+            <ScripturePageIntroCard
+                badges={
+                    <>
                         <Badge variant="outline">Chapter</Badge>
                         <Badge variant="secondary">{book.title}</Badge>
                         {!hidesGenericBookSection && (
@@ -74,84 +71,65 @@ export default function ChapterShow({
                                 {bookSectionTitle}
                             </Badge>
                         )}
-                    </div>
-                    <div className="space-y-2">
-                        <CardTitle className="text-3xl">{chapterTitle}</CardTitle>
-                        <CardDescription className="text-base leading-7">
-                            Read the chapter overview first, then open the
-                            reader and continue in canonical order.
-                        </CardDescription>
-                    </div>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                    <div className="flex flex-wrap gap-3">
-                        <Button asChild>
-                            <Link href={chapter.verses_href ?? chapter.href}>
-                                Open Reader
-                                <ArrowRight className="size-4" />
-                            </Link>
-                        </Button>
-                        <Button asChild variant="outline">
-                            <Link href={book.href}>Back to Book</Link>
-                        </Button>
-                    </div>
-                    <div className="space-y-2">
-                        <p className="text-sm font-medium">Presentation</p>
-                        <ToggleGroup
-                            type="single"
-                            value={viewMode}
-                            variant="outline"
-                            onValueChange={(value) => {
-                                if (value === 'cards' || value === 'list') {
-                                    setViewMode(value);
-                                }
-                            }}
-                        >
-                            <ToggleGroupItem value="cards" aria-label="Card view">
-                                <LayoutGrid className="size-4" />
-                                Card View
-                            </ToggleGroupItem>
-                            <ToggleGroupItem value="list" aria-label="List view">
-                                <Rows3 className="size-4" />
-                                List View
-                            </ToggleGroupItem>
-                        </ToggleGroup>
-                    </div>
-                </CardContent>
-            </Card>
-
-            {content_blocks.length > 0 && (
-                <section className="space-y-4">
-                    <div className="space-y-1">
-                        <h2 className="text-xl font-semibold">Published Notes</h2>
-                        <p className="text-sm text-muted-foreground">
-                            Study content attached to this chapter.
-                        </p>
-                    </div>
-                    <div className="space-y-4">
-                        {content_blocks.map((block) => (
-                            <ContentBlockRenderer
-                                key={block.id}
-                                block={block}
-                            />
-                        ))}
-                    </div>
-                </section>
-            )}
-
-            <section className="space-y-4">
-                <div className="space-y-1">
-                    <h2 className="text-xl font-semibold">
-                        {hidesGenericChapterSection
-                            ? 'Reader Entry'
-                            : 'Chapter Sections'}
-                    </h2>
-                    <p className="text-sm text-muted-foreground">
-                        {hidesGenericChapterSection
-                            ? 'This chapter flows through one continuous reader entry point.'
-                            : 'Canonical sections inside this chapter, with verse counts for quick entry into the reader.'}
-                    </p>
+                    </>
+                }
+                title={chapterTitle}
+                description="Read the chapter overview first, then open the reader and continue in canonical order."
+                contentClassName="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"
+            >
+                <ScriptureActionRow>
+                    <Button asChild>
+                        <Link href={chapter.verses_href ?? chapter.href}>
+                            Open Reader
+                            <ArrowRight className="size-4" />
+                        </Link>
+                    </Button>
+                    <Button asChild variant="outline">
+                        <Link href={book.href}>Back to Book</Link>
+                    </Button>
+                </ScriptureActionRow>
+                <div className="space-y-2">
+                    <p className="text-sm font-medium">Presentation</p>
+                    <ToggleGroup
+                        type="single"
+                        value={viewMode}
+                        variant="outline"
+                        onValueChange={(value) => {
+                            if (value === 'cards' || value === 'list') {
+                                setViewMode(value);
+                            }
+                        }}
+                    >
+                        <ToggleGroupItem value="cards" aria-label="Card view">
+                            <LayoutGrid className="size-4" />
+                            Card View
+                        </ToggleGroupItem>
+                        <ToggleGroupItem value="list" aria-label="List view">
+                            <Rows3 className="size-4" />
+                            List View
+                        </ToggleGroupItem>
+                    </ToggleGroup>
                 </div>
+            </ScripturePageIntroCard>
+
+            <ScriptureContentBlocksSection
+                title="Published Notes"
+                description="Study content attached to this chapter."
+                blocks={content_blocks}
+            />
+
+            <ScriptureSection
+                title={
+                    hidesGenericChapterSection
+                        ? 'Reader Entry'
+                        : 'Chapter Sections'
+                }
+                description={
+                    hidesGenericChapterSection
+                        ? 'This chapter flows through one continuous reader entry point.'
+                        : 'Canonical sections inside this chapter, with verse counts for quick entry into the reader.'
+                }
+            >
                 {viewMode === 'cards' ? (
                     <div className="grid gap-4 md:grid-cols-2">
                         {chapter_sections.map((section) => (
@@ -174,7 +152,9 @@ export default function ChapterShow({
                                 <CardContent className="flex items-center justify-between gap-3">
                                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                         <ListTree className="size-4" />
-                                        <span>Open this section in the reader</span>
+                                        <span>
+                                            Open this section in the reader
+                                        </span>
                                     </div>
                                     <Button asChild variant="outline" size="sm">
                                         <Link
@@ -213,7 +193,7 @@ export default function ChapterShow({
                                         </Badge>
                                     </div>
                                     <div className="space-y-1">
-                                        <p className="font-medium leading-none">
+                                        <p className="leading-none font-medium">
                                             {hidesGenericChapterSection
                                                 ? 'All Verses'
                                                 : sectionLabel(
@@ -242,7 +222,7 @@ export default function ChapterShow({
                         ))}
                     </div>
                 )}
-            </section>
+            </ScriptureSection>
         </ScriptureLayout>
     );
 }

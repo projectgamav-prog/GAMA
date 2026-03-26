@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('target_type');
             $table->unsignedBigInteger('target_id');
             $table->string('relation_type');
+            $table->foreignId('relation_type_id')->nullable()->constrained()->nullOnDelete();
             $table->unsignedInteger('sort_order')->default(0);
             $table->json('meta_json')->nullable();
             $table->timestamps();

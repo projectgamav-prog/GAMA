@@ -10,7 +10,10 @@ import {
     Tag,
     Users,
 } from 'lucide-react';
-import { ContentBlockRenderer } from '@/components/scripture/content-block-renderer';
+import { ScriptureActionRow } from '@/components/scripture/scripture-action-row';
+import { ScriptureContentBlocksSection } from '@/components/scripture/scripture-content-blocks-section';
+import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
+import { ScriptureSection } from '@/components/scripture/scripture-section';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,9 +24,9 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import ScriptureLayout from '@/layouts/scripture-layout';
 import { chapterLabel, sectionLabel, verseLabel } from '@/lib/scripture';
 import { cn } from '@/lib/utils';
-import ScriptureLayout from '@/layouts/scripture-layout';
 import type { BreadcrumbItem, VerseShowProps } from '@/types';
 
 const getStringList = (values: unknown[] | null): string[] => {
@@ -57,7 +60,10 @@ export default function VerseShow({
     content_blocks,
 }: VerseShowProps) {
     const chapterTitle = chapterLabel(chapter.number, chapter.title);
-    const bookSectionTitle = sectionLabel(book_section.number, book_section.title);
+    const bookSectionTitle = sectionLabel(
+        book_section.number,
+        book_section.title,
+    );
     const chapterSectionTitle = sectionLabel(
         chapter_section.number,
         chapter_section.title,
@@ -98,16 +104,18 @@ export default function VerseShow({
     ].filter((value): value is string => value !== null);
     const keywords = getStringList(verse_meta?.keywords_json ?? null);
     const studyFlags = getStringList(verse_meta?.study_flags_json ?? null);
-    const hasVerseMeta = verse_meta !== null
-        && (metaBadges.length > 0
-            || verse_meta.summary_short !== null
-            || keywords.length > 0
-            || studyFlags.length > 0);
-    const hasCompanionSections = hasVerseMeta
-        || dictionary_terms.length > 0
-        || recitations.length > 0
-        || topics.length > 0
-        || characters.length > 0;
+    const hasVerseMeta =
+        verse_meta !== null &&
+        (metaBadges.length > 0 ||
+            verse_meta.summary_short !== null ||
+            keywords.length > 0 ||
+            studyFlags.length > 0);
+    const hasCompanionSections =
+        hasVerseMeta ||
+        dictionary_terms.length > 0 ||
+        recitations.length > 0 ||
+        topics.length > 0 ||
+        characters.length > 0;
     const formatDuration = (durationSeconds: number | null): string | null => {
         if (durationSeconds === null || durationSeconds < 0) {
             return null;
@@ -129,81 +137,70 @@ export default function VerseShow({
             title={`${verseTitle} - ${chapterTitle}`}
             breadcrumbs={breadcrumbs}
         >
-            <Card className="overflow-hidden">
-                <CardHeader className="gap-5">
-                    <div className="flex flex-wrap items-center gap-2">
+            <ScripturePageIntroCard
+                className="overflow-hidden"
+                badges={
+                    <>
                         <Badge variant="outline">Verse Details</Badge>
                         <Badge variant="secondary">{book.title}</Badge>
                         <Badge variant="secondary">{bookSectionTitle}</Badge>
                         <Badge variant="secondary">{chapterSectionTitle}</Badge>
                         <Badge variant="secondary">{verseTitle}</Badge>
-                    </div>
-                    <div className="space-y-3">
-                        <CardTitle className="text-3xl sm:text-4xl">
-                            {verseTitle}
-                        </CardTitle>
-                        <CardDescription className="max-w-3xl text-base leading-7">
-                            {chapterTitle}. Read the canonical verse first, then
-                            move through translations, commentary, and attached
-                            study references in a calmer reading flow.
-                        </CardDescription>
-                    </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    <div className="rounded-2xl border border-border/70 bg-muted/20 px-5 py-5 sm:px-6 sm:py-6">
-                        <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
-                            Canonical Verse
-                        </p>
-                        <p className="mt-4 text-xl leading-10 sm:text-2xl sm:leading-[3rem]">
-                            {verse.text}
-                        </p>
-                    </div>
+                    </>
+                }
+                title={verseTitle}
+                titleClassName="text-3xl sm:text-4xl"
+                description={`${chapterTitle}. Read the canonical verse first, then move through translations, commentary, and attached study references in a calmer reading flow.`}
+                contentClassName="space-y-6"
+            >
+                <div className="rounded-2xl border border-border/70 bg-muted/20 px-5 py-5 sm:px-6 sm:py-6">
+                    <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
+                        Canonical Verse
+                    </p>
+                    <p className="mt-4 text-xl leading-10 sm:text-2xl sm:leading-[3rem]">
+                        {verse.text}
+                    </p>
+                </div>
 
-                    <Separator />
+                <Separator />
 
-                    <div className="flex flex-wrap gap-3">
-                        {previous_verse && (
-                            <Button asChild variant="outline">
-                                <Link href={previous_verse.href}>
-                                    <ArrowLeft className="size-4" />
-                                    Previous Verse
-                                </Link>
-                            </Button>
-                        )}
-                        {next_verse && (
-                            <Button asChild>
-                                <Link href={next_verse.href}>
-                                    Next Verse
-                                    <ArrowRight className="size-4" />
-                                </Link>
-                            </Button>
-                        )}
+                <ScriptureActionRow>
+                    {previous_verse && (
                         <Button asChild variant="outline">
-                            <Link href={chapter.verses_href ?? chapter.href}>
+                            <Link href={previous_verse.href}>
                                 <ArrowLeft className="size-4" />
-                                Back to Reader
+                                Previous Verse
                             </Link>
                         </Button>
-                        <Button asChild variant="outline">
-                            <Link href={chapter.href}>
-                                <BookOpenText className="size-4" />
-                                Back to Chapter
+                    )}
+                    {next_verse && (
+                        <Button asChild>
+                            <Link href={next_verse.href}>
+                                Next Verse
+                                <ArrowRight className="size-4" />
                             </Link>
                         </Button>
-                    </div>
-                </CardContent>
-            </Card>
+                    )}
+                    <Button asChild variant="outline">
+                        <Link href={chapter.verses_href ?? chapter.href}>
+                            <ArrowLeft className="size-4" />
+                            Back to Reader
+                        </Link>
+                    </Button>
+                    <Button asChild variant="outline">
+                        <Link href={chapter.href}>
+                            <BookOpenText className="size-4" />
+                            Back to Chapter
+                        </Link>
+                    </Button>
+                </ScriptureActionRow>
+            </ScripturePageIntroCard>
 
             {hasCompanionSections && (
-                <section className="space-y-4">
-                    <div className="space-y-1">
-                        <h2 className="text-xl font-semibold">Study Companion</h2>
-                        <p className="text-sm text-muted-foreground">
-                            Supporting metadata and reference material grouped
-                            separately from the main reading flow.
-                        </p>
-                    </div>
-
+                <ScriptureSection
+                    title="Study Companion"
+                    description="Supporting metadata and reference material grouped separately from the main reading flow."
+                >
                     <div className="grid gap-4 xl:grid-cols-2">
                         {hasVerseMeta && (
                             <Card>
@@ -302,8 +299,8 @@ export default function VerseShow({
                                             term.matched_text ??
                                             'Untitled term';
                                         const matchedText =
-                                            term.matched_text
-                                            && term.matched_text !== termLabel
+                                            term.matched_text &&
+                                            term.matched_text !== termLabel
                                                 ? term.matched_text
                                                 : null;
 
@@ -312,25 +309,36 @@ export default function VerseShow({
                                                 key={term.id}
                                                 className={cn(
                                                     'space-y-3',
-                                                    index > 0 && 'border-t pt-4',
+                                                    index > 0 &&
+                                                        'border-t pt-4',
                                                 )}
                                             >
                                                 <div className="space-y-1">
-                                                    {term.dictionary_entry?.href ? (
+                                                    {term.dictionary_entry
+                                                        ?.href ? (
                                                         <Link
-                                                            href={term.dictionary_entry.href}
-                                                            className="inline-flex font-medium leading-none underline-offset-4 hover:text-primary hover:underline"
+                                                            href={
+                                                                term
+                                                                    .dictionary_entry
+                                                                    .href
+                                                            }
+                                                            className="inline-flex leading-none font-medium underline-offset-4 hover:text-primary hover:underline"
                                                         >
                                                             {termLabel}
                                                         </Link>
                                                     ) : (
-                                                        <p className="font-medium leading-none">
+                                                        <p className="leading-none font-medium">
                                                             {termLabel}
                                                         </p>
                                                     )}
-                                                    {term.dictionary_entry?.transliteration && (
+                                                    {term.dictionary_entry
+                                                        ?.transliteration && (
                                                         <p className="text-sm text-muted-foreground">
-                                                            {term.dictionary_entry.transliteration}
+                                                            {
+                                                                term
+                                                                    .dictionary_entry
+                                                                    .transliteration
+                                                            }
                                                         </p>
                                                     )}
                                                 </div>
@@ -350,9 +358,14 @@ export default function VerseShow({
                                                         {matchedText}
                                                     </p>
                                                 )}
-                                                {term.dictionary_entry?.short_meaning && (
+                                                {term.dictionary_entry
+                                                    ?.short_meaning && (
                                                     <p className="text-sm leading-6 text-muted-foreground">
-                                                        {term.dictionary_entry.short_meaning}
+                                                        {
+                                                            term
+                                                                .dictionary_entry
+                                                                .short_meaning
+                                                        }
                                                     </p>
                                                 )}
                                             </div>
@@ -389,39 +402,57 @@ export default function VerseShow({
                                                 key={recitation.id}
                                                 className={cn(
                                                     'space-y-3',
-                                                    index > 0 && 'border-t pt-4',
+                                                    index > 0 &&
+                                                        'border-t pt-4',
                                                 )}
                                             >
                                                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                                     <div className="space-y-2">
                                                         <div className="flex flex-wrap items-center gap-2">
                                                             <span className="font-medium">
-                                                                {recitation.reciter_name}
+                                                                {
+                                                                    recitation.reciter_name
+                                                                }
                                                             </span>
                                                             {recitation.language_code && (
                                                                 <Badge variant="outline">
-                                                                    {recitation.language_code}
+                                                                    {
+                                                                        recitation.language_code
+                                                                    }
                                                                 </Badge>
                                                             )}
                                                             {recitation.style && (
                                                                 <Badge variant="secondary">
-                                                                    {recitation.style}
+                                                                    {
+                                                                        recitation.style
+                                                                    }
                                                                 </Badge>
                                                             )}
                                                             {durationLabel && (
                                                                 <Badge variant="outline">
-                                                                    {durationLabel}
+                                                                    {
+                                                                        durationLabel
+                                                                    }
                                                                 </Badge>
                                                             )}
                                                         </div>
-                                                        {recitation.media?.title && (
+                                                        {recitation.media
+                                                            ?.title && (
                                                             <p className="text-sm text-muted-foreground">
-                                                                {recitation.media.title}
+                                                                {
+                                                                    recitation
+                                                                        .media
+                                                                        .title
+                                                                }
                                                             </p>
                                                         )}
                                                     </div>
                                                     {mediaHref && (
-                                                        <Button asChild size="sm" variant="outline">
+                                                        <Button
+                                                            asChild
+                                                            size="sm"
+                                                            variant="outline"
+                                                        >
                                                             <a
                                                                 href={mediaHref}
                                                                 target="_blank"
@@ -463,20 +494,25 @@ export default function VerseShow({
                                             <div className="flex flex-wrap items-center gap-2">
                                                 {assignment.topic?.href ? (
                                                     <Link
-                                                        href={assignment.topic.href}
+                                                        href={
+                                                            assignment.topic
+                                                                .href
+                                                        }
                                                         className="font-medium underline-offset-4 hover:text-primary hover:underline"
                                                     >
                                                         {assignment.topic.name}
                                                     </Link>
                                                 ) : (
                                                     <span className="font-medium">
-                                                        {assignment.topic?.name ??
+                                                        {assignment.topic
+                                                            ?.name ??
                                                             'Untitled topic'}
                                                     </span>
                                                 )}
                                                 {assignment.weight !== null && (
                                                     <Badge variant="outline">
-                                                        Weight {assignment.weight}
+                                                        Weight{' '}
+                                                        {assignment.weight}
                                                     </Badge>
                                                 )}
                                             </div>
@@ -515,20 +551,28 @@ export default function VerseShow({
                                             <div className="flex flex-wrap items-center gap-2">
                                                 {assignment.character?.href ? (
                                                     <Link
-                                                        href={assignment.character.href}
+                                                        href={
+                                                            assignment.character
+                                                                .href
+                                                        }
                                                         className="font-medium underline-offset-4 hover:text-primary hover:underline"
                                                     >
-                                                        {assignment.character.name}
+                                                        {
+                                                            assignment.character
+                                                                .name
+                                                        }
                                                     </Link>
                                                 ) : (
                                                     <span className="font-medium">
-                                                        {assignment.character?.name ??
+                                                        {assignment.character
+                                                            ?.name ??
                                                             'Untitled character'}
                                                     </span>
                                                 )}
                                                 {assignment.weight !== null && (
                                                     <Badge variant="outline">
-                                                        Weight {assignment.weight}
+                                                        Weight{' '}
+                                                        {assignment.weight}
                                                     </Badge>
                                                 )}
                                             </div>
@@ -543,33 +587,27 @@ export default function VerseShow({
                             </Card>
                         )}
                     </div>
-                </section>
+                </ScriptureSection>
             )}
 
             {translations.length > 0 && (
-                <section className="space-y-4">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                        <div className="space-y-1">
-                            <div className="flex items-center gap-2">
-                                <Languages className="size-5 text-muted-foreground" />
-                                <h2 className="text-xl font-semibold">
-                                    Translations
-                                </h2>
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                                Supporting translations for this verse, kept
-                                separate from the canonical text above.
-                            </p>
-                        </div>
+                <ScriptureSection
+                    title="Translations"
+                    description="Supporting translations for this verse, kept separate from the canonical text above."
+                    icon={Languages}
+                    action={
                         <Badge variant="outline">
                             {translations.length} translation
                             {translations.length === 1 ? '' : 's'}
                         </Badge>
-                    </div>
-
+                    }
+                >
                     <div className="space-y-4">
                         {translations.map((translation) => (
-                            <Card key={translation.id} className="overflow-hidden">
+                            <Card
+                                key={translation.id}
+                                className="overflow-hidden"
+                            >
                                 <CardHeader className="gap-3 border-b bg-muted/20">
                                     <div className="flex flex-wrap items-center gap-2">
                                         <Badge variant="outline">
@@ -587,38 +625,34 @@ export default function VerseShow({
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent className="pt-6">
-                                    <p className="leading-8">{translation.text}</p>
+                                    <p className="leading-8">
+                                        {translation.text}
+                                    </p>
                                 </CardContent>
                             </Card>
                         ))}
                     </div>
-                </section>
+                </ScriptureSection>
             )}
 
             {commentaries.length > 0 && (
-                <section className="space-y-4">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                        <div className="space-y-1">
-                            <div className="flex items-center gap-2">
-                                <MessageSquareQuote className="size-5 text-muted-foreground" />
-                                <h2 className="text-xl font-semibold">
-                                    Commentaries
-                                </h2>
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                                Editorial commentary and source material attached
-                                directly to this verse.
-                            </p>
-                        </div>
+                <ScriptureSection
+                    title="Commentaries"
+                    description="Editorial commentary and source material attached directly to this verse."
+                    icon={MessageSquareQuote}
+                    action={
                         <Badge variant="outline">
                             {commentaries.length} commentary
                             {commentaries.length === 1 ? '' : 's'}
                         </Badge>
-                    </div>
-
+                    }
+                >
                     <div className="space-y-4">
                         {commentaries.map((commentary) => (
-                            <Card key={commentary.id} className="overflow-hidden">
+                            <Card
+                                key={commentary.id}
+                                className="overflow-hidden"
+                            >
                                 <CardHeader className="gap-3 border-b bg-muted/20">
                                     <div className="flex flex-wrap items-center gap-2">
                                         <Badge variant="outline">
@@ -630,7 +664,8 @@ export default function VerseShow({
                                         </Badge>
                                     </div>
                                     <CardTitle className="text-xl">
-                                        {commentary.title ?? commentary.source_name}
+                                        {commentary.title ??
+                                            commentary.source_name}
                                     </CardTitle>
                                     <CardDescription>
                                         <span>{commentary.source_name}</span>
@@ -648,34 +683,22 @@ export default function VerseShow({
                                         <MessageSquareQuote className="size-4" />
                                         <span>Commentary</span>
                                     </div>
-                                    <p className="leading-8">{commentary.body}</p>
+                                    <p className="leading-8">
+                                        {commentary.body}
+                                    </p>
                                 </CardContent>
                             </Card>
                         ))}
                     </div>
-                </section>
+                </ScriptureSection>
             )}
 
-            {content_blocks.length > 0 && (
-                <section id="published-notes" className="space-y-4">
-                    <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                            <BookOpenText className="size-5 text-muted-foreground" />
-                            <h2 className="text-xl font-semibold">
-                                Published Notes
-                            </h2>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                            Published content blocks attached directly to this verse.
-                        </p>
-                    </div>
-                    <div className="space-y-4">
-                        {content_blocks.map((block) => (
-                            <ContentBlockRenderer key={block.id} block={block} />
-                        ))}
-                    </div>
-                </section>
-            )}
+            <ScriptureContentBlocksSection
+                id="published-notes"
+                title="Published Notes"
+                description="Published content blocks attached directly to this verse."
+                blocks={content_blocks}
+            />
         </ScriptureLayout>
     );
 }

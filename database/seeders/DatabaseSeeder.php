@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -16,14 +15,9 @@ class DatabaseSeeder extends Seeder
             return;
         }
 
-        User::query()->firstOrCreate(
-            ['email' => 'test@example.com'],
-            [
-                'name' => 'Test User',
-                'password' => 'password',
-            ],
-        );
-
-        $this->call(BhagavadGitaDevelopmentSeeder::class);
+        $this->call([
+            DevelopmentUserSeeder::class,
+            BhagavadGitaDevelopmentSeeder::class,
+        ]);
     }
 }

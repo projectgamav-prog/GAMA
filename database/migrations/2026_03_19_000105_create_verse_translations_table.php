@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('verse_id')->constrained()->cascadeOnDelete();
             $table->string('source_key');
             $table->string('source_name');
+            $table->foreignId('translation_source_id')->nullable()->constrained()->nullOnDelete();
             $table->string('language_code', 16);
             $table->longText('text');
             $table->unsignedInteger('sort_order')->default(0);

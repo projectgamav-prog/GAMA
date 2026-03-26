@@ -1,5 +1,4 @@
 import { Link } from '@inertiajs/react';
-import { useState } from 'react';
 import {
     ArrowLeft,
     BookOpenText,
@@ -7,16 +6,15 @@ import {
     MessageSquareQuote,
     PlayCircle,
 } from 'lucide-react';
+import { useState } from 'react';
+import { ScriptureActionRow } from '@/components/scripture/scripture-action-row';
+import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
+import { ScriptureSection } from '@/components/scripture/scripture-section';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import ScriptureLayout from '@/layouts/scripture-layout';
 import {
     chapterLabel,
     hidesSingleGenericSection,
@@ -25,7 +23,6 @@ import {
     sectionLabel,
     verseLabel,
 } from '@/lib/scripture';
-import ScriptureLayout from '@/layouts/scripture-layout';
 import type { BreadcrumbItem, ChapterVersesIndexProps } from '@/types';
 
 export default function ChapterVersesIndex({
@@ -53,7 +50,10 @@ export default function ChapterVersesIndex({
     const hidesGenericChapterSection =
         hidesSingleGenericSection(chapter_sections);
     const chapterTitle = chapterLabel(chapter.number, chapter.title);
-    const bookSectionTitle = sectionLabel(book_section.number, book_section.title);
+    const bookSectionTitle = sectionLabel(
+        book_section.number,
+        book_section.title,
+    );
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -79,9 +79,9 @@ export default function ChapterVersesIndex({
             title={`${chapterTitle} Reader`}
             breadcrumbs={breadcrumbs}
         >
-            <Card>
-                <CardHeader className="gap-4">
-                    <div className="flex flex-wrap items-center gap-2">
+            <ScripturePageIntroCard
+                badges={
+                    <>
                         <Badge variant="outline">Reader</Badge>
                         <Badge variant="secondary">{book.title}</Badge>
                         {!hidesGenericBookSection && (
@@ -92,87 +92,78 @@ export default function ChapterVersesIndex({
                         <Badge variant="secondary">
                             {totalCards} card{totalCards === 1 ? '' : 's'}
                         </Badge>
-                    </div>
-                    <div className="space-y-2">
-                        <CardTitle className="text-3xl">
-                            {chapterTitle}
-                        </CardTitle>
-                        <CardDescription className="text-base leading-7">
-                            Canonical verses are rendered in reading order,
-                            while valid helper-layer groupings stay inside their
-                            own chapter section.
-                        </CardDescription>
-                    </div>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                    <div className="space-y-2">
-                        <p className="text-sm font-medium">Reader Controls</p>
-                        <div className="flex flex-wrap items-center gap-3">
-                            {hasReaderLanguages ? (
-                                <>
-                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                        <Languages className="size-4" />
-                                        <span>Translation</span>
-                                    </div>
-                                    {showsLanguageToggle ? (
-                                        <ToggleGroup
-                                            type="single"
-                                            value={language}
-                                            variant="outline"
-                                            onValueChange={(value) => {
-                                                if (
-                                                    value === 'en' ||
-                                                    value === 'hi'
-                                                ) {
-                                                    setLanguage(value);
-                                                }
-                                            }}
-                                        >
-                                            {reader_languages.map(
-                                                (readerLanguage) => (
-                                                    <ToggleGroupItem
-                                                        key={readerLanguage}
-                                                        value={readerLanguage}
-                                                    >
-                                                        {languageLabel(
-                                                            readerLanguage,
-                                                        )}
-                                                    </ToggleGroupItem>
-                                                ),
-                                            )}
-                                        </ToggleGroup>
-                                    ) : (
-                                        <Badge variant="outline">
-                                            {languageLabel(
-                                                reader_languages[0],
-                                            )}{' '}
-                                            Translation
-                                        </Badge>
-                                    )}
-                                </>
-                            ) : (
-                                <p className="text-sm text-muted-foreground">
-                                    No supporting translations are available for
-                                    this chapter yet.
-                                </p>
-                            )}
-                        </div>
-                        {showsLanguageToggle && (
+                    </>
+                }
+                title={chapterTitle}
+                description="Canonical verses are rendered in reading order, while valid helper-layer groupings stay inside their own chapter section."
+                contentClassName="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"
+            >
+                <div className="space-y-2">
+                    <p className="text-sm font-medium">Reader Controls</p>
+                    <div className="flex flex-wrap items-center gap-3">
+                        {hasReaderLanguages ? (
+                            <>
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <Languages className="size-4" />
+                                    <span>Translation</span>
+                                </div>
+                                {showsLanguageToggle ? (
+                                    <ToggleGroup
+                                        type="single"
+                                        value={language}
+                                        variant="outline"
+                                        onValueChange={(value) => {
+                                            if (
+                                                value === 'en' ||
+                                                value === 'hi'
+                                            ) {
+                                                setLanguage(value);
+                                            }
+                                        }}
+                                    >
+                                        {reader_languages.map(
+                                            (readerLanguage) => (
+                                                <ToggleGroupItem
+                                                    key={readerLanguage}
+                                                    value={readerLanguage}
+                                                >
+                                                    {languageLabel(
+                                                        readerLanguage,
+                                                    )}
+                                                </ToggleGroupItem>
+                                            ),
+                                        )}
+                                    </ToggleGroup>
+                                ) : (
+                                    <Badge variant="outline">
+                                        {languageLabel(reader_languages[0])}{' '}
+                                        Translation
+                                    </Badge>
+                                )}
+                            </>
+                        ) : (
                             <p className="text-sm text-muted-foreground">
-                                Sanskrit remains visible. The control only
-                                switches the supporting translation line below
-                                each verse.
+                                No supporting translations are available for
+                                this chapter yet.
                             </p>
                         )}
                     </div>
+                    {showsLanguageToggle && (
+                        <p className="text-sm text-muted-foreground">
+                            Sanskrit remains visible. The control only switches
+                            the supporting translation line below each verse.
+                        </p>
+                    )}
+                </div>
+                <ScriptureActionRow className="shrink-0">
                     <Button asChild variant="outline">
                         <Link href={chapter.href}>
                             <ArrowLeft className="size-4" />
                             Back to Chapter
                         </Link>
                     </Button>
-                </CardContent>
-            </Card>
+                </ScriptureActionRow>
+            </ScripturePageIntroCard>
 
             <div className="space-y-6">
                 {chapter_sections.map((section) => {
@@ -182,13 +173,19 @@ export default function ChapterVersesIndex({
                     );
 
                     return (
-                        <section
+                        <ScriptureSection
                             key={section.id}
                             id={section.slug}
-                            className="space-y-4"
-                        >
-                            <div className="space-y-1">
-                                <div className="flex flex-wrap items-center gap-2">
+                            title={
+                                hidesGenericChapterSection
+                                    ? 'All Verses'
+                                    : sectionLabel(
+                                          section.number,
+                                          section.title,
+                                      )
+                            }
+                            description={
+                                <span className="flex flex-wrap items-center gap-2">
                                     <Badge variant="outline">
                                         {section.cards.length} card
                                         {section.cards.length === 1 ? '' : 's'}
@@ -197,17 +194,9 @@ export default function ChapterVersesIndex({
                                         {verseCount} verse
                                         {verseCount === 1 ? '' : 's'}
                                     </Badge>
-                                </div>
-                                <h2 className="text-xl font-semibold">
-                                    {hidesGenericChapterSection
-                                        ? 'All Verses'
-                                        : sectionLabel(
-                                              section.number,
-                                              section.title,
-                                          )}
-                                </h2>
-                            </div>
-
+                                </span>
+                            }
+                        >
                             <div className="space-y-4">
                                 {section.cards.map((card) => (
                                     <Card key={card.id}>
@@ -243,7 +232,7 @@ export default function ChapterVersesIndex({
                                                                     verse.number,
                                                                 )}
                                                             </p>
-                                                            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                                                            <p className="text-xs tracking-[0.18em] text-muted-foreground uppercase">
                                                                 Sanskrit
                                                             </p>
                                                         </div>
@@ -259,7 +248,8 @@ export default function ChapterVersesIndex({
                                                                     }
                                                                 >
                                                                     <MessageSquareQuote className="size-4" />
-                                                                    Verse Details
+                                                                    Verse
+                                                                    Details
                                                                 </Link>
                                                             </Button>
                                                             {verse.video_href && (
@@ -287,7 +277,7 @@ export default function ChapterVersesIndex({
                                                     </p>
 
                                                     <div className="rounded-lg bg-muted/40 px-4 py-4">
-                                                        <p className="mb-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                                                        <p className="mb-2 text-xs tracking-[0.18em] text-muted-foreground uppercase">
                                                             {hasReaderLanguages
                                                                 ? `${languageLabel(language)} Translation`
                                                                 : 'Translation'}
@@ -330,25 +320,27 @@ export default function ChapterVersesIndex({
                                     </Card>
                                 ))}
                             </div>
-                        </section>
+                        </ScriptureSection>
                     );
                 })}
             </div>
 
             <Card>
-                <CardContent className="flex flex-wrap gap-3 py-6">
-                    <Button asChild variant="outline">
-                        <Link href={chapter.href}>
-                            <ArrowLeft className="size-4" />
-                            Back to Chapter
-                        </Link>
-                    </Button>
-                    <Button asChild variant="outline">
-                        <Link href={book.href}>
-                            <BookOpenText className="size-4" />
-                            Back to Book
-                        </Link>
-                    </Button>
+                <CardContent className="py-6">
+                    <ScriptureActionRow>
+                        <Button asChild variant="outline">
+                            <Link href={chapter.href}>
+                                <ArrowLeft className="size-4" />
+                                Back to Chapter
+                            </Link>
+                        </Button>
+                        <Button asChild variant="outline">
+                            <Link href={book.href}>
+                                <BookOpenText className="size-4" />
+                                Back to Book
+                            </Link>
+                        </Button>
+                    </ScriptureActionRow>
                 </CardContent>
             </Card>
         </ScriptureLayout>

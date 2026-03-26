@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('verse_id')->constrained()->cascadeOnDelete();
             $table->string('source_key');
             $table->string('source_name');
+            $table->foreignId('commentary_source_id')->nullable()->constrained()->nullOnDelete();
             $table->string('author_name')->nullable();
             $table->string('language_code', 16);
             $table->string('title')->nullable();
