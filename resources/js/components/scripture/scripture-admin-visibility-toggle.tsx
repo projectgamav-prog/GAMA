@@ -8,15 +8,17 @@ export function ScriptureAdminVisibilityToggle() {
     const adminContext = useAdminContext();
     const [processing, setProcessing] = useState(false);
 
-    if (!adminContext.canAccess) {
+    if (!adminContext.canAccess || adminContext.visibilityUrl === null) {
         return null;
     }
+
+    const visibilityUrl = adminContext.visibilityUrl;
 
     const toggleVisibility = () => {
         setProcessing(true);
 
         router.post(
-            adminContext.visibilityUrl,
+            visibilityUrl,
             {
                 visible: !adminContext.isVisible,
             },

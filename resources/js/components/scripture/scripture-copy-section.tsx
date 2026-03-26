@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { ScriptureEntityRegionInput } from '@/types/scripture';
@@ -8,6 +9,7 @@ type Props = {
     description: string;
     body: string | null;
     preserveWhitespace?: boolean;
+    action?: ReactNode;
     entityMeta?: ScriptureEntityRegionInput;
 };
 
@@ -16,6 +18,7 @@ export function ScriptureCopySection({
     description,
     body,
     preserveWhitespace = false,
+    action,
     entityMeta,
 }: Props) {
     if (!body) {
@@ -26,6 +29,7 @@ export function ScriptureCopySection({
         <ScriptureSection
             title={title}
             description={description}
+            action={action}
             entityMeta={entityMeta}
         >
             <Card>

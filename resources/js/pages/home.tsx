@@ -1,4 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
+import { AuthenticatedUtilityNav } from '@/components/authenticated-utility-nav';
 import { Button } from '@/components/ui/button';
 import { login, register } from '@/routes';
 import { index as scriptureBooksIndex } from '@/routes/scripture/books';
@@ -30,11 +31,13 @@ export default function Home({ canRegister, featured_book }: HomeProps) {
 
                         <nav className="flex flex-wrap items-center gap-2">
                             {auth.user ? (
-                                <Button asChild variant="outline">
-                                    <Link href={scriptureBooksIndex()}>
-                                        Browse Scripture
-                                    </Link>
-                                </Button>
+                                <AuthenticatedUtilityNav showHome={false}>
+                                    <Button asChild variant="outline">
+                                        <Link href={scriptureBooksIndex()}>
+                                            Browse Scripture
+                                        </Link>
+                                    </Button>
+                                </AuthenticatedUtilityNav>
                             ) : (
                                 <>
                                     <Button asChild variant="ghost">

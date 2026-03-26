@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Book;
 use App\Models\ContentBlock;
+use App\Models\Topic;
 use App\Models\User;
 use App\Support\AdminContext\AdminContext;
 use Database\Seeders\BhagavadGitaDevelopmentSeeder;
@@ -16,59 +16,28 @@ beforeEach(function () {
         BhagavadGitaDevelopmentSeeder::class,
     ]);
 
-    $this->book = Book::query()
-        ->where('slug', 'bhagavad-gita')
+    $this->topic = Topic::query()
+        ->where('slug', 'dharma')
         ->firstOrFail();
 
-    $this->bookSection = $this->book->bookSections()
-        ->where('slug', 'main')
-        ->firstOrFail();
-
-    $this->chapter = $this->bookSection->chapters()
-        ->where('slug', 'chapter-2')
-        ->firstOrFail();
-
-    $this->chapterSection = $this->chapter->chapterSections()
-        ->inCanonicalOrder()
-        ->firstOrFail();
-
-    $sectionVerses = $this->chapterSection->verses()
-        ->inCanonicalOrder()
-        ->get()
-        ->values();
-
-    $this->firstVerse = $sectionVerses[0];
-    $this->secondVerse = $sectionVerses[1];
-
-    $this->verseRouteParameters = [
-        'book' => $this->book,
-        'bookSection' => $this->bookSection,
-        'chapter' => $this->chapter,
-        'chapterSection' => $this->chapterSection,
-        'verse' => $this->firstVerse,
-    ];
-
-    $this->verseShowRoute = route(
-        'scripture.chapters.verses.show',
-        $this->verseRouteParameters,
-    );
-    $this->metaUpdateRoute = route(
-        'scripture.chapters.verses.admin.meta.update',
-        $this->verseRouteParameters,
+    $this->topicShowRoute = route('scripture.topics.show', $this->topic);
+    $this->detailsUpdateRoute = route(
+        'scripture.topics.admin.details.update',
+        $this->topic,
     );
     $this->fullEditRoute = route(
-        'scripture.chapters.verses.admin.full-edit',
-        $this->verseRouteParameters,
+        'scripture.topics.admin.full-edit',
+        $this->topic,
     );
     $this->contentBlockStoreRoute = route(
-        'scripture.chapters.verses.admin.content-blocks.store',
-        $this->verseRouteParameters,
+        'scripture.topics.admin.content-blocks.store',
+        $this->topic,
     );
     $this->visibilityRoute = route('scripture.admin-context.visibility.update');
 });
 
-test('guests and non editors cannot access protected verse admin context', function () {
-    $this->get($this->verseShowRoute)
+test('guests and non editors cannot access protected topic admin context', function () {
+    $this->get($this->topicShowRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('adminContext.canAccess', false)
@@ -85,7 +54,7 @@ test('guests and non editors cannot access protected verse admin context', funct
     ]);
 
     $this->actingAs($nonEditor)
-        ->get($this->verseShowRoute)
+        ->get($this->topicShowRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('adminContext.canAccess', false)
@@ -99,11 +68,8 @@ test('guests and non editors cannot access protected verse admin context', funct
         ->assertForbidden();
 
     $this->actingAs($nonEditor)
-        ->patch($this->metaUpdateRoute, [
-            'summary_short' => 'Blocked summary',
-            'is_featured' => false,
-            'keywords' => [],
-            'study_flags' => [],
+        ->patch($this->detailsUpdateRoute, [
+            'description' => 'Blocked topic update',
         ])
         ->assertForbidden();
 
@@ -114,29 +80,21 @@ test('guests and non editors cannot access protected verse admin context', funct
         ->assertForbidden();
 });
 
-test('authorized editors can toggle protected admin visibility and receive verse admin props', function () {
+test('authorized editors can toggle protected admin visibility and receive topic admin props', function () {
     $editor = User::query()->where('email', 'editor1@example.com')->firstOrFail();
 
-    $this->firstVerse->verseMeta()->create([
-        'summary_short' => 'Study notes visible in admin mode.',
-        'scene_location' => 'Kurukshetra',
-        'is_featured' => true,
-        'keywords_json' => ['focus'],
-        'study_flags_json' => ['discussion'],
-    ]);
-
-    $publishedBlock = $this->firstVerse->contentBlocks()->create([
+    $publishedBlock = $this->topic->contentBlocks()->create([
         'region' => 'study',
         'block_type' => 'text',
-        'title' => 'Published editorial note',
-        'body' => 'Editable note block shown on the public verse page.',
+        'title' => 'Published topic note',
+        'body' => 'Editable topic note shown on the public topic page.',
         'data_json' => null,
-        'sort_order' => 1,
+        'sort_order' => 10,
         'status' => 'published',
     ]);
 
     $this->actingAs($editor)
-        ->get($this->verseShowRoute)
+        ->get($this->topicShowRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('adminContext.canAccess', true)
@@ -146,112 +104,97 @@ test('authorized editors can toggle protected admin visibility and receive verse
         );
 
     $response = $this->actingAs($editor)
-        ->from($this->verseShowRoute)
+        ->from($this->topicShowRoute)
         ->post($this->visibilityRoute, [
             'visible' => true,
         ]);
 
     $response
-        ->assertRedirect($this->verseShowRoute)
+        ->assertRedirect($this->topicShowRoute)
         ->assertCookie(AdminContext::VISIBILITY_COOKIE, '1');
 
     $this->actingAs($editor)
         ->withCookie(AdminContext::VISIBILITY_COOKIE, '1')
-        ->get($this->verseShowRoute)
+        ->get($this->topicShowRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('adminContext.canAccess', true)
             ->where('adminContext.isVisible', true)
             ->where('adminContext.visibilityUrl', $this->visibilityRoute)
-            ->where('verse_meta.summary_short', 'Study notes visible in admin mode.')
-            ->where('admin.meta_update_href', $this->metaUpdateRoute)
+            ->where('admin.details_update_href', $this->detailsUpdateRoute)
             ->where('admin.full_edit_href', $this->fullEditRoute)
             ->where(
                 "admin.content_block_update_hrefs.{$publishedBlock->id}",
-                route('scripture.chapters.verses.admin.content-blocks.update', [
-                    ...$this->verseRouteParameters,
+                route('scripture.topics.admin.content-blocks.update', [
+                    'topic' => $this->topic,
                     'contentBlock' => $publishedBlock,
                 ]),
             ),
         );
 
     $hideResponse = $this->actingAs($editor)
-        ->from($this->verseShowRoute)
+        ->from($this->topicShowRoute)
         ->post($this->visibilityRoute, [
             'visible' => false,
         ]);
 
     $hideResponse
-        ->assertRedirect($this->verseShowRoute)
+        ->assertRedirect($this->topicShowRoute)
         ->assertCookieExpired(AdminContext::VISIBILITY_COOKIE);
 });
 
-test('authorized editors can update verse meta without wiping untouched full-edit fields', function () {
+test('authorized editors can update topic description', function () {
     $editor = User::query()->where('email', 'editor2@example.com')->firstOrFail();
 
-    $this->firstVerse->verseMeta()->create([
-        'summary_short' => 'Original summary',
-        'scene_location' => 'Kurukshetra',
-        'narrative_phase' => 'Opening tension',
-        'teaching_mode' => 'Dialogue',
-        'difficulty_level' => 'Intermediate',
-        'memorization_priority' => 4,
-        'is_featured' => false,
-        'keywords_json' => ['old'],
-        'study_flags_json' => ['legacy'],
-    ]);
-
     $this->actingAs($editor)
-        ->from($this->verseShowRoute)
-        ->patch($this->metaUpdateRoute, [
-            'summary_short' => 'Context-aware summary',
-            'is_featured' => true,
-            'keywords' => ['clarity', 'discipline'],
-            'study_flags' => ['memorization'],
+        ->from($this->topicShowRoute)
+        ->patch($this->detailsUpdateRoute, [
+            'description' => 'Updated public topic description from admin context.',
         ])
-        ->assertRedirect($this->verseShowRoute);
+        ->assertRedirect($this->topicShowRoute);
 
-    $meta = $this->firstVerse->fresh()->verseMeta()->firstOrFail();
-
-    expect($meta->summary_short)->toBe('Context-aware summary');
-    expect($meta->is_featured)->toBeTrue();
-    expect($meta->keywords_json)->toBe(['clarity', 'discipline']);
-    expect($meta->study_flags_json)->toBe(['memorization']);
-    expect($meta->scene_location)->toBe('Kurukshetra');
-    expect($meta->narrative_phase)->toBe('Opening tension');
-    expect($meta->teaching_mode)->toBe('Dialogue');
-    expect($meta->difficulty_level)->toBe('Intermediate');
-    expect($meta->memorization_priority)->toBe(4);
+    expect($this->topic->fresh()->description)
+        ->toBe('Updated public topic description from admin context.');
 
     $this->actingAs($editor)
-        ->get($this->verseShowRoute)
+        ->get($this->topicShowRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('verse_meta.summary_short', 'Context-aware summary')
-            ->where('verse_meta.scene_location', 'Kurukshetra')
-            ->where('verse_meta.is_featured', true)
-            ->where('verse_meta.keywords_json.0', 'clarity')
-            ->where('verse_meta.study_flags_json.0', 'memorization'),
+            ->where(
+                'topic.description',
+                'Updated public topic description from admin context.',
+            ),
         );
 });
 
-test('authorized editors can manage verse note blocks while public verse page stays published only', function () {
+test('authorized editors can manage topic note blocks while public topic page stays published only', function () {
     $editor = User::query()->where('email', 'editor3@example.com')->firstOrFail();
 
-    $publishedBlock = $this->firstVerse->contentBlocks()->create([
+    $topic = Topic::query()->create([
+        'slug' => 'karma-topic-admin',
+        'name' => 'Karma Topic Admin',
+        'description' => 'Topic used for admin-context block management tests.',
+        'sort_order' => 99,
+    ]);
+
+    $showRoute = route('scripture.topics.show', $topic);
+    $fullEditRoute = route('scripture.topics.admin.full-edit', $topic);
+    $storeRoute = route('scripture.topics.admin.content-blocks.store', $topic);
+
+    $publishedBlock = $topic->contentBlocks()->create([
         'region' => 'study',
         'block_type' => 'text',
-        'title' => 'Published verse note',
-        'body' => 'Visible on the public verse page.',
+        'title' => 'Published topic note',
+        'body' => 'Visible on the public topic page.',
         'data_json' => null,
         'sort_order' => 1,
         'status' => 'published',
     ]);
 
-    $draftBlock = $this->firstVerse->contentBlocks()->create([
+    $draftBlock = $topic->contentBlocks()->create([
         'region' => 'study',
         'block_type' => 'text',
-        'title' => 'Draft verse note',
+        'title' => 'Draft topic note',
         'body' => 'Still hidden publicly.',
         'data_json' => null,
         'sort_order' => 2,
@@ -259,74 +202,81 @@ test('authorized editors can manage verse note blocks while public verse page st
     ]);
 
     $this->actingAs($editor)
-        ->from($this->fullEditRoute)
-        ->post($this->contentBlockStoreRoute, [
-            'title' => 'Fresh draft note',
-            'body' => 'Created from the full editor.',
+        ->from($fullEditRoute)
+        ->post($storeRoute, [
+            'title' => 'Fresh draft topic note',
+            'body' => 'Created from the topic full editor.',
             'region' => 'study',
             'sort_order' => 3,
             'status' => 'draft',
         ])
-        ->assertRedirect($this->fullEditRoute);
+        ->assertRedirect($fullEditRoute);
 
-    $newDraftBlock = $this->firstVerse->contentBlocks()
-        ->where('title', 'Fresh draft note')
+    $newDraftBlock = $topic->contentBlocks()
+        ->where('title', 'Fresh draft topic note')
         ->firstOrFail();
 
     $this->actingAs($editor)
-        ->from($this->fullEditRoute)
-        ->patch(route('scripture.chapters.verses.admin.content-blocks.update', [
-            ...$this->verseRouteParameters,
+        ->from($fullEditRoute)
+        ->patch(route('scripture.topics.admin.content-blocks.update', [
+            'topic' => $topic,
             'contentBlock' => $draftBlock,
         ]), [
-            'title' => 'Updated draft verse note',
+            'title' => 'Updated draft topic note',
             'body' => 'Still hidden publicly after update.',
             'region' => 'study',
             'sort_order' => 2,
             'status' => 'draft',
         ])
-        ->assertRedirect($this->fullEditRoute);
+        ->assertRedirect($fullEditRoute);
 
     $this->actingAs($editor)
-        ->get($this->fullEditRoute)
+        ->get($fullEditRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('scripture/chapters/verses/full-edit')
+            ->component('scripture/topics/full-edit')
             ->has('admin_content_blocks', 3)
-            ->where('admin_content_blocks.0.title', 'Published verse note')
-            ->where('admin_content_blocks.1.title', 'Updated draft verse note')
+            ->where('admin_content_blocks.0.title', 'Published topic note')
+            ->where('admin_content_blocks.1.title', 'Updated draft topic note')
             ->where('admin_content_blocks.1.status', 'draft')
-            ->where('admin_content_blocks.2.title', 'Fresh draft note')
+            ->where('admin_content_blocks.2.title', 'Fresh draft topic note')
             ->where('admin_content_blocks.2.status', 'draft'),
         );
 
-    $this->get($this->verseShowRoute)
+    $this->get($showRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->has('content_blocks', 1)
-            ->where('content_blocks.0.title', 'Published verse note'),
+            ->where('content_blocks.0.title', 'Published topic note'),
         );
 
     expect($newDraftBlock->status)->toBe('draft');
     expect($publishedBlock->status)->toBe('published');
 });
 
-test('content block update hard fails when the block is not owned by the current verse', function () {
+test('content block update hard fails when the block is not owned by the current topic', function () {
     $editor = User::query()->where('email', 'admin@example.com')->firstOrFail();
 
-    $foreignBlock = $this->secondVerse->contentBlocks()->create([
+    $foreignTopic = Topic::query()->create([
+        'slug' => 'foreign-topic-admin',
+        'name' => 'Foreign Topic Admin',
+        'description' => 'A foreign topic for ownership checks.',
+        'sort_order' => 100,
+    ]);
+
+    $foreignBlock = $foreignTopic->contentBlocks()->create([
         'region' => 'study',
         'block_type' => 'text',
-        'title' => 'Other verse block',
-        'body' => 'Not owned by the current verse.',
+        'title' => 'Other topic block',
+        'body' => 'Not owned by the current topic.',
         'data_json' => null,
         'sort_order' => 1,
         'status' => 'draft',
     ]);
 
     $this->actingAs($editor)
-        ->patch(route('scripture.chapters.verses.admin.content-blocks.update', [
-            ...$this->verseRouteParameters,
+        ->patch(route('scripture.topics.admin.content-blocks.update', [
+            'topic' => $this->topic,
             'contentBlock' => $foreignBlock,
         ]), [
             'title' => 'Should not update',
@@ -338,13 +288,23 @@ test('content block update hard fails when the block is not owned by the current
         ->assertNotFound();
 
     expect(ContentBlock::query()->findOrFail($foreignBlock->id)->title)
-        ->toBe('Other verse block');
+        ->toBe('Other topic block');
 });
 
-test('phase one content block editing is limited to verse owned text notes', function () {
+test('phase one topic block editing is limited to topic owned text notes', function () {
     $editor = User::query()->where('email', 'admin@example.com')->firstOrFail();
 
-    $textBlock = $this->firstVerse->contentBlocks()->create([
+    $topic = Topic::query()->create([
+        'slug' => 'topic-note-scope',
+        'name' => 'Topic Note Scope',
+        'description' => 'Topic used to verify editable text-note limits.',
+        'sort_order' => 101,
+    ]);
+
+    $showRoute = route('scripture.topics.show', $topic);
+    $fullEditRoute = route('scripture.topics.admin.full-edit', $topic);
+
+    $textBlock = $topic->contentBlocks()->create([
         'region' => 'study',
         'block_type' => 'text',
         'title' => 'Editable text note',
@@ -354,25 +314,25 @@ test('phase one content block editing is limited to verse owned text notes', fun
         'status' => 'published',
     ]);
 
-    $videoBlock = $this->firstVerse->contentBlocks()->create([
+    $videoBlock = $topic->contentBlocks()->create([
         'region' => 'study',
         'block_type' => 'video',
         'title' => 'Protected video block',
         'body' => null,
-        'data_json' => ['url' => 'https://example.test/video.mp4'],
+        'data_json' => ['url' => 'https://example.test/topic-video.mp4'],
         'sort_order' => 2,
         'status' => 'published',
     ]);
 
     $this->actingAs($editor)
         ->withCookie(AdminContext::VISIBILITY_COOKIE, '1')
-        ->get($this->verseShowRoute)
+        ->get($showRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where(
                 "admin.content_block_update_hrefs.{$textBlock->id}",
-                route('scripture.chapters.verses.admin.content-blocks.update', [
-                    ...$this->verseRouteParameters,
+                route('scripture.topics.admin.content-blocks.update', [
+                    'topic' => $topic,
                     'contentBlock' => $textBlock,
                 ]),
             )
@@ -380,17 +340,18 @@ test('phase one content block editing is limited to verse owned text notes', fun
         );
 
     $this->actingAs($editor)
-        ->get($this->fullEditRoute)
+        ->get($fullEditRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->has('admin_content_blocks', 1)
             ->where('admin_content_blocks.0.title', 'Editable text note')
-            ->where('admin_content_blocks.0.block_type', 'text'),
+            ->where('admin_content_blocks.0.block_type', 'text')
+            ->where('next_content_block_sort_order', 3),
         );
 
     $this->actingAs($editor)
-        ->patch(route('scripture.chapters.verses.admin.content-blocks.update', [
-            ...$this->verseRouteParameters,
+        ->patch(route('scripture.topics.admin.content-blocks.update', [
+            'topic' => $topic,
             'contentBlock' => $videoBlock,
         ]), [
             'title' => 'Should stay protected',

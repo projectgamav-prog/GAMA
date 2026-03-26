@@ -8,7 +8,10 @@ export type ScriptureContentBlock = {
     sort_order: number;
 };
 
-export type ScriptureAdminEditTarget = 'verse_meta' | 'content_block';
+export type ScriptureAdminEditTarget =
+    | 'verse_meta'
+    | 'entity_details'
+    | 'content_block';
 
 export type ScriptureAdminRegionConfig = {
     supportsEdit: boolean;
@@ -20,6 +23,12 @@ export type ScriptureAdminRegionConfig = {
 
 export type ScriptureVerseAdmin = {
     meta_update_href: string;
+    full_edit_href: string;
+    content_block_update_hrefs: Record<string, string>;
+};
+
+export type ScriptureTopicAdmin = {
+    details_update_href: string;
     full_edit_href: string;
     content_block_update_hrefs: Record<string, string>;
 };
@@ -333,6 +342,7 @@ export type TopicShowProps = {
     topic: ScriptureTopic;
     related_verses: ScriptureRelatedVerse[];
     content_blocks: ScriptureContentBlock[];
+    admin?: ScriptureTopicAdmin | null;
 };
 
 export type CharactersIndexProps = {
@@ -400,5 +410,15 @@ export type VerseFullEditProps = {
     verse_meta: ScriptureVerseMeta | null;
     admin_meta_update_href: string;
     admin_content_block_store_href: string;
+    admin_content_blocks: ScriptureAdminContentBlock[];
+};
+
+export type TopicFullEditProps = {
+    topic: ScriptureTopic & {
+        admin_full_edit_href: string;
+    };
+    admin_details_update_href: string;
+    admin_content_block_store_href: string;
+    next_content_block_sort_order: number;
     admin_content_blocks: ScriptureAdminContentBlock[];
 };

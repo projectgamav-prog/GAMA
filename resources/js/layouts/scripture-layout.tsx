@@ -1,5 +1,6 @@
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import type { ReactNode } from 'react';
+import { AuthenticatedUtilityNav } from '@/components/authenticated-utility-nav';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import type { BreadcrumbItem } from '@/types';
 
@@ -14,12 +15,14 @@ export default function ScriptureLayout({
     breadcrumbs = [],
     title,
 }: Props) {
+    const { auth } = usePage().props;
+
     return (
         <>
             <Head title={title} />
             <div className="min-h-screen bg-background text-foreground">
                 <header className="border-b border-border/70">
-                    <div className="mx-auto flex max-w-5xl items-center px-4 py-5 sm:px-6">
+                    <div className="mx-auto flex max-w-5xl flex-col gap-4 px-4 py-5 sm:px-6 md:flex-row md:items-center md:justify-between">
                         <div>
                             <p className="text-xs font-semibold tracking-[0.22em] text-muted-foreground uppercase">
                                 Scripture
@@ -28,6 +31,8 @@ export default function ScriptureLayout({
                                 Canonical Reading
                             </h1>
                         </div>
+
+                        {auth.user && <AuthenticatedUtilityNav />}
                     </div>
                 </header>
 

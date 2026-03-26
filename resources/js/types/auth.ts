@@ -18,7 +18,7 @@ export type Auth = {
 export type AdminContext = {
     canAccess: boolean;
     isVisible: boolean;
-    visibilityUrl: string;
+    visibilityUrl: string | null;
 };
 
 export type TwoFactorSetupData = {

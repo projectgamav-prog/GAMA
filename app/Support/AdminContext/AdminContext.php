@@ -37,4 +37,13 @@ class AdminContext
             FILTER_VALIDATE_BOOL,
         );
     }
+
+    public static function visibilityUrl(?Authenticatable $user): ?string
+    {
+        if (! self::canAccess($user)) {
+            return null;
+        }
+
+        return route('scripture.admin-context.visibility.update');
+    }
 }

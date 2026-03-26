@@ -3,35 +3,25 @@
 namespace App\Http\Controllers\Scripture;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Scripture\VerseContentBlockStoreRequest;
-use App\Http\Requests\Scripture\VerseContentBlockUpdateRequest;
-use App\Models\Book;
-use App\Models\BookSection;
-use App\Models\Chapter;
-use App\Models\ChapterSection;
+use App\Http\Requests\Scripture\EditableTextContentBlockStoreRequest;
+use App\Http\Requests\Scripture\EditableTextContentBlockUpdateRequest;
 use App\Models\ContentBlock;
-use App\Models\Verse;
-use App\Support\Scripture\Admin\VerseAdminRouteContext;
+use App\Models\Topic;
+use App\Support\Scripture\Admin\TopicAdminRouteContext;
 use Illuminate\Http\RedirectResponse;
 
-class VerseAdminContentBlockController extends Controller
+class TopicAdminContentBlockController extends Controller
 {
     /**
-     * Create a new verse-owned editorial note block.
+     * Create a new topic-owned editorial note block.
      */
     public function store(
-        VerseContentBlockStoreRequest $request,
-        Book $book,
-        BookSection $bookSection,
-        Chapter $chapter,
-        ChapterSection $chapterSection,
-        Verse $verse,
+        EditableTextContentBlockStoreRequest $request,
+        Topic $topic,
     ): RedirectResponse {
-        unset($book, $bookSection, $chapter, $chapterSection);
-
         $validated = $request->validated();
 
-        $verse->contentBlocks()->create([
+        $topic->contentBlocks()->create([
             'region' => trim($validated['region']),
             'block_type' => 'text',
             'title' => $this->nullableString($validated['title'] ?? null),
@@ -45,24 +35,14 @@ class VerseAdminContentBlockController extends Controller
     }
 
     /**
-     * Update a verse-owned text note block.
+     * Update a topic-owned text note block.
      */
     public function update(
-        VerseContentBlockUpdateRequest $request,
-        Book $book,
-        BookSection $bookSection,
-        Chapter $chapter,
-        ChapterSection $chapterSection,
-        Verse $verse,
+        EditableTextContentBlockUpdateRequest $request,
+        Topic $topic,
         ContentBlock $contentBlock,
     ): RedirectResponse {
-        $adminRouteContext = new VerseAdminRouteContext(
-            $book,
-            $bookSection,
-            $chapter,
-            $chapterSection,
-            $verse,
-        );
+        $adminRouteContext = new TopicAdminRouteContext($topic);
 
         $adminRouteContext->abortUnlessEditableNoteBlock($contentBlock);
 

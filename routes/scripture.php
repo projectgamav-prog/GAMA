@@ -6,6 +6,9 @@ use App\Http\Controllers\Scripture\ChapterController;
 use App\Http\Controllers\Scripture\ChapterVerseController;
 use App\Http\Controllers\Scripture\CharacterController;
 use App\Http\Controllers\Scripture\DictionaryEntryController;
+use App\Http\Controllers\Scripture\TopicAdminContentBlockController;
+use App\Http\Controllers\Scripture\TopicAdminDetailsController;
+use App\Http\Controllers\Scripture\TopicFullEditController;
 use App\Http\Controllers\Scripture\TopicController;
 use App\Http\Controllers\Scripture\VerseAdminContentBlockController;
 use App\Http\Controllers\Scripture\VerseAdminMetaController;
@@ -31,6 +34,25 @@ Route::get('topics', [TopicController::class, 'index'])
 
 Route::get('topics/{topic:slug}', [TopicController::class, 'show'])
     ->name('scripture.topics.show');
+
+Route::middleware(['auth', EnsureCanAccessAdminContext::class])
+    ->prefix('topics/{topic:slug}/admin')
+    ->name('scripture.topics.admin.')
+    ->group(function () {
+        Route::get('full-edit', [TopicFullEditController::class, 'show'])
+            ->name('full-edit');
+
+        Route::patch('details', [TopicAdminDetailsController::class, 'update'])
+            ->name('details.update');
+
+        Route::post('content-blocks', [TopicAdminContentBlockController::class, 'store'])
+            ->name('content-blocks.store');
+
+        Route::patch(
+            'content-blocks/{contentBlock}',
+            [TopicAdminContentBlockController::class, 'update'],
+        )->name('content-blocks.update');
+    });
 
 Route::middleware(['auth', EnsureCanAccessAdminContext::class])
     ->prefix('scripture/admin-context')

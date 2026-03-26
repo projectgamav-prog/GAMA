@@ -7,7 +7,9 @@ use App\Models\Book;
 use App\Models\BookSection;
 use App\Models\Chapter;
 use App\Models\ChapterSection;
+use App\Models\ContentBlock;
 use App\Models\Verse;
+use App\Support\Scripture\Admin\VerseAdminRouteContext;
 use App\Support\Scripture\PublicScriptureData;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -29,6 +31,16 @@ class VerseFullEditController extends Controller
 
         $contentBlocks = $verse->contentBlocks()
             ->get();
+        $adminRouteContext = new VerseAdminRouteContext(
+            $book,
+            $bookSection,
+            $chapter,
+            $chapterSection,
+            $verse,
+        );
+        $editableNoteBlocks = $contentBlocks
+            ->filter(fn (ContentBlock $block) => $adminRouteContext->isEditableNoteBlock($block))
+            ->values();
 
         return Inertia::render('scripture/chapters/verses/full-edit', [
             'book' => $publicScriptureData->book($book),
@@ -43,38 +55,14 @@ class VerseFullEditController extends Controller
             'verse' => [
                 ...$publicScriptureData->verse(
                     $verse,
-                    route('scripture.chapters.verses.show', [
-                        'book' => $book,
-                        'bookSection' => $bookSection,
-                        'chapter' => $chapter,
-                        'chapterSection' => $chapterSection,
-                        'verse' => $verse,
-                    ]),
+                    $adminRouteContext->verseHref(),
                 ),
-                'admin_full_edit_href' => route('scripture.chapters.verses.admin.full-edit', [
-                    'book' => $book,
-                    'bookSection' => $bookSection,
-                    'chapter' => $chapter,
-                    'chapterSection' => $chapterSection,
-                    'verse' => $verse,
-                ]),
+                'admin_full_edit_href' => $adminRouteContext->fullEditHref(),
             ],
             'verse_meta' => $publicScriptureData->verseMeta($verse->verseMeta),
-            'admin_meta_update_href' => route('scripture.chapters.verses.admin.meta.update', [
-                'book' => $book,
-                'bookSection' => $bookSection,
-                'chapter' => $chapter,
-                'chapterSection' => $chapterSection,
-                'verse' => $verse,
-            ]),
-            'admin_content_block_store_href' => route('scripture.chapters.verses.admin.content-blocks.store', [
-                'book' => $book,
-                'bookSection' => $bookSection,
-                'chapter' => $chapter,
-                'chapterSection' => $chapterSection,
-                'verse' => $verse,
-            ]),
-            'admin_content_blocks' => $contentBlocks
+            'admin_meta_update_href' => $adminRouteContext->metaUpdateHref(),
+            'admin_content_block_store_href' => $adminRouteContext->contentBlockStoreHref(),
+            'admin_content_blocks' => $editableNoteBlocks
                 ->map(fn ($block) => [
                     'id' => $block->id,
                     'region' => $block->region,
@@ -84,14 +72,7 @@ class VerseFullEditController extends Controller
                     'data_json' => $block->data_json,
                     'sort_order' => $block->sort_order,
                     'status' => $block->status,
-                    'update_href' => route('scripture.chapters.verses.admin.content-blocks.update', [
-                        'book' => $book,
-                        'bookSection' => $bookSection,
-                        'chapter' => $chapter,
-                        'chapterSection' => $chapterSection,
-                        'verse' => $verse,
-                        'contentBlock' => $block,
-                    ]),
+                    'update_href' => $adminRouteContext->contentBlockUpdateHref($block),
                 ])
                 ->values()
                 ->all(),

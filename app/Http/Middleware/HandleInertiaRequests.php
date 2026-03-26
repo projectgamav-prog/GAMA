@@ -45,7 +45,7 @@ class HandleInertiaRequests extends Middleware
             'adminContext' => [
                 'canAccess' => AdminContext::canAccess($request->user()),
                 'isVisible' => AdminContext::isVisible($request),
-                'visibilityUrl' => route('scripture.admin-context.visibility.update'),
+                'visibilityUrl' => AdminContext::visibilityUrl($request->user()),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];

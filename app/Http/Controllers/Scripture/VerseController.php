@@ -9,6 +9,7 @@ use App\Models\Chapter;
 use App\Models\ChapterSection;
 use App\Models\Verse;
 use App\Support\AdminContext\AdminContext;
+use App\Support\Scripture\Admin\VerseAdminRouteContext;
 use App\Support\Scripture\PublicScriptureData;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -51,6 +52,13 @@ class VerseController extends Controller
             ->get();
 
         $adminVisibilityEnabled = AdminContext::isVisible($request);
+        $adminRouteContext = new VerseAdminRouteContext(
+            $book,
+            $bookSection,
+            $chapter,
+            $chapterSection,
+            $verse,
+        );
 
         return Inertia::render('scripture/chapters/verses/show', [
             'book' => $publicScriptureData->book($book),
@@ -91,30 +99,12 @@ class VerseController extends Controller
             'content_blocks' => $publicScriptureData->contentBlocks($contentBlocks),
             'admin' => $adminVisibilityEnabled
                 ? [
-                    'meta_update_href' => route('scripture.chapters.verses.admin.meta.update', [
-                        'book' => $book,
-                        'bookSection' => $bookSection,
-                        'chapter' => $chapter,
-                        'chapterSection' => $chapterSection,
-                        'verse' => $verse,
-                    ]),
-                    'full_edit_href' => route('scripture.chapters.verses.admin.full-edit', [
-                        'book' => $book,
-                        'bookSection' => $bookSection,
-                        'chapter' => $chapter,
-                        'chapterSection' => $chapterSection,
-                        'verse' => $verse,
-                    ]),
+                    'meta_update_href' => $adminRouteContext->metaUpdateHref(),
+                    'full_edit_href' => $adminRouteContext->fullEditHref(),
                     'content_block_update_hrefs' => $contentBlocks
+                        ->filter(fn ($block) => $adminRouteContext->isEditableNoteBlock($block))
                         ->mapWithKeys(fn ($block) => [
-                            (string) $block->id => route('scripture.chapters.verses.admin.content-blocks.update', [
-                                'book' => $book,
-                                'bookSection' => $bookSection,
-                                'chapter' => $chapter,
-                                'chapterSection' => $chapterSection,
-                                'verse' => $verse,
-                                'contentBlock' => $block,
-                            ]),
+                            (string) $block->id => $adminRouteContext->contentBlockUpdateHref($block),
                         ])
                         ->all(),
                 ]
