@@ -33,6 +33,19 @@ export type ScriptureTopicAdmin = {
     content_block_update_hrefs: Record<string, string>;
 };
 
+export type ScriptureCharacterAdmin = {
+    details_update_href: string;
+    full_edit_href: string;
+    content_block_update_hrefs: Record<string, string>;
+};
+
+export type ScriptureChapterAdmin = {
+    full_edit_href: string;
+    primary_content_block_id: number | null;
+    primary_content_block_update_href: string | null;
+    content_block_update_hrefs: Record<string, string>;
+};
+
 export type ScriptureAdminContentBlock = ScriptureContentBlock & {
     status: 'draft' | 'published';
     update_href: string;
@@ -353,6 +366,7 @@ export type CharacterShowProps = {
     character: ScriptureCharacter;
     related_verses: ScriptureRelatedVerse[];
     content_blocks: ScriptureContentBlock[];
+    admin?: ScriptureCharacterAdmin | null;
 };
 
 export type ChapterShowProps = {
@@ -361,6 +375,7 @@ export type ChapterShowProps = {
     chapter: ScriptureChapter;
     content_blocks: ScriptureContentBlock[];
     chapter_sections: ScriptureChapterSection[];
+    admin?: ScriptureChapterAdmin | null;
 };
 
 export type ChapterVersesIndexProps = {
@@ -418,6 +433,27 @@ export type TopicFullEditProps = {
         admin_full_edit_href: string;
     };
     admin_details_update_href: string;
+    admin_content_block_store_href: string;
+    next_content_block_sort_order: number;
+    admin_content_blocks: ScriptureAdminContentBlock[];
+};
+
+export type CharacterFullEditProps = {
+    character: ScriptureCharacter & {
+        admin_full_edit_href: string;
+    };
+    admin_details_update_href: string;
+    admin_content_block_store_href: string;
+    next_content_block_sort_order: number;
+    admin_content_blocks: ScriptureAdminContentBlock[];
+};
+
+export type ChapterFullEditProps = {
+    book: ScriptureBook;
+    book_section: ScriptureBookSection;
+    chapter: ScriptureChapter & {
+        admin_full_edit_href: string;
+    };
     admin_content_block_store_href: string;
     next_content_block_sort_order: number;
     admin_content_blocks: ScriptureAdminContentBlock[];

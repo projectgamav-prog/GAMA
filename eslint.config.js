@@ -105,6 +105,14 @@ export default [
         },
     },
     {
+        files: ['scripts/**/*.{js,mjs,cjs}'],
+        languageOptions: {
+            globals: {
+                ...globals.node,
+            },
+        },
+    },
+    {
         ignores: [
             'vendor',
             'node_modules',

@@ -63,14 +63,12 @@ class VerseAdminRouteContext
 
     public function ownsContentBlock(ContentBlock $contentBlock): bool
     {
-        return $contentBlock->parent_type === $this->verse->getMorphClass()
-            && (int) $contentBlock->parent_id === (int) $this->verse->getKey();
+        return EditableTextNoteBlock::owns($this->verse, $contentBlock);
     }
 
     public function isEditableNoteBlock(ContentBlock $contentBlock): bool
     {
-        return $this->ownsContentBlock($contentBlock)
-            && $contentBlock->block_type === 'text';
+        return EditableTextNoteBlock::isEditableFor($this->verse, $contentBlock);
     }
 
     public function abortUnlessOwnsContentBlock(ContentBlock $contentBlock): void
@@ -80,6 +78,6 @@ class VerseAdminRouteContext
 
     public function abortUnlessEditableNoteBlock(ContentBlock $contentBlock): void
     {
-        abort_unless($this->isEditableNoteBlock($contentBlock), 404);
+        EditableTextNoteBlock::abortUnlessEditableFor($this->verse, $contentBlock);
     }
 }

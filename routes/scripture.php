@@ -2,9 +2,14 @@
 
 use App\Http\Controllers\Scripture\AdminContextVisibilityController;
 use App\Http\Controllers\Scripture\BookController;
+use App\Http\Controllers\Scripture\ChapterAdminContentBlockController;
 use App\Http\Controllers\Scripture\ChapterController;
+use App\Http\Controllers\Scripture\ChapterFullEditController;
 use App\Http\Controllers\Scripture\ChapterVerseController;
+use App\Http\Controllers\Scripture\CharacterAdminContentBlockController;
+use App\Http\Controllers\Scripture\CharacterAdminDetailsController;
 use App\Http\Controllers\Scripture\CharacterController;
+use App\Http\Controllers\Scripture\CharacterFullEditController;
 use App\Http\Controllers\Scripture\DictionaryEntryController;
 use App\Http\Controllers\Scripture\TopicAdminContentBlockController;
 use App\Http\Controllers\Scripture\TopicAdminDetailsController;
@@ -22,6 +27,25 @@ Route::get('characters', [CharacterController::class, 'index'])
 
 Route::get('characters/{character:slug}', [CharacterController::class, 'show'])
     ->name('scripture.characters.show');
+
+Route::middleware(['auth', EnsureCanAccessAdminContext::class])
+    ->prefix('characters/{character:slug}/admin')
+    ->name('scripture.characters.admin.')
+    ->group(function () {
+        Route::get('full-edit', [CharacterFullEditController::class, 'show'])
+            ->name('full-edit');
+
+        Route::patch('details', [CharacterAdminDetailsController::class, 'update'])
+            ->name('details.update');
+
+        Route::post('content-blocks', [CharacterAdminContentBlockController::class, 'store'])
+            ->name('content-blocks.store');
+
+        Route::patch(
+            'content-blocks/{contentBlock}',
+            [CharacterAdminContentBlockController::class, 'update'],
+        )->name('content-blocks.update');
+    });
 
 Route::get('dictionary', [DictionaryEntryController::class, 'index'])
     ->name('scripture.dictionary.index');
@@ -79,6 +103,22 @@ Route::prefix('books')
             '{book:slug}/sections/{bookSection:slug}/chapters/{chapter:slug}',
             [ChapterController::class, 'show'],
         )->name('chapters.show');
+
+        Route::middleware(['auth', EnsureCanAccessAdminContext::class])
+            ->prefix('{book:slug}/sections/{bookSection:slug}/chapters/{chapter:slug}/admin')
+            ->name('chapters.admin.')
+            ->group(function () {
+                Route::get('full-edit', [ChapterFullEditController::class, 'show'])
+                    ->name('full-edit');
+
+                Route::post('content-blocks', [ChapterAdminContentBlockController::class, 'store'])
+                    ->name('content-blocks.store');
+
+                Route::patch(
+                    'content-blocks/{contentBlock}',
+                    [ChapterAdminContentBlockController::class, 'update'],
+                )->name('content-blocks.update');
+            });
 
         Route::get(
             '{book:slug}/sections/{bookSection:slug}/chapters/{chapter:slug}/verses',

@@ -2,13 +2,13 @@
 
 namespace App\Support\Scripture\Admin;
 
+use App\Models\Character;
 use App\Models\ContentBlock;
-use App\Models\Topic;
 
-class TopicAdminRouteContext
+class CharacterAdminRouteContext
 {
     public function __construct(
-        private readonly Topic $topic,
+        private readonly Character $character,
     ) {}
 
     /**
@@ -18,49 +18,49 @@ class TopicAdminRouteContext
     public function routeParameters(array $extra = []): array
     {
         return array_merge([
-            'topic' => $this->topic,
+            'character' => $this->character,
         ], $extra);
     }
 
-    public function topicHref(): string
+    public function characterHref(): string
     {
-        return route('scripture.topics.show', $this->routeParameters());
+        return route('scripture.characters.show', $this->routeParameters());
     }
 
     public function fullEditHref(): string
     {
-        return route('scripture.topics.admin.full-edit', $this->routeParameters());
+        return route('scripture.characters.admin.full-edit', $this->routeParameters());
     }
 
     public function detailsUpdateHref(): string
     {
-        return route('scripture.topics.admin.details.update', $this->routeParameters());
+        return route('scripture.characters.admin.details.update', $this->routeParameters());
     }
 
     public function contentBlockStoreHref(): string
     {
-        return route('scripture.topics.admin.content-blocks.store', $this->routeParameters());
+        return route('scripture.characters.admin.content-blocks.store', $this->routeParameters());
     }
 
     public function contentBlockUpdateHref(ContentBlock $contentBlock): string
     {
-        return route('scripture.topics.admin.content-blocks.update', $this->routeParameters([
+        return route('scripture.characters.admin.content-blocks.update', $this->routeParameters([
             'contentBlock' => $contentBlock,
         ]));
     }
 
     public function ownsContentBlock(ContentBlock $contentBlock): bool
     {
-        return EditableTextNoteBlock::owns($this->topic, $contentBlock);
+        return EditableTextNoteBlock::owns($this->character, $contentBlock);
     }
 
     public function isEditableNoteBlock(ContentBlock $contentBlock): bool
     {
-        return EditableTextNoteBlock::isEditableFor($this->topic, $contentBlock);
+        return EditableTextNoteBlock::isEditableFor($this->character, $contentBlock);
     }
 
     public function abortUnlessEditableNoteBlock(ContentBlock $contentBlock): void
     {
-        EditableTextNoteBlock::abortUnlessEditableFor($this->topic, $contentBlock);
+        EditableTextNoteBlock::abortUnlessEditableFor($this->character, $contentBlock);
     }
 }

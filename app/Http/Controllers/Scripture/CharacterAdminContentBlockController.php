@@ -5,22 +5,22 @@ namespace App\Http\Controllers\Scripture;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Scripture\EditableTextContentBlockStoreRequest;
 use App\Http\Requests\Scripture\EditableTextContentBlockUpdateRequest;
+use App\Models\Character;
 use App\Models\ContentBlock;
-use App\Models\Topic;
+use App\Support\Scripture\Admin\CharacterAdminRouteContext;
 use App\Support\Scripture\Admin\EditableTextNoteBlock;
-use App\Support\Scripture\Admin\TopicAdminRouteContext;
 use Illuminate\Http\RedirectResponse;
 
-class TopicAdminContentBlockController extends Controller
+class CharacterAdminContentBlockController extends Controller
 {
     /**
-     * Create a new topic-owned editorial note block.
+     * Create a new character-owned editorial note block.
      */
     public function store(
         EditableTextContentBlockStoreRequest $request,
-        Topic $topic,
+        Character $character,
     ): RedirectResponse {
-        $topic->contentBlocks()->create(
+        $character->contentBlocks()->create(
             EditableTextNoteBlock::createAttributes($request->validated()),
         );
 
@@ -28,14 +28,14 @@ class TopicAdminContentBlockController extends Controller
     }
 
     /**
-     * Update a topic-owned text note block.
+     * Update a character-owned text note block.
      */
     public function update(
         EditableTextContentBlockUpdateRequest $request,
-        Topic $topic,
+        Character $character,
         ContentBlock $contentBlock,
     ): RedirectResponse {
-        $adminRouteContext = new TopicAdminRouteContext($topic);
+        $adminRouteContext = new CharacterAdminRouteContext($character);
 
         $adminRouteContext->abortUnlessEditableNoteBlock($contentBlock);
 

@@ -3,14 +3,19 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "vite build",
-        "build:ssr": "vite build && vite build --ssr",
-        "dev": "vite",
+        "build": "npm run wayfinder:generate && vite build",
+        "build:ssr": "npm run wayfinder:generate && vite build && vite build --ssr",
+        "dev": "npm run wayfinder:generate && vite",
         "format": "prettier --write resources/",
         "format:check": "prettier --check resources/",
         "lint": "eslint . --fix",
         "lint:check": "eslint .",
-        "types:check": "tsc --noEmit"
+        "types:check": "npm run wayfinder:generate && npm run types:check:raw",
+        "types:check:raw": "tsc --noEmit",
+        "wayfinder:clean": "node scripts/wayfinder-generate.mjs --clean-only",
+        "wayfinder:generate": "node scripts/wayfinder-generate.mjs",
+        "wayfinder:rebuild": "npm run wayfinder:generate",
+        "wayfinder:validate": "npm run types:check"
     },
     "devDependencies": {
         "@eslint/js": "^9.19.0",

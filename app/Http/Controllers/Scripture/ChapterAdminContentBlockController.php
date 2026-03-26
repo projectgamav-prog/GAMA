@@ -3,34 +3,30 @@
 namespace App\Http\Controllers\Scripture;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Scripture\VerseContentBlockStoreRequest;
-use App\Http\Requests\Scripture\VerseContentBlockUpdateRequest;
+use App\Http\Requests\Scripture\EditableTextContentBlockStoreRequest;
+use App\Http\Requests\Scripture\EditableTextContentBlockUpdateRequest;
 use App\Models\Book;
 use App\Models\BookSection;
 use App\Models\Chapter;
-use App\Models\ChapterSection;
 use App\Models\ContentBlock;
-use App\Models\Verse;
+use App\Support\Scripture\Admin\ChapterAdminRouteContext;
 use App\Support\Scripture\Admin\EditableTextNoteBlock;
-use App\Support\Scripture\Admin\VerseAdminRouteContext;
 use Illuminate\Http\RedirectResponse;
 
-class VerseAdminContentBlockController extends Controller
+class ChapterAdminContentBlockController extends Controller
 {
     /**
-     * Create a new verse-owned editorial note block.
+     * Create a new chapter-owned editorial note block.
      */
     public function store(
-        VerseContentBlockStoreRequest $request,
+        EditableTextContentBlockStoreRequest $request,
         Book $book,
         BookSection $bookSection,
         Chapter $chapter,
-        ChapterSection $chapterSection,
-        Verse $verse,
     ): RedirectResponse {
-        unset($book, $bookSection, $chapter, $chapterSection);
+        unset($book, $bookSection);
 
-        $verse->contentBlocks()->create(
+        $chapter->contentBlocks()->create(
             EditableTextNoteBlock::createAttributes($request->validated()),
         );
 
@@ -38,24 +34,16 @@ class VerseAdminContentBlockController extends Controller
     }
 
     /**
-     * Update a verse-owned text note block.
+     * Update a chapter-owned text note block.
      */
     public function update(
-        VerseContentBlockUpdateRequest $request,
+        EditableTextContentBlockUpdateRequest $request,
         Book $book,
         BookSection $bookSection,
         Chapter $chapter,
-        ChapterSection $chapterSection,
-        Verse $verse,
         ContentBlock $contentBlock,
     ): RedirectResponse {
-        $adminRouteContext = new VerseAdminRouteContext(
-            $book,
-            $bookSection,
-            $chapter,
-            $chapterSection,
-            $verse,
-        );
+        $adminRouteContext = new ChapterAdminRouteContext($book, $bookSection, $chapter);
 
         $adminRouteContext->abortUnlessEditableNoteBlock($contentBlock);
 

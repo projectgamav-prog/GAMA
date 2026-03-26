@@ -8,6 +8,10 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { ScriptureActionRow } from '@/components/scripture/scripture-action-row';
+import { ScriptureAdminRegionToolbar } from '@/components/scripture/scripture-admin-region-toolbar';
+import { ScriptureAdminVisibilityToggle } from '@/components/scripture/scripture-admin-visibility-toggle';
+import { ScriptureChapterAdminEditSheet } from '@/components/scripture/scripture-chapter-admin-edit-sheet';
+import type { ScriptureChapterAdminEditSession } from '@/components/scripture/scripture-chapter-admin-edit-sheet';
 import { ScriptureContentBlocksSection } from '@/components/scripture/scripture-content-blocks-section';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
@@ -23,7 +27,13 @@ import {
     isGenericSectionLabel,
     sectionLabel,
 } from '@/lib/scripture';
-import type { BreadcrumbItem, ChapterShowProps } from '@/types';
+import type {
+    BreadcrumbItem,
+    ChapterShowProps,
+    ScriptureAdminRegionConfig,
+    ScriptureContentBlock,
+    ScriptureEntityRegionMeta,
+} from '@/types';
 
 export default function ChapterShow({
     book,
@@ -31,8 +41,11 @@ export default function ChapterShow({
     chapter,
     content_blocks,
     chapter_sections,
+    admin,
 }: ChapterShowProps) {
     const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
+    const [editSession, setEditSession] =
+        useState<ScriptureChapterAdminEditSession | null>(null);
     const hidesGenericBookSection = isGenericSectionLabel(
         book_section.slug,
         book_section.title,
@@ -66,6 +79,70 @@ export default function ChapterShow({
             href: chapter.href,
         },
     ];
+    const primaryEditableBlock =
+        admin?.primary_content_block_id === null ||
+        admin?.primary_content_block_id === undefined
+            ? null
+            : (content_blocks.find(
+                  (block) => block.id === admin.primary_content_block_id,
+              ) ?? null);
+    const pageIntroConfig: ScriptureAdminRegionConfig | null = admin
+        ? {
+              supportsEdit:
+                  primaryEditableBlock !== null &&
+                  admin.primary_content_block_update_href !== null,
+              supportsFullEdit: true,
+              editTarget: 'content_block',
+              contextualEditHref: admin.primary_content_block_update_href,
+              fullEditHref:
+                  primaryEditableBlock !== null
+                      ? `${admin.full_edit_href}#block-${primaryEditableBlock.id}`
+                      : admin.full_edit_href,
+          }
+        : null;
+    const openContentBlockEditor = (
+        meta: ScriptureEntityRegionMeta,
+        block: ScriptureContentBlock,
+        config: ScriptureAdminRegionConfig,
+    ) => {
+        if (!config.contextualEditHref) {
+            return;
+        }
+
+        setEditSession({
+            meta,
+            updateHref: config.contextualEditHref,
+            fullEditHref: config.fullEditHref ?? admin?.full_edit_href ?? '#',
+            bookTitle: book.title,
+            bookSectionTitle: bookSectionTitle,
+            chapterTitle,
+            block,
+            values: {
+                title: block.title ?? '',
+                body: block.body ?? '',
+                region: block.region,
+                sort_order: block.sort_order,
+                status: 'published',
+            },
+        });
+    };
+    const getContentBlockConfig = (
+        block: ScriptureContentBlock,
+    ): ScriptureAdminRegionConfig | null => {
+        const updateHref = admin?.content_block_update_hrefs[String(block.id)];
+
+        if (!updateHref || !admin) {
+            return null;
+        }
+
+        return {
+            supportsEdit: true,
+            supportsFullEdit: true,
+            editTarget: 'content_block',
+            contextualEditHref: updateHref,
+            fullEditHref: `${admin.full_edit_href}#block-${block.id}`,
+        };
+    };
 
     return (
         <ScriptureLayout title={chapterTitle} breadcrumbs={breadcrumbs}>
@@ -88,6 +165,25 @@ export default function ChapterShow({
                 }
                 title={chapterTitle}
                 description="Read the chapter overview first, then open the reader and continue in canonical order."
+                headerAction={
+                    <>
+                        <ScriptureAdminVisibilityToggle />
+                        {pageIntroConfig && (
+                            <ScriptureAdminRegionToolbar
+                                config={pageIntroConfig}
+                                onEdit={(meta, config) => {
+                                    if (primaryEditableBlock !== null) {
+                                        openContentBlockEditor(
+                                            meta,
+                                            primaryEditableBlock,
+                                            config,
+                                        );
+                                    }
+                                }}
+                            />
+                        )}
+                    </>
+                }
                 contentClassName="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"
             >
                 <ScriptureActionRow>
@@ -129,6 +225,26 @@ export default function ChapterShow({
                 title="Published Notes"
                 description="Study content attached to this chapter."
                 blocks={content_blocks}
+                renderBlockHeaderAction={(block) => {
+                    const config = getContentBlockConfig(block);
+
+                    if (config === null) {
+                        return null;
+                    }
+
+                    return (
+                        <ScriptureAdminRegionToolbar
+                            config={config}
+                            onEdit={(meta, regionConfig) =>
+                                openContentBlockEditor(
+                                    meta,
+                                    block,
+                                    regionConfig,
+                                )
+                            }
+                        />
+                    );
+                }}
                 entityMeta={{
                     ...chapterEntity,
                     region: 'content_blocks',
@@ -281,6 +397,15 @@ export default function ChapterShow({
                     </div>
                 )}
             </ScriptureSection>
+
+            <ScriptureChapterAdminEditSheet
+                session={editSession}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setEditSession(null);
+                    }
+                }}
+            />
         </ScriptureLayout>
     );
 }
