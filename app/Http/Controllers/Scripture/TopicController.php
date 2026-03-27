@@ -4,10 +4,7 @@ namespace App\Http\Controllers\Scripture;
 
 use App\Http\Controllers\Controller;
 use App\Models\Topic;
-use App\Support\AdminContext\AdminContext;
-use App\Support\Scripture\Admin\TopicAdminRouteContext;
 use App\Support\Scripture\PublicScriptureData;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -33,7 +30,6 @@ class TopicController extends Controller
      * Display a public topic page.
      */
     public function show(
-        Request $request,
         Topic $topic,
         PublicScriptureData $publicScriptureData,
     ): Response {
@@ -46,8 +42,6 @@ class TopicController extends Controller
         $contentBlocks = $topic->contentBlocks()
             ->published()
             ->get();
-        $adminVisibilityEnabled = AdminContext::isVisible($request);
-        $adminRouteContext = new TopicAdminRouteContext($topic);
 
         return Inertia::render('scripture/topics/show', [
             'topic' => $publicScriptureData->topic($topic),
@@ -55,18 +49,7 @@ class TopicController extends Controller
                 $topic->verseAssignments,
             ),
             'content_blocks' => $publicScriptureData->contentBlocks($contentBlocks),
-            'admin' => $adminVisibilityEnabled
-                ? [
-                    'details_update_href' => $adminRouteContext->detailsUpdateHref(),
-                    'full_edit_href' => $adminRouteContext->fullEditHref(),
-                    'content_block_update_hrefs' => $contentBlocks
-                        ->filter(fn ($block) => $adminRouteContext->isEditableNoteBlock($block))
-                        ->mapWithKeys(fn ($block) => [
-                            (string) $block->id => $adminRouteContext->contentBlockUpdateHref($block),
-                        ])
-                        ->all(),
-                ]
-                : null,
+            'admin' => null,
         ]);
     }
 }

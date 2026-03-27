@@ -33,7 +33,8 @@ export function ScriptureAdminVisibilityToggle() {
         <Button
             type="button"
             size="sm"
-            variant={adminContext.isVisible ? 'secondary' : 'outline'}
+            variant={adminContext.isVisible ? 'default' : 'outline'}
+            className="h-9 rounded-full px-4"
             onClick={toggleVisibility}
             disabled={processing}
         >
@@ -42,7 +43,7 @@ export function ScriptureAdminVisibilityToggle() {
             ) : (
                 <Eye className="size-4" />
             )}
-            {adminContext.isVisible ? 'Hide admin controls' : 'Show admin controls'}
+            {adminContext.isVisible ? 'Hide controls' : 'Show controls'}
         </Button>
     );
 }

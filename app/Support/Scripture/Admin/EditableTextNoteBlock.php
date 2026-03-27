@@ -7,12 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class EditableTextNoteBlock
 {
+    private const BLOCK_TYPE = 'text';
+
     /**
      * Determine whether the block belongs to the given parent model.
      */
     public static function owns(Model $owner, ContentBlock $contentBlock): bool
     {
-        return RegisteredContentBlock::owns($owner, $contentBlock);
+        return FixedTypeContentBlock::owns($owner, $contentBlock);
     }
 
     /**
@@ -20,10 +22,10 @@ class EditableTextNoteBlock
      */
     public static function isEditableFor(Model $owner, ContentBlock $contentBlock): bool
     {
-        return RegisteredContentBlock::isEditableFor(
+        return FixedTypeContentBlock::isEditableFor(
             $owner,
             $contentBlock,
-            ['text'],
+            self::BLOCK_TYPE,
         );
     }
 
@@ -34,10 +36,10 @@ class EditableTextNoteBlock
         Model $owner,
         ContentBlock $contentBlock,
     ): void {
-        RegisteredContentBlock::abortUnlessEditableFor(
+        FixedTypeContentBlock::abortUnlessEditableFor(
             $owner,
             $contentBlock,
-            ['text'],
+            self::BLOCK_TYPE,
         );
     }
 
@@ -49,10 +51,9 @@ class EditableTextNoteBlock
      */
     public static function createAttributes(array $validated): array
     {
-        return RegisteredContentBlock::createAttributes(
+        return FixedTypeContentBlock::createAttributes(
             $validated,
-            forcedBlockType: 'text',
-            includeDataJson: true,
+            self::BLOCK_TYPE,
         );
     }
 
@@ -64,9 +65,6 @@ class EditableTextNoteBlock
      */
     public static function updateAttributes(array $validated): array
     {
-        return RegisteredContentBlock::updateAttributes(
-            $validated,
-            allowBlockTypeUpdate: false,
-        );
+        return FixedTypeContentBlock::updateAttributes($validated);
     }
 }

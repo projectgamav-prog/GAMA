@@ -1,24 +1,9 @@
-import { Link, useForm } from '@inertiajs/react';
+import { useForm } from '@inertiajs/react';
 import { useEffect, useEffectEvent } from 'react';
 import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
+import { ScriptureInlineAdminSheet } from '@/components/scripture/scripture-inline-admin-sheet';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetFooter,
-    SheetHeader,
-    SheetTitle,
-} from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
 import type {
     BookDetailsDraft,
@@ -27,6 +12,7 @@ import type {
     ScriptureBookAdminEditSession,
 } from '@/lib/book-admin-edit-session';
 import { scriptureAdminStartCase } from '@/lib/scripture-admin-field-display';
+import { scriptureInlineRegionLabel } from '@/lib/scripture-inline-admin';
 
 type Props = {
     session: ScriptureBookAdminEditSession | null;
@@ -161,336 +147,213 @@ export function ScriptureBookAdminEditSheet({ session, onOpenChange }: Props) {
             : session?.kind === 'content_block'
               ? contentBlockForm.processing
               : createContentBlockForm.processing;
+    const surfaceLabel =
+        session?.kind === 'entity_details'
+            ? 'Book intro'
+            : session?.kind === 'content_block'
+              ? 'Reading note'
+              : 'Reading notes';
 
     return (
-        <Sheet open={session !== null} onOpenChange={closeSheet}>
-            <SheetContent side="right" className="w-full sm:max-w-xl">
-                {session && (
+        <ScriptureInlineAdminSheet
+            open={session !== null}
+            onOpenChange={closeSheet}
+            surfaceLabel={surfaceLabel}
+            mode={
+                session?.kind === 'create_content_block' ? 'create' : 'edit'
+            }
+            title={
+                session?.kind === 'entity_details'
+                    ? 'Edit book intro'
+                    : session?.kind === 'content_block'
+                      ? 'Edit reading note'
+                      : 'Add reading note'
+            }
+            description={
+                session
+                    ? session.kind === 'create_content_block'
+                        ? `Create a new block directly in ${scriptureInlineRegionLabel(session.meta.region)} for ${session.bookTitle}.`
+                        : `Update the attached ${surfaceLabel.toLowerCase()} for ${session.bookTitle}.`
+                    : ''
+            }
+            contextLabel="Book context"
+            contextSlot={
+                session ? (
                     <>
-                        <SheetHeader className="space-y-3 border-b">
-                            <div className="space-y-2">
-                                <SheetTitle>
-                                    {session.kind === 'entity_details'
-                                        ? 'Edit book description'
-                                        : session.kind === 'content_block'
-                                          ? 'Edit book content block'
-                                          : 'Add book content block'}
-                                </SheetTitle>
-                                <SheetDescription>
-                                    Context-aware{' '}
-                                    {session.kind === 'create_content_block'
-                                        ? 'block creation'
-                                        : 'editing'}{' '}
-                                    for{' '}
-                                    <span className="font-medium text-foreground">
-                                        {session.bookTitle}
-                                    </span>{' '}
-                                    in region{' '}
-                                    <span className="font-medium text-foreground">
-                                        {session.meta.region}
-                                    </span>
-                                    .
-                                </SheetDescription>
-                            </div>
-
-                            <div className="rounded-2xl border border-border/70 bg-muted/30 px-4 py-4">
-                                <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-                                    Book context
+                        <p className="font-medium text-foreground">
+                            {session.bookTitle}
+                        </p>
+                        {session.kind === 'entity_details' ? (
+                            session.bookDescription ? (
+                                <p className="leading-7 text-muted-foreground">
+                                    {session.bookDescription}
                                 </p>
-                                <p className="mt-3 text-sm font-medium text-foreground">
-                                    {session.bookTitle}
-                                </p>
-                                {session.kind === 'entity_details' ? (
-                                    session.bookDescription ? (
-                                        <p className="mt-2 text-sm leading-7 text-muted-foreground">
-                                            {session.bookDescription}
-                                        </p>
-                                    ) : (
-                                        <p className="mt-2 text-sm text-muted-foreground">
-                                            No public book description is set
-                                            yet.
-                                        </p>
-                                    )
-                                ) : session.kind === 'content_block' ? (
-                                    <p className="mt-2 text-sm text-muted-foreground">
-                                        {session.block.block_type} block in{' '}
-                                        {session.block.region}.
-                                    </p>
-                                ) : (
-                                    <div className="mt-2 space-y-2 text-sm text-muted-foreground">
-                                        <p>{session.insertionLabel}.</p>
-                                        <p>
-                                            This contextual flow creates a
-                                            published block and places it at the
-                                            chosen page position.
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
-                        </SheetHeader>
-
-                        <div className="flex-1 space-y-6 overflow-y-auto px-4 py-5">
-                            {session.kind === 'entity_details' ? (
-                                <div className="space-y-5">
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="book_description">
-                                            Description
-                                        </Label>
-                                        <Textarea
-                                            id="book_description"
-                                            value={detailsForm.data.description}
-                                            onChange={(event) =>
-                                                detailsForm.setData(
-                                                    'description',
-                                                    event.target.value,
-                                                )
-                                            }
-                                            rows={8}
-                                            placeholder="Add public editorial copy for this book."
-                                        />
-                                        <InputError
-                                            message={
-                                                detailsForm.errors.description
-                                            }
-                                        />
-                                    </div>
-                                </div>
-                            ) : session.kind === 'content_block' ? (
-                                <div className="space-y-5">
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="book_block_title">
-                                            Title
-                                        </Label>
-                                        <Input
-                                            id="book_block_title"
-                                            value={contentBlockForm.data.title}
-                                            onChange={(event) =>
-                                                contentBlockForm.setData(
-                                                    'title',
-                                                    event.target.value,
-                                                )
-                                            }
-                                            placeholder="Block title"
-                                        />
-                                        <InputError
-                                            message={contentBlockErrors.title}
-                                        />
-                                    </div>
-
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="book_block_body">
-                                            Body
-                                        </Label>
-                                        <Textarea
-                                            id="book_block_body"
-                                            value={contentBlockForm.data.body}
-                                            onChange={(event) =>
-                                                contentBlockForm.setData(
-                                                    'body',
-                                                    event.target.value,
-                                                )
-                                            }
-                                            rows={8}
-                                            placeholder="Published block copy"
-                                        />
-                                        <InputError
-                                            message={contentBlockErrors.body}
-                                        />
-                                    </div>
-                                </div>
                             ) : (
-                                <div className="space-y-5">
-                                    <div className="rounded-2xl border border-border/70 bg-muted/20 px-4 py-4">
-                                        <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-                                            Insertion point
-                                        </p>
-                                        <p className="mt-3 text-sm font-medium text-foreground">
-                                            {session.insertionLabel}
-                                        </p>
-                                        <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                                            The new block will publish into the
-                                            selected Book region and appear at
-                                            this visual location.
-                                        </p>
-                                    </div>
-                                    <InputError
-                                        message={
-                                            createContentBlockErrors.insertion_mode ??
-                                            createContentBlockErrors.relative_block_id
-                                        }
-                                    />
+                                <p className="text-muted-foreground">
+                                    No public book description is set yet.
+                                </p>
+                            )
+                        ) : session.kind === 'content_block' ? (
+                            <p className="text-muted-foreground">
+                                {session.block.block_type} block in{' '}
+                                {session.block.region}.
+                            </p>
+                        ) : (
+                            <>
+                                <p className="font-medium text-foreground">
+                                    {session.insertionLabel}
+                                </p>
+                                <p className="text-muted-foreground">
+                                    The new block will publish into the selected
+                                    book region at this position.
+                                </p>
+                            </>
+                        )}
+                    </>
+                ) : undefined
+            }
+            fullEditHref={session?.fullEditHref ?? null}
+            primaryActionLabel={
+                session?.kind === 'create_content_block'
+                    ? 'Add block'
+                    : 'Save'
+            }
+            processingLabel={
+                session?.kind === 'create_content_block' ? 'Adding...' : 'Saving...'
+            }
+            onPrimaryAction={
+                session?.kind === 'entity_details'
+                    ? submitDetails
+                    : session?.kind === 'content_block'
+                      ? submitContentBlock
+                      : submitCreateContentBlock
+            }
+            processing={processing}
+        >
+            {session?.kind === 'entity_details' ? (
+                <div className="space-y-5">
+                    <div className="grid gap-2">
+                        <Label htmlFor="book_description">Description</Label>
+                        <Textarea
+                            id="book_description"
+                            autoFocus
+                            value={detailsForm.data.description}
+                            onChange={(event) =>
+                                detailsForm.setData(
+                                    'description',
+                                    event.target.value,
+                                )
+                            }
+                            rows={8}
+                            placeholder="Add public editorial copy for this book."
+                        />
+                        <InputError message={detailsForm.errors.description} />
+                    </div>
+                </div>
+            ) : session?.kind === 'content_block' ? (
+                <div className="space-y-5">
+                    <div className="grid gap-2">
+                        <Label htmlFor="book_block_title">Title</Label>
+                        <Input
+                            id="book_block_title"
+                            autoFocus
+                            value={contentBlockForm.data.title}
+                            onChange={(event) =>
+                                contentBlockForm.setData(
+                                    'title',
+                                    event.target.value,
+                                )
+                            }
+                            placeholder="Block title"
+                        />
+                        <InputError message={contentBlockErrors.title} />
+                    </div>
 
-                                    <div className="grid gap-4 md:grid-cols-2">
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="book_create_block_type">
-                                                Block type
-                                            </Label>
-                                            <Select
-                                                value={
-                                                    createContentBlockForm.data
-                                                        .block_type
-                                                }
-                                                onValueChange={(value) =>
-                                                    createContentBlockForm.setData(
-                                                        'block_type',
-                                                        value as
-                                                            | 'text'
-                                                            | 'quote',
-                                                    )
-                                                }
-                                            >
-                                                <SelectTrigger id="book_create_block_type">
-                                                    <SelectValue placeholder="Choose block type" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {session.allowedBlockTypes.map(
-                                                        (type) => (
-                                                            <SelectItem
-                                                                key={type}
-                                                                value={type}
-                                                            >
-                                                                {scriptureAdminStartCase(
-                                                                    type,
-                                                                )}
-                                                            </SelectItem>
-                                                        ),
-                                                    )}
-                                                </SelectContent>
-                                            </Select>
-                                            <InputError
-                                                message={
-                                                    createContentBlockErrors.block_type
-                                                }
-                                            />
-                                        </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="book_block_body">Body</Label>
+                        <Textarea
+                            id="book_block_body"
+                            value={contentBlockForm.data.body}
+                            onChange={(event) =>
+                                contentBlockForm.setData(
+                                    'body',
+                                    event.target.value,
+                                )
+                            }
+                            rows={8}
+                            placeholder="Published block copy"
+                        />
+                        <InputError message={contentBlockErrors.body} />
+                    </div>
+                </div>
+            ) : session?.kind === 'create_content_block' ? (
+                <div className="space-y-5">
+                    <InputError
+                        message={
+                            createContentBlockErrors.insertion_mode ??
+                            createContentBlockErrors.relative_block_id
+                        }
+                    />
 
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="book_create_block_region">
-                                                Region
-                                            </Label>
-                                            <Select
-                                                value={
-                                                    createContentBlockForm.data
-                                                        .region
-                                                }
-                                                onValueChange={(value) =>
-                                                    createContentBlockForm.setData(
-                                                        'region',
-                                                        value,
-                                                    )
-                                                }
-                                            >
-                                                <SelectTrigger id="book_create_block_region">
-                                                    <SelectValue placeholder="Choose region" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {session.allowedRegions.map(
-                                                        (region) => (
-                                                            <SelectItem
-                                                                key={region}
-                                                                value={region}
-                                                            >
-                                                                {scriptureAdminStartCase(
-                                                                    region,
-                                                                )}
-                                                            </SelectItem>
-                                                        ),
-                                                    )}
-                                                </SelectContent>
-                                            </Select>
-                                            <InputError
-                                                message={
-                                                    createContentBlockErrors.region
-                                                }
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="book_create_block_title">
-                                            Title
-                                        </Label>
-                                        <Input
-                                            id="book_create_block_title"
-                                            value={
-                                                createContentBlockForm.data
-                                                    .title
-                                            }
-                                            onChange={(event) =>
-                                                createContentBlockForm.setData(
-                                                    'title',
-                                                    event.target.value,
-                                                )
-                                            }
-                                            placeholder="Optional block title"
-                                        />
-                                        <InputError
-                                            message={
-                                                createContentBlockErrors.title
-                                            }
-                                        />
-                                    </div>
-
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="book_create_block_body">
-                                            Body
-                                        </Label>
-                                        <Textarea
-                                            id="book_create_block_body"
-                                            value={
-                                                createContentBlockForm.data.body
-                                            }
-                                            onChange={(event) =>
-                                                createContentBlockForm.setData(
-                                                    'body',
-                                                    event.target.value,
-                                                )
-                                            }
-                                            rows={8}
-                                            placeholder="Published block copy"
-                                        />
-                                        <InputError
-                                            message={
-                                                createContentBlockErrors.body
-                                            }
-                                        />
-                                    </div>
-                                </div>
-                            )}
+                    <div className="grid gap-4 md:grid-cols-2">
+                        <div className="rounded-xl border border-border/70 bg-muted/20 px-4 py-3">
+                            <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+                                Block type
+                            </p>
+                            <p className="mt-2 font-medium text-foreground">
+                                {scriptureAdminStartCase(
+                                    createContentBlockForm.data.block_type,
+                                )}
+                            </p>
                         </div>
 
-                        <SheetFooter className="border-t">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => onOpenChange(false)}
-                            >
-                                Cancel
-                            </Button>
-                            <Button asChild variant="outline">
-                                <Link href={session.fullEditHref}>
-                                    Open Full edit
-                                </Link>
-                            </Button>
-                            <Button
-                                type="button"
-                                onClick={
-                                    session.kind === 'entity_details'
-                                        ? submitDetails
-                                        : session.kind === 'content_block'
-                                          ? submitContentBlock
-                                          : submitCreateContentBlock
-                                }
-                                disabled={processing}
-                            >
-                                {session.kind === 'create_content_block'
-                                    ? 'Add block'
-                                    : 'Save changes'}
-                            </Button>
-                        </SheetFooter>
-                    </>
-                )}
-            </SheetContent>
-        </Sheet>
+                        <div className="rounded-xl border border-border/70 bg-muted/20 px-4 py-3">
+                            <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+                                Placement
+                            </p>
+                            <p className="mt-2 font-medium text-foreground">
+                                {scriptureInlineRegionLabel(
+                                    createContentBlockForm.data.region,
+                                )}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label htmlFor="book_create_block_title">Title</Label>
+                        <Input
+                            id="book_create_block_title"
+                            autoFocus
+                            value={createContentBlockForm.data.title}
+                            onChange={(event) =>
+                                createContentBlockForm.setData(
+                                    'title',
+                                    event.target.value,
+                                )
+                            }
+                            placeholder="Optional block title"
+                        />
+                        <InputError message={createContentBlockErrors.title} />
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label htmlFor="book_create_block_body">Body</Label>
+                        <Textarea
+                            id="book_create_block_body"
+                            value={createContentBlockForm.data.body}
+                            onChange={(event) =>
+                                createContentBlockForm.setData(
+                                    'body',
+                                    event.target.value,
+                                )
+                            }
+                            rows={8}
+                            placeholder="Published block copy"
+                        />
+                        <InputError message={createContentBlockErrors.body} />
+                    </div>
+                </div>
+            ) : null}
+        </ScriptureInlineAdminSheet>
     );
 }

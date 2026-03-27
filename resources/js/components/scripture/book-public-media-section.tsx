@@ -1,7 +1,7 @@
-import { Link } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import type { ScriptureAdminRegionConfig } from '@/types';
 import { getBookMediaSlotMeta } from '@/lib/book-media-slot-meta';
 import type {
     ScriptureBook,
@@ -79,6 +79,14 @@ export function BookPublicMediaSection({ book, admin }: Props) {
         overview_video !== null ||
         hero_media !== null ||
         supporting_media.length > 0;
+    const mediaAdminConfig: ScriptureAdminRegionConfig | null = admin
+        ? {
+              supportsEdit: false,
+              supportsFullEdit: true,
+              editTarget: 'content_block',
+              fullEditHref: `${admin.full_edit_href}#media-slots`,
+          }
+        : null;
 
     if (!hasMedia) {
         return null;
@@ -88,21 +96,17 @@ export function BookPublicMediaSection({ book, admin }: Props) {
         <ScriptureSection
             title="Book Media"
             description="Published book-level media rendered from registered Book media slots."
-            action={
-                admin ? (
-                    <Button asChild variant="outline" size="sm">
-                        <Link href={`${admin.full_edit_href}#media-slots`}>
-                            Manage Media Slots
-                        </Link>
-                    </Button>
-                ) : undefined
-            }
             entityMeta={{
                 entityType: 'book',
                 entityId: book.id,
                 entityLabel: book.title,
                 region: 'media_slots',
                 capabilityHint: 'media',
+            }}
+            adminSurface={{
+                config: mediaAdminConfig,
+                label: 'Media slots',
+                highlight: false,
             }}
         >
             <div className="space-y-4">

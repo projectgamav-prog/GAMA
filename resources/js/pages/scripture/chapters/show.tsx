@@ -8,18 +8,19 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { ScriptureActionRow } from '@/components/scripture/scripture-action-row';
-import { ScriptureAdminRegionToolbar } from '@/components/scripture/scripture-admin-region-toolbar';
-import { ScriptureAdminVisibilityToggle } from '@/components/scripture/scripture-admin-visibility-toggle';
+import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
 import { ScriptureChapterAdminEditSheet } from '@/components/scripture/scripture-chapter-admin-edit-sheet';
-import type { ScriptureChapterAdminEditSession } from '@/components/scripture/scripture-chapter-admin-edit-sheet';
+import { ScriptureChapterIntroInlineEditor } from '@/components/scripture/scripture-chapter-intro-inline-editor';
 import { ScriptureContentBlocksSection } from '@/components/scripture/scripture-content-blocks-section';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
+import { ScriptureTextContentBlockInlineEditor } from '@/components/scripture/scripture-text-content-block-inline-editor';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { useChapterAdminEditSession } from '@/hooks/use-chapter-admin-edit-session';
 import ScriptureLayout from '@/layouts/scripture-layout';
 import {
     chapterLabel,
@@ -27,13 +28,7 @@ import {
     isGenericSectionLabel,
     sectionLabel,
 } from '@/lib/scripture';
-import type {
-    BreadcrumbItem,
-    ChapterShowProps,
-    ScriptureAdminRegionConfig,
-    ScriptureContentBlock,
-    ScriptureEntityRegionMeta,
-} from '@/types';
+import type { BreadcrumbItem, ChapterShowProps } from '@/types';
 
 export default function ChapterShow({
     book,
@@ -44,8 +39,6 @@ export default function ChapterShow({
     admin,
 }: ChapterShowProps) {
     const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
-    const [editSession, setEditSession] =
-        useState<ScriptureChapterAdminEditSession | null>(null);
     const hidesGenericBookSection = isGenericSectionLabel(
         book_section.slug,
         book_section.title,
@@ -79,73 +72,36 @@ export default function ChapterShow({
             href: chapter.href,
         },
     ];
-    const primaryEditableBlock =
-        admin?.primary_content_block_id === null ||
-        admin?.primary_content_block_id === undefined
-            ? null
-            : (content_blocks.find(
-                  (block) => block.id === admin.primary_content_block_id,
-              ) ?? null);
-    const pageIntroConfig: ScriptureAdminRegionConfig | null = admin
-        ? {
-              supportsEdit:
-                  primaryEditableBlock !== null &&
-                  admin.primary_content_block_update_href !== null,
-              supportsFullEdit: true,
-              editTarget: 'content_block',
-              contextualEditHref: admin.primary_content_block_update_href,
-              fullEditHref:
-                  primaryEditableBlock !== null
-                      ? `${admin.full_edit_href}#block-${primaryEditableBlock.id}`
-                      : admin.full_edit_href,
-          }
-        : null;
-    const openContentBlockEditor = (
-        meta: ScriptureEntityRegionMeta,
-        block: ScriptureContentBlock,
-        config: ScriptureAdminRegionConfig,
-    ) => {
-        if (!config.contextualEditHref) {
-            return;
-        }
-
-        setEditSession({
-            meta,
-            updateHref: config.contextualEditHref,
-            fullEditHref: config.fullEditHref ?? admin?.full_edit_href ?? '#',
-            bookTitle: book.title,
-            bookSectionTitle: bookSectionTitle,
-            chapterTitle,
-            block,
-            values: {
-                title: block.title ?? '',
-                body: block.body ?? '',
-                region: block.region,
-                sort_order: block.sort_order,
-                status: 'published',
-            },
-        });
-    };
-    const getContentBlockConfig = (
-        block: ScriptureContentBlock,
-    ): ScriptureAdminRegionConfig | null => {
-        const updateHref = admin?.content_block_update_hrefs[String(block.id)];
-
-        if (!updateHref || !admin) {
-            return null;
-        }
-
-        return {
-            supportsEdit: true,
-            supportsFullEdit: true,
-            editTarget: 'content_block',
-            contextualEditHref: updateHref,
-            fullEditHref: `${admin.full_edit_href}#block-${block.id}`,
-        };
-    };
+    const {
+        editSession,
+        inlineIntroSession,
+        inlineCreateTextContentBlockSession,
+        getInlineTextContentBlockSession,
+        closeEditSession,
+        pageIntroBlock,
+        pageIntroSurface,
+        contentBlocksMeta,
+        contentBlocksCapabilities,
+        handlePageIntroSaveSuccess,
+        handleContentBlockSaveSuccess,
+        handleContentBlockCreateSuccess,
+    } = useChapterAdminEditSession({
+        chapterId: chapter.id,
+        bookTitle: book.title,
+        bookSectionTitle,
+        chapterTitle,
+        contentBlocks: content_blocks,
+        admin,
+    });
+    const chapterNoteBlocks =
+        pageIntroBlock === null
+            ? content_blocks
+            : content_blocks.filter((block) => block.id !== pageIntroBlock.id);
 
     return (
         <ScriptureLayout title={chapterTitle} breadcrumbs={breadcrumbs}>
+            <ScriptureAdminModeBar />
+
             <ScripturePageIntroCard
                 entityMeta={{
                     ...chapterEntity,
@@ -165,91 +121,113 @@ export default function ChapterShow({
                 }
                 title={chapterTitle}
                 description="Read the chapter overview first, then open the reader and continue in canonical order."
-                headerAction={
-                    <>
-                        <ScriptureAdminVisibilityToggle />
-                        {pageIntroConfig && (
-                            <ScriptureAdminRegionToolbar
-                                config={pageIntroConfig}
-                                onEdit={(meta, config) => {
-                                    if (primaryEditableBlock !== null) {
-                                        openContentBlockEditor(
-                                            meta,
-                                            primaryEditableBlock,
-                                            config,
-                                        );
-                                    }
-                                }}
-                            />
-                        )}
-                    </>
-                }
-                contentClassName="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"
+                adminSurface={pageIntroSurface ?? undefined}
+                contentClassName="space-y-6"
             >
-                <ScriptureActionRow>
-                    <Button asChild>
-                        <Link href={chapter.verses_href ?? chapter.href}>
-                            Open Reader
-                            <ArrowRight className="size-4" />
-                        </Link>
-                    </Button>
-                    <Button asChild variant="outline">
-                        <Link href={book.href}>Back to Book</Link>
-                    </Button>
-                </ScriptureActionRow>
-                <div className="space-y-2">
-                    <p className="text-sm font-medium">Presentation</p>
-                    <ToggleGroup
-                        type="single"
-                        value={viewMode}
-                        variant="outline"
-                        onValueChange={(value) => {
-                            if (value === 'cards' || value === 'list') {
-                                setViewMode(value);
-                            }
-                        }}
-                    >
-                        <ToggleGroupItem value="cards" aria-label="Card view">
-                            <LayoutGrid className="size-4" />
-                            Card View
-                        </ToggleGroupItem>
-                        <ToggleGroupItem value="list" aria-label="List view">
-                            <Rows3 className="size-4" />
-                            List View
-                        </ToggleGroupItem>
-                    </ToggleGroup>
+                {inlineIntroSession ? (
+                    <ScriptureChapterIntroInlineEditor
+                        session={inlineIntroSession}
+                        onCancel={closeEditSession}
+                        onSaveSuccess={handlePageIntroSaveSuccess}
+                    />
+                ) : pageIntroBlock ? (
+                    <div className="rounded-2xl border border-border/70 bg-muted/20 px-5 py-5 sm:px-6 sm:py-6">
+                        <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+                            Chapter Introduction
+                        </p>
+                        {pageIntroBlock.title && (
+                            <p className="mt-4 text-lg font-semibold">
+                                {pageIntroBlock.title}
+                            </p>
+                        )}
+                        {pageIntroBlock.body && (
+                            <p className="mt-3 leading-7 text-muted-foreground">
+                                {pageIntroBlock.body}
+                            </p>
+                        )}
+                    </div>
+                ) : null}
+
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                    <ScriptureActionRow>
+                        <Button asChild>
+                            <Link href={chapter.verses_href ?? chapter.href}>
+                                Open Reader
+                                <ArrowRight className="size-4" />
+                            </Link>
+                        </Button>
+                        <Button asChild variant="outline">
+                            <Link href={book.href}>Back to Book</Link>
+                        </Button>
+                    </ScriptureActionRow>
+                    <div className="space-y-2">
+                        <p className="text-sm font-medium">Presentation</p>
+                        <ToggleGroup
+                            type="single"
+                            value={viewMode}
+                            variant="outline"
+                            onValueChange={(value) => {
+                                if (value === 'cards' || value === 'list') {
+                                    setViewMode(value);
+                                }
+                            }}
+                        >
+                            <ToggleGroupItem value="cards" aria-label="Card view">
+                                <LayoutGrid className="size-4" />
+                                Card View
+                            </ToggleGroupItem>
+                            <ToggleGroupItem value="list" aria-label="List view">
+                                <Rows3 className="size-4" />
+                                List View
+                            </ToggleGroupItem>
+                        </ToggleGroup>
+                    </div>
                 </div>
             </ScripturePageIntroCard>
 
             <ScriptureContentBlocksSection
                 title="Published Notes"
                 description="Study content attached to this chapter."
-                blocks={content_blocks}
-                renderBlockHeaderAction={(block) => {
-                    const config = getContentBlockConfig(block);
-
-                    if (config === null) {
-                        return null;
-                    }
-
-                    return (
-                        <ScriptureAdminRegionToolbar
-                            config={config}
-                            onEdit={(meta, regionConfig) =>
-                                openContentBlockEditor(
-                                    meta,
-                                    block,
-                                    regionConfig,
-                                )
-                            }
+                blocks={chapterNoteBlocks}
+                capabilities={contentBlocksCapabilities}
+                pendingInlineCreateInsertionPoint={
+                    inlineCreateTextContentBlockSession?.insertionPoint ?? null
+                }
+                renderPendingInlineCreateEditor={() =>
+                    inlineCreateTextContentBlockSession ? (
+                        <ScriptureTextContentBlockInlineEditor
+                            session={inlineCreateTextContentBlockSession}
+                            entityLabel={chapterTitle}
+                            onCancel={closeEditSession}
+                            onSaveSuccess={(result) => {
+                                if (result.kind === 'create') {
+                                    handleContentBlockCreateSuccess();
+                                }
+                            }}
                         />
+                    ) : null
+                }
+                renderInlineBlockEditor={(block) => {
+                    const inlineSession = getInlineTextContentBlockSession(
+                        block.id,
                     );
+
+                    return inlineSession ? (
+                        <ScriptureTextContentBlockInlineEditor
+                            session={inlineSession}
+                            entityLabel={chapterTitle}
+                            onCancel={closeEditSession}
+                            onSaveSuccess={(result) => {
+                                if (result.kind === 'edit') {
+                                    handleContentBlockSaveSuccess(
+                                        result.blockId,
+                                    );
+                                }
+                            }}
+                        />
+                    ) : null;
                 }}
-                entityMeta={{
-                    ...chapterEntity,
-                    region: 'content_blocks',
-                    capabilityHint: 'content_blocks',
-                }}
+                entityMeta={contentBlocksMeta}
             />
 
             <ScriptureSection
@@ -402,7 +380,7 @@ export default function ChapterShow({
                 session={editSession}
                 onOpenChange={(open) => {
                     if (!open) {
-                        setEditSession(null);
+                        closeEditSession();
                     }
                 }}
             />

@@ -49,3 +49,13 @@ export function createAfterLastContentBlockInsertionPoint(
         label: 'After the last block',
     };
 }
+
+export function matchesContentBlockInsertionPoint(
+    first: ScriptureContentBlockInsertionPoint,
+    second: ScriptureContentBlockInsertionPoint,
+): boolean {
+    return (
+        first.insertion_mode === second.insertion_mode &&
+        first.relative_block_id === second.relative_block_id
+    );
+}

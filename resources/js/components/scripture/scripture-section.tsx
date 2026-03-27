@@ -1,5 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
+import type { ScriptureAdminSurfaceOptions } from '@/components/scripture/scripture-admin-surface';
+import { ScriptureAdminSurface } from '@/components/scripture/scripture-admin-surface';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { cn } from '@/lib/utils';
 import type { ScriptureEntityRegionInput } from '@/types/scripture';
@@ -13,6 +15,7 @@ type Props = {
     id?: string;
     className?: string;
     entityMeta?: ScriptureEntityRegionInput;
+    adminSurface?: ScriptureAdminSurfaceOptions;
 };
 
 export function ScriptureSection({
@@ -24,6 +27,7 @@ export function ScriptureSection({
     id,
     className,
     entityMeta,
+    adminSurface,
 }: Props) {
     const section = (
         <section id={id} className={cn('space-y-4', className)}>
@@ -61,12 +65,26 @@ export function ScriptureSection({
     );
 
     if (!entityMeta) {
-        return section;
+        if (!adminSurface) {
+            return section;
+        }
+
+        return (
+            <ScriptureAdminSurface {...adminSurface}>
+                {section}
+            </ScriptureAdminSurface>
+        );
     }
 
     return (
         <ScriptureEntityRegion meta={entityMeta} asChild>
-            {section}
+            {adminSurface ? (
+                <ScriptureAdminSurface {...adminSurface}>
+                    {section}
+                </ScriptureAdminSurface>
+            ) : (
+                section
+            )}
         </ScriptureEntityRegion>
     );
 }

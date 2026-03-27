@@ -448,9 +448,28 @@ class AdminEntityRegistry
                     contextualFieldKeys: ['content_block_title', 'content_block_body'],
                     fullFieldKeys: array_keys($this->sharedTextBlockFields()),
                     capabilityHint: 'content_blocks',
+                    helpText: 'Chapter currently uses a fixed text-block policy while sharing the registered content-block executor family.',
+                    methods: [
+                        new AdminRegionMethodDefinition(
+                            family: AdminMethodFamily::CONTENT_BLOCK_CREATE,
+                            editModes: [AdminEditMode::FULL],
+                            label: 'Chapter content-block create',
+                        ),
+                        new AdminRegionMethodDefinition(
+                            family: AdminMethodFamily::CONTENT_BLOCK_EDIT,
+                            editModes: [AdminEditMode::CONTEXTUAL, AdminEditMode::FULL],
+                            label: 'Chapter content-block edit',
+                        ),
+                        new AdminRegionMethodDefinition(
+                            family: AdminMethodFamily::REORDER,
+                            editModes: [AdminEditMode::FULL],
+                            label: 'Chapter content-block reorder',
+                            description: 'Uses the shared ordering resolver while Chapter keeps its current fixed text-block policy.',
+                        ),
+                    ],
                 ),
             ],
-            notes: 'Chapter remains on the phase-one protected note-block workflow while sharing the registration foundation.',
+            notes: 'Chapter remains on the phase-one fixed-type content-block workflow while sharing the registration foundation.',
         );
     }
 
@@ -546,7 +565,7 @@ class AdminEntityRegistry
                     contextualFieldKeys: ['content_block_title', 'content_block_body'],
                     fullFieldKeys: array_keys($this->sharedTextBlockFields()),
                     capabilityHint: 'content_blocks',
-                    helpText: 'Verse keeps text-note schema choices entity-specific while reusing the shared content-block executor family.',
+                    helpText: 'Verse currently uses a fixed text-block policy while reusing the shared content-block executor family.',
                     methods: [
                         new AdminRegionMethodDefinition(
                             family: AdminMethodFamily::CONTENT_BLOCK_CREATE,
@@ -580,21 +599,21 @@ class AdminEntityRegistry
             editModePolicy: new AdminEditModePolicy([
                 AdminEditMode::CONTEXTUAL => [
                     'label' => 'Contextual Edit',
-                    'status' => 'active',
-                    'description' => 'Fast editing for topic description and note blocks.',
-                    'warning' => null,
+                    'status' => 'disabled',
+                    'description' => 'Topic admin is paused while the active CMS scope stays focused on scripture pages.',
+                    'warning' => 'Topic editing is intentionally postponed and is not part of the active admin architecture for the next phase.',
                 ],
                 AdminEditMode::FULL => [
                     'label' => 'Full Editorial Edit',
-                    'status' => 'active',
-                    'description' => 'Protected editorial workspace for topic proof-stage data.',
-                    'warning' => null,
+                    'status' => 'disabled',
+                    'description' => 'The proof-stage topic editor is retained only as a postponed reference surface.',
+                    'warning' => 'Topic admin routes are disabled while books, chapters, verses, and supporting CMS infrastructure are cleaned up first.',
                 ],
                 AdminEditMode::CANONICAL => [
                     'label' => 'Canonical Protected Edit',
-                    'status' => 'planned',
-                    'description' => 'Reserved for future protected topic identity workflows.',
-                    'warning' => 'Topic remains proof-stage and does not yet have a canonical protected route.',
+                    'status' => 'disabled',
+                    'description' => 'Canonical topic workflows remain outside the current cleanup scope.',
+                    'warning' => 'Topic remains postponed and does not have an active canonical protected route.',
                 ],
             ]),
             fields: [
@@ -642,7 +661,7 @@ class AdminEntityRegistry
                     capabilityHint: 'content_blocks',
                 ),
             ],
-            notes: 'Topic remains a framework proof rather than a final schema-complete editor.',
+            notes: 'Topic admin is currently postponed and retained only as a proof-stage schema sketch outside the active admin surface.',
         );
     }
 
@@ -656,21 +675,21 @@ class AdminEntityRegistry
             editModePolicy: new AdminEditModePolicy([
                 AdminEditMode::CONTEXTUAL => [
                     'label' => 'Contextual Edit',
-                    'status' => 'active',
-                    'description' => 'Fast editing for character description and note blocks.',
-                    'warning' => null,
+                    'status' => 'disabled',
+                    'description' => 'Character admin is paused while the active CMS scope stays focused on scripture pages.',
+                    'warning' => 'Character editing is intentionally postponed and is not part of the active admin architecture for the next phase.',
                 ],
                 AdminEditMode::FULL => [
                     'label' => 'Full Editorial Edit',
-                    'status' => 'active',
-                    'description' => 'Protected editorial workspace for character proof-stage data.',
-                    'warning' => null,
+                    'status' => 'disabled',
+                    'description' => 'The proof-stage character editor is retained only as a postponed reference surface.',
+                    'warning' => 'Character admin routes are disabled while books, chapters, verses, and supporting CMS infrastructure are cleaned up first.',
                 ],
                 AdminEditMode::CANONICAL => [
                     'label' => 'Canonical Protected Edit',
-                    'status' => 'planned',
-                    'description' => 'Reserved for future protected character identity workflows.',
-                    'warning' => 'Character remains proof-stage and does not yet have a canonical protected route.',
+                    'status' => 'disabled',
+                    'description' => 'Canonical character workflows remain outside the current cleanup scope.',
+                    'warning' => 'Character remains postponed and does not have an active canonical protected route.',
                 ],
             ]),
             fields: [
@@ -718,7 +737,7 @@ class AdminEntityRegistry
                     capabilityHint: 'content_blocks',
                 ),
             ],
-            notes: 'Character remains a framework proof rather than a final schema-complete editor.',
+            notes: 'Character admin is currently postponed and retained only as a proof-stage schema sketch outside the active admin surface.',
         );
     }
 

@@ -2,6 +2,4 @@
 
 namespace App\Http\Requests\Scripture;
 
-class VerseContentBlockUpdateRequest extends EditableTextContentBlockUpdateRequest
-{
-}
+class VerseContentBlockUpdateRequest extends VerseContentBlockStoreRequest {}

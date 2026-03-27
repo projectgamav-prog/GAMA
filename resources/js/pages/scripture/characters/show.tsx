@@ -1,30 +1,16 @@
-import { useState } from 'react';
-import { ScriptureAdminRegionToolbar } from '@/components/scripture/scripture-admin-region-toolbar';
-import { ScriptureAdminVisibilityToggle } from '@/components/scripture/scripture-admin-visibility-toggle';
-import { ScriptureCharacterAdminEditSheet } from '@/components/scripture/scripture-character-admin-edit-sheet';
-import type { ScriptureCharacterAdminEditSession } from '@/components/scripture/scripture-character-admin-edit-sheet';
 import { ScriptureContentBlocksSection } from '@/components/scripture/scripture-content-blocks-section';
 import { ScriptureCopySection } from '@/components/scripture/scripture-copy-section';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { ScriptureRelatedVersesSection } from '@/components/scripture/scripture-related-verses-section';
 import { Badge } from '@/components/ui/badge';
 import ScriptureLayout from '@/layouts/scripture-layout';
-import type {
-    BreadcrumbItem,
-    CharacterShowProps,
-    ScriptureAdminRegionConfig,
-    ScriptureContentBlock,
-    ScriptureEntityRegionMeta,
-} from '@/types';
+import type { BreadcrumbItem, CharacterShowProps } from '@/types';
 
 export default function CharacterShow({
     character,
     related_verses,
     content_blocks,
-    admin,
 }: CharacterShowProps) {
-    const [editSession, setEditSession] =
-        useState<ScriptureCharacterAdminEditSession | null>(null);
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Characters',
@@ -40,78 +26,6 @@ export default function CharacterShow({
         entityId: character.id,
         entityLabel: character.name,
     };
-    const characterDetailsConfig: ScriptureAdminRegionConfig | null = admin
-        ? {
-              supportsEdit: true,
-              supportsFullEdit: true,
-              editTarget: 'entity_details',
-              contextualEditHref: admin.details_update_href,
-              fullEditHref: `${admin.full_edit_href}#details-editor`,
-          }
-        : null;
-    const openCharacterDetailsEditor = (
-        meta: ScriptureEntityRegionMeta,
-        config: ScriptureAdminRegionConfig,
-    ) => {
-        if (!config.contextualEditHref) {
-            return;
-        }
-
-        setEditSession({
-            kind: 'entity_details',
-            meta,
-            updateHref: config.contextualEditHref,
-            fullEditHref: config.fullEditHref ?? admin?.full_edit_href ?? '#',
-            characterName: character.name,
-            characterDescription: character.description,
-            values: {
-                description: character.description ?? '',
-            },
-        });
-    };
-    const getContentBlockConfig = (
-        block: ScriptureContentBlock,
-    ): ScriptureAdminRegionConfig | null => {
-        const updateHref = admin?.content_block_update_hrefs[String(block.id)];
-
-        if (!updateHref || !admin) {
-            return null;
-        }
-
-        return {
-            supportsEdit: true,
-            supportsFullEdit: true,
-            editTarget: 'content_block',
-            contextualEditHref: updateHref,
-            fullEditHref: `${admin.full_edit_href}#block-${block.id}`,
-        };
-    };
-    const openContentBlockEditor = (
-        meta: ScriptureEntityRegionMeta,
-        block: ScriptureContentBlock,
-        config: ScriptureAdminRegionConfig,
-    ) => {
-        if (!config.contextualEditHref) {
-            return;
-        }
-
-        setEditSession({
-            kind: 'content_block',
-            meta,
-            updateHref: config.contextualEditHref,
-            fullEditHref: config.fullEditHref ?? admin?.full_edit_href ?? '#',
-            characterName: character.name,
-            characterDescription: character.description,
-            block,
-            values: {
-                title: block.title ?? '',
-                body: block.body ?? '',
-                region: block.region,
-                sort_order: block.sort_order,
-                status: 'published',
-            },
-        });
-    };
 
     return (
         <ScriptureLayout title={character.name} breadcrumbs={breadcrumbs}>
@@ -123,17 +37,6 @@ export default function CharacterShow({
                 }}
                 badges={<Badge variant="outline">Character</Badge>}
                 title={character.name}
-                headerAction={
-                    <>
-                        <ScriptureAdminVisibilityToggle />
-                        {characterDetailsConfig && (
-                            <ScriptureAdminRegionToolbar
-                                config={characterDetailsConfig}
-                                onEdit={openCharacterDetailsEditor}
-                            />
-                        )}
-                    </>
-                }
             />
 
             <ScriptureCopySection
@@ -141,14 +44,6 @@ export default function CharacterShow({
                 description="Public overview text attached directly to this character."
                 body={character.description}
                 preserveWhitespace
-                action={
-                    characterDetailsConfig && (
-                        <ScriptureAdminRegionToolbar
-                            config={characterDetailsConfig}
-                            onEdit={openCharacterDetailsEditor}
-                        />
-                    )
-                }
                 entityMeta={{
                     ...characterEntity,
                     region: 'description',
@@ -160,26 +55,6 @@ export default function CharacterShow({
                 title="Character Content"
                 description="Published editorial blocks attached to this character."
                 blocks={content_blocks}
-                renderBlockHeaderAction={(block) => {
-                    const config = getContentBlockConfig(block);
-
-                    if (config === null) {
-                        return null;
-                    }
-
-                    return (
-                        <ScriptureAdminRegionToolbar
-                            config={config}
-                            onEdit={(meta, regionConfig) =>
-                                openContentBlockEditor(
-                                    meta,
-                                    block,
-                                    regionConfig,
-                                )
-                            }
-                        />
-                    );
-                }}
                 entityMeta={{
                     ...characterEntity,
                     region: 'content_blocks',
@@ -195,15 +70,6 @@ export default function CharacterShow({
                     ...characterEntity,
                     region: 'related_verses',
                     capabilityHint: 'relationships',
-                }}
-            />
-
-            <ScriptureCharacterAdminEditSheet
-                session={editSession}
-                onOpenChange={(open) => {
-                    if (!open) {
-                        setEditSession(null);
-                    }
                 }}
             />
         </ScriptureLayout>

@@ -5,8 +5,8 @@ namespace App\Http\Requests\Scripture;
 use App\Models\Book;
 use App\Models\ContentBlock;
 use App\Support\Scripture\Admin\BookAdminRouteContext;
-use App\Support\Scripture\Admin\BookContentBlockSchema;
 use App\Support\Scripture\Admin\Registry\AdminEntityRegistry;
+use App\Support\Scripture\Admin\RegisteredContentBlockOrdering;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
@@ -42,7 +42,7 @@ class BookAdminContentBlockStoreRequest extends FormRequest
             'region' => $definition->field('content_block_region')->validationRules(),
             'sort_order' => ['nullable', ...$sortOrderRules],
             'status' => $definition->field('content_block_status')->validationRules(),
-            'insertion_mode' => ['nullable', 'string', 'in:'.implode(',', BookContentBlockSchema::insertionModes())],
+            'insertion_mode' => ['nullable', 'string', 'in:'.implode(',', RegisteredContentBlockOrdering::insertionModes())],
             'relative_block_id' => ['nullable', 'integer'],
         ];
     }

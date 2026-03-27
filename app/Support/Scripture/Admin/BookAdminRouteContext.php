@@ -60,6 +60,41 @@ class BookAdminRouteContext
         ]));
     }
 
+    public function contentBlockMoveUpHref(ContentBlock $contentBlock): string
+    {
+        return route('scripture.books.admin.content-blocks.move-up', $this->routeParameters([
+            'contentBlock' => $contentBlock,
+        ]));
+    }
+
+    public function contentBlockMoveDownHref(ContentBlock $contentBlock): string
+    {
+        return route('scripture.books.admin.content-blocks.move-down', $this->routeParameters([
+            'contentBlock' => $contentBlock,
+        ]));
+    }
+
+    public function contentBlockReorderHref(ContentBlock $contentBlock): string
+    {
+        return route('scripture.books.admin.content-blocks.move', $this->routeParameters([
+            'contentBlock' => $contentBlock,
+        ]));
+    }
+
+    public function contentBlockDuplicateHref(ContentBlock $contentBlock): string
+    {
+        return route('scripture.books.admin.content-blocks.duplicate', $this->routeParameters([
+            'contentBlock' => $contentBlock,
+        ]));
+    }
+
+    public function contentBlockDestroyHref(ContentBlock $contentBlock): string
+    {
+        return route('scripture.books.admin.content-blocks.destroy', $this->routeParameters([
+            'contentBlock' => $contentBlock,
+        ]));
+    }
+
     /**
      * @return list<string>
      */
@@ -102,6 +137,12 @@ class BookAdminRouteContext
         );
     }
 
+    public function isDuplicableContentBlock(ContentBlock $contentBlock): bool
+    {
+        return $this->isEditableContentBlock($contentBlock)
+            && $contentBlock->block_type === 'text';
+    }
+
     public function abortUnlessEditableContentBlock(ContentBlock $contentBlock): void
     {
         RegisteredContentBlock::abortUnlessEditableFor(
@@ -109,6 +150,11 @@ class BookAdminRouteContext
             $contentBlock,
             $this->editableContentBlockTypes(),
         );
+    }
+
+    public function abortUnlessDuplicableContentBlock(ContentBlock $contentBlock): void
+    {
+        abort_unless($this->isDuplicableContentBlock($contentBlock), 404);
     }
 
     public function isContextualInsertionAnchor(ContentBlock $contentBlock): bool

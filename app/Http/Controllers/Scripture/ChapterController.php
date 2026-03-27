@@ -9,6 +9,8 @@ use App\Models\Chapter;
 use App\Models\ContentBlock;
 use App\Support\AdminContext\AdminContext;
 use App\Support\Scripture\Admin\ChapterAdminRouteContext;
+use App\Support\Scripture\Admin\ContentBlockCapabilityPayload;
+use App\Support\Scripture\Admin\VisibleContentBlockSequence;
 use App\Support\Scripture\PublicScriptureData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -30,6 +32,8 @@ class ChapterController extends Controller
     {
         $contentBlocks = $chapter->contentBlocks()
             ->published()
+            ->orderBy('sort_order')
+            ->orderBy('id')
             ->get();
         $adminVisibilityEnabled = AdminContext::isVisible($request);
         $adminRouteContext = new ChapterAdminRouteContext($book, $bookSection, $chapter);
@@ -49,19 +53,11 @@ class ChapterController extends Controller
             'chapter' => $publicScriptureData->chapter($book, $bookSection, $chapter),
             'content_blocks' => $publicScriptureData->contentBlocks($contentBlocks),
             'admin' => $adminVisibilityEnabled
-                ? [
-                    'full_edit_href' => $adminRouteContext->fullEditHref(),
-                    'primary_content_block_id' => $primaryEditableBlock?->id,
-                    'primary_content_block_update_href' => $primaryEditableBlock
-                        ? $adminRouteContext->contentBlockUpdateHref($primaryEditableBlock)
-                        : null,
-                    'content_block_update_hrefs' => $contentBlocks
-                        ->filter(fn (ContentBlock $block) => $adminRouteContext->isEditableNoteBlock($block))
-                        ->mapWithKeys(fn (ContentBlock $block) => [
-                            (string) $block->id => $adminRouteContext->contentBlockUpdateHref($block),
-                        ])
-                        ->all(),
-                ]
+                ? $this->chapterAdminPayload(
+                    $adminRouteContext,
+                    $contentBlocks,
+                    $primaryEditableBlock,
+                )
                 : null,
             'chapter_sections' => $publicScriptureData->chapterSections(
                 $book,
@@ -100,5 +96,40 @@ class ChapterController extends Controller
         return $editableBlocks->count() === 1
             ? $editableBlocks->first()
             : null;
+    }
+
+    /**
+     * @param  Collection<int, ContentBlock>  $contentBlocks
+     * @return array<string, mixed>
+     */
+    private function chapterAdminPayload(
+        ChapterAdminRouteContext $adminRouteContext,
+        Collection $contentBlocks,
+        ?ContentBlock $primaryEditableBlock,
+    ): array {
+        $visibleSequence = new VisibleContentBlockSequence($contentBlocks);
+
+        return [
+            'full_edit_href' => $adminRouteContext->fullEditHref(),
+            'content_block_store_href' => $adminRouteContext->contentBlockStoreHref(),
+            'content_block_types' => $adminRouteContext->contentBlockTypes(),
+            'content_block_default_region' => $adminRouteContext->defaultContentBlockRegion(),
+            'primary_content_block_id' => $primaryEditableBlock?->id,
+            'primary_content_block_update_href' => $primaryEditableBlock
+                ? $adminRouteContext->contentBlockUpdateHref($primaryEditableBlock)
+                : null,
+            ...ContentBlockCapabilityPayload::build(
+                $contentBlocks,
+                $visibleSequence,
+                fn (ContentBlock $block): bool => $adminRouteContext->isEditableNoteBlock($block),
+                fn (ContentBlock $block): bool => $adminRouteContext->isEditableNoteBlock($block),
+                fn (ContentBlock $block): string => $adminRouteContext->contentBlockUpdateHref($block),
+                fn (ContentBlock $block): string => $adminRouteContext->contentBlockMoveUpHref($block),
+                fn (ContentBlock $block): string => $adminRouteContext->contentBlockMoveDownHref($block),
+                fn (ContentBlock $block): string => $adminRouteContext->contentBlockReorderHref($block),
+                fn (ContentBlock $block): string => $adminRouteContext->contentBlockDuplicateHref($block),
+                fn (ContentBlock $block): string => $adminRouteContext->contentBlockDestroyHref($block),
+            ),
+        ];
     }
 }

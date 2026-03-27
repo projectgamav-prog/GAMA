@@ -11,15 +11,10 @@ use App\Http\Controllers\Scripture\ChapterAdminContentBlockController;
 use App\Http\Controllers\Scripture\ChapterController;
 use App\Http\Controllers\Scripture\ChapterFullEditController;
 use App\Http\Controllers\Scripture\ChapterVerseController;
-use App\Http\Controllers\Scripture\CharacterAdminContentBlockController;
-use App\Http\Controllers\Scripture\CharacterAdminDetailsController;
 use App\Http\Controllers\Scripture\CharacterController;
-use App\Http\Controllers\Scripture\CharacterFullEditController;
 use App\Http\Controllers\Scripture\DictionaryEntryController;
-use App\Http\Controllers\Scripture\TopicAdminContentBlockController;
-use App\Http\Controllers\Scripture\TopicAdminDetailsController;
+use App\Http\Controllers\Scripture\PostponedAdminSurfaceController;
 use App\Http\Controllers\Scripture\TopicController;
-use App\Http\Controllers\Scripture\TopicFullEditController;
 use App\Http\Controllers\Scripture\VerseAdminContentBlockController;
 use App\Http\Controllers\Scripture\VerseAdminMetaController;
 use App\Http\Controllers\Scripture\VerseController;
@@ -33,22 +28,24 @@ Route::get('characters', [CharacterController::class, 'index'])
 Route::get('characters/{character:slug}', [CharacterController::class, 'show'])
     ->name('scripture.characters.show');
 
+// Character admin remains a postponed proof surface. Keep route names stable,
+// but disable the workflow while the active CMS scope focuses on scripture pages.
 Route::middleware(['auth', EnsureCanAccessAdminContext::class])
     ->prefix('characters/{character:slug}/admin')
     ->name('scripture.characters.admin.')
     ->group(function () {
-        Route::get('full-edit', [CharacterFullEditController::class, 'show'])
+        Route::get('full-edit', PostponedAdminSurfaceController::class)
             ->name('full-edit');
 
-        Route::patch('details', [CharacterAdminDetailsController::class, 'update'])
+        Route::patch('details', PostponedAdminSurfaceController::class)
             ->name('details.update');
 
-        Route::post('content-blocks', [CharacterAdminContentBlockController::class, 'store'])
+        Route::post('content-blocks', PostponedAdminSurfaceController::class)
             ->name('content-blocks.store');
 
         Route::patch(
             'content-blocks/{contentBlock}',
-            [CharacterAdminContentBlockController::class, 'update'],
+            PostponedAdminSurfaceController::class,
         )->name('content-blocks.update');
     });
 
@@ -64,22 +61,24 @@ Route::get('topics', [TopicController::class, 'index'])
 Route::get('topics/{topic:slug}', [TopicController::class, 'show'])
     ->name('scripture.topics.show');
 
+// Topic admin remains a postponed proof surface. Keep route names stable,
+// but disable the workflow while the active CMS scope focuses on scripture pages.
 Route::middleware(['auth', EnsureCanAccessAdminContext::class])
     ->prefix('topics/{topic:slug}/admin')
     ->name('scripture.topics.admin.')
     ->group(function () {
-        Route::get('full-edit', [TopicFullEditController::class, 'show'])
+        Route::get('full-edit', PostponedAdminSurfaceController::class)
             ->name('full-edit');
 
-        Route::patch('details', [TopicAdminDetailsController::class, 'update'])
+        Route::patch('details', PostponedAdminSurfaceController::class)
             ->name('details.update');
 
-        Route::post('content-blocks', [TopicAdminContentBlockController::class, 'store'])
+        Route::post('content-blocks', PostponedAdminSurfaceController::class)
             ->name('content-blocks.store');
 
         Route::patch(
             'content-blocks/{contentBlock}',
-            [TopicAdminContentBlockController::class, 'update'],
+            PostponedAdminSurfaceController::class,
         )->name('content-blocks.update');
     });
 
@@ -126,6 +125,31 @@ Route::prefix('books')
                 )->name('content-blocks.update');
 
                 Route::post(
+                    'content-blocks/{contentBlock}/move-up',
+                    [BookAdminContentBlockController::class, 'moveUp'],
+                )->name('content-blocks.move-up');
+
+                Route::post(
+                    'content-blocks/{contentBlock}/move-down',
+                    [BookAdminContentBlockController::class, 'moveDown'],
+                )->name('content-blocks.move-down');
+
+                Route::post(
+                    'content-blocks/{contentBlock}/move',
+                    [BookAdminContentBlockController::class, 'move'],
+                )->name('content-blocks.move');
+
+                Route::post(
+                    'content-blocks/{contentBlock}/duplicate',
+                    [BookAdminContentBlockController::class, 'duplicate'],
+                )->name('content-blocks.duplicate');
+
+                Route::delete(
+                    'content-blocks/{contentBlock}',
+                    [BookAdminContentBlockController::class, 'destroy'],
+                )->name('content-blocks.destroy');
+
+                Route::post(
                     'media-assignments',
                     [BookAdminMediaAssignmentController::class, 'store'],
                 )->name('media-assignments.store');
@@ -155,6 +179,31 @@ Route::prefix('books')
                     'content-blocks/{contentBlock}',
                     [ChapterAdminContentBlockController::class, 'update'],
                 )->name('content-blocks.update');
+
+                Route::post(
+                    'content-blocks/{contentBlock}/move-up',
+                    [ChapterAdminContentBlockController::class, 'moveUp'],
+                )->name('content-blocks.move-up');
+
+                Route::post(
+                    'content-blocks/{contentBlock}/move-down',
+                    [ChapterAdminContentBlockController::class, 'moveDown'],
+                )->name('content-blocks.move-down');
+
+                Route::post(
+                    'content-blocks/{contentBlock}/move',
+                    [ChapterAdminContentBlockController::class, 'move'],
+                )->name('content-blocks.move');
+
+                Route::post(
+                    'content-blocks/{contentBlock}/duplicate',
+                    [ChapterAdminContentBlockController::class, 'duplicate'],
+                )->name('content-blocks.duplicate');
+
+                Route::delete(
+                    'content-blocks/{contentBlock}',
+                    [ChapterAdminContentBlockController::class, 'destroy'],
+                )->name('content-blocks.destroy');
             });
 
         Route::get(
@@ -186,5 +235,30 @@ Route::prefix('books')
                     'content-blocks/{contentBlock}',
                     [VerseAdminContentBlockController::class, 'update'],
                 )->name('content-blocks.update');
+
+                Route::post(
+                    'content-blocks/{contentBlock}/move-up',
+                    [VerseAdminContentBlockController::class, 'moveUp'],
+                )->name('content-blocks.move-up');
+
+                Route::post(
+                    'content-blocks/{contentBlock}/move-down',
+                    [VerseAdminContentBlockController::class, 'moveDown'],
+                )->name('content-blocks.move-down');
+
+                Route::post(
+                    'content-blocks/{contentBlock}/move',
+                    [VerseAdminContentBlockController::class, 'move'],
+                )->name('content-blocks.move');
+
+                Route::post(
+                    'content-blocks/{contentBlock}/duplicate',
+                    [VerseAdminContentBlockController::class, 'duplicate'],
+                )->name('content-blocks.duplicate');
+
+                Route::delete(
+                    'content-blocks/{contentBlock}',
+                    [VerseAdminContentBlockController::class, 'destroy'],
+                )->name('content-blocks.destroy');
             });
     });

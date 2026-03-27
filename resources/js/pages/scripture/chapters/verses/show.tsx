@@ -10,16 +10,16 @@ import {
     Tag,
     Users,
 } from 'lucide-react';
-import { useState } from 'react';
 import { ScriptureActionRow } from '@/components/scripture/scripture-action-row';
-import { ScriptureAdminRegionToolbar } from '@/components/scripture/scripture-admin-region-toolbar';
-import { ScriptureAdminVisibilityToggle } from '@/components/scripture/scripture-admin-visibility-toggle';
+import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
+import { ScriptureAdminSurface } from '@/components/scripture/scripture-admin-surface';
 import { ScriptureContentBlocksSection } from '@/components/scripture/scripture-content-blocks-section';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
 import { ScriptureVerseAdminEditSheet } from '@/components/scripture/scripture-verse-admin-edit-sheet';
-import type { ScriptureVerseAdminEditSession } from '@/components/scripture/scripture-verse-admin-edit-sheet';
+import { ScriptureVerseNotesInlineEditor } from '@/components/scripture/scripture-verse-notes-inline-editor';
+import { ScriptureTextContentBlockInlineEditor } from '@/components/scripture/scripture-text-content-block-inline-editor';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -30,17 +30,11 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { useVerseAdminEditSession } from '@/hooks/use-verse-admin-edit-session';
 import ScriptureLayout from '@/layouts/scripture-layout';
 import { chapterLabel, sectionLabel, verseLabel } from '@/lib/scripture';
-import { formatAdminList } from '@/lib/scripture-admin';
 import { cn } from '@/lib/utils';
-import type {
-    BreadcrumbItem,
-    ScriptureAdminRegionConfig,
-    ScriptureContentBlock,
-    ScriptureEntityRegionMeta,
-    VerseShowProps,
-} from '@/types';
+import type { BreadcrumbItem, VerseShowProps } from '@/types';
 
 const getStringList = (values: unknown[] | null): string[] => {
     if (!Array.isArray(values)) {
@@ -73,8 +67,6 @@ export default function VerseShow({
     content_blocks,
     admin,
 }: VerseShowProps) {
-    const [editSession, setEditSession] =
-        useState<ScriptureVerseAdminEditSession | null>(null);
     const chapterTitle = chapterLabel(chapter.number, chapter.title);
     const bookSectionTitle = sectionLabel(
         book_section.number,
@@ -154,89 +146,35 @@ export default function VerseShow({
 
         return `${minutes}:${String(seconds).padStart(2, '0')}`;
     };
-    const verseMetaConfig: ScriptureAdminRegionConfig | null = admin
-        ? {
-              supportsEdit: true,
-              supportsFullEdit: true,
-              editTarget: 'verse_meta',
-              contextualEditHref: admin.meta_update_href,
-              fullEditHref: `${admin.full_edit_href}#meta-editor`,
-          }
-        : null;
-    const openVerseMetaEditor = (
-        meta: ScriptureEntityRegionMeta,
-        config: ScriptureAdminRegionConfig,
-    ) => {
-        if (!config.contextualEditHref) {
-            return;
-        }
-
-        setEditSession({
-            kind: 'verse_meta',
-            meta,
-            updateHref: config.contextualEditHref,
-            fullEditHref: config.fullEditHref ?? admin?.full_edit_href ?? '#',
-            verseTitle,
-            verseText: verse.text,
-            values: {
-                summary_short: verse_meta?.summary_short ?? '',
-                is_featured: verse_meta?.is_featured ?? false,
-                keywords_text: formatAdminList(verse_meta?.keywords_json ?? null),
-                study_flags_text: formatAdminList(
-                    verse_meta?.study_flags_json ?? null,
-                ),
-            },
-        });
-    };
-    const getContentBlockConfig = (
-        block: ScriptureContentBlock,
-    ): ScriptureAdminRegionConfig | null => {
-        const updateHref = admin?.content_block_update_hrefs[String(block.id)];
-
-        if (!updateHref || !admin) {
-            return null;
-        }
-
-        return {
-            supportsEdit: true,
-            supportsFullEdit: true,
-            editTarget: 'content_block',
-            contextualEditHref: updateHref,
-            fullEditHref: `${admin.full_edit_href}#block-${block.id}`,
-        };
-    };
-    const openContentBlockEditor = (
-        meta: ScriptureEntityRegionMeta,
-        block: ScriptureContentBlock,
-        config: ScriptureAdminRegionConfig,
-    ) => {
-        if (!config.contextualEditHref) {
-            return;
-        }
-
-        setEditSession({
-            kind: 'content_block',
-            meta,
-            updateHref: config.contextualEditHref,
-            fullEditHref: config.fullEditHref ?? admin?.full_edit_href ?? '#',
-            verseTitle,
-            verseText: verse.text,
-            block,
-            values: {
-                title: block.title ?? '',
-                body: block.body ?? '',
-                region: block.region,
-                sort_order: block.sort_order,
-                status: 'published',
-            },
-        });
-    };
+    const {
+        editSession,
+        inlineVerseNotesSession,
+        inlineCreateTextContentBlockSession,
+        getInlineTextContentBlockSession,
+        closeEditSession,
+        introVerseNotesSurface,
+        verseMetaSurface,
+        contentBlocksMeta,
+        contentBlocksCapabilities,
+        handleVerseMetaSaveSuccess,
+        handleContentBlockSaveSuccess,
+        handleContentBlockCreateSuccess,
+    } = useVerseAdminEditSession({
+        verse,
+        verseMeta: verse_meta,
+        admin,
+    });
+    const introAdminSurface = !hasVerseMeta
+        ? (introVerseNotesSurface ?? undefined)
+        : undefined;
 
     return (
         <ScriptureLayout
             title={`${verseTitle} - ${chapterTitle}`}
             breadcrumbs={breadcrumbs}
         >
+            <ScriptureAdminModeBar />
+
             <ScripturePageIntroCard
                 entityMeta={{
                     ...verseEntity,
@@ -256,19 +194,17 @@ export default function VerseShow({
                 title={verseTitle}
                 titleClassName="text-3xl sm:text-4xl"
                 description={`${chapterTitle}. Read the canonical verse first, then move through translations, commentary, and attached study references in a calmer reading flow.`}
-                headerAction={
-                    <>
-                        <ScriptureAdminVisibilityToggle />
-                        {verseMetaConfig && (
-                            <ScriptureAdminRegionToolbar
-                                config={verseMetaConfig}
-                                onEdit={openVerseMetaEditor}
-                            />
-                        )}
-                    </>
-                }
+                adminSurface={introAdminSurface}
                 contentClassName="space-y-6"
             >
+                {!hasVerseMeta && (
+                    <ScriptureVerseNotesInlineEditor
+                        session={inlineVerseNotesSession}
+                        onCancel={closeEditSession}
+                        onSaveSuccess={handleVerseMetaSaveSuccess}
+                    />
+                )}
+
                 <div className="rounded-2xl border border-border/70 bg-muted/20 px-5 py-5 sm:px-6 sm:py-6">
                     <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
                         Canonical Verse
@@ -332,91 +268,125 @@ export default function VerseShow({
                                 }}
                                 asChild
                             >
-                                <Card>
-                                    <CardHeader className="gap-3">
-                                        {verseMetaConfig && (
-                                            <div className="flex justify-end">
-                                                <ScriptureAdminRegionToolbar
-                                                    config={verseMetaConfig}
-                                                    onEdit={
-                                                        openVerseMetaEditor
+                                <ScriptureAdminSurface
+                                    {...(verseMetaSurface ?? {})}
+                                >
+                                    <Card>
+                                        <CardHeader className="gap-3">
+                                            <CardTitle className="flex items-center gap-2 text-xl">
+                                                <Sparkles className="size-5" />
+                                                Study Notes
+                                            </CardTitle>
+                                            <CardDescription>
+                                                Compact verse-level study
+                                                metadata and editorial cues.
+                                            </CardDescription>
+                                        </CardHeader>
+                                        <CardContent className="space-y-5">
+                                            {inlineVerseNotesSession ? (
+                                                <ScriptureVerseNotesInlineEditor
+                                                    session={
+                                                        inlineVerseNotesSession
+                                                    }
+                                                    onCancel={closeEditSession}
+                                                    onSaveSuccess={
+                                                        handleVerseMetaSaveSuccess
                                                     }
                                                 />
-                                            </div>
-                                        )}
-                                        <CardTitle className="flex items-center gap-2 text-xl">
-                                            <Sparkles className="size-5" />
-                                            Study Notes
-                                        </CardTitle>
-                                        <CardDescription>
-                                            Compact verse-level study metadata
-                                            and editorial cues.
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="space-y-5">
-                                        {verse_meta?.summary_short && (
-                                            <div className="rounded-xl bg-muted/30 px-4 py-4">
-                                                <p className="text-sm leading-7">
-                                                    {verse_meta.summary_short}
-                                                </p>
-                                            </div>
-                                        )}
+                                            ) : (
+                                                <>
+                                                    {verse_meta?.summary_short && (
+                                                        <div className="rounded-xl bg-muted/30 px-4 py-4">
+                                                            <p className="text-sm leading-7">
+                                                                {
+                                                                    verse_meta.summary_short
+                                                                }
+                                                            </p>
+                                                        </div>
+                                                    )}
 
-                                        {metaBadges.length > 0 && (
-                                            <div className="space-y-2">
-                                                <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-                                                    Verse Metadata
-                                                </p>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {metaBadges.map((item) => (
-                                                        <Badge
-                                                            key={item}
-                                                            variant="outline"
-                                                        >
-                                                            {item}
-                                                        </Badge>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
+                                                    {metaBadges.length > 0 && (
+                                                        <div className="space-y-2">
+                                                            <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+                                                                Verse Metadata
+                                                            </p>
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {metaBadges.map(
+                                                                    (
+                                                                        item,
+                                                                    ) => (
+                                                                        <Badge
+                                                                            key={
+                                                                                item
+                                                                            }
+                                                                            variant="outline"
+                                                                        >
+                                                                            {
+                                                                                item
+                                                                            }
+                                                                        </Badge>
+                                                                    ),
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )}
 
-                                        {keywords.length > 0 && (
-                                            <div className="space-y-2">
-                                                <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-                                                    Keywords
-                                                </p>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {keywords.map((keyword) => (
-                                                        <Badge
-                                                            key={keyword}
-                                                            variant="secondary"
-                                                        >
-                                                            {keyword}
-                                                        </Badge>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
+                                                    {keywords.length > 0 && (
+                                                        <div className="space-y-2">
+                                                            <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+                                                                Keywords
+                                                            </p>
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {keywords.map(
+                                                                    (
+                                                                        keyword,
+                                                                    ) => (
+                                                                        <Badge
+                                                                            key={
+                                                                                keyword
+                                                                            }
+                                                                            variant="secondary"
+                                                                        >
+                                                                            {
+                                                                                keyword
+                                                                            }
+                                                                        </Badge>
+                                                                    ),
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )}
 
-                                        {studyFlags.length > 0 && (
-                                            <div className="space-y-2">
-                                                <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-                                                    Study Flags
-                                                </p>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {studyFlags.map((flag) => (
-                                                        <Badge
-                                                            key={flag}
-                                                            variant="outline"
-                                                        >
-                                                            {flag}
-                                                        </Badge>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </CardContent>
-                                </Card>
+                                                    {studyFlags.length > 0 && (
+                                                        <div className="space-y-2">
+                                                            <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+                                                                Study Flags
+                                                            </p>
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {studyFlags.map(
+                                                                    (
+                                                                        flag,
+                                                                    ) => (
+                                                                        <Badge
+                                                                            key={
+                                                                                flag
+                                                                            }
+                                                                            variant="outline"
+                                                                        >
+                                                                            {
+                                                                                flag
+                                                                            }
+                                                                        </Badge>
+                                                                    ),
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                </ScriptureAdminSurface>
                             </ScriptureEntityRegion>
                         )}
 
@@ -996,38 +966,52 @@ export default function VerseShow({
                 title="Published Notes"
                 description="Published content blocks attached directly to this verse."
                 blocks={content_blocks}
-                renderBlockHeaderAction={(block) => {
-                    const config = getContentBlockConfig(block);
-
-                    if (config === null) {
-                        return null;
-                    }
-
-                    return (
-                        <ScriptureAdminRegionToolbar
-                            config={config}
-                            onEdit={(meta, regionConfig) =>
-                                openContentBlockEditor(
-                                    meta,
-                                    block,
-                                    regionConfig,
-                                )
-                            }
+                capabilities={contentBlocksCapabilities}
+                pendingInlineCreateInsertionPoint={
+                    inlineCreateTextContentBlockSession?.insertionPoint ?? null
+                }
+                renderPendingInlineCreateEditor={() =>
+                    inlineCreateTextContentBlockSession ? (
+                        <ScriptureTextContentBlockInlineEditor
+                            session={inlineCreateTextContentBlockSession}
+                            entityLabel={verseTitle}
+                            onCancel={closeEditSession}
+                            onSaveSuccess={(result) => {
+                                if (result.kind === 'create') {
+                                    handleContentBlockCreateSuccess();
+                                }
+                            }}
                         />
+                    ) : null
+                }
+                renderInlineBlockEditor={(block) => {
+                    const inlineSession = getInlineTextContentBlockSession(
+                        block.id,
                     );
+
+                    return inlineSession ? (
+                        <ScriptureTextContentBlockInlineEditor
+                            session={inlineSession}
+                            entityLabel={verseTitle}
+                            onCancel={closeEditSession}
+                            onSaveSuccess={(result) => {
+                                if (result.kind === 'edit') {
+                                    handleContentBlockSaveSuccess(
+                                        result.blockId,
+                                    );
+                                }
+                            }}
+                        />
+                    ) : null;
                 }}
-                entityMeta={{
-                    ...verseEntity,
-                    region: 'content_blocks',
-                    capabilityHint: 'content_blocks',
-                }}
+                entityMeta={contentBlocksMeta}
             />
 
             <ScriptureVerseAdminEditSheet
                 session={editSession}
                 onOpenChange={(open) => {
                     if (!open) {
-                        setEditSession(null);
+                        closeEditSession();
                     }
                 }}
             />

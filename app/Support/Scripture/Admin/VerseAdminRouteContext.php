@@ -11,6 +11,9 @@ use App\Models\Verse;
 
 class VerseAdminRouteContext
 {
+    private const EDITABLE_BLOCK_TYPE = 'text';
+    private const DEFAULT_CONTENT_BLOCK_REGION = 'study';
+
     public function __construct(
         private readonly Book $book,
         private readonly BookSection $bookSection,
@@ -61,14 +64,75 @@ class VerseAdminRouteContext
         ]));
     }
 
+    public function contentBlockMoveUpHref(ContentBlock $contentBlock): string
+    {
+        return route('scripture.chapters.verses.admin.content-blocks.move-up', $this->routeParameters([
+            'contentBlock' => $contentBlock,
+        ]));
+    }
+
+    public function contentBlockMoveDownHref(ContentBlock $contentBlock): string
+    {
+        return route('scripture.chapters.verses.admin.content-blocks.move-down', $this->routeParameters([
+            'contentBlock' => $contentBlock,
+        ]));
+    }
+
+    public function contentBlockReorderHref(ContentBlock $contentBlock): string
+    {
+        return route('scripture.chapters.verses.admin.content-blocks.move', $this->routeParameters([
+            'contentBlock' => $contentBlock,
+        ]));
+    }
+
+    public function contentBlockDuplicateHref(ContentBlock $contentBlock): string
+    {
+        return route('scripture.chapters.verses.admin.content-blocks.duplicate', $this->routeParameters([
+            'contentBlock' => $contentBlock,
+        ]));
+    }
+
+    public function contentBlockDestroyHref(ContentBlock $contentBlock): string
+    {
+        return route('scripture.chapters.verses.admin.content-blocks.destroy', $this->routeParameters([
+            'contentBlock' => $contentBlock,
+        ]));
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function contentBlockTypes(): array
+    {
+        return [self::EDITABLE_BLOCK_TYPE];
+    }
+
+    public function defaultContentBlockRegion(): string
+    {
+        return self::DEFAULT_CONTENT_BLOCK_REGION;
+    }
+
     public function ownsContentBlock(ContentBlock $contentBlock): bool
     {
-        return EditableTextNoteBlock::owns($this->verse, $contentBlock);
+        return FixedTypeContentBlock::owns($this->verse, $contentBlock);
     }
 
     public function isEditableNoteBlock(ContentBlock $contentBlock): bool
     {
-        return EditableTextNoteBlock::isEditableFor($this->verse, $contentBlock);
+        return FixedTypeContentBlock::isEditableFor(
+            $this->verse,
+            $contentBlock,
+            self::EDITABLE_BLOCK_TYPE,
+        );
+    }
+
+    public function isContextualInsertionAnchor(ContentBlock $contentBlock): bool
+    {
+        return FixedTypeContentBlock::isInsertionAnchorFor(
+            $this->verse,
+            $contentBlock,
+            self::EDITABLE_BLOCK_TYPE,
+        );
     }
 
     public function abortUnlessOwnsContentBlock(ContentBlock $contentBlock): void
@@ -78,7 +142,25 @@ class VerseAdminRouteContext
 
     public function abortUnlessEditableNoteBlock(ContentBlock $contentBlock): void
     {
-        EditableTextNoteBlock::abortUnlessEditableFor($this->verse, $contentBlock);
+        FixedTypeContentBlock::abortUnlessEditableFor(
+            $this->verse,
+            $contentBlock,
+            self::EDITABLE_BLOCK_TYPE,
+        );
+    }
+
+    public function abortUnlessDuplicableNoteBlock(ContentBlock $contentBlock): void
+    {
+        $this->abortUnlessEditableNoteBlock($contentBlock);
+    }
+
+    public function abortUnlessContextualInsertionAnchor(ContentBlock $contentBlock): void
+    {
+        FixedTypeContentBlock::abortUnlessInsertionAnchorFor(
+            $this->verse,
+            $contentBlock,
+            self::EDITABLE_BLOCK_TYPE,
+        );
     }
 
     public function contentBlockProtectionReason(): string

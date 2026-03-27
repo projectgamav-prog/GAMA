@@ -22,6 +22,7 @@ beforeEach(function () {
         ->where('slug', 'bhagavad-gita')
         ->firstOrFail();
 
+    $this->booksIndexRoute = route('scripture.books.index');
     $this->showRoute = route('scripture.books.show', $this->book);
     $this->overviewRoute = route('scripture.books.overview', $this->book);
     $this->detailsUpdateRoute = route('scripture.books.admin.details.update', $this->book);
@@ -133,6 +134,25 @@ test('authorized editors can toggle protected admin visibility and receive regis
 
     $this->actingAs($editor)
         ->withCookie(AdminContext::VISIBILITY_COOKIE, '1')
+        ->get($this->booksIndexRoute)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where(
+                'books.0.admin.details_update_href',
+                route('scripture.books.admin.details.update', $this->book),
+            )
+            ->where(
+                'books.0.admin.full_edit_href',
+                route('scripture.books.admin.full-edit', $this->book),
+            )
+            ->where(
+                'books.0.admin.canonical_edit_href',
+                route('scripture.books.admin.canonical-edit', $this->book),
+            ),
+        );
+
+    $this->actingAs($editor)
+        ->withCookie(AdminContext::VISIBILITY_COOKIE, '1')
         ->get($this->showRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
@@ -141,6 +161,7 @@ test('authorized editors can toggle protected admin visibility and receive regis
             ->where('admin.canonical_edit_href', $this->canonicalEditRoute)
             ->where('admin.content_block_store_href', $this->contentBlockStoreRoute)
             ->where('admin.content_block_types', ['text', 'quote'])
+            ->where('admin.content_block_default_region', 'overview')
             ->where('admin.content_block_regions', ['overview', 'highlights'])
             ->where(
                 "admin.content_block_update_hrefs.{$textBlock->id}",
@@ -168,6 +189,7 @@ test('authorized editors can toggle protected admin visibility and receive regis
             ->where('admin.canonical_edit_href', $this->canonicalEditRoute)
             ->where('admin.content_block_store_href', $this->contentBlockStoreRoute)
             ->where('admin.content_block_types', ['text', 'quote'])
+            ->where('admin.content_block_default_region', 'overview')
             ->where('admin.content_block_regions', ['overview', 'highlights'])
             ->where(
                 "admin.content_block_update_hrefs.{$quoteBlock->id}",
@@ -462,6 +484,158 @@ test('authorized editors can create book content blocks at contextual insertion 
         );
 
     expect($lastBlock->fresh()->sort_order)->toBe(5);
+});
+
+test('authorized editors can manage visible book blocks from the public page', function () {
+    $editor = User::query()->where('email', 'editor3@example.com')->firstOrFail();
+
+    $book = Book::query()->create([
+        'slug' => 'book-public-block-management',
+        'number' => '109',
+        'title' => 'Book Public Block Management',
+        'description' => 'Book used for public block management tests.',
+    ]);
+
+    $showRoute = route('scripture.books.show', $book);
+
+    $firstBlock = $book->contentBlocks()->create([
+        'region' => 'overview',
+        'block_type' => 'text',
+        'title' => 'First published note',
+        'body' => 'First body.',
+        'data_json' => null,
+        'sort_order' => 1,
+        'status' => 'published',
+    ]);
+
+    $secondBlock = $book->contentBlocks()->create([
+        'region' => 'overview',
+        'block_type' => 'text',
+        'title' => 'Second published note',
+        'body' => 'Second body.',
+        'data_json' => null,
+        'sort_order' => 2,
+        'status' => 'published',
+    ]);
+
+    $quoteBlock = $book->contentBlocks()->create([
+        'region' => 'overview',
+        'block_type' => 'quote',
+        'title' => 'Closing quote',
+        'body' => 'Quote body.',
+        'data_json' => null,
+        'sort_order' => 3,
+        'status' => 'published',
+    ]);
+
+    $this->actingAs($editor)
+        ->withCookie(AdminContext::VISIBILITY_COOKIE, '1')
+        ->get($showRoute)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where(
+                "admin.content_block_move_down_hrefs.{$firstBlock->id}",
+                route('scripture.books.admin.content-blocks.move-down', [
+                    'book' => $book,
+                    'contentBlock' => $firstBlock,
+                ]),
+            )
+            ->where(
+                "admin.content_block_reorder_hrefs.{$firstBlock->id}",
+                route('scripture.books.admin.content-blocks.move', [
+                    'book' => $book,
+                    'contentBlock' => $firstBlock,
+                ]),
+            )
+            ->missing("admin.content_block_move_up_hrefs.{$firstBlock->id}")
+            ->where(
+                "admin.content_block_move_up_hrefs.{$secondBlock->id}",
+                route('scripture.books.admin.content-blocks.move-up', [
+                    'book' => $book,
+                    'contentBlock' => $secondBlock,
+                ]),
+            )
+            ->where(
+                "admin.content_block_duplicate_hrefs.{$firstBlock->id}",
+                route('scripture.books.admin.content-blocks.duplicate', [
+                    'book' => $book,
+                    'contentBlock' => $firstBlock,
+                ]),
+            )
+            ->missing("admin.content_block_duplicate_hrefs.{$quoteBlock->id}")
+            ->where(
+                "admin.content_block_delete_hrefs.{$quoteBlock->id}",
+                route('scripture.books.admin.content-blocks.destroy', [
+                    'book' => $book,
+                    'contentBlock' => $quoteBlock,
+                ]),
+            ),
+        );
+
+    $this->actingAs($editor)
+        ->from($showRoute)
+        ->post(route('scripture.books.admin.content-blocks.move', [
+            'book' => $book,
+            'contentBlock' => $firstBlock,
+        ]), [
+            'relative_block_id' => $secondBlock->id,
+            'position' => 'after',
+        ])
+        ->assertRedirect($showRoute);
+
+    expect(
+        $book->fresh()
+            ->contentBlocks()
+            ->published()
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->pluck('title')
+            ->all(),
+    )->toBe([
+        'Second published note',
+        'First published note',
+        'Closing quote',
+    ]);
+
+    $this->actingAs($editor)
+        ->from($showRoute)
+        ->post(route('scripture.books.admin.content-blocks.duplicate', [
+            'book' => $book,
+            'contentBlock' => $secondBlock,
+        ]))
+        ->assertRedirect($showRoute);
+
+    expect(
+        $book->fresh()
+            ->contentBlocks()
+            ->published()
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->pluck('title')
+            ->all(),
+    )->toBe([
+        'Second published note',
+        'Second published note Copy',
+        'First published note',
+        'Closing quote',
+    ]);
+
+    $this->actingAs($editor)
+        ->from($showRoute)
+        ->delete(route('scripture.books.admin.content-blocks.destroy', [
+            'book' => $book,
+            'contentBlock' => $quoteBlock,
+        ]))
+        ->assertRedirect($showRoute);
+
+    $this->get($showRoute)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('content_blocks.0.title', 'Second published note')
+            ->where('content_blocks.1.title', 'Second published note Copy')
+            ->where('content_blocks.2.title', 'First published note')
+            ->has('content_blocks', 3),
+        );
 });
 
 test('authorized editors can manage book media assignments and access canonical protected book identity view', function () {

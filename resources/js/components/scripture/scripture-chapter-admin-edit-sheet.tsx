@@ -1,18 +1,11 @@
-import { Link, useForm } from '@inertiajs/react';
+import { useForm } from '@inertiajs/react';
 import { useEffect, useEffectEvent } from 'react';
 import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
+import { ScriptureInlineAdminSheet } from '@/components/scripture/scripture-inline-admin-sheet';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetFooter,
-    SheetHeader,
-    SheetTitle,
-} from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
+import { scriptureInlineRegionLabel } from '@/lib/scripture-inline-admin';
 import type { ScriptureContentBlock, ScriptureEntityRegionMeta } from '@/types';
 
 type ContentBlockDraft = {
@@ -74,7 +67,7 @@ export function ScriptureChapterAdminEditSheet({
 
     useEffect(() => {
         syncSession(session);
-    }, [session]);
+    }, [session, syncSession]);
 
     const closeSheet = (open: boolean) => {
         if (!open) {
@@ -92,105 +85,83 @@ export function ScriptureChapterAdminEditSheet({
             onSuccess: () => onOpenChange(false),
         });
     };
+    const surfaceLabel =
+        session?.meta.region === 'page_intro'
+            ? 'Chapter intro'
+            : 'Published note';
 
     return (
-        <Sheet open={session !== null} onOpenChange={closeSheet}>
-            <SheetContent side="right" className="w-full sm:max-w-xl">
-                {session && (
+        <ScriptureInlineAdminSheet
+            open={session !== null}
+            onOpenChange={closeSheet}
+            surfaceLabel={surfaceLabel}
+            mode="edit"
+            title={
+                session?.meta.region === 'page_intro'
+                    ? 'Edit chapter intro'
+                    : 'Edit published note'
+            }
+            description={
+                session
+                    ? `Update the attached ${scriptureInlineRegionLabel(session.meta.region, surfaceLabel).toLowerCase()} for ${session.chapterTitle}.`
+                    : ''
+            }
+            contextLabel="Chapter context"
+            contextSlot={
+                session ? (
                     <>
-                        <SheetHeader className="space-y-3 border-b">
-                            <div className="space-y-2">
-                                <SheetTitle>Edit chapter note</SheetTitle>
-                                <SheetDescription>
-                                    Context-aware editing for{' '}
-                                    <span className="font-medium text-foreground">
-                                        {session.chapterTitle}
-                                    </span>{' '}
-                                    from{' '}
-                                    <span className="font-medium text-foreground">
-                                        {session.meta.region}
-                                    </span>
-                                    . This updates the attached published text
-                                    note in block region{' '}
-                                    <span className="font-medium text-foreground">
-                                        {session.block.region}
-                                    </span>
-                                    .
-                                </SheetDescription>
-                            </div>
-
-                            <div className="rounded-2xl border border-border/70 bg-muted/30 px-4 py-4">
-                                <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-                                    Chapter context
-                                </p>
-                                <p className="mt-3 text-sm font-medium text-foreground">
-                                    {session.bookTitle}
-                                </p>
-                                <p className="mt-1 text-sm text-muted-foreground">
-                                    {session.bookSectionTitle}
-                                </p>
-                                <p className="mt-1 text-sm text-muted-foreground">
-                                    {session.chapterTitle}
-                                </p>
-                            </div>
-                        </SheetHeader>
-
-                        <div className="flex-1 space-y-5 overflow-y-auto px-4 py-5">
-                            <div className="grid gap-2">
-                                <Label htmlFor="chapter_block_title">Title</Label>
-                                <Input
-                                    id="chapter_block_title"
-                                    value={form.data.title}
-                                    onChange={(event) =>
-                                        form.setData(
-                                            'title',
-                                            event.target.value,
-                                        )
-                                    }
-                                    placeholder="Block title"
-                                />
-                                <InputError message={formErrors.title} />
-                            </div>
-
-                            <div className="grid gap-2">
-                                <Label htmlFor="chapter_block_body">Body</Label>
-                                <Textarea
-                                    id="chapter_block_body"
-                                    value={form.data.body}
-                                    onChange={(event) =>
-                                        form.setData('body', event.target.value)
-                                    }
-                                    rows={8}
-                                    placeholder="Published chapter note copy"
-                                />
-                                <InputError message={formErrors.body} />
-                            </div>
-                        </div>
-
-                        <SheetFooter className="border-t">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => onOpenChange(false)}
-                            >
-                                Cancel
-                            </Button>
-                            <Button asChild variant="outline">
-                                <Link href={session.fullEditHref}>
-                                    Open Full edit
-                                </Link>
-                            </Button>
-                            <Button
-                                type="button"
-                                onClick={submit}
-                                disabled={form.processing}
-                            >
-                                Save changes
-                            </Button>
-                        </SheetFooter>
+                        <p className="font-medium text-foreground">
+                            {session.bookTitle}
+                        </p>
+                        <p className="text-muted-foreground">
+                            {session.bookSectionTitle}
+                        </p>
+                        <p className="text-muted-foreground">
+                            {session.chapterTitle}
+                        </p>
+                        <p className="text-muted-foreground">
+                            Text block in {session.block.region}.
+                        </p>
                     </>
-                )}
-            </SheetContent>
-        </Sheet>
+                ) : undefined
+            }
+            fullEditHref={session?.fullEditHref ?? null}
+            primaryActionLabel="Save"
+            processingLabel="Saving..."
+            onPrimaryAction={submit}
+            processing={form.processing}
+        >
+            {session && (
+                <div className="space-y-5">
+                    <div className="grid gap-2">
+                        <Label htmlFor="chapter_block_title">Title</Label>
+                        <Input
+                            id="chapter_block_title"
+                            autoFocus
+                            value={form.data.title}
+                            onChange={(event) =>
+                                form.setData('title', event.target.value)
+                            }
+                            placeholder="Block title"
+                        />
+                        <InputError message={formErrors.title} />
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label htmlFor="chapter_block_body">Body</Label>
+                        <Textarea
+                            id="chapter_block_body"
+                            value={form.data.body}
+                            onChange={(event) =>
+                                form.setData('body', event.target.value)
+                            }
+                            rows={8}
+                            placeholder="Published chapter note copy"
+                        />
+                        <InputError message={formErrors.body} />
+                    </div>
+                </div>
+            )}
+        </ScriptureInlineAdminSheet>
     );
 }

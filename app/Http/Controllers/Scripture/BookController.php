@@ -7,6 +7,8 @@ use App\Models\Book;
 use App\Models\ContentBlock;
 use App\Support\AdminContext\AdminContext;
 use App\Support\Scripture\Admin\BookAdminRouteContext;
+use App\Support\Scripture\Admin\ContentBlockCapabilityPayload;
+use App\Support\Scripture\Admin\VisibleContentBlockSequence;
 use App\Support\Scripture\PublicScriptureData;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
@@ -18,15 +20,28 @@ class BookController extends Controller
     /**
      * Display the public scripture library.
      */
-    public function index(PublicScriptureData $publicScriptureData): Response
+    public function index(
+        Request $request,
+        PublicScriptureData $publicScriptureData,
+    ): Response
     {
         $books = Book::query()
             ->with($this->publicBookMediaRelations())
             ->inCanonicalOrder()
             ->get();
+        $adminVisibilityEnabled = AdminContext::isVisible($request);
 
         return Inertia::render('scripture/books/index', [
-            'books' => $publicScriptureData->books($books),
+            'books' => $books
+                ->map(fn (Book $book) => [
+                    ...$publicScriptureData->book($book),
+                    'admin' => $this->bookCardAdminPayload(
+                        $book,
+                        $adminVisibilityEnabled,
+                    ),
+                ])
+                ->values()
+                ->all(),
         ]);
     }
 
@@ -137,6 +152,7 @@ class BookController extends Controller
         }
 
         $adminRouteContext = new BookAdminRouteContext($book);
+        $visibleSequence = new VisibleContentBlockSequence($contentBlocks);
 
         return [
             'details_update_href' => $adminRouteContext->detailsUpdateHref(),
@@ -144,13 +160,40 @@ class BookController extends Controller
             'canonical_edit_href' => $adminRouteContext->canonicalEditHref(),
             'content_block_store_href' => $adminRouteContext->contentBlockStoreHref(),
             'content_block_types' => $adminRouteContext->editableContentBlockTypes(),
+            'content_block_default_region' => $adminRouteContext->creatableContentBlockRegions()[0],
             'content_block_regions' => $adminRouteContext->creatableContentBlockRegions(),
-            'content_block_update_hrefs' => $contentBlocks
-                ->filter(fn (ContentBlock $block) => $adminRouteContext->isEditableContentBlock($block))
-                ->mapWithKeys(fn (ContentBlock $block) => [
-                    (string) $block->id => $adminRouteContext->contentBlockUpdateHref($block),
-                ])
-                ->all(),
+            ...ContentBlockCapabilityPayload::build(
+                $contentBlocks,
+                $visibleSequence,
+                fn (ContentBlock $block): bool => $adminRouteContext->isEditableContentBlock($block),
+                fn (ContentBlock $block): bool => $adminRouteContext->isDuplicableContentBlock($block),
+                fn (ContentBlock $block): string => $adminRouteContext->contentBlockUpdateHref($block),
+                fn (ContentBlock $block): string => $adminRouteContext->contentBlockMoveUpHref($block),
+                fn (ContentBlock $block): string => $adminRouteContext->contentBlockMoveDownHref($block),
+                fn (ContentBlock $block): string => $adminRouteContext->contentBlockReorderHref($block),
+                fn (ContentBlock $block): string => $adminRouteContext->contentBlockDuplicateHref($block),
+                fn (ContentBlock $block): string => $adminRouteContext->contentBlockDestroyHref($block),
+            ),
+        ];
+    }
+
+    /**
+     * @return array<string, string>|null
+     */
+    private function bookCardAdminPayload(
+        Book $book,
+        bool $adminVisibilityEnabled,
+    ): ?array {
+        if (! $adminVisibilityEnabled) {
+            return null;
+        }
+
+        $adminRouteContext = new BookAdminRouteContext($book);
+
+        return [
+            'details_update_href' => $adminRouteContext->detailsUpdateHref(),
+            'full_edit_href' => $adminRouteContext->fullEditHref(),
+            'canonical_edit_href' => $adminRouteContext->canonicalEditHref(),
         ];
     }
 }

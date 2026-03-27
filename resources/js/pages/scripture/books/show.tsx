@@ -1,13 +1,14 @@
 import { Link } from '@inertiajs/react';
 import { BookOpenText } from 'lucide-react';
-import { ScriptureAdminRegionToolbar } from '@/components/scripture/scripture-admin-region-toolbar';
-import { ScriptureAdminVisibilityToggle } from '@/components/scripture/scripture-admin-visibility-toggle';
+import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
 import { ScriptureBookAdminEditSheet } from '@/components/scripture/scripture-book-admin-edit-sheet';
+import { ScriptureBookIntroInlineEditor } from '@/components/scripture/scripture-book-intro-inline-editor';
 import { BookPublicMediaSection } from '@/components/scripture/book-public-media-section';
 import { ScriptureContentBlocksSection } from '@/components/scripture/scripture-content-blocks-section';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
+import { ScriptureTextContentBlockInlineEditor } from '@/components/scripture/scripture-text-content-block-inline-editor';
 import { Badge } from '@/components/ui/badge';
 import { useBookAdminEditSession } from '@/hooks/use-book-admin-edit-session';
 import {
@@ -40,13 +41,16 @@ export default function BookShow({
     };
     const {
         editSession,
+        inlineIntroSession,
+        inlineCreateTextContentBlockSession,
+        getInlineTextContentBlockSession,
         closeEditSession,
-        detailsConfig,
+        introSurface,
+        contentBlocksCapabilities,
         contentBlocksMeta,
-        getContentBlockConfig,
-        openDetailsEditor,
-        openContentBlockEditor,
-        openContentBlockCreator,
+        handleIntroSaveSuccess,
+        handleContentBlockSaveSuccess,
+        handleContentBlockCreateSuccess,
     } = useBookAdminEditSession({
         book,
         admin,
@@ -61,6 +65,8 @@ export default function BookShow({
 
     return (
         <ScriptureLayout title={book.title} breadcrumbs={breadcrumbs}>
+            <ScriptureAdminModeBar />
+
             <ScripturePageIntroCard
                 entityMeta={{
                     ...bookEntity,
@@ -77,19 +83,17 @@ export default function BookShow({
                     </>
                 }
                 title={book.title}
-                description={book.description ?? undefined}
-                headerAction={
-                    <>
-                        <ScriptureAdminVisibilityToggle />
-                        {detailsConfig && (
-                            <ScriptureAdminRegionToolbar
-                                config={detailsConfig}
-                                onEdit={openDetailsEditor}
-                            />
-                        )}
-                    </>
+                description={
+                    inlineIntroSession ? undefined : (book.description ?? undefined)
                 }
-            />
+                adminSurface={introSurface ?? undefined}
+            >
+                <ScriptureBookIntroInlineEditor
+                    session={inlineIntroSession}
+                    onCancel={closeEditSession}
+                    onSaveSuccess={handleIntroSaveSuccess}
+                />
+            </ScripturePageIntroCard>
 
             <BookPublicMediaSection book={book} admin={admin} />
 
@@ -97,34 +101,43 @@ export default function BookShow({
                 title="Reading Notes"
                 description="Published study content attached to this book."
                 blocks={content_blocks}
-                onInsertBlock={
-                    admin
-                        ? (insertion) =>
-                              openContentBlockCreator(
-                                  contentBlocksMeta,
-                                  insertion,
-                              )
-                        : undefined
+                capabilities={contentBlocksCapabilities}
+                pendingInlineCreateInsertionPoint={
+                    inlineCreateTextContentBlockSession?.insertionPoint ?? null
                 }
-                renderBlockHeaderAction={(block) => {
-                    const config = getContentBlockConfig(block);
-
-                    if (config === null) {
-                        return null;
-                    }
-
-                    return (
-                        <ScriptureAdminRegionToolbar
-                            config={config}
-                            onEdit={(meta, regionConfig) =>
-                                openContentBlockEditor(
-                                    meta,
-                                    block,
-                                    regionConfig,
-                                )
-                            }
+                renderPendingInlineCreateEditor={() =>
+                    inlineCreateTextContentBlockSession ? (
+                        <ScriptureTextContentBlockInlineEditor
+                            session={inlineCreateTextContentBlockSession}
+                            entityLabel={book.title}
+                            onCancel={closeEditSession}
+                            onSaveSuccess={(result) => {
+                                if (result.kind === 'create') {
+                                    handleContentBlockCreateSuccess();
+                                }
+                            }}
                         />
+                    ) : null
+                }
+                renderInlineBlockEditor={(block) => {
+                    const inlineSession = getInlineTextContentBlockSession(
+                        block.id,
                     );
+
+                    return inlineSession ? (
+                        <ScriptureTextContentBlockInlineEditor
+                            session={inlineSession}
+                            entityLabel={book.title}
+                            onCancel={closeEditSession}
+                            onSaveSuccess={(result) => {
+                                if (result.kind === 'edit') {
+                                    handleContentBlockSaveSuccess(
+                                        result.blockId,
+                                    );
+                                }
+                            }}
+                        />
+                    ) : null;
                 }}
                 entityMeta={{
                     ...contentBlocksMeta,

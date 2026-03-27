@@ -1,19 +1,12 @@
-import { Link, useForm } from '@inertiajs/react';
+import { useForm } from '@inertiajs/react';
 import { useEffect, useEffectEvent } from 'react';
 import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
+import { ScriptureInlineAdminSheet } from '@/components/scripture/scripture-inline-admin-sheet';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetFooter,
-    SheetHeader,
-    SheetTitle,
-} from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
+import { scriptureInlineRegionLabel } from '@/lib/scripture-inline-admin';
 import { parseAdminList } from '@/lib/scripture-admin';
 import type { ScriptureContentBlock, ScriptureEntityRegionMeta } from '@/types';
 
@@ -115,9 +108,7 @@ export function ScriptureVerseAdminEditSheet({
 
     useEffect(() => {
         syncSession(session);
-    }, [session]);
-
-    const isOpen = session !== null;
+    }, [session, syncSession]);
 
     const closeSheet = (open: boolean) => {
         if (!open) {
@@ -158,225 +149,173 @@ export function ScriptureVerseAdminEditSheet({
         session?.kind === 'verse_meta'
             ? verseMetaForm.processing
             : contentBlockForm.processing;
+    const surfaceLabel =
+        session?.kind === 'verse_meta' ? 'Verse notes' : 'Published note';
 
     return (
-        <Sheet open={isOpen} onOpenChange={closeSheet}>
-            <SheetContent side="right" className="w-full sm:max-w-xl">
-                {session && (
-                    <>
-                        <SheetHeader className="space-y-3 border-b">
-                            <div className="space-y-2">
-                                <SheetTitle>
-                                    {session.kind === 'verse_meta'
-                                        ? 'Edit verse notes'
-                                        : 'Edit note block'}
-                                </SheetTitle>
-                                <SheetDescription>
-                                    Context-aware editing for {session.verseTitle}{' '}
-                                    in region{' '}
-                                    <span className="font-medium text-foreground">
-                                        {session.meta.region}
-                                    </span>
-                                    .
-                                </SheetDescription>
-                            </div>
+        <ScriptureInlineAdminSheet
+            open={session !== null}
+            onOpenChange={closeSheet}
+            surfaceLabel={surfaceLabel}
+            mode="edit"
+            title={
+                session?.kind === 'verse_meta'
+                    ? 'Edit verse notes'
+                    : 'Edit published note'
+            }
+            description={
+                session
+                    ? `Update the attached ${scriptureInlineRegionLabel(session.meta.region, surfaceLabel).toLowerCase()} for ${session.verseTitle}.`
+                    : ''
+            }
+            contextLabel="Canonical verse"
+            contextSlot={
+                session ? (
+                    <p className="leading-7 text-foreground">
+                        {session.verseText}
+                    </p>
+                ) : undefined
+            }
+            fullEditHref={session?.fullEditHref ?? null}
+            primaryActionLabel="Save"
+            processingLabel="Saving..."
+            onPrimaryAction={
+                session?.kind === 'verse_meta'
+                    ? submitVerseMeta
+                    : submitContentBlock
+            }
+            processing={processing}
+        >
+            {session?.kind === 'verse_meta' ? (
+                <div className="space-y-5">
+                    <div className="grid gap-2">
+                        <Label htmlFor="summary_short">Summary</Label>
+                        <Textarea
+                            id="summary_short"
+                            autoFocus
+                            value={verseMetaForm.data.summary_short}
+                            onChange={(event) =>
+                                verseMetaForm.setData(
+                                    'summary_short',
+                                    event.target.value,
+                                )
+                            }
+                            rows={5}
+                            placeholder="Add a short editorial summary for this verse."
+                        />
+                        <InputError
+                            message={verseMetaForm.errors.summary_short}
+                        />
+                    </div>
 
-                            <div className="rounded-2xl border border-border/70 bg-muted/30 px-4 py-4">
-                                <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-                                    Canonical verse context
-                                </p>
-                                <p className="mt-3 text-sm leading-7 text-foreground">
-                                    {session.verseText}
-                                </p>
-                            </div>
-                        </SheetHeader>
-
-                        <div className="flex-1 space-y-6 overflow-y-auto px-4 py-5">
-                            {session.kind === 'verse_meta' ? (
-                                <div className="space-y-5">
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="summary_short">
-                                            Summary
-                                        </Label>
-                                        <Textarea
-                                            id="summary_short"
-                                            value={verseMetaForm.data.summary_short}
-                                            onChange={(event) =>
-                                                verseMetaForm.setData(
-                                                    'summary_short',
-                                                    event.target.value,
-                                                )
-                                            }
-                                            rows={5}
-                                            placeholder="Add a short editorial summary for this verse."
-                                        />
-                                        <InputError
-                                            message={
-                                                verseMetaForm.errors.summary_short
-                                            }
-                                        />
-                                    </div>
-
-                                    <div className="flex items-start gap-3 rounded-xl border px-4 py-3">
-                                        <Checkbox
-                                            id="is_featured"
-                                            checked={
-                                                verseMetaForm.data.is_featured
-                                            }
-                                            onCheckedChange={(checked) =>
-                                                verseMetaForm.setData(
-                                                    'is_featured',
-                                                    checked === true,
-                                                )
-                                            }
-                                        />
-                                        <div className="space-y-1">
-                                            <Label htmlFor="is_featured">
-                                                Featured verse
-                                            </Label>
-                                            <p className="text-sm text-muted-foreground">
-                                                Mark this verse for featured
-                                                study treatment.
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="keywords_text">
-                                            Keywords
-                                        </Label>
-                                        <Textarea
-                                            id="keywords_text"
-                                            value={
-                                                verseMetaForm.data.keywords_text
-                                            }
-                                            onChange={(event) =>
-                                                verseMetaForm.setData(
-                                                    'keywords_text',
-                                                    event.target.value,
-                                                )
-                                            }
-                                            rows={3}
-                                            placeholder="karma, duty, steadiness"
-                                        />
-                                        <p className="text-sm text-muted-foreground">
-                                            Separate items with commas or new
-                                            lines.
-                                        </p>
-                                        <InputError
-                                            message={
-                                                verseMetaErrors.keywords ??
-                                                verseMetaErrors.keywords_text
-                                            }
-                                        />
-                                    </div>
-
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="study_flags_text">
-                                            Study flags
-                                        </Label>
-                                        <Textarea
-                                            id="study_flags_text"
-                                            value={
-                                                verseMetaForm.data
-                                                    .study_flags_text
-                                            }
-                                            onChange={(event) =>
-                                                verseMetaForm.setData(
-                                                    'study_flags_text',
-                                                    event.target.value,
-                                                )
-                                            }
-                                            rows={3}
-                                            placeholder="memorization, discourse"
-                                        />
-                                        <p className="text-sm text-muted-foreground">
-                                            Separate items with commas or new
-                                            lines.
-                                        </p>
-                                        <InputError
-                                            message={
-                                                verseMetaErrors.study_flags ??
-                                                verseMetaErrors.study_flags_text
-                                            }
-                                        />
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="space-y-5">
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="block_title">
-                                            Title
-                                        </Label>
-                                        <Input
-                                            id="block_title"
-                                            value={contentBlockForm.data.title}
-                                            onChange={(event) =>
-                                                contentBlockForm.setData(
-                                                    'title',
-                                                    event.target.value,
-                                                )
-                                            }
-                                            placeholder="Block title"
-                                        />
-                                        <InputError
-                                            message={contentBlockErrors.title}
-                                        />
-                                    </div>
-
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="block_body">Body</Label>
-                                        <Textarea
-                                            id="block_body"
-                                            value={contentBlockForm.data.body}
-                                            onChange={(event) =>
-                                                contentBlockForm.setData(
-                                                    'body',
-                                                    event.target.value,
-                                                )
-                                            }
-                                            rows={8}
-                                            placeholder="Published note copy"
-                                        />
-                                        <InputError
-                                            message={contentBlockErrors.body}
-                                        />
-                                    </div>
-                                </div>
-                            )}
+                    <div className="flex items-start gap-3 rounded-xl border px-4 py-3">
+                        <Checkbox
+                            id="is_featured"
+                            checked={verseMetaForm.data.is_featured}
+                            onCheckedChange={(checked) =>
+                                verseMetaForm.setData(
+                                    'is_featured',
+                                    checked === true,
+                                )
+                            }
+                        />
+                        <div className="space-y-1">
+                            <Label htmlFor="is_featured">
+                                Featured verse
+                            </Label>
+                            <p className="text-sm text-muted-foreground">
+                                Mark this verse for featured study treatment.
+                            </p>
                         </div>
+                    </div>
 
-                        <SheetFooter className="border-t">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => onOpenChange(false)}
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                asChild
-                                variant="outline"
-                            >
-                                <Link href={session.fullEditHref}>
-                                    Open Full edit
-                                </Link>
-                            </Button>
-                            <Button
-                                type="button"
-                                onClick={
-                                    session.kind === 'verse_meta'
-                                        ? submitVerseMeta
-                                        : submitContentBlock
-                                }
-                                disabled={processing}
-                            >
-                                Save changes
-                            </Button>
-                        </SheetFooter>
-                    </>
-                )}
-            </SheetContent>
-        </Sheet>
+                    <div className="grid gap-2">
+                        <Label htmlFor="keywords_text">Keywords</Label>
+                        <Textarea
+                            id="keywords_text"
+                            value={verseMetaForm.data.keywords_text}
+                            onChange={(event) =>
+                                verseMetaForm.setData(
+                                    'keywords_text',
+                                    event.target.value,
+                                )
+                            }
+                            rows={3}
+                            placeholder="karma, duty, steadiness"
+                        />
+                        <p className="text-sm text-muted-foreground">
+                            Separate items with commas or new lines.
+                        </p>
+                        <InputError
+                            message={
+                                verseMetaErrors.keywords ??
+                                verseMetaErrors.keywords_text
+                            }
+                        />
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label htmlFor="study_flags_text">Study flags</Label>
+                        <Textarea
+                            id="study_flags_text"
+                            value={verseMetaForm.data.study_flags_text}
+                            onChange={(event) =>
+                                verseMetaForm.setData(
+                                    'study_flags_text',
+                                    event.target.value,
+                                )
+                            }
+                            rows={3}
+                            placeholder="memorization, discourse"
+                        />
+                        <p className="text-sm text-muted-foreground">
+                            Separate items with commas or new lines.
+                        </p>
+                        <InputError
+                            message={
+                                verseMetaErrors.study_flags ??
+                                verseMetaErrors.study_flags_text
+                            }
+                        />
+                    </div>
+                </div>
+            ) : session?.kind === 'content_block' ? (
+                <div className="space-y-5">
+                    <div className="grid gap-2">
+                        <Label htmlFor="block_title">Title</Label>
+                        <Input
+                            id="block_title"
+                            autoFocus
+                            value={contentBlockForm.data.title}
+                            onChange={(event) =>
+                                contentBlockForm.setData(
+                                    'title',
+                                    event.target.value,
+                                )
+                            }
+                            placeholder="Block title"
+                        />
+                        <InputError message={contentBlockErrors.title} />
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label htmlFor="block_body">Body</Label>
+                        <Textarea
+                            id="block_body"
+                            value={contentBlockForm.data.body}
+                            onChange={(event) =>
+                                contentBlockForm.setData(
+                                    'body',
+                                    event.target.value,
+                                )
+                            }
+                            rows={8}
+                            placeholder="Published note copy"
+                        />
+                        <InputError message={contentBlockErrors.body} />
+                    </div>
+                </div>
+            ) : null}
+        </ScriptureInlineAdminSheet>
     );
 }

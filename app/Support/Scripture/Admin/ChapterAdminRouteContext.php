@@ -9,6 +9,9 @@ use App\Models\ContentBlock;
 
 class ChapterAdminRouteContext
 {
+    private const EDITABLE_BLOCK_TYPE = 'text';
+    private const DEFAULT_CONTENT_BLOCK_REGION = 'study';
+
     public function __construct(
         private readonly Book $book,
         private readonly BookSection $bookSection,
@@ -50,18 +53,97 @@ class ChapterAdminRouteContext
         ]));
     }
 
+    public function contentBlockMoveUpHref(ContentBlock $contentBlock): string
+    {
+        return route('scripture.chapters.admin.content-blocks.move-up', $this->routeParameters([
+            'contentBlock' => $contentBlock,
+        ]));
+    }
+
+    public function contentBlockMoveDownHref(ContentBlock $contentBlock): string
+    {
+        return route('scripture.chapters.admin.content-blocks.move-down', $this->routeParameters([
+            'contentBlock' => $contentBlock,
+        ]));
+    }
+
+    public function contentBlockReorderHref(ContentBlock $contentBlock): string
+    {
+        return route('scripture.chapters.admin.content-blocks.move', $this->routeParameters([
+            'contentBlock' => $contentBlock,
+        ]));
+    }
+
+    public function contentBlockDuplicateHref(ContentBlock $contentBlock): string
+    {
+        return route('scripture.chapters.admin.content-blocks.duplicate', $this->routeParameters([
+            'contentBlock' => $contentBlock,
+        ]));
+    }
+
+    public function contentBlockDestroyHref(ContentBlock $contentBlock): string
+    {
+        return route('scripture.chapters.admin.content-blocks.destroy', $this->routeParameters([
+            'contentBlock' => $contentBlock,
+        ]));
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function contentBlockTypes(): array
+    {
+        return [self::EDITABLE_BLOCK_TYPE];
+    }
+
+    public function defaultContentBlockRegion(): string
+    {
+        return self::DEFAULT_CONTENT_BLOCK_REGION;
+    }
+
     public function ownsContentBlock(ContentBlock $contentBlock): bool
     {
-        return EditableTextNoteBlock::owns($this->chapter, $contentBlock);
+        return FixedTypeContentBlock::owns($this->chapter, $contentBlock);
     }
 
     public function isEditableNoteBlock(ContentBlock $contentBlock): bool
     {
-        return EditableTextNoteBlock::isEditableFor($this->chapter, $contentBlock);
+        return FixedTypeContentBlock::isEditableFor(
+            $this->chapter,
+            $contentBlock,
+            self::EDITABLE_BLOCK_TYPE,
+        );
     }
 
     public function abortUnlessEditableNoteBlock(ContentBlock $contentBlock): void
     {
-        EditableTextNoteBlock::abortUnlessEditableFor($this->chapter, $contentBlock);
+        FixedTypeContentBlock::abortUnlessEditableFor(
+            $this->chapter,
+            $contentBlock,
+            self::EDITABLE_BLOCK_TYPE,
+        );
+    }
+
+    public function abortUnlessDuplicableNoteBlock(ContentBlock $contentBlock): void
+    {
+        $this->abortUnlessEditableNoteBlock($contentBlock);
+    }
+
+    public function isContextualInsertionAnchor(ContentBlock $contentBlock): bool
+    {
+        return FixedTypeContentBlock::isInsertionAnchorFor(
+            $this->chapter,
+            $contentBlock,
+            self::EDITABLE_BLOCK_TYPE,
+        );
+    }
+
+    public function abortUnlessContextualInsertionAnchor(ContentBlock $contentBlock): void
+    {
+        FixedTypeContentBlock::abortUnlessInsertionAnchorFor(
+            $this->chapter,
+            $contentBlock,
+            self::EDITABLE_BLOCK_TYPE,
+        );
     }
 }
