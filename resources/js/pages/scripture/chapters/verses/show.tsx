@@ -10,7 +10,14 @@ import {
     Tag,
     Users,
 } from 'lucide-react';
-import { AdminModuleHost } from '@/admin/modules/shared';
+import {
+    AdminModuleHost,
+    BLOCK_CREATE_SURFACE_CAPABILITIES,
+    EDITOR_SURFACE_CAPABILITIES,
+    createInlineEditorModuleSurface,
+    createSheetEditorModuleSurface,
+    createSurfaceOwner,
+} from '@/admin/modules/shared';
 import { ScriptureActionRow } from '@/components/scripture/scripture-action-row';
 import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
 import { ScriptureAdminSurface } from '@/components/scripture/scripture-admin-surface';
@@ -197,18 +204,15 @@ export default function VerseShow({
             >
                 {!hasVerseMeta && (
                     <AdminModuleHost
-                        surface={{
+                        surface={createInlineEditorModuleSurface({
                             entity: 'verse',
                             entityId: verse.id,
-                            slot: 'inline_editor',
                             regionKey: 'page_intro',
-                            capabilities: ['edit', 'full_edit'],
-                            metadata: {
-                                session: inlineVerseNotesSession,
-                                onCancel: closeEditSession,
-                                onSaveSuccess: handleVerseMetaSaveSuccess,
-                            },
-                        }}
+                            capabilities: EDITOR_SURFACE_CAPABILITIES,
+                            session: inlineVerseNotesSession,
+                            onCancel: closeEditSession,
+                            onSaveSuccess: handleVerseMetaSaveSuccess,
+                        })}
                     />
                 )}
 
@@ -292,22 +296,19 @@ export default function VerseShow({
                                             <CardContent className="space-y-5">
                                             {inlineVerseNotesSession ? (
                                                 <AdminModuleHost
-                                                    surface={{
+                                                    surface={createInlineEditorModuleSurface({
                                                         entity: 'verse',
                                                         entityId: verse.id,
-                                                        slot: 'inline_editor',
                                                         regionKey: 'study_notes',
-                                                        capabilities: [
-                                                            'edit',
-                                                            'full_edit',
-                                                        ],
-                                                        metadata: {
-                                                            session: inlineVerseNotesSession,
-                                                            onCancel: closeEditSession,
-                                                            onSaveSuccess:
-                                                                handleVerseMetaSaveSuccess,
-                                                        },
-                                                    }}
+                                                        capabilities:
+                                                            EDITOR_SURFACE_CAPABILITIES,
+                                                        session:
+                                                            inlineVerseNotesSession,
+                                                        onCancel:
+                                                            closeEditSession,
+                                                        onSaveSuccess:
+                                                            handleVerseMetaSaveSuccess,
+                                                    })}
                                                 />
                                             ) : (
                                                 <>
@@ -989,26 +990,26 @@ export default function VerseShow({
                 renderPendingInlineCreateEditor={() =>
                     inlineCreateTextContentBlockSession ? (
                         <AdminModuleHost
-                            surface={{
+                            surface={createInlineEditorModuleSurface({
                                 entity: 'verse',
                                 entityId: verse.id,
-                                slot: 'inline_editor',
                                 regionKey: 'content_blocks',
                                 blockType: 'text',
-                                capabilities: ['add_block', 'full_edit'],
-                                metadata: {
-                                    session: inlineCreateTextContentBlockSession,
-                                    entityLabel: verseTitle,
-                                    onCancel: closeEditSession,
-                                    onSaveSuccess: (result: {
-                                        kind: 'create' | 'edit';
-                                    }) => {
-                                        if (result.kind === 'create') {
-                                            handleContentBlockCreateSuccess();
-                                        }
-                                    },
+                                capabilities:
+                                    BLOCK_CREATE_SURFACE_CAPABILITIES,
+                                session: inlineCreateTextContentBlockSession,
+                                onCancel: closeEditSession,
+                                onSaveSuccess: (result: {
+                                    kind: 'create' | 'edit';
+                                }) => {
+                                    if (result.kind === 'create') {
+                                        handleContentBlockCreateSuccess();
+                                    }
                                 },
-                            }}
+                                metadata: {
+                                    entityLabel: verseTitle,
+                                },
+                            })}
                         />
                     ) : null
                 }
@@ -1019,36 +1020,32 @@ export default function VerseShow({
 
                     return (
                         <AdminModuleHost
-                            surface={{
+                            surface={createInlineEditorModuleSurface({
                                 entity: 'content_block',
                                 entityId: block.id,
-                                slot: 'inline_editor',
                                 regionKey: 'content_blocks',
                                 blockType: block.block_type,
-                                owner: {
-                                    entity: 'verse',
-                                    entityId: verse.id,
+                                owner: createSurfaceOwner('verse', verse.id),
+                                capabilities: EDITOR_SURFACE_CAPABILITIES,
+                                session: inlineSession,
+                                onCancel: closeEditSession,
+                                onSaveSuccess: (result: {
+                                    kind: 'create' | 'edit';
+                                    blockId?: number;
+                                }) => {
+                                    if (
+                                        result.kind === 'edit' &&
+                                        result.blockId !== undefined
+                                    ) {
+                                        handleContentBlockSaveSuccess(
+                                            result.blockId,
+                                        );
+                                    }
                                 },
-                                capabilities: ['edit', 'full_edit'],
                                 metadata: {
-                                    session: inlineSession,
                                     entityLabel: verseTitle,
-                                    onCancel: closeEditSession,
-                                    onSaveSuccess: (result: {
-                                        kind: 'create' | 'edit';
-                                        blockId?: number;
-                                    }) => {
-                                        if (
-                                            result.kind === 'edit' &&
-                                            result.blockId !== undefined
-                                        ) {
-                                            handleContentBlockSaveSuccess(
-                                                result.blockId,
-                                            );
-                                        }
-                                    },
                                 },
-                            }}
+                            })}
                         />
                     );
                 }}
@@ -1056,25 +1053,24 @@ export default function VerseShow({
             />
 
             <AdminModuleHost
-                surface={{
+                surface={createSheetEditorModuleSurface({
                     entity: 'verse',
                     entityId: verse.id,
-                    slot: 'sheet_editor',
                     regionKey: editSession?.meta.region ?? null,
                     blockType:
                         editSession?.kind === 'content_block'
                             ? editSession.block.block_type
                             : null,
-                    capabilities: editSession ? ['edit', 'full_edit'] : [],
-                    metadata: {
-                        session: editSession,
-                        onOpenChange: (open: boolean) => {
-                            if (!open) {
-                                closeEditSession();
-                            }
-                        },
+                    capabilities: editSession
+                        ? EDITOR_SURFACE_CAPABILITIES
+                        : [],
+                    session: editSession,
+                    onOpenChange: (open: boolean) => {
+                        if (!open) {
+                            closeEditSession();
+                        }
                     },
-                }}
+                })}
             />
         </ScriptureLayout>
     );

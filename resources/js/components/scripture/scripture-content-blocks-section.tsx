@@ -1,11 +1,11 @@
 import { router } from '@inertiajs/react';
 import { Fragment, useState } from 'react';
 import type { DragEvent, ReactNode } from 'react';
+import { AdminModuleHost } from '@/admin/modules/shared';
 import {
-    AdminModuleHost,
-    type AdminSurfaceCapability,
-    type AdminSurfaceContract,
-} from '@/admin/modules/shared';
+    createContentBlockActionsSurface,
+    createContentBlockInsertControlSurface,
+} from '@/admin/modules/blocks/surface-builders';
 import { ContentBlockRenderer } from '@/components/scripture/content-block-renderer';
 import type { ScriptureAdminSurfaceOptions } from '@/components/scripture/scripture-admin-surface';
 import {
@@ -45,16 +45,6 @@ type DropTarget = {
     position: DropPosition;
     previewPosition: number;
 };
-
-const buildSurfaceOwner = (
-    entityMeta?: ScriptureEntityRegionInput,
-): AdminSurfaceContract['owner'] =>
-    entityMeta
-        ? {
-              entity: entityMeta.entityType,
-              entityId: entityMeta.entityId,
-          }
-        : null;
 
 /**
  * Shared public-page block section renderer for books, chapters, and verses.
@@ -161,118 +151,6 @@ export function ScriptureContentBlocksSection({
         setPendingDragBlockId(null);
     };
 
-    const buildInsertControlSurface = (
-        insertionPoint: ScriptureContentBlockInsertionPoint,
-    ): AdminSurfaceContract | null => {
-        if (
-            !entityMeta ||
-            !canInsertBlocks ||
-            resolvedOnInsertBlockTypeSelected === undefined
-        ) {
-            return null;
-        }
-
-        const capabilities: AdminSurfaceCapability[] = ['add_block'];
-
-        if (insertionPoint.insertion_mode === 'end') {
-            capabilities.push('add_block_bottom');
-        }
-
-        return {
-            entity: entityMeta.entityType,
-            entityId: entityMeta.entityId,
-            slot: 'insert_control',
-            regionKey: entityMeta.region,
-            owner: buildSurfaceOwner(entityMeta),
-            capabilities,
-            label: 'Add block',
-            metadata: {
-                blockTypes: resolvedInsertBlockTypes,
-                disabled: resolvedBlockCreationDisabled,
-                label: 'Add block',
-                placementLabel: insertionPoint.label,
-                onSelectType: (blockType: string) =>
-                    resolvedOnInsertBlockTypeSelected(
-                        insertionPoint,
-                        blockType,
-                    ),
-            },
-        };
-    };
-
-    const buildBlockActionsSurface = (
-        block: ScriptureContentBlock,
-        blockSurface: ScriptureAdminSurfaceOptions | null,
-        management: ScriptureContentBlockManagementCapability | null,
-        canDragReorder: boolean,
-        isDragSource: boolean,
-        reorderMeta: ScriptureContentBlockReorderMeta,
-    ): AdminSurfaceContract | null => {
-        if (!management && !blockSurface?.config?.fullEditHref) {
-            return null;
-        }
-
-        const capabilities: AdminSurfaceCapability[] = [];
-
-        if (management?.moveUpHref || management?.moveDownHref) {
-            capabilities.push('reorder');
-        }
-
-        if (canDragReorder) {
-            capabilities.push('drag_reorder');
-        }
-
-        if (management?.duplicateHref) {
-            capabilities.push('duplicate');
-        }
-
-        if (management?.deleteHref) {
-            capabilities.push('delete');
-        }
-
-        if (blockSurface?.config?.supportsFullEdit && blockSurface.config.fullEditHref) {
-            capabilities.push('full_edit');
-        }
-
-        if (capabilities.length === 0) {
-            return null;
-        }
-
-        return {
-            entity: 'content_block',
-            entityId: block.id,
-            slot: 'block_actions',
-            regionKey: block.region,
-            blockType: block.block_type,
-            owner: buildSurfaceOwner(entityMeta),
-            capabilities,
-            label: block.title ?? scriptureInlineRegionLabel(block.region),
-            metadata: {
-                management,
-                dragHandleProps: canDragReorder
-                    ? {
-                          draggable: true,
-                          onDragStart: (event: DragEvent<HTMLButtonElement>) => {
-                              event.dataTransfer.effectAllowed = 'move';
-                              setDragState({
-                                  blockId: block.id,
-                                  reorderHref: management!.reorderHref!,
-                                  region: block.region,
-                                  currentPosition: reorderMeta.positionInRegion,
-                                  totalInRegion: reorderMeta.totalInRegion,
-                                  onReorderSuccess:
-                                      management!.onReorderSuccess,
-                              });
-                          },
-                          onDragEnd: clearDragState,
-                      }
-                    : undefined,
-                isDragging: isDragSource,
-                fullEditHref: blockSurface?.config?.fullEditHref ?? null,
-            },
-        };
-    };
-
     const renderInsertionSurface = (
         insertionPoint: ScriptureContentBlockInsertionPoint,
     ) => {
@@ -295,8 +173,20 @@ export function ScriptureContentBlocksSection({
             return null;
         }
 
-        const insertControlSurface =
-            buildInsertControlSurface(insertionPoint);
+        const insertControlSurface = createContentBlockInsertControlSurface({
+            entityMeta,
+            insertionPoint,
+            blockTypes: resolvedInsertBlockTypes,
+            disabled: resolvedBlockCreationDisabled,
+            onSelectType:
+                resolvedOnInsertBlockTypeSelected === undefined
+                    ? undefined
+                    : (blockType) =>
+                          resolvedOnInsertBlockTypeSelected(
+                              insertionPoint,
+                              blockType,
+                          ),
+        });
 
         return insertControlSurface ? (
             <AdminModuleHost surface={insertControlSurface} />
@@ -475,14 +365,39 @@ export function ScriptureContentBlocksSection({
                     const isDragSource =
                         dragState?.blockId === block.id ||
                         pendingDragBlockId === block.id;
-                    const blockActionsSurface = buildBlockActionsSurface(
-                        block,
-                        blockSurface,
-                        management,
-                        canDragReorder,
-                        isDragSource,
-                        reorderMeta,
-                    );
+                    const blockActionsSurface =
+                        createContentBlockActionsSurface({
+                            entityMeta,
+                            block,
+                            blockSurface,
+                            management,
+                            canDragReorder,
+                            isDragSource,
+                            dragHandleProps: canDragReorder
+                                ? {
+                                      draggable: true,
+                                      onDragStart: (
+                                          event: DragEvent<HTMLButtonElement>,
+                                      ) => {
+                                          event.dataTransfer.effectAllowed =
+                                              'move';
+                                          setDragState({
+                                              blockId: block.id,
+                                              reorderHref:
+                                                  management!.reorderHref!,
+                                              region: block.region,
+                                              currentPosition:
+                                                  reorderMeta.positionInRegion,
+                                              totalInRegion:
+                                                  reorderMeta.totalInRegion,
+                                              onReorderSuccess:
+                                                  management!.onReorderSuccess,
+                                          });
+                                      },
+                                      onDragEnd: clearDragState,
+                                  }
+                                : undefined,
+                        });
                     const actions =
                         blockActionsSurface ? (
                             <AdminModuleHost surface={blockActionsSurface} />

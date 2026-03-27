@@ -26,6 +26,13 @@ import {
     isGenericSectionLabel,
     sectionLabel,
 } from '@/lib/scripture';
+import {
+    BLOCK_CREATE_SURFACE_CAPABILITIES,
+    EDITOR_SURFACE_CAPABILITIES,
+    createInlineEditorModuleSurface,
+    createSheetEditorModuleSurface,
+    createSurfaceOwner,
+} from '@/admin/modules/shared';
 import type { BreadcrumbItem, ChapterShowProps } from '@/types';
 
 export default function ChapterShow({
@@ -124,18 +131,15 @@ export default function ChapterShow({
             >
                 {inlineIntroSession ? (
                     <AdminModuleHost
-                        surface={{
+                        surface={createInlineEditorModuleSurface({
                             entity: 'chapter',
                             entityId: chapter.id,
-                            slot: 'inline_editor',
                             regionKey: 'page_intro',
-                            capabilities: ['edit', 'full_edit'],
-                            metadata: {
-                                session: inlineIntroSession,
-                                onCancel: closeEditSession,
-                                onSaveSuccess: handlePageIntroSaveSuccess,
-                            },
-                        }}
+                            capabilities: EDITOR_SURFACE_CAPABILITIES,
+                            session: inlineIntroSession,
+                            onCancel: closeEditSession,
+                            onSaveSuccess: handlePageIntroSaveSuccess,
+                        })}
                     />
                 ) : pageIntroBlock ? (
                     <div className="rounded-2xl border border-border/70 bg-muted/20 px-5 py-5 sm:px-6 sm:py-6">
@@ -203,26 +207,26 @@ export default function ChapterShow({
                 renderPendingInlineCreateEditor={() =>
                     inlineCreateTextContentBlockSession ? (
                         <AdminModuleHost
-                            surface={{
+                            surface={createInlineEditorModuleSurface({
                                 entity: 'chapter',
                                 entityId: chapter.id,
-                                slot: 'inline_editor',
                                 regionKey: 'content_blocks',
                                 blockType: 'text',
-                                capabilities: ['add_block', 'full_edit'],
-                                metadata: {
-                                    session: inlineCreateTextContentBlockSession,
-                                    entityLabel: chapterTitle,
-                                    onCancel: closeEditSession,
-                                    onSaveSuccess: (result: {
-                                        kind: 'create' | 'edit';
-                                    }) => {
-                                        if (result.kind === 'create') {
-                                            handleContentBlockCreateSuccess();
-                                        }
-                                    },
+                                capabilities:
+                                    BLOCK_CREATE_SURFACE_CAPABILITIES,
+                                session: inlineCreateTextContentBlockSession,
+                                onCancel: closeEditSession,
+                                onSaveSuccess: (result: {
+                                    kind: 'create' | 'edit';
+                                }) => {
+                                    if (result.kind === 'create') {
+                                        handleContentBlockCreateSuccess();
+                                    }
                                 },
-                            }}
+                                metadata: {
+                                    entityLabel: chapterTitle,
+                                },
+                            })}
                         />
                     ) : null
                 }
@@ -233,36 +237,35 @@ export default function ChapterShow({
 
                     return (
                         <AdminModuleHost
-                            surface={{
+                            surface={createInlineEditorModuleSurface({
                                 entity: 'content_block',
                                 entityId: block.id,
-                                slot: 'inline_editor',
                                 regionKey: 'content_blocks',
                                 blockType: block.block_type,
-                                owner: {
-                                    entity: 'chapter',
-                                    entityId: chapter.id,
+                                owner: createSurfaceOwner(
+                                    'chapter',
+                                    chapter.id,
+                                ),
+                                capabilities: EDITOR_SURFACE_CAPABILITIES,
+                                session: inlineSession,
+                                onCancel: closeEditSession,
+                                onSaveSuccess: (result: {
+                                    kind: 'create' | 'edit';
+                                    blockId?: number;
+                                }) => {
+                                    if (
+                                        result.kind === 'edit' &&
+                                        result.blockId !== undefined
+                                    ) {
+                                        handleContentBlockSaveSuccess(
+                                            result.blockId,
+                                        );
+                                    }
                                 },
-                                capabilities: ['edit', 'full_edit'],
                                 metadata: {
-                                    session: inlineSession,
                                     entityLabel: chapterTitle,
-                                    onCancel: closeEditSession,
-                                    onSaveSuccess: (result: {
-                                        kind: 'create' | 'edit';
-                                        blockId?: number;
-                                    }) => {
-                                        if (
-                                            result.kind === 'edit' &&
-                                            result.blockId !== undefined
-                                        ) {
-                                            handleContentBlockSaveSuccess(
-                                                result.blockId,
-                                            );
-                                        }
-                                    },
                                 },
-                            }}
+                            })}
                         />
                     );
                 }}
@@ -416,22 +419,21 @@ export default function ChapterShow({
             </ScriptureSection>
 
             <AdminModuleHost
-                surface={{
+                surface={createSheetEditorModuleSurface({
                     entity: 'chapter',
                     entityId: chapter.id,
-                    slot: 'sheet_editor',
                     regionKey: editSession?.meta.region ?? null,
                     blockType: editSession?.block.block_type ?? null,
-                    capabilities: editSession ? ['edit', 'full_edit'] : [],
-                    metadata: {
-                        session: editSession,
-                        onOpenChange: (open: boolean) => {
-                            if (!open) {
-                                closeEditSession();
-                            }
-                        },
+                    capabilities: editSession
+                        ? EDITOR_SURFACE_CAPABILITIES
+                        : [],
+                    session: editSession,
+                    onOpenChange: (open: boolean) => {
+                        if (!open) {
+                            closeEditSession();
+                        }
                     },
-                }}
+                })}
             />
         </ScriptureLayout>
     );

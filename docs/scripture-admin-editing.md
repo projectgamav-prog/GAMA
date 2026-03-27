@@ -23,6 +23,73 @@ This is a deliberate transition state. The goal is to keep the page itself as
 the primary editing surface without forcing every structure into inline editing
 before the CMS model is ready.
 
+## Module-Host Architecture
+
+Live scripture pages no longer import most concrete editors directly. They now
+expose surface contracts and mount `AdminModuleHost`, which resolves qualifying
+modules from the shared registry.
+
+The current attachment flow is:
+
+1. A page or shared section renderer builds an `AdminSurfaceContract`.
+2. `AdminModuleHost` asks the registry for modules that qualify for that surface.
+3. Qualification checks entity, slot, region, block type, and required
+   capabilities.
+4. Matching modules render in deterministic order.
+
+This keeps pages thin and makes the module engine the stable attachment point
+for future editors.
+
+## Surface Contract
+
+Each module-ready surface currently exposes:
+
+- `entity` and `entityId`
+- `slot`
+- `regionKey`
+- `blockType` when the surface represents a block
+- `owner` when the surface belongs to a parent scripture entity
+- `capabilities`
+- `label`
+- `metadata`
+
+The host and qualification engine depend only on this contract, not on page
+components.
+
+## Slots
+
+The current module engine uses four slots:
+
+- `inline_editor`
+  For true in-place editors such as book intro, chapter intro, verse notes, and
+  safe text-block editing.
+- `sheet_editor`
+  For the existing sheet fallback when a structure is still too rich for the
+  inline path.
+- `insert_control`
+  For add-block controls at valid start, between, and bottom insertion points.
+- `block_actions`
+  For local block operations such as reorder, drag reorder, duplicate, delete,
+  and full edit.
+
+## Registry And Qualification
+
+`module-registry.ts` is the central list of reusable admin modules. Modules are
+grouped by domain (`books`, `chapters`, `verses`, `blocks`) and then composed
+into one deterministic registry.
+
+`qualify-module.ts` attaches a module only when the surface passes all relevant
+checks:
+
+- entity scope
+- slot
+- region scope
+- block type
+- required capabilities
+
+This means a future page can inherit existing editor behavior by exposing the
+same valid surface metadata rather than by manually wiring buttons and editors.
+
 ## Surface Model
 
 `ScriptureAdminSurface` is the shared wrapper used to attach admin controls to a
@@ -38,6 +105,10 @@ The surface does not own editing state. It only renders:
 
 The page-level session hooks decide what is editable, what stays inline, what
 falls back to a sheet, and which actions are safe for a given block.
+
+The module host does not replace `ScriptureAdminSurface`. The surface still
+owns visible wrapper behavior; the module host only resolves editor and
+operation modules that belong inside that wrapper.
 
 ## Editing Lifecycle
 
@@ -101,12 +172,26 @@ Block management is intentionally conservative on live public pages.
 
 ## Shared Files
 
+- [AdminModuleHost.tsx](/c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/modules/shared/AdminModuleHost.tsx)
+  Resolves qualifying modules for a surface contract.
+- [module-registry.ts](/c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/modules/shared/module-registry.ts)
+  Central registry composed from grouped module folders.
+- [module-types.ts](/c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/modules/shared/module-types.ts)
+  Declares module scope, capabilities, and editor-component contracts.
+- [surface-contracts.ts](/c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/modules/shared/surface-contracts.ts)
+  Defines the stable host-readable surface metadata shape.
+- [surface-builders.ts](/c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/modules/shared/surface-builders.ts)
+  Shared builders that keep page-level surface wiring small and consistent.
+- [qualify-module.ts](/c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/modules/shared/qualify-module.ts)
+  Shared qualification rules for capability-driven module attachment.
 - [scripture-admin-surface.tsx](/c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/components/scripture/scripture-admin-surface.tsx)
   Attaches the local admin shell to a region or block.
 - [scripture-inline-region-editor.tsx](/c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/components/scripture/scripture-inline-region-editor.tsx)
   Shared inline frame for save/cancel/full-edit behavior.
 - [scripture-content-blocks-section.tsx](/c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/components/scripture/scripture-content-blocks-section.tsx)
   Renders block sections, insertion points, inline create, and block-local actions.
+- [surface-builders.ts](/c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/modules/blocks/surface-builders.ts)
+  Shared builders for insert-control and block-action module surfaces.
 - [scripture-text-content-block-inline-editor.tsx](/c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/components/scripture/scripture-text-content-block-inline-editor.tsx)
   Inline editor for safe text block create/edit flows.
 - [use-book-admin-edit-session.ts](/c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/hooks/use-book-admin-edit-session.ts)

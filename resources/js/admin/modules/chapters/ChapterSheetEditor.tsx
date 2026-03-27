@@ -2,31 +2,13 @@ import { ScriptureChapterAdminEditSheet } from '@/components/scripture/scripture
 import type { ScriptureChapterAdminEditSession } from '@/components/scripture/scripture-chapter-admin-edit-sheet';
 import { defineAdminModule } from '@/admin/modules/shared/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/modules/shared/module-types';
-import type { AdminSurfaceContract } from '@/admin/modules/shared/surface-contracts';
-
-type ChapterSheetSurfaceMetadata = {
-    session: ScriptureChapterAdminEditSession | null;
-    onOpenChange: (open: boolean) => void;
-};
-
-const getMetadata = (
-    surface: AdminSurfaceContract,
-): ChapterSheetSurfaceMetadata | null => {
-    const metadata = surface.metadata;
-
-    if (!metadata || typeof metadata !== 'object') {
-        return null;
-    }
-
-    const candidate = metadata as Partial<ChapterSheetSurfaceMetadata>;
-
-    return typeof candidate.onOpenChange === 'function'
-        ? (candidate as ChapterSheetSurfaceMetadata)
-        : null;
-};
+import { getSheetEditorSurfaceMetadata } from '@/admin/modules/shared/surface-metadata';
 
 function ChapterSheetEditor({ surface }: AdminModuleComponentProps) {
-    const metadata = getMetadata(surface);
+    const metadata =
+        getSheetEditorSurfaceMetadata<ScriptureChapterAdminEditSession>(
+            surface,
+        );
 
     if (metadata === null) {
         return null;

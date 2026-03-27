@@ -1,20 +1,8 @@
 import type { AdminModuleDefinition } from './module-types';
-import { bookIntroEditorModule } from '@/admin/modules/books/BookIntroEditor';
-import { bookSheetEditorModule } from '@/admin/modules/books/BookSheetEditor';
-import { chapterIntroEditorModule } from '@/admin/modules/chapters/ChapterIntroEditor';
-import { chapterSheetEditorModule } from '@/admin/modules/chapters/ChapterSheetEditor';
-import { verseNotesEditorModule } from '@/admin/modules/verses/VerseNotesEditor';
-import { verseSheetEditorModule } from '@/admin/modules/verses/VerseSheetEditor';
-import { blockCreateModule } from '@/admin/modules/blocks/BlockCreate';
-import { blockDragReorderModule } from '@/admin/modules/blocks/BlockDragReorder';
-import { blockReorderModule } from '@/admin/modules/blocks/BlockReorder';
-import { blockDuplicateModule } from '@/admin/modules/blocks/BlockDuplicate';
-import { blockDeleteModule } from '@/admin/modules/blocks/BlockDelete';
-import { blockFullEditLauncherModule } from '@/admin/modules/blocks/BlockFullEditLauncher';
-import { textBlockEditorModule } from '@/admin/modules/blocks/TextBlockEditor';
-import { quoteBlockEditorModule } from '@/admin/modules/blocks/QuoteBlockEditor';
-import { imageBlockEditorModule } from '@/admin/modules/blocks/ImageBlockEditor';
-import { videoBlockEditorModule } from '@/admin/modules/blocks/VideoBlockEditor';
+import { blockAdminModules } from '@/admin/modules/blocks';
+import { bookAdminModules } from '@/admin/modules/books';
+import { chapterAdminModules } from '@/admin/modules/chapters';
+import { verseAdminModules } from '@/admin/modules/verses';
 
 /**
  * Small helper for future module definitions so module files can export typed
@@ -50,22 +38,10 @@ export function defineAdminModuleRegistry(
  * plus qualification rules attach the right module automatically.
  */
 export const adminModuleRegistry = defineAdminModuleRegistry([
-    bookIntroEditorModule,
-    chapterIntroEditorModule,
-    verseNotesEditorModule,
-    textBlockEditorModule,
-    quoteBlockEditorModule,
-    imageBlockEditorModule,
-    videoBlockEditorModule,
-    blockCreateModule,
-    blockDragReorderModule,
-    blockReorderModule,
-    blockDuplicateModule,
-    blockDeleteModule,
-    blockFullEditLauncherModule,
-    bookSheetEditorModule,
-    chapterSheetEditorModule,
-    verseSheetEditorModule,
+    ...bookAdminModules,
+    ...chapterAdminModules,
+    ...verseAdminModules,
+    ...blockAdminModules,
 ]);
 
 export function getRegisteredAdminModules(): readonly AdminModuleDefinition[] {

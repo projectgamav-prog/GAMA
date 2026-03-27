@@ -2,31 +2,11 @@ import { ScriptureVerseAdminEditSheet } from '@/components/scripture/scripture-v
 import type { ScriptureVerseAdminEditSession } from '@/components/scripture/scripture-verse-admin-edit-sheet';
 import { defineAdminModule } from '@/admin/modules/shared/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/modules/shared/module-types';
-import type { AdminSurfaceContract } from '@/admin/modules/shared/surface-contracts';
-
-type VerseSheetSurfaceMetadata = {
-    session: ScriptureVerseAdminEditSession | null;
-    onOpenChange: (open: boolean) => void;
-};
-
-const getMetadata = (
-    surface: AdminSurfaceContract,
-): VerseSheetSurfaceMetadata | null => {
-    const metadata = surface.metadata;
-
-    if (!metadata || typeof metadata !== 'object') {
-        return null;
-    }
-
-    const candidate = metadata as Partial<VerseSheetSurfaceMetadata>;
-
-    return typeof candidate.onOpenChange === 'function'
-        ? (candidate as VerseSheetSurfaceMetadata)
-        : null;
-};
+import { getSheetEditorSurfaceMetadata } from '@/admin/modules/shared/surface-metadata';
 
 function VerseSheetEditor({ surface }: AdminModuleComponentProps) {
-    const metadata = getMetadata(surface);
+    const metadata =
+        getSheetEditorSurfaceMetadata<ScriptureVerseAdminEditSession>(surface);
 
     if (metadata === null) {
         return null;

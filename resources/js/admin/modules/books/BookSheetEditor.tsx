@@ -2,31 +2,11 @@ import { ScriptureBookAdminEditSheet } from '@/components/scripture/scripture-bo
 import type { ScriptureBookAdminEditSession } from '@/lib/book-admin-edit-session';
 import { defineAdminModule } from '@/admin/modules/shared/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/modules/shared/module-types';
-import type { AdminSurfaceContract } from '@/admin/modules/shared/surface-contracts';
-
-type BookSheetSurfaceMetadata = {
-    session: ScriptureBookAdminEditSession | null;
-    onOpenChange: (open: boolean) => void;
-};
-
-const getMetadata = (
-    surface: AdminSurfaceContract,
-): BookSheetSurfaceMetadata | null => {
-    const metadata = surface.metadata;
-
-    if (!metadata || typeof metadata !== 'object') {
-        return null;
-    }
-
-    const candidate = metadata as Partial<BookSheetSurfaceMetadata>;
-
-    return typeof candidate.onOpenChange === 'function'
-        ? (candidate as BookSheetSurfaceMetadata)
-        : null;
-};
+import { getSheetEditorSurfaceMetadata } from '@/admin/modules/shared/surface-metadata';
 
 function BookSheetEditor({ surface }: AdminModuleComponentProps) {
-    const metadata = getMetadata(surface);
+    const metadata =
+        getSheetEditorSurfaceMetadata<ScriptureBookAdminEditSession>(surface);
 
     if (metadata === null) {
         return null;

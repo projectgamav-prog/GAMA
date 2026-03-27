@@ -2,37 +2,18 @@ import { ScriptureBookIntroInlineEditor } from '@/components/scripture/scripture
 import type { ScriptureBookAdminEditSession } from '@/lib/book-admin-edit-session';
 import { defineAdminModule } from '@/admin/modules/shared/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/modules/shared/module-types';
-import type { AdminSurfaceContract } from '@/admin/modules/shared/surface-contracts';
+import { getInlineEditorSurfaceMetadata } from '@/admin/modules/shared/surface-metadata';
 
 type InlineBookIntroSession = Extract<
     ScriptureBookAdminEditSession,
     { kind: 'entity_details' }
 >;
 
-type BookIntroSurfaceMetadata = {
-    session: InlineBookIntroSession | null;
-    onCancel: () => void;
-    onSaveSuccess?: () => void;
-};
-
-const getMetadata = (
-    surface: AdminSurfaceContract,
-): BookIntroSurfaceMetadata | null => {
-    const metadata = surface.metadata;
-
-    if (!metadata || typeof metadata !== 'object') {
-        return null;
-    }
-
-    const candidate = metadata as Partial<BookIntroSurfaceMetadata>;
-
-    return typeof candidate.onCancel === 'function'
-        ? (candidate as BookIntroSurfaceMetadata)
-        : null;
-};
-
 function BookIntroEditor({ surface }: AdminModuleComponentProps) {
-    const metadata = getMetadata(surface);
+    const metadata =
+        getInlineEditorSurfaceMetadata<InlineBookIntroSession, () => void>(
+            surface,
+        );
 
     if (metadata === null) {
         return null;

@@ -40,7 +40,7 @@ export type AdminSurfaceOwner = {
  * keep their own rendering concerns, while modules decide whether they attach
  * based on entity, region, block type, and capabilities.
  */
-export type AdminSurfaceContract = {
+export type AdminSurfaceContract<TMetadata = unknown> = {
     entity: ScriptureEntityType;
     entityId: AdminSurfaceIdentifier;
     slot: AdminSurfaceSlot;
@@ -49,5 +49,5 @@ export type AdminSurfaceContract = {
     owner?: AdminSurfaceOwner | null;
     capabilities: readonly AdminSurfaceCapability[];
     label?: string | null;
-    metadata?: unknown;
+    metadata?: TMetadata;
 };

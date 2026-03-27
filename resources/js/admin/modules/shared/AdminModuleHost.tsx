@@ -9,11 +9,11 @@ type Props = {
 };
 
 /**
- * Shared host for future admin editor modules.
+ * Shared host for capability-driven admin modules.
  *
- * Pages will eventually mount this host for an editable surface and let the
- * registry plus qualification rules decide which modules attach. Until real
- * modules are registered, this host remains inert and returns nothing.
+ * Pages and shared renderers hand the host a surface contract. The host then
+ * resolves qualifying modules from the central registry and renders them in
+ * deterministic order, keeping concrete editor imports out of page files.
  */
 export function AdminModuleHost({
     surface,
