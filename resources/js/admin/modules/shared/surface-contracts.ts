@@ -22,6 +22,12 @@ export type AdminSurfaceCapability =
 
 export type AdminSurfaceIdentifier = string | number;
 
+export type AdminSurfaceSlot =
+    | 'inline_editor'
+    | 'sheet_editor'
+    | 'insert_control'
+    | 'block_actions';
+
 export type AdminSurfaceOwner = {
     entity: ScriptureEntityType;
     entityId: AdminSurfaceIdentifier;
@@ -37,10 +43,11 @@ export type AdminSurfaceOwner = {
 export type AdminSurfaceContract = {
     entity: ScriptureEntityType;
     entityId: AdminSurfaceIdentifier;
+    slot: AdminSurfaceSlot;
     regionKey?: string | null;
     blockType?: string | null;
     owner?: AdminSurfaceOwner | null;
     capabilities: readonly AdminSurfaceCapability[];
     label?: string | null;
-    metadata?: Readonly<Record<string, unknown>>;
+    metadata?: unknown;
 };

@@ -1,13 +1,11 @@
 import { Link } from '@inertiajs/react';
 import { ArrowRight } from 'lucide-react';
+import { AdminModuleHost } from '@/admin/modules/shared';
 import { ScriptureActionRow } from '@/components/scripture/scripture-action-row';
 import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
-import { ScriptureBookAdminEditSheet } from '@/components/scripture/scripture-book-admin-edit-sheet';
-import { ScriptureBookIntroInlineEditor } from '@/components/scripture/scripture-book-intro-inline-editor';
 import { BookPublicMediaSection } from '@/components/scripture/book-public-media-section';
 import { ScriptureContentBlocksSection } from '@/components/scripture/scripture-content-blocks-section';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
-import { ScriptureTextContentBlockInlineEditor } from '@/components/scripture/scripture-text-content-block-inline-editor';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useBookAdminEditSession } from '@/hooks/use-book-admin-edit-session';
@@ -81,10 +79,19 @@ export default function BookOverview({
                 adminSurface={introSurface ?? undefined}
                 contentClassName="space-y-6"
             >
-                <ScriptureBookIntroInlineEditor
-                    session={inlineIntroSession}
-                    onCancel={closeEditSession}
-                    onSaveSuccess={handleIntroSaveSuccess}
+                <AdminModuleHost
+                    surface={{
+                        entity: 'book',
+                        entityId: book.id,
+                        slot: 'inline_editor',
+                        regionKey: 'page_intro',
+                        capabilities: ['edit', 'full_edit'],
+                        metadata: {
+                            session: inlineIntroSession,
+                            onCancel: closeEditSession,
+                            onSaveSuccess: handleIntroSaveSuccess,
+                        },
+                    }}
                 />
 
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -117,14 +124,26 @@ export default function BookOverview({
                 }
                 renderPendingInlineCreateEditor={() =>
                     inlineCreateTextContentBlockSession ? (
-                        <ScriptureTextContentBlockInlineEditor
-                            session={inlineCreateTextContentBlockSession}
-                            entityLabel={book.title}
-                            onCancel={closeEditSession}
-                            onSaveSuccess={(result) => {
-                                if (result.kind === 'create') {
-                                    handleContentBlockCreateSuccess();
-                                }
+                        <AdminModuleHost
+                            surface={{
+                                entity: 'book',
+                                entityId: book.id,
+                                slot: 'inline_editor',
+                                regionKey: 'content_blocks',
+                                blockType: 'text',
+                                capabilities: ['add_block', 'full_edit'],
+                                metadata: {
+                                    session: inlineCreateTextContentBlockSession,
+                                    entityLabel: book.title,
+                                    onCancel: closeEditSession,
+                                    onSaveSuccess: (result: {
+                                        kind: 'create' | 'edit';
+                                    }) => {
+                                        if (result.kind === 'create') {
+                                            handleContentBlockCreateSuccess();
+                                        }
+                                    },
+                                },
                             }}
                         />
                     ) : null
@@ -134,20 +153,40 @@ export default function BookOverview({
                         block.id,
                     );
 
-                    return inlineSession ? (
-                        <ScriptureTextContentBlockInlineEditor
-                            session={inlineSession}
-                            entityLabel={book.title}
-                            onCancel={closeEditSession}
-                            onSaveSuccess={(result) => {
-                                if (result.kind === 'edit') {
-                                    handleContentBlockSaveSuccess(
-                                        result.blockId,
-                                    );
-                                }
+                    return (
+                        <AdminModuleHost
+                            surface={{
+                                entity: 'content_block',
+                                entityId: block.id,
+                                slot: 'inline_editor',
+                                regionKey: 'content_blocks',
+                                blockType: block.block_type,
+                                owner: {
+                                    entity: 'book',
+                                    entityId: book.id,
+                                },
+                                capabilities: ['edit', 'full_edit'],
+                                metadata: {
+                                    session: inlineSession,
+                                    entityLabel: book.title,
+                                    onCancel: closeEditSession,
+                                    onSaveSuccess: (result: {
+                                        kind: 'create' | 'edit';
+                                        blockId?: number;
+                                    }) => {
+                                        if (
+                                            result.kind === 'edit' &&
+                                            result.blockId !== undefined
+                                        ) {
+                                            handleContentBlockSaveSuccess(
+                                                result.blockId,
+                                            );
+                                        }
+                                    },
+                                },
                             }}
                         />
-                    ) : null;
+                    );
                 }}
                 emptyStateAction={
                     <div className="flex flex-wrap gap-3">
@@ -162,12 +201,34 @@ export default function BookOverview({
                 }}
             />
 
-            <ScriptureBookAdminEditSheet
-                session={editSession}
-                onOpenChange={(open) => {
-                    if (!open) {
-                        closeEditSession();
-                    }
+            <AdminModuleHost
+                surface={{
+                    entity: 'book',
+                    entityId: book.id,
+                    slot: 'sheet_editor',
+                    regionKey:
+                        editSession?.kind === 'entity_details'
+                            ? 'page_intro'
+                            : 'content_blocks',
+                    blockType:
+                        editSession?.kind === 'content_block'
+                            ? editSession.block.block_type
+                            : editSession?.kind === 'create_content_block'
+                              ? editSession.values.block_type
+                              : null,
+                    capabilities: editSession
+                        ? editSession.kind === 'create_content_block'
+                            ? ['add_block', 'full_edit']
+                            : ['edit', 'full_edit']
+                        : [],
+                    metadata: {
+                        session: editSession,
+                        onOpenChange: (open: boolean) => {
+                            if (!open) {
+                                closeEditSession();
+                            }
+                        },
+                    },
                 }}
             />
         </ScriptureLayout>

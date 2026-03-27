@@ -10,6 +10,7 @@ import {
     Tag,
     Users,
 } from 'lucide-react';
+import { AdminModuleHost } from '@/admin/modules/shared';
 import { ScriptureActionRow } from '@/components/scripture/scripture-action-row';
 import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
 import { ScriptureAdminSurface } from '@/components/scripture/scripture-admin-surface';
@@ -17,9 +18,6 @@ import { ScriptureContentBlocksSection } from '@/components/scripture/scripture-
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
-import { ScriptureVerseAdminEditSheet } from '@/components/scripture/scripture-verse-admin-edit-sheet';
-import { ScriptureVerseNotesInlineEditor } from '@/components/scripture/scripture-verse-notes-inline-editor';
-import { ScriptureTextContentBlockInlineEditor } from '@/components/scripture/scripture-text-content-block-inline-editor';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -198,10 +196,19 @@ export default function VerseShow({
                 contentClassName="space-y-6"
             >
                 {!hasVerseMeta && (
-                    <ScriptureVerseNotesInlineEditor
-                        session={inlineVerseNotesSession}
-                        onCancel={closeEditSession}
-                        onSaveSuccess={handleVerseMetaSaveSuccess}
+                    <AdminModuleHost
+                        surface={{
+                            entity: 'verse',
+                            entityId: verse.id,
+                            slot: 'inline_editor',
+                            regionKey: 'page_intro',
+                            capabilities: ['edit', 'full_edit'],
+                            metadata: {
+                                session: inlineVerseNotesSession,
+                                onCancel: closeEditSession,
+                                onSaveSuccess: handleVerseMetaSaveSuccess,
+                            },
+                        }}
                     />
                 )}
 
@@ -282,16 +289,25 @@ export default function VerseShow({
                                                 metadata and editorial cues.
                                             </CardDescription>
                                         </CardHeader>
-                                        <CardContent className="space-y-5">
+                                            <CardContent className="space-y-5">
                                             {inlineVerseNotesSession ? (
-                                                <ScriptureVerseNotesInlineEditor
-                                                    session={
-                                                        inlineVerseNotesSession
-                                                    }
-                                                    onCancel={closeEditSession}
-                                                    onSaveSuccess={
-                                                        handleVerseMetaSaveSuccess
-                                                    }
+                                                <AdminModuleHost
+                                                    surface={{
+                                                        entity: 'verse',
+                                                        entityId: verse.id,
+                                                        slot: 'inline_editor',
+                                                        regionKey: 'study_notes',
+                                                        capabilities: [
+                                                            'edit',
+                                                            'full_edit',
+                                                        ],
+                                                        metadata: {
+                                                            session: inlineVerseNotesSession,
+                                                            onCancel: closeEditSession,
+                                                            onSaveSuccess:
+                                                                handleVerseMetaSaveSuccess,
+                                                        },
+                                                    }}
                                                 />
                                             ) : (
                                                 <>
@@ -972,14 +988,26 @@ export default function VerseShow({
                 }
                 renderPendingInlineCreateEditor={() =>
                     inlineCreateTextContentBlockSession ? (
-                        <ScriptureTextContentBlockInlineEditor
-                            session={inlineCreateTextContentBlockSession}
-                            entityLabel={verseTitle}
-                            onCancel={closeEditSession}
-                            onSaveSuccess={(result) => {
-                                if (result.kind === 'create') {
-                                    handleContentBlockCreateSuccess();
-                                }
+                        <AdminModuleHost
+                            surface={{
+                                entity: 'verse',
+                                entityId: verse.id,
+                                slot: 'inline_editor',
+                                regionKey: 'content_blocks',
+                                blockType: 'text',
+                                capabilities: ['add_block', 'full_edit'],
+                                metadata: {
+                                    session: inlineCreateTextContentBlockSession,
+                                    entityLabel: verseTitle,
+                                    onCancel: closeEditSession,
+                                    onSaveSuccess: (result: {
+                                        kind: 'create' | 'edit';
+                                    }) => {
+                                        if (result.kind === 'create') {
+                                            handleContentBlockCreateSuccess();
+                                        }
+                                    },
+                                },
                             }}
                         />
                     ) : null
@@ -989,30 +1017,63 @@ export default function VerseShow({
                         block.id,
                     );
 
-                    return inlineSession ? (
-                        <ScriptureTextContentBlockInlineEditor
-                            session={inlineSession}
-                            entityLabel={verseTitle}
-                            onCancel={closeEditSession}
-                            onSaveSuccess={(result) => {
-                                if (result.kind === 'edit') {
-                                    handleContentBlockSaveSuccess(
-                                        result.blockId,
-                                    );
-                                }
+                    return (
+                        <AdminModuleHost
+                            surface={{
+                                entity: 'content_block',
+                                entityId: block.id,
+                                slot: 'inline_editor',
+                                regionKey: 'content_blocks',
+                                blockType: block.block_type,
+                                owner: {
+                                    entity: 'verse',
+                                    entityId: verse.id,
+                                },
+                                capabilities: ['edit', 'full_edit'],
+                                metadata: {
+                                    session: inlineSession,
+                                    entityLabel: verseTitle,
+                                    onCancel: closeEditSession,
+                                    onSaveSuccess: (result: {
+                                        kind: 'create' | 'edit';
+                                        blockId?: number;
+                                    }) => {
+                                        if (
+                                            result.kind === 'edit' &&
+                                            result.blockId !== undefined
+                                        ) {
+                                            handleContentBlockSaveSuccess(
+                                                result.blockId,
+                                            );
+                                        }
+                                    },
+                                },
                             }}
                         />
-                    ) : null;
+                    );
                 }}
                 entityMeta={contentBlocksMeta}
             />
 
-            <ScriptureVerseAdminEditSheet
-                session={editSession}
-                onOpenChange={(open) => {
-                    if (!open) {
-                        closeEditSession();
-                    }
+            <AdminModuleHost
+                surface={{
+                    entity: 'verse',
+                    entityId: verse.id,
+                    slot: 'sheet_editor',
+                    regionKey: editSession?.meta.region ?? null,
+                    blockType:
+                        editSession?.kind === 'content_block'
+                            ? editSession.block.block_type
+                            : null,
+                    capabilities: editSession ? ['edit', 'full_edit'] : [],
+                    metadata: {
+                        session: editSession,
+                        onOpenChange: (open: boolean) => {
+                            if (!open) {
+                                closeEditSession();
+                            }
+                        },
+                    },
                 }}
             />
         </ScriptureLayout>

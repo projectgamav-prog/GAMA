@@ -7,15 +7,13 @@ import {
     Rows3,
 } from 'lucide-react';
 import { useState } from 'react';
+import { AdminModuleHost } from '@/admin/modules/shared';
 import { ScriptureActionRow } from '@/components/scripture/scripture-action-row';
 import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
-import { ScriptureChapterAdminEditSheet } from '@/components/scripture/scripture-chapter-admin-edit-sheet';
-import { ScriptureChapterIntroInlineEditor } from '@/components/scripture/scripture-chapter-intro-inline-editor';
 import { ScriptureContentBlocksSection } from '@/components/scripture/scripture-content-blocks-section';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
-import { ScriptureTextContentBlockInlineEditor } from '@/components/scripture/scripture-text-content-block-inline-editor';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -125,10 +123,19 @@ export default function ChapterShow({
                 contentClassName="space-y-6"
             >
                 {inlineIntroSession ? (
-                    <ScriptureChapterIntroInlineEditor
-                        session={inlineIntroSession}
-                        onCancel={closeEditSession}
-                        onSaveSuccess={handlePageIntroSaveSuccess}
+                    <AdminModuleHost
+                        surface={{
+                            entity: 'chapter',
+                            entityId: chapter.id,
+                            slot: 'inline_editor',
+                            regionKey: 'page_intro',
+                            capabilities: ['edit', 'full_edit'],
+                            metadata: {
+                                session: inlineIntroSession,
+                                onCancel: closeEditSession,
+                                onSaveSuccess: handlePageIntroSaveSuccess,
+                            },
+                        }}
                     />
                 ) : pageIntroBlock ? (
                     <div className="rounded-2xl border border-border/70 bg-muted/20 px-5 py-5 sm:px-6 sm:py-6">
@@ -195,14 +202,26 @@ export default function ChapterShow({
                 }
                 renderPendingInlineCreateEditor={() =>
                     inlineCreateTextContentBlockSession ? (
-                        <ScriptureTextContentBlockInlineEditor
-                            session={inlineCreateTextContentBlockSession}
-                            entityLabel={chapterTitle}
-                            onCancel={closeEditSession}
-                            onSaveSuccess={(result) => {
-                                if (result.kind === 'create') {
-                                    handleContentBlockCreateSuccess();
-                                }
+                        <AdminModuleHost
+                            surface={{
+                                entity: 'chapter',
+                                entityId: chapter.id,
+                                slot: 'inline_editor',
+                                regionKey: 'content_blocks',
+                                blockType: 'text',
+                                capabilities: ['add_block', 'full_edit'],
+                                metadata: {
+                                    session: inlineCreateTextContentBlockSession,
+                                    entityLabel: chapterTitle,
+                                    onCancel: closeEditSession,
+                                    onSaveSuccess: (result: {
+                                        kind: 'create' | 'edit';
+                                    }) => {
+                                        if (result.kind === 'create') {
+                                            handleContentBlockCreateSuccess();
+                                        }
+                                    },
+                                },
                             }}
                         />
                     ) : null
@@ -212,20 +231,40 @@ export default function ChapterShow({
                         block.id,
                     );
 
-                    return inlineSession ? (
-                        <ScriptureTextContentBlockInlineEditor
-                            session={inlineSession}
-                            entityLabel={chapterTitle}
-                            onCancel={closeEditSession}
-                            onSaveSuccess={(result) => {
-                                if (result.kind === 'edit') {
-                                    handleContentBlockSaveSuccess(
-                                        result.blockId,
-                                    );
-                                }
+                    return (
+                        <AdminModuleHost
+                            surface={{
+                                entity: 'content_block',
+                                entityId: block.id,
+                                slot: 'inline_editor',
+                                regionKey: 'content_blocks',
+                                blockType: block.block_type,
+                                owner: {
+                                    entity: 'chapter',
+                                    entityId: chapter.id,
+                                },
+                                capabilities: ['edit', 'full_edit'],
+                                metadata: {
+                                    session: inlineSession,
+                                    entityLabel: chapterTitle,
+                                    onCancel: closeEditSession,
+                                    onSaveSuccess: (result: {
+                                        kind: 'create' | 'edit';
+                                        blockId?: number;
+                                    }) => {
+                                        if (
+                                            result.kind === 'edit' &&
+                                            result.blockId !== undefined
+                                        ) {
+                                            handleContentBlockSaveSuccess(
+                                                result.blockId,
+                                            );
+                                        }
+                                    },
+                                },
                             }}
                         />
-                    ) : null;
+                    );
                 }}
                 entityMeta={contentBlocksMeta}
             />
@@ -376,12 +415,22 @@ export default function ChapterShow({
                 )}
             </ScriptureSection>
 
-            <ScriptureChapterAdminEditSheet
-                session={editSession}
-                onOpenChange={(open) => {
-                    if (!open) {
-                        closeEditSession();
-                    }
+            <AdminModuleHost
+                surface={{
+                    entity: 'chapter',
+                    entityId: chapter.id,
+                    slot: 'sheet_editor',
+                    regionKey: editSession?.meta.region ?? null,
+                    blockType: editSession?.block.block_type ?? null,
+                    capabilities: editSession ? ['edit', 'full_edit'] : [],
+                    metadata: {
+                        session: editSession,
+                        onOpenChange: (open: boolean) => {
+                            if (!open) {
+                                closeEditSession();
+                            }
+                        },
+                    },
                 }}
             />
         </ScriptureLayout>

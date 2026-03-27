@@ -28,6 +28,7 @@ export type ScriptureAdminSurfaceOptions = {
     actions?: ReactNode;
     label?: string;
     highlight?: boolean;
+    showFullEditAction?: boolean;
     isActive?: boolean;
     activeLabel?: string;
     statusLabel?: string;
@@ -72,6 +73,7 @@ export function ScriptureAdminSurface({
     actions,
     label,
     highlight = true,
+    showFullEditAction = true,
     isActive = false,
     activeLabel = 'Editing',
     statusLabel,
@@ -166,6 +168,7 @@ export function ScriptureAdminSurface({
 
                     {config?.supportsFullEdit &&
                         config.fullEditHref &&
+                        showFullEditAction &&
                         !isActive && (
                         <Button
                             asChild

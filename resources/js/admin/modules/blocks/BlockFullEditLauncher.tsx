@@ -1,0 +1,40 @@
+import { Link } from '@inertiajs/react';
+import { SquareArrowOutUpRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { defineAdminModule } from '@/admin/modules/shared/module-registry';
+import type { AdminModuleComponentProps } from '@/admin/modules/shared/module-types';
+import { getBlockActionMetadata } from './surface-types';
+
+function BlockFullEditLauncher({ surface }: AdminModuleComponentProps) {
+    const metadata = getBlockActionMetadata(surface);
+
+    if (metadata === null || !metadata.fullEditHref) {
+        return null;
+    }
+
+    return (
+        <Button
+            asChild
+            size="sm"
+            variant="outline"
+            className="h-8 rounded-full px-3"
+        >
+            <Link href={metadata.fullEditHref}>
+                <SquareArrowOutUpRight className="size-3.5" />
+                Full edit
+            </Link>
+        </Button>
+    );
+}
+
+export const blockFullEditLauncherModule = defineAdminModule({
+    key: 'block-full-edit-launcher',
+    entityScope: 'content_block',
+    surfaceSlots: 'block_actions',
+    regionScope: '*',
+    requiredCapabilities: ['full_edit'],
+    EditorComponent: BlockFullEditLauncher,
+    order: 50,
+    description:
+        'Renders the shared full-edit fallback entry in the block action cluster.',
+});

@@ -50,6 +50,7 @@ export function qualifyAdminModule(
 ): boolean {
     return (
         matchesScope(module.entityScope, surface.entity) &&
+        matchesScope(module.surfaceSlots, surface.slot) &&
         matchesScope(module.regionScope, surface.regionKey) &&
         matchesScope(module.blockTypes, surface.blockType) &&
         hasRequiredCapabilities(surface, module)
