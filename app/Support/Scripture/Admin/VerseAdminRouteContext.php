@@ -11,7 +11,6 @@ use App\Models\Verse;
 
 class VerseAdminRouteContext
 {
-    private const EDITABLE_BLOCK_TYPE = 'text';
     private const DEFAULT_CONTENT_BLOCK_REGION = 'study';
 
     public function __construct(
@@ -109,7 +108,7 @@ class VerseAdminRouteContext
      */
     public function contentBlockTypes(): array
     {
-        return [self::EDITABLE_BLOCK_TYPE];
+        return TextualContentBlockSchema::editableTypes();
     }
 
     public function defaultContentBlockRegion(): string
@@ -119,24 +118,29 @@ class VerseAdminRouteContext
 
     public function ownsContentBlock(ContentBlock $contentBlock): bool
     {
-        return FixedTypeContentBlock::owns($this->verse, $contentBlock);
+        return RegisteredContentBlock::owns($this->verse, $contentBlock);
     }
 
     public function isEditableNoteBlock(ContentBlock $contentBlock): bool
     {
-        return FixedTypeContentBlock::isEditableFor(
+        return RegisteredContentBlock::isEditableFor(
             $this->verse,
             $contentBlock,
-            self::EDITABLE_BLOCK_TYPE,
+            $this->contentBlockTypes(),
         );
+    }
+
+    public function isDuplicableNoteBlock(ContentBlock $contentBlock): bool
+    {
+        return $this->isEditableNoteBlock($contentBlock);
     }
 
     public function isContextualInsertionAnchor(ContentBlock $contentBlock): bool
     {
-        return FixedTypeContentBlock::isInsertionAnchorFor(
+        return RegisteredContentBlock::isInsertionAnchorFor(
             $this->verse,
             $contentBlock,
-            self::EDITABLE_BLOCK_TYPE,
+            $this->contentBlockTypes(),
         );
     }
 
@@ -147,29 +151,29 @@ class VerseAdminRouteContext
 
     public function abortUnlessEditableNoteBlock(ContentBlock $contentBlock): void
     {
-        FixedTypeContentBlock::abortUnlessEditableFor(
+        RegisteredContentBlock::abortUnlessEditableFor(
             $this->verse,
             $contentBlock,
-            self::EDITABLE_BLOCK_TYPE,
+            $this->contentBlockTypes(),
         );
     }
 
     public function abortUnlessDuplicableNoteBlock(ContentBlock $contentBlock): void
     {
-        $this->abortUnlessEditableNoteBlock($contentBlock);
+        abort_unless($this->isDuplicableNoteBlock($contentBlock), 404);
     }
 
     public function abortUnlessContextualInsertionAnchor(ContentBlock $contentBlock): void
     {
-        FixedTypeContentBlock::abortUnlessInsertionAnchorFor(
+        RegisteredContentBlock::abortUnlessInsertionAnchorFor(
             $this->verse,
             $contentBlock,
-            self::EDITABLE_BLOCK_TYPE,
+            $this->contentBlockTypes(),
         );
     }
 
     public function contentBlockProtectionReason(): string
     {
-        return 'Only verse-owned text note blocks are editable in this phase.';
+        return 'Only verse-owned text and quote note blocks are editable in this phase.';
     }
 }

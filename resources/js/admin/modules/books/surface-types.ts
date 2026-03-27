@@ -4,8 +4,6 @@ import type {
     ScriptureAdminMediaAssignment,
     ScriptureAdminMediaSummary,
     ScriptureBook,
-    ScriptureContentBlock,
-    ScriptureContentBlockInsertionPoint,
 } from '@/types';
 
 export type BookIdentitySurfaceMetadata = {
@@ -20,27 +18,6 @@ export type BookIntroSurfaceMetadata = {
     book: ScriptureBook;
     updateHref: string;
     fullEditHref: string;
-};
-
-export type BookContentBlockSurfaceMetadata = {
-    editor: 'book_content_block';
-    entityLabel: string;
-    block: ScriptureContentBlock;
-    updateHref: string;
-    fullEditHref: string;
-};
-
-export type BookBlockRegionSurfaceMetadata = {
-    editor: 'book_block_region';
-    entityLabel: string;
-    storeHref: string;
-    fullEditHref: string;
-    defaultRegion: string;
-    blockTypes: string[];
-    insertionPoint: ScriptureContentBlockInsertionPoint;
-    label?: string;
-    placementLabel?: string;
-    onSelectType: (blockType: string) => void;
 };
 
 export type BookMediaSlotsSurfaceMetadata = {
@@ -91,39 +68,6 @@ export function getBookIntroMetadata(
             typeof metadata.fullEditHref === 'string' &&
             typeof metadata.book === 'object' &&
             metadata.book !== null,
-    );
-}
-
-export function getBookContentBlockMetadata(
-    surface: AdminSurfaceContract,
-): BookContentBlockSurfaceMetadata | null {
-    return getSurfaceMetadata<BookContentBlockSurfaceMetadata>(
-        surface,
-        (metadata) =>
-            metadata.editor === 'book_content_block' &&
-            typeof metadata.entityLabel === 'string' &&
-            typeof metadata.updateHref === 'string' &&
-            typeof metadata.fullEditHref === 'string' &&
-            typeof metadata.block === 'object' &&
-            metadata.block !== null,
-    );
-}
-
-export function getBookBlockRegionMetadata(
-    surface: AdminSurfaceContract,
-): BookBlockRegionSurfaceMetadata | null {
-    return getSurfaceMetadata<BookBlockRegionSurfaceMetadata>(
-        surface,
-        (metadata) =>
-            metadata.editor === 'book_block_region' &&
-            typeof metadata.entityLabel === 'string' &&
-            typeof metadata.storeHref === 'string' &&
-            typeof metadata.fullEditHref === 'string' &&
-            typeof metadata.defaultRegion === 'string' &&
-            Array.isArray(metadata.blockTypes) &&
-            typeof metadata.insertionPoint === 'object' &&
-            metadata.insertionPoint !== null &&
-            typeof metadata.onSelectType === 'function',
     );
 }
 

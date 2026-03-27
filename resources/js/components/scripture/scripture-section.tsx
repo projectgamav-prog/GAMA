@@ -1,8 +1,10 @@
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
-import type { ScriptureAdminSurfaceOptions } from '@/components/scripture/scripture-admin-surface';
-import { ScriptureAdminSurface } from '@/components/scripture/scripture-admin-surface';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
+import {
+    getScriptureAdminSectionElementId,
+    type ScriptureAdminTargetSection,
+} from '@/lib/scripture-admin-navigation';
 import { cn } from '@/lib/utils';
 import type { ScriptureEntityRegionInput } from '@/types/scripture';
 
@@ -13,9 +15,9 @@ type Props = {
     icon?: LucideIcon;
     children: ReactNode;
     id?: string;
+    adminTargetSection?: ScriptureAdminTargetSection;
     className?: string;
     entityMeta?: ScriptureEntityRegionInput;
-    adminSurface?: ScriptureAdminSurfaceOptions;
 };
 
 export function ScriptureSection({
@@ -25,12 +27,20 @@ export function ScriptureSection({
     icon: Icon,
     children,
     id,
+    adminTargetSection,
     className,
     entityMeta,
-    adminSurface,
 }: Props) {
+    const resolvedId =
+        adminTargetSection !== undefined
+            ? id ?? getScriptureAdminSectionElementId(adminTargetSection)
+            : id;
     const section = (
-        <section id={id} className={cn('space-y-4', className)}>
+        <section
+            id={resolvedId}
+            data-admin-target-section={adminTargetSection}
+            className={cn('space-y-4', className)}
+        >
             <div
                 className={
                     action
@@ -65,26 +75,12 @@ export function ScriptureSection({
     );
 
     if (!entityMeta) {
-        if (!adminSurface) {
-            return section;
-        }
-
-        return (
-            <ScriptureAdminSurface {...adminSurface}>
-                {section}
-            </ScriptureAdminSurface>
-        );
+        return section;
     }
 
     return (
         <ScriptureEntityRegion meta={entityMeta} asChild>
-            {adminSurface ? (
-                <ScriptureAdminSurface {...adminSurface}>
-                    {section}
-                </ScriptureAdminSurface>
-            ) : (
-                section
-            )}
+            {section}
         </ScriptureEntityRegion>
     );
 }

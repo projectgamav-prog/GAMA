@@ -10,7 +10,7 @@ use App\Models\ContentBlock;
 use App\Models\Verse;
 use App\Support\Scripture\Admin\VerseAdminRouteContext;
 
-class VerseContentBlockStoreRequest extends OrderedRegistryTextContentBlockStoreRequest
+class VerseContentBlockStoreRequest extends OrderedRegistryContentBlockStoreRequest
 {
     protected function adminEntityKey(): string
     {

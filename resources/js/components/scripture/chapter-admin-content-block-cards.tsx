@@ -10,6 +10,7 @@ import type {
 } from '@/types';
 
 type SharedProps = {
+    blockTypeField: ScriptureRegisteredAdminField;
     titleField: ScriptureRegisteredAdminField;
     bodyField: ScriptureRegisteredAdminField;
     regionField: ScriptureRegisteredAdminField;
@@ -20,6 +21,7 @@ type SharedProps = {
 export function CreateChapterContentBlockCard({
     storeHref,
     nextSortOrder,
+    blockTypeField,
     titleField,
     bodyField,
     regionField,
@@ -33,7 +35,7 @@ export function CreateChapterContentBlockCard({
         <CreateScriptureAdminContentBlockCard
             storeHref={storeHref}
             nextSortOrder={nextSortOrder}
-            fixedBlockType="text"
+            blockTypeField={blockTypeField}
             defaultRegion="study"
             titleField={titleField}
             bodyField={bodyField}
@@ -41,7 +43,7 @@ export function CreateChapterContentBlockCard({
             sortOrderField={sortOrderField}
             statusField={statusField}
             createBadgeLabel="Add note block"
-            scopeBadgeLabel="Text only"
+            scopeBadgeLabel="Text + Quote"
             createTitle="Create Chapter Note"
             createActionLabel="Add note block"
         />
@@ -50,6 +52,7 @@ export function CreateChapterContentBlockCard({
 
 export function ChapterContentBlockEditorCard({
     block,
+    blockTypeField,
     titleField,
     bodyField,
     regionField,
@@ -61,7 +64,7 @@ export function ChapterContentBlockEditorCard({
     return (
         <ScriptureAdminContentBlockEditorCard
             block={block}
-            fixedBlockType="text"
+            blockTypeField={blockTypeField}
             titleField={titleField}
             bodyField={bodyField}
             regionField={regionField}

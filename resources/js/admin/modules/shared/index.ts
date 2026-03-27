@@ -1,4 +1,3 @@
-export { AdminModuleHost } from './AdminModuleHost';
 export {
     adminModuleRegistry,
     defineAdminModule,
@@ -17,6 +16,18 @@ export {
     createSheetEditorSurface,
     createSurfaceOwner,
 } from './surface-builders';
+export {
+    ADMIN_SURFACE_KEYS,
+    BOOK_CONTENT_BLOCKS_SURFACE_KEY,
+    BOOK_INTRO_SURFACE_KEY,
+    BOOK_MEDIA_SLOTS_SURFACE_KEY,
+    CHAPTER_CONTENT_BLOCKS_SURFACE_KEY,
+    CHAPTER_INTRO_SURFACE_KEY,
+    VERSE_INTRO_SURFACE_KEY,
+    VERSE_META_SURFACE_KEY,
+    VERSE_NOTES_SURFACE_KEY,
+    resolveSemanticSurfaceKey,
+} from './surface-keys';
 export {
     getQualifyingAdminModules,
     qualifyAdminModule,

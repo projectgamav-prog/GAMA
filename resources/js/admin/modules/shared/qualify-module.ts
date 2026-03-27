@@ -49,11 +49,20 @@ export function qualifyAdminModule(
     module: AdminModuleDefinition,
 ): boolean {
     return (
+        matchesScope(module.surfaceKeys, surface.surfaceKey) &&
         matchesScope(module.entityScope, surface.entity) &&
         matchesScope(module.surfaceSlots, surface.slot) &&
+        hasRequiredCapabilities(surface, module) &&
+        matchesScope(
+            module.presentationPlacements,
+            surface.presentation?.placement,
+        ) &&
+        matchesScope(
+            module.presentationVariants,
+            surface.presentation?.variant,
+        ) &&
         matchesScope(module.regionScope, surface.regionKey) &&
-        matchesScope(module.blockTypes, surface.blockType) &&
-        hasRequiredCapabilities(surface, module)
+        matchesScope(module.blockTypes, surface.blockType)
     );
 }
 

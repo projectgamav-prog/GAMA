@@ -31,16 +31,14 @@ class BookController extends Controller
             ->with($this->publicBookMediaRelations())
             ->inCanonicalOrder()
             ->get();
-        $adminVisibilityEnabled = AdminContext::isVisible($request);
+        $isAdmin = AdminContext::canAccess($request->user());
 
         return Inertia::render('scripture/books/index', [
+            'isAdmin' => $isAdmin,
             'books' => $books
                 ->map(fn (Book $book) => [
                     ...$publicScriptureData->book($book),
-                    'admin' => $this->bookCardAdminPayload(
-                        $book,
-                        $adminVisibilityEnabled,
-                    ),
+                    'admin' => $this->bookCardAdminPayload($book, $isAdmin),
                 ])
                 ->values()
                 ->all(),
@@ -57,13 +55,18 @@ class BookController extends Controller
     ): Response {
         $this->loadPublicBookMediaRelations($book);
         $contentBlocks = $this->publicBookContentBlocks($book);
-        $adminVisibilityEnabled = AdminContext::isVisible($request);
+        $isAdmin = AdminContext::canAccess($request->user());
 
         return Inertia::render('scripture/books/overview', [
             'book' => $publicScriptureData->book($book),
             'content_blocks' => $publicScriptureData->contentBlocks($contentBlocks),
-            'admin' => $adminVisibilityEnabled
-                ? $this->bookAdminPayload($book, $contentBlocks)
+            'isAdmin' => $isAdmin,
+            'admin' => $isAdmin
+                ? $this->bookAdminPayload(
+                    $book,
+                    $contentBlocks,
+                    includeMediaManagement: true,
+                )
                 : null,
         ]);
     }
@@ -240,9 +243,9 @@ class BookController extends Controller
      */
     private function bookCardAdminPayload(
         Book $book,
-        bool $adminVisibilityEnabled,
+        bool $isAdmin,
     ): ?array {
-        if (! $adminVisibilityEnabled) {
+        if (! $isAdmin) {
             return null;
         }
 

@@ -7,10 +7,11 @@ import {
     Rows3,
 } from 'lucide-react';
 import { useState } from 'react';
-import { AdminModuleHost } from '@/admin/modules/shared';
+import { AdminModuleHost } from '@/admin/modules/shared/AdminModuleHost';
+import { createChapterIntroSurface } from '@/admin/modules/chapters/surface-builders';
 import { ScriptureActionRow } from '@/components/scripture/scripture-action-row';
 import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
-import { ScriptureContentBlocksSection } from '@/components/scripture/scripture-content-blocks-section';
+import { ScriptureChapterContentBlockRegion } from '@/components/scripture/scripture-chapter-content-block-region';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
@@ -18,7 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { useChapterAdminEditSession } from '@/hooks/use-chapter-admin-edit-session';
+import { useVisibleAdminControls } from '@/hooks/use-admin-context';
 import ScriptureLayout from '@/layouts/scripture-layout';
 import {
     chapterLabel,
@@ -26,14 +27,10 @@ import {
     isGenericSectionLabel,
     sectionLabel,
 } from '@/lib/scripture';
-import {
-    BLOCK_CREATE_SURFACE_CAPABILITIES,
-    EDITOR_SURFACE_CAPABILITIES,
-    createInlineEditorModuleSurface,
-    createSheetEditorModuleSurface,
-    createSurfaceOwner,
-} from '@/admin/modules/shared';
 import type { BreadcrumbItem, ChapterShowProps } from '@/types';
+
+const PANEL_CLASS_NAME =
+    'flex flex-wrap items-center gap-2 rounded-2xl border border-border/70 bg-muted/20 p-3';
 
 export default function ChapterShow({
     book,
@@ -41,9 +38,11 @@ export default function ChapterShow({
     chapter,
     content_blocks,
     chapter_sections,
+    isAdmin,
     admin,
 }: ChapterShowProps) {
     const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
+    const showAdminControls = useVisibleAdminControls();
     const hidesGenericBookSection = isGenericSectionLabel(
         book_section.slug,
         book_section.title,
@@ -62,6 +61,26 @@ export default function ChapterShow({
         parentEntityType: 'book_section' as const,
         parentEntityId: book_section.id,
     };
+    const pageIntroBlock =
+        isAdmin && admin && admin.primary_content_block_id !== null
+            ? (content_blocks.find(
+                  (block) => block.id === admin.primary_content_block_id,
+              ) ?? null)
+            : null;
+    const chapterIntroSurface =
+        showAdminControls && admin
+            ? createChapterIntroSurface({
+                  chapter,
+                  chapterTitle,
+                  block: pageIntroBlock,
+                  updateHref: admin.primary_content_block_update_href,
+                  fullEditHref: admin.full_edit_href,
+              })
+            : null;
+    const chapterNoteBlocks =
+        pageIntroBlock === null
+            ? content_blocks
+            : content_blocks.filter((block) => block.id !== pageIntroBlock.id);
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -77,31 +96,6 @@ export default function ChapterShow({
             href: chapter.href,
         },
     ];
-    const {
-        editSession,
-        inlineIntroSession,
-        inlineCreateTextContentBlockSession,
-        getInlineTextContentBlockSession,
-        closeEditSession,
-        pageIntroBlock,
-        pageIntroSurface,
-        contentBlocksMeta,
-        contentBlocksCapabilities,
-        handlePageIntroSaveSuccess,
-        handleContentBlockSaveSuccess,
-        handleContentBlockCreateSuccess,
-    } = useChapterAdminEditSession({
-        chapterId: chapter.id,
-        bookTitle: book.title,
-        bookSectionTitle,
-        chapterTitle,
-        contentBlocks: content_blocks,
-        admin,
-    });
-    const chapterNoteBlocks =
-        pageIntroBlock === null
-            ? content_blocks
-            : content_blocks.filter((block) => block.id !== pageIntroBlock.id);
 
     return (
         <ScriptureLayout title={chapterTitle} breadcrumbs={breadcrumbs}>
@@ -126,22 +120,16 @@ export default function ChapterShow({
                 }
                 title={chapterTitle}
                 description="Read the chapter overview first, then open the reader and continue in canonical order."
-                adminSurface={pageIntroSurface ?? undefined}
                 contentClassName="space-y-6"
             >
-                {inlineIntroSession ? (
+                {chapterIntroSurface && (
                     <AdminModuleHost
-                        surface={createInlineEditorModuleSurface({
-                            entity: 'chapter',
-                            entityId: chapter.id,
-                            regionKey: 'page_intro',
-                            capabilities: EDITOR_SURFACE_CAPABILITIES,
-                            session: inlineIntroSession,
-                            onCancel: closeEditSession,
-                            onSaveSuccess: handlePageIntroSaveSuccess,
-                        })}
+                        surface={chapterIntroSurface}
+                        className={PANEL_CLASS_NAME}
                     />
-                ) : pageIntroBlock ? (
+                )}
+
+                {pageIntroBlock ? (
                     <div className="rounded-2xl border border-border/70 bg-muted/20 px-5 py-5 sm:px-6 sm:py-6">
                         <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
                             Chapter Introduction
@@ -196,80 +184,12 @@ export default function ChapterShow({
                 </div>
             </ScripturePageIntroCard>
 
-            <ScriptureContentBlocksSection
-                title="Published Notes"
-                description="Study content attached to this chapter."
+            <ScriptureChapterContentBlockRegion
+                chapter={chapter}
+                chapterTitle={chapterTitle}
                 blocks={chapterNoteBlocks}
-                capabilities={contentBlocksCapabilities}
-                pendingInlineCreateInsertionPoint={
-                    inlineCreateTextContentBlockSession?.insertionPoint ?? null
-                }
-                renderPendingInlineCreateEditor={() =>
-                    inlineCreateTextContentBlockSession ? (
-                        <AdminModuleHost
-                            surface={createInlineEditorModuleSurface({
-                                entity: 'chapter',
-                                entityId: chapter.id,
-                                regionKey: 'content_blocks',
-                                blockType: 'text',
-                                capabilities:
-                                    BLOCK_CREATE_SURFACE_CAPABILITIES,
-                                session: inlineCreateTextContentBlockSession,
-                                onCancel: closeEditSession,
-                                onSaveSuccess: (result: {
-                                    kind: 'create' | 'edit';
-                                }) => {
-                                    if (result.kind === 'create') {
-                                        handleContentBlockCreateSuccess();
-                                    }
-                                },
-                                metadata: {
-                                    entityLabel: chapterTitle,
-                                },
-                            })}
-                        />
-                    ) : null
-                }
-                renderInlineBlockEditor={(block) => {
-                    const inlineSession = getInlineTextContentBlockSession(
-                        block.id,
-                    );
-
-                    return (
-                        <AdminModuleHost
-                            surface={createInlineEditorModuleSurface({
-                                entity: 'content_block',
-                                entityId: block.id,
-                                regionKey: 'content_blocks',
-                                blockType: block.block_type,
-                                owner: createSurfaceOwner(
-                                    'chapter',
-                                    chapter.id,
-                                ),
-                                capabilities: EDITOR_SURFACE_CAPABILITIES,
-                                session: inlineSession,
-                                onCancel: closeEditSession,
-                                onSaveSuccess: (result: {
-                                    kind: 'create' | 'edit';
-                                    blockId?: number;
-                                }) => {
-                                    if (
-                                        result.kind === 'edit' &&
-                                        result.blockId !== undefined
-                                    ) {
-                                        handleContentBlockSaveSuccess(
-                                            result.blockId,
-                                        );
-                                    }
-                                },
-                                metadata: {
-                                    entityLabel: chapterTitle,
-                                },
-                            })}
-                        />
-                    );
-                }}
-                entityMeta={contentBlocksMeta}
+                showAdminControls={showAdminControls}
+                admin={admin}
             />
 
             <ScriptureSection
@@ -417,24 +337,6 @@ export default function ChapterShow({
                     </div>
                 )}
             </ScriptureSection>
-
-            <AdminModuleHost
-                surface={createSheetEditorModuleSurface({
-                    entity: 'chapter',
-                    entityId: chapter.id,
-                    regionKey: editSession?.meta.region ?? null,
-                    blockType: editSession?.block.block_type ?? null,
-                    capabilities: editSession
-                        ? EDITOR_SURFACE_CAPABILITIES
-                        : [],
-                    session: editSession,
-                    onOpenChange: (open: boolean) => {
-                        if (!open) {
-                            closeEditSession();
-                        }
-                    },
-                })}
-            />
         </ScriptureLayout>
     );
 }

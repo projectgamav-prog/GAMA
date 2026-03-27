@@ -46,7 +46,7 @@ test('character public page no longer exposes character-specific admin props', f
             ->where('adminContext.canAccess', true)
             ->where('adminContext.isVisible', true)
             ->where('adminContext.visibilityUrl', $this->visibilityRoute)
-            ->where('admin', null),
+            ->missing('admin'),
         );
 });
 

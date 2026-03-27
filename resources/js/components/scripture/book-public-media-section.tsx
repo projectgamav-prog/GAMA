@@ -1,9 +1,8 @@
-import { AdminModuleHost } from '@/admin/modules/shared';
+import { AdminModuleHost } from '@/admin/modules/shared/AdminModuleHost';
 import { createBookMediaSlotsSurface } from '@/admin/modules/books/surface-builders';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { ScriptureAdminRegionConfig } from '@/types';
 import { getBookMediaSlotMeta } from '@/lib/book-media-slot-meta';
 import type {
     ScriptureBook,
@@ -15,8 +14,8 @@ import { ScriptureSection } from './scripture-section';
 
 type Props = {
     book: ScriptureBook;
+    isAdmin: boolean;
     admin?: ScriptureBookAdmin | null;
-    isAdmin?: boolean;
 };
 
 const PANEL_CLASS_NAME =
@@ -79,20 +78,12 @@ function BookMediaSlotCard({ slot }: { slot: ScriptureBookMediaSlot }) {
     );
 }
 
-export function BookPublicMediaSection({ book, admin, isAdmin = false }: Props) {
+export function BookPublicMediaSection({ book, admin, isAdmin }: Props) {
     const { overview_video, hero_media, supporting_media } = book.media_slots;
     const hasMedia =
         overview_video !== null ||
         hero_media !== null ||
         supporting_media.length > 0;
-    const mediaAdminConfig: ScriptureAdminRegionConfig | null = !isAdmin && admin
-        ? {
-              supportsEdit: false,
-              supportsFullEdit: true,
-              editTarget: 'content_block',
-              fullEditHref: `${admin.full_edit_href}#media-slots`,
-          }
-        : null;
     const mediaSurface =
         isAdmin &&
         admin?.media_assignment_store_href &&
@@ -102,14 +93,14 @@ export function BookPublicMediaSection({ book, admin, isAdmin = false }: Props) 
             ? createBookMediaSlotsSurface({
                   book,
                   storeHref: admin.media_assignment_store_href,
-                  fullEditHref: `${admin.full_edit_href}#media-slots`,
+                  fullEditHref: admin.full_edit_href,
                   assignments: admin.media_assignments,
                   availableMedia: admin.available_media,
                   nextSortOrder: admin.next_media_assignment_sort_order,
               })
             : null;
 
-    if (!hasMedia) {
+    if (!hasMedia && !mediaSurface) {
         return null;
     }
 
@@ -124,11 +115,6 @@ export function BookPublicMediaSection({ book, admin, isAdmin = false }: Props) 
                 region: 'book_media_slots',
                 capabilityHint: 'media',
             }}
-            adminSurface={{
-                config: mediaAdminConfig,
-                label: 'Media slots',
-                highlight: false,
-            }}
         >
             <div className="space-y-4">
                 {mediaSurface && (
@@ -136,6 +122,14 @@ export function BookPublicMediaSection({ book, admin, isAdmin = false }: Props) 
                         surface={mediaSurface}
                         className={PANEL_CLASS_NAME}
                     />
+                )}
+
+                {!hasMedia && mediaSurface && (
+                    <div className="rounded-2xl border border-dashed border-border/80 bg-muted/20 px-5 py-5 text-sm leading-6 text-muted-foreground sm:px-6 sm:py-6">
+                        No published media slots are assigned to this book yet.
+                        The semantic media surface still stays available for
+                        admins because this book can manage media assignments.
+                    </div>
                 )}
 
                 {overview_video && (

@@ -22,6 +22,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { useScriptureAdminTargetNavigation } from '@/hooks/use-scripture-admin-target-navigation';
 import ScriptureLayout from '@/layouts/scripture-layout';
 import { chapterLabel, sectionLabel, verseLabel } from '@/lib/scripture';
 import { formatAdminList, parseAdminList } from '@/lib/scripture-admin';
@@ -69,7 +70,7 @@ function VerseIdentityEditorCard({
     };
 
     return (
-        <Card id="identity-editor">
+        <Card>
             <CardHeader className="gap-3">
                 <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="outline">Verse identity</Badge>
@@ -207,7 +208,7 @@ function VerseMetaEditorCard({
     };
 
     return (
-        <Card id="meta-editor">
+        <Card>
             <CardHeader className="gap-3">
                 <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="outline">Verse meta</Badge>
@@ -520,6 +521,7 @@ export default function VerseFullEdit({
             href: verse.admin_full_edit_href,
         },
     ];
+    useScriptureAdminTargetNavigation();
 
     return (
         <ScriptureLayout
@@ -557,7 +559,7 @@ export default function VerseFullEdit({
             </ScripturePageIntroCard>
 
             <ScriptureSection
-                id="identity-editor"
+                adminTargetSection="identity"
                 title="Verse Identity"
                 description="Canonical verse identity and text for this verse."
             >
@@ -568,7 +570,7 @@ export default function VerseFullEdit({
             </ScriptureSection>
 
             <ScriptureSection
-                id="meta-editor"
+                adminTargetSection="meta"
                 title="Verse Meta"
                 description="Broader editorial metadata for this verse."
             >
@@ -580,9 +582,9 @@ export default function VerseFullEdit({
             </ScriptureSection>
 
             <ScriptureSection
-                id="block-manager"
+                adminTargetSection="content_blocks"
                 title="Note Blocks"
-                description="Manage verse-owned note blocks, including drafts that stay hidden from the public page."
+                description="Manage verse-owned text and quote note blocks, including drafts that stay hidden from the public page."
                 action={
                     <div className="flex flex-wrap gap-2">
                         <Badge variant="outline">
@@ -598,6 +600,7 @@ export default function VerseFullEdit({
                     <CreateVerseContentBlockCard
                         storeHref={admin_content_block_store_href}
                         nextSortOrder={next_content_block_sort_order}
+                        blockTypeField={fields.content_block_type}
                         titleField={fields.content_block_title}
                         bodyField={fields.content_block_body}
                         regionField={fields.content_block_region}
@@ -609,6 +612,7 @@ export default function VerseFullEdit({
                         <VerseContentBlockEditorCard
                             key={block.id}
                             block={block}
+                            blockTypeField={fields.content_block_type}
                             titleField={fields.content_block_title}
                             bodyField={fields.content_block_body}
                             regionField={fields.content_block_region}

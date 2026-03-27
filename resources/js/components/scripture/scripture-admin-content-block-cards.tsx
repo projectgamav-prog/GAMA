@@ -14,6 +14,10 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import {
+    getScriptureAdminTargetItemAttribute,
+    getScriptureAdminTargetItemId,
+} from '@/lib/scripture-admin-navigation';
 import { scriptureAdminStartCase } from '@/lib/scripture-admin-field-display';
 import type {
     ScriptureAdminContentBlock,
@@ -25,6 +29,8 @@ type ContentBlockFormData = {
     block_type: string;
     title: string;
     body: string;
+    media_url: string;
+    alt_text: string;
     region: string;
     sort_order: string;
     status: 'draft' | 'published';
@@ -33,6 +39,8 @@ type ContentBlockFormData = {
 type SharedProps = {
     titleField: ScriptureRegisteredAdminField;
     bodyField: ScriptureRegisteredAdminField;
+    mediaUrlField?: ScriptureRegisteredAdminField | null;
+    altTextField?: ScriptureRegisteredAdminField | null;
     regionField: ScriptureRegisteredAdminField;
     sortOrderField: ScriptureRegisteredAdminField;
     statusField: ScriptureRegisteredAdminField;
@@ -65,6 +73,15 @@ function blockTypeOptions(
     field: ScriptureRegisteredAdminField | null | undefined,
 ): string[] {
     return field?.options ?? [];
+}
+
+function blockDataValue(
+    block: ScriptureAdminContentBlock,
+    key: string,
+): string {
+    const value = block.data_json?.[key];
+
+    return typeof value === 'string' ? value : '';
 }
 
 function ContentBlockTypeField({
@@ -160,6 +177,8 @@ export function CreateScriptureAdminContentBlockCard({
     fixedBlockType = null,
     titleField,
     bodyField,
+    mediaUrlField,
+    altTextField,
     regionField,
     sortOrderField,
     statusField,
@@ -176,10 +195,13 @@ export function CreateScriptureAdminContentBlockCard({
         block_type: fixedBlockType ?? typeOptions[0] ?? 'text',
         title: '',
         body: '',
+        media_url: '',
+        alt_text: '',
         region: defaultRegion ?? regionOptions[0] ?? 'overview',
         sort_order: String(nextSortOrder),
         status: 'draft',
     });
+    const showsImageFields = form.data.block_type === 'image';
 
     return (
         <Card>
@@ -250,6 +272,42 @@ export function CreateScriptureAdminContentBlockCard({
                     <InputError message={form.errors.body} />
                 </div>
 
+                {showsImageFields && mediaUrlField && (
+                    <div className="grid gap-2">
+                        <ScriptureAdminSourceLabel
+                            field={mediaUrlField}
+                            htmlFor="new_content_block_media_url"
+                        />
+                        <Input
+                            id="new_content_block_media_url"
+                            value={form.data.media_url}
+                            onChange={(event) =>
+                                form.setData('media_url', event.target.value)
+                            }
+                            placeholder="https://example.test/image.jpg"
+                        />
+                        <InputError message={form.errors.media_url} />
+                    </div>
+                )}
+
+                {showsImageFields && altTextField && (
+                    <div className="grid gap-2">
+                        <ScriptureAdminSourceLabel
+                            field={altTextField}
+                            htmlFor="new_content_block_alt_text"
+                        />
+                        <Input
+                            id="new_content_block_alt_text"
+                            value={form.data.alt_text}
+                            onChange={(event) =>
+                                form.setData('alt_text', event.target.value)
+                            }
+                            placeholder="Helpful description for the image"
+                        />
+                        <InputError message={form.errors.alt_text} />
+                    </div>
+                )}
+
                 <div className="grid gap-4 md:grid-cols-2">
                     <div className="grid gap-2">
                         <ScriptureAdminSourceLabel
@@ -312,7 +370,14 @@ export function CreateScriptureAdminContentBlockCard({
                             preserveScroll: true,
                             preserveState: false,
                             onSuccess: () =>
-                                form.reset('title', 'body', 'region', 'status'),
+                                form.reset(
+                                    'title',
+                                    'body',
+                                    'media_url',
+                                    'alt_text',
+                                    'region',
+                                    'status',
+                                ),
                         });
                     }}
                     disabled={form.processing}
@@ -331,6 +396,8 @@ export function ScriptureAdminContentBlockEditorCard({
     fixedBlockType = null,
     titleField,
     bodyField,
+    mediaUrlField,
+    altTextField,
     regionField,
     sortOrderField,
     statusField,
@@ -341,13 +408,22 @@ export function ScriptureAdminContentBlockEditorCard({
         block_type: fixedBlockType ?? block.block_type,
         title: block.title ?? '',
         body: block.body ?? '',
+        media_url: blockDataValue(block, 'url'),
+        alt_text: blockDataValue(block, 'alt'),
         region: block.region,
         sort_order: String(block.sort_order),
         status: block.status,
     });
+    const showsImageFields = form.data.block_type === 'image';
 
     return (
-        <Card id={`block-${block.id}`}>
+        <Card
+            id={getScriptureAdminTargetItemId('block', block.id)}
+            data-admin-target-item={getScriptureAdminTargetItemAttribute(
+                'block',
+                block.id,
+            )}
+        >
             <CardHeader className="gap-3">
                 <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="outline">
@@ -423,6 +499,42 @@ export function ScriptureAdminContentBlockEditorCard({
                     />
                     <InputError message={form.errors.body} />
                 </div>
+
+                {showsImageFields && mediaUrlField && (
+                    <div className="grid gap-2">
+                        <ScriptureAdminSourceLabel
+                            field={mediaUrlField}
+                            htmlFor={`content_block_media_url_${block.id}`}
+                        />
+                        <Input
+                            id={`content_block_media_url_${block.id}`}
+                            value={form.data.media_url}
+                            onChange={(event) =>
+                                form.setData('media_url', event.target.value)
+                            }
+                            placeholder="https://example.test/image.jpg"
+                        />
+                        <InputError message={form.errors.media_url} />
+                    </div>
+                )}
+
+                {showsImageFields && altTextField && (
+                    <div className="grid gap-2">
+                        <ScriptureAdminSourceLabel
+                            field={altTextField}
+                            htmlFor={`content_block_alt_text_${block.id}`}
+                        />
+                        <Input
+                            id={`content_block_alt_text_${block.id}`}
+                            value={form.data.alt_text}
+                            onChange={(event) =>
+                                form.setData('alt_text', event.target.value)
+                            }
+                            placeholder="Helpful description for the image"
+                        />
+                        <InputError message={form.errors.alt_text} />
+                    </div>
+                )}
 
                 <div className="grid gap-4 md:grid-cols-2">
                     <div className="grid gap-2">

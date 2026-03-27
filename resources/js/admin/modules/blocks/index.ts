@@ -3,11 +3,10 @@ import { blockDeleteModule } from './BlockDelete';
 import { blockDragReorderModule } from './BlockDragReorder';
 import { blockDuplicateModule } from './BlockDuplicate';
 import { blockFullEditLauncherModule } from './BlockFullEditLauncher';
+import { blockRegionFullEditModule } from './BlockRegionFullEdit';
 import { blockReorderModule } from './BlockReorder';
 import { imageBlockEditorModule } from './ImageBlockEditor';
-import { quoteBlockEditorModule } from './QuoteBlockEditor';
-import { textBlockEditorModule } from './TextBlockEditor';
-import { videoBlockEditorModule } from './VideoBlockEditor';
+import { textualBlockEditorModule } from './TextualBlockEditor';
 
 export {
     blockCreateModule,
@@ -15,22 +14,20 @@ export {
     blockDragReorderModule,
     blockDuplicateModule,
     blockFullEditLauncherModule,
+    blockRegionFullEditModule,
     blockReorderModule,
     imageBlockEditorModule,
-    quoteBlockEditorModule,
-    textBlockEditorModule,
-    videoBlockEditorModule,
+    textualBlockEditorModule,
 };
 
 export const blockAdminModules = [
     blockCreateModule,
+    blockRegionFullEditModule,
     blockDragReorderModule,
     blockReorderModule,
     blockDuplicateModule,
     blockDeleteModule,
     blockFullEditLauncherModule,
-    textBlockEditorModule,
-    quoteBlockEditorModule,
+    textualBlockEditorModule,
     imageBlockEditorModule,
-    videoBlockEditorModule,
 ] as const;

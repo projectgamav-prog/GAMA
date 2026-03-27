@@ -10,6 +10,7 @@ import type {
 } from '@/types';
 
 type SharedProps = {
+    blockTypeField: ScriptureRegisteredAdminField;
     titleField: ScriptureRegisteredAdminField;
     bodyField: ScriptureRegisteredAdminField;
     regionField: ScriptureRegisteredAdminField;
@@ -20,6 +21,7 @@ type SharedProps = {
 export function CreateVerseContentBlockCard({
     storeHref,
     nextSortOrder,
+    blockTypeField,
     titleField,
     bodyField,
     regionField,
@@ -33,7 +35,7 @@ export function CreateVerseContentBlockCard({
         <CreateScriptureAdminContentBlockCard
             storeHref={storeHref}
             nextSortOrder={nextSortOrder}
-            fixedBlockType="text"
+            blockTypeField={blockTypeField}
             defaultRegion="study"
             titleField={titleField}
             bodyField={bodyField}
@@ -41,7 +43,7 @@ export function CreateVerseContentBlockCard({
             sortOrderField={sortOrderField}
             statusField={statusField}
             createBadgeLabel="Add note block"
-            scopeBadgeLabel="Text only"
+            scopeBadgeLabel="Text + Quote"
             createTitle="Create Verse Note"
             createActionLabel="Add note block"
         />
@@ -50,6 +52,7 @@ export function CreateVerseContentBlockCard({
 
 export function VerseContentBlockEditorCard({
     block,
+    blockTypeField,
     titleField,
     bodyField,
     regionField,
@@ -59,21 +62,19 @@ export function VerseContentBlockEditorCard({
     block: ScriptureAdminContentBlock;
 }) {
     return (
-        <div id={`block-${block.id}`}>
-            <ScriptureAdminContentBlockEditorCard
-                block={block}
-                fixedBlockType="text"
-                titleField={titleField}
-                bodyField={bodyField}
-                regionField={regionField}
-                sortOrderField={sortOrderField}
-                statusField={statusField}
-                saveActionLabel="Save block"
-                editorTitle={(currentBlock) =>
-                    currentBlock.title ?? `Verse note ${currentBlock.id}`
-                }
-            />
-        </div>
+        <ScriptureAdminContentBlockEditorCard
+            block={block}
+            blockTypeField={blockTypeField}
+            titleField={titleField}
+            bodyField={bodyField}
+            regionField={regionField}
+            sortOrderField={sortOrderField}
+            statusField={statusField}
+            saveActionLabel="Save block"
+            editorTitle={(currentBlock) =>
+                currentBlock.title ?? `Verse note ${currentBlock.id}`
+            }
+        />
     );
 }
 

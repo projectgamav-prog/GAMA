@@ -3,15 +3,21 @@ import { Button } from '@/components/ui/button';
 import { ScriptureTextContentBlockInlineEditor } from '@/components/scripture/scripture-text-content-block-inline-editor';
 import { defineAdminModule } from '@/admin/modules/shared/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/modules/shared/module-types';
-import { getVerseNoteBlockMetadata } from './surface-types';
+import { buildScriptureAdminBlockHref } from '@/lib/scripture-admin-navigation';
+import { getRegisteredBlockEditorMetadata } from './surface-types';
 
-function VerseNotesEditor({ surface }: AdminModuleComponentProps) {
-    const metadata = getVerseNoteBlockMetadata(surface);
+function TextualBlockEditor({ surface }: AdminModuleComponentProps) {
+    const metadata = getRegisteredBlockEditorMetadata(surface);
     const [isOpen, setIsOpen] = useState(false);
 
     if (metadata === null) {
         return null;
     }
+
+    const fullEditHref = buildScriptureAdminBlockHref(
+        metadata.fullEditHref,
+        metadata.block.id,
+    );
 
     if (!isOpen) {
         return (
@@ -31,9 +37,10 @@ function VerseNotesEditor({ surface }: AdminModuleComponentProps) {
             <ScriptureTextContentBlockInlineEditor
                 session={{
                     updateHref: metadata.updateHref,
-                    fullEditHref: metadata.fullEditHref,
+                    fullEditHref,
                     block: metadata.block,
                     values: {
+                        block_type: metadata.block.block_type,
                         title: metadata.block.title ?? '',
                         body: metadata.block.body ?? '',
                         region: metadata.block.region,
@@ -48,15 +55,15 @@ function VerseNotesEditor({ surface }: AdminModuleComponentProps) {
     );
 }
 
-export const verseNotesEditorModule = defineAdminModule({
-    key: 'verse-notes-editor',
+export const textualBlockEditorModule = defineAdminModule({
+    key: 'textual-block-editor',
     entityScope: 'content_block',
     surfaceSlots: 'inline_editor',
     regionScope: 'content_blocks',
-    blockTypes: 'text',
+    blockTypes: ['text', 'quote'],
     requiredCapabilities: ['edit'],
-    EditorComponent: VerseNotesEditor,
+    EditorComponent: TextualBlockEditor,
     order: 30,
     description:
-        'Renders the attached verse note editor for text blocks on the verse page.',
+        'Renders the shared inline editor for registered text and quote blocks on active scripture surfaces.',
 });

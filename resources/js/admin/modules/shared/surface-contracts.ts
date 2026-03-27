@@ -1,4 +1,5 @@
 import type { ScriptureEntityType } from '@/types';
+import type { AdminSurfaceKey } from './surface-keys';
 
 /**
  * Stable capability keys that a page surface can advertise to the shared
@@ -28,6 +29,20 @@ export type AdminSurfaceSlot =
     | 'insert_control'
     | 'block_actions';
 
+export type AdminSurfacePlacement =
+    | 'inline'
+    | 'sidebar'
+    | 'drawer'
+    | 'header_tools'
+    | 'section_footer';
+
+export type AdminSurfaceVariant = 'compact' | 'full';
+
+export type AdminSurfacePresentation = {
+    placement?: AdminSurfacePlacement | null;
+    variant?: AdminSurfaceVariant | null;
+};
+
 export type AdminSurfaceOwner = {
     entity: ScriptureEntityType;
     entityId: AdminSurfaceIdentifier;
@@ -38,9 +53,11 @@ export type AdminSurfaceOwner = {
  *
  * The host and qualification engine only depend on this contract. Pages can
  * keep their own rendering concerns, while modules decide whether they attach
- * based on entity, region, block type, and capabilities.
+ * based on semantic surface identity, entity ownership, capabilities, and
+ * optional supporting metadata such as region or block type.
  */
 export type AdminSurfaceContract<TMetadata = unknown> = {
+    surfaceKey?: AdminSurfaceKey | null;
     entity: ScriptureEntityType;
     entityId: AdminSurfaceIdentifier;
     slot: AdminSurfaceSlot;
@@ -48,6 +65,7 @@ export type AdminSurfaceContract<TMetadata = unknown> = {
     blockType?: string | null;
     owner?: AdminSurfaceOwner | null;
     capabilities: readonly AdminSurfaceCapability[];
+    presentation?: AdminSurfacePresentation | null;
     label?: string | null;
     metadata?: TMetadata;
 };

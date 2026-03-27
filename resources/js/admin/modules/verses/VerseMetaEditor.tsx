@@ -13,8 +13,10 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { VERSE_META_SURFACE_KEY } from '@/admin/modules/shared/surface-keys';
 import { defineAdminModule } from '@/admin/modules/shared/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/modules/shared/module-types';
+import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
 import { getVerseMetaMetadata } from './surface-types';
 
 type VerseMetaFormData = {
@@ -59,6 +61,10 @@ function VerseMetaEditor({ surface }: AdminModuleComponentProps) {
                     (candidate) => candidate.id === character.id,
                 ) === index,
         );
+    const fullEditHref = buildScriptureAdminSectionHref(
+        metadata.fullEditHref,
+        'meta',
+    );
 
     if (!isOpen) {
         return (
@@ -108,9 +114,7 @@ function VerseMetaEditor({ surface }: AdminModuleComponentProps) {
                     variant="outline"
                     className="h-8 rounded-full px-3"
                 >
-                    <Link href={`${metadata.fullEditHref}#meta-editor`}>
-                        Full Edit
-                    </Link>
+                    <Link href={fullEditHref}>Full Edit</Link>
                 </Button>
             </>
         );
@@ -121,7 +125,7 @@ function VerseMetaEditor({ surface }: AdminModuleComponentProps) {
             <ScriptureInlineRegionEditor
                 title="Verse meta"
                 description="Update the structured verse metadata without re-entering the verse or region context."
-                fullEditHref={`${metadata.fullEditHref}#meta-editor`}
+                fullEditHref={fullEditHref}
                 onCancel={() => {
                     form.reset();
                     form.clearErrors();
@@ -255,9 +259,9 @@ function VerseMetaEditor({ surface }: AdminModuleComponentProps) {
 
 export const verseMetaEditorModule = defineAdminModule({
     key: 'verse-meta-editor',
+    surfaceKeys: VERSE_META_SURFACE_KEY,
     entityScope: 'verse',
     surfaceSlots: 'inline_editor',
-    regionScope: 'verse_notes',
     requiredCapabilities: ['edit'],
     EditorComponent: VerseMetaEditor,
     order: 20,

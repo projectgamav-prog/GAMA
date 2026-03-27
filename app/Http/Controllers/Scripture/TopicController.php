@@ -49,7 +49,6 @@ class TopicController extends Controller
                 $topic->verseAssignments,
             ),
             'content_blocks' => $publicScriptureData->contentBlocks($contentBlocks),
-            'admin' => null,
         ]);
     }
 }

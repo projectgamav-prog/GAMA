@@ -1,10 +1,23 @@
 import {
+    BOOK_CONTENT_BLOCKS_SURFACE_KEY,
+    BOOK_INTRO_SURFACE_KEY,
+    BOOK_MEDIA_SLOTS_SURFACE_KEY,
+} from '@/admin/modules/shared/surface-keys';
+import {
     createBlockActionsSurface,
     createInlineEditorSurface,
     createInsertControlSurface,
     createSurfaceOwner,
-} from '@/admin/modules/shared';
-import type { AdminSurfaceContract } from '@/admin/modules/shared';
+} from '@/admin/modules/shared/surface-builders';
+import type {
+    AdminSurfaceContract,
+    AdminSurfacePresentation,
+} from '@/admin/modules/shared/surface-contracts';
+import type {
+    BlockActionManagement,
+    BlockRegionSurfaceMetadata,
+    RegisteredBlockEditorSurfaceMetadata,
+} from '@/admin/modules/blocks/surface-types';
 import {
     createAfterLastContentBlockInsertionPoint,
     createSectionStartContentBlockInsertionPoint,
@@ -16,8 +29,6 @@ import type {
     ScriptureContentBlock,
 } from '@/types';
 import type {
-    BookBlockRegionSurfaceMetadata,
-    BookContentBlockSurfaceMetadata,
     BookIdentitySurfaceMetadata,
     BookIntroSurfaceMetadata,
     BookMediaSlotsSurfaceMetadata,
@@ -33,6 +44,7 @@ type BookIntroSurfaceArgs = {
     book: ScriptureBook;
     updateHref: string;
     fullEditHref: string;
+    presentation?: AdminSurfacePresentation | null;
 };
 
 type BookBlockRegionSurfaceArgs = {
@@ -61,6 +73,7 @@ type BookBlockActionsSurfaceArgs = {
     moveUpHref?: string;
     moveDownHref?: string;
     reorderHref?: string;
+    duplicateHref?: string;
     deleteHref?: string;
     positionInRegion?: number;
     totalInRegion?: number;
@@ -82,6 +95,7 @@ export function createBookIdentitySurface({
     fullEditHref,
 }: BookIdentitySurfaceArgs): AdminSurfaceContract<BookIdentitySurfaceMetadata> {
     return createInlineEditorSurface({
+        surfaceKey: BOOK_INTRO_SURFACE_KEY,
         entity: 'book',
         entityId: book.id,
         regionKey: 'book_intro',
@@ -99,12 +113,15 @@ export function createBookIntroSurface({
     book,
     updateHref,
     fullEditHref,
+    presentation,
 }: BookIntroSurfaceArgs): AdminSurfaceContract<BookIntroSurfaceMetadata> {
     return createInlineEditorSurface({
+        surfaceKey: BOOK_INTRO_SURFACE_KEY,
         entity: 'book',
         entityId: book.id,
         regionKey: 'book_intro',
         capabilities: ['edit', 'full_edit'],
+        presentation,
         metadata: {
             editor: 'book_intro',
             book,
@@ -123,20 +140,21 @@ export function createBookBlockRegionSurface({
     defaultRegion,
     blockTypes,
     onSelectType,
-}: BookBlockRegionSurfaceArgs): AdminSurfaceContract<BookBlockRegionSurfaceMetadata> {
+}: BookBlockRegionSurfaceArgs): AdminSurfaceContract<BlockRegionSurfaceMetadata> {
     const insertionPoint =
         blocks.length > 0
             ? createAfterLastContentBlockInsertionPoint(blocks[blocks.length - 1])
             : createSectionStartContentBlockInsertionPoint(defaultRegion);
 
     return createInsertControlSurface({
+        surfaceKey: BOOK_CONTENT_BLOCKS_SURFACE_KEY,
         entity: 'book',
         entityId: book.id,
         regionKey: 'content_blocks',
         owner: createSurfaceOwner('book', book.id),
         capabilities: ['add_block', 'full_edit'],
         metadata: {
-            editor: 'book_block_region',
+            editor: 'block_region',
             entityLabel,
             storeHref,
             fullEditHref,
@@ -156,8 +174,9 @@ export function createBookContentBlockSurface({
     block,
     updateHref,
     fullEditHref,
-}: BookContentBlockSurfaceArgs): AdminSurfaceContract<BookContentBlockSurfaceMetadata> {
+}: BookContentBlockSurfaceArgs): AdminSurfaceContract<RegisteredBlockEditorSurfaceMetadata> {
     return createInlineEditorSurface({
+        surfaceKey: BOOK_CONTENT_BLOCKS_SURFACE_KEY,
         entity: 'content_block',
         entityId: block.id,
         regionKey: 'content_blocks',
@@ -165,7 +184,7 @@ export function createBookContentBlockSurface({
         owner: createSurfaceOwner('book', book.id),
         capabilities: ['edit'],
         metadata: {
-            editor: 'book_content_block',
+            editor: 'registered_block',
             entityLabel,
             block,
             updateHref,
@@ -181,15 +200,30 @@ export function createBookContentBlockActionsSurface({
     moveUpHref,
     moveDownHref,
     reorderHref,
+    duplicateHref,
     deleteHref,
     positionInRegion,
     totalInRegion,
     regionLabel,
 }: BookBlockActionsSurfaceArgs) {
-    const capabilities: Array<'reorder' | 'delete' | 'full_edit'> = [];
+    const capabilities: Array<'reorder' | 'duplicate' | 'delete' | 'full_edit'> = [];
+    const management: BlockActionManagement = {
+        moveUpHref,
+        moveDownHref,
+        reorderHref,
+        duplicateHref,
+        deleteHref,
+        positionInRegion,
+        totalInRegion,
+        regionLabel,
+    };
 
     if (moveUpHref || moveDownHref) {
         capabilities.push('reorder');
+    }
+
+    if (duplicateHref) {
+        capabilities.push('duplicate');
     }
 
     if (deleteHref) {
@@ -201,6 +235,7 @@ export function createBookContentBlockActionsSurface({
     }
 
     return createBlockActionsSurface({
+        surfaceKey: BOOK_CONTENT_BLOCKS_SURFACE_KEY,
         entity: 'content_block',
         entityId: block.id,
         regionKey: 'content_blocks',
@@ -208,15 +243,7 @@ export function createBookContentBlockActionsSurface({
         owner: createSurfaceOwner('book', book.id),
         capabilities,
         metadata: {
-            management: {
-                moveUpHref,
-                moveDownHref,
-                reorderHref,
-                deleteHref,
-                positionInRegion,
-                totalInRegion,
-                regionLabel,
-            },
+            management,
             fullEditHref,
         },
     });
@@ -231,6 +258,7 @@ export function createBookMediaSlotsSurface({
     nextSortOrder,
 }: BookMediaSlotsSurfaceArgs): AdminSurfaceContract<BookMediaSlotsSurfaceMetadata> {
     return createInlineEditorSurface({
+        surfaceKey: BOOK_MEDIA_SLOTS_SURFACE_KEY,
         entity: 'book',
         entityId: book.id,
         regionKey: 'book_media_slots',

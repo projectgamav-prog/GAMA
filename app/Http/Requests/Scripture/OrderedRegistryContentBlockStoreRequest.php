@@ -7,7 +7,7 @@ use App\Support\Scripture\Admin\RegisteredContentBlockOrdering;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Validator;
 
-abstract class OrderedRegistryTextContentBlockStoreRequest extends RegistryTextContentBlockRequest
+abstract class OrderedRegistryContentBlockStoreRequest extends RegistryContentBlockRequest
 {
     /**
      * Determine whether the given block can anchor contextual insertion.

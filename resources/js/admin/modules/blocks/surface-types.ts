@@ -1,22 +1,35 @@
 import type { ComponentProps } from 'react';
-import type { InlineTextContentBlockCreateSession } from '@/lib/scripture-inline-text-content-block';
-import type {
-    InlineTextContentBlockSaveResult,
-    InlineTextContentBlockSession,
-} from '@/components/scripture/scripture-text-content-block-inline-editor';
-import type { InlineEditorSurfaceMetadata } from '@/admin/modules/shared/surface-metadata';
 import { isSurfaceMetadataObject } from '@/admin/modules/shared/surface-metadata';
-import type { ScriptureContentBlockManagementCapability } from '@/lib/scripture-admin-capabilities';
 import type { AdminSurfaceContract } from '@/admin/modules/shared/surface-contracts';
-import type { ScriptureContentBlockInsertionPoint } from '@/types';
+import type {
+    ScriptureContentBlock,
+    ScriptureContentBlockInsertionPoint,
+} from '@/types';
 
-export type TextBlockEditorSurfaceMetadata = InlineEditorSurfaceMetadata<
-    InlineTextContentBlockSession | InlineTextContentBlockCreateSession,
-    (result: InlineTextContentBlockSaveResult) => void,
-    {
-        entityLabel: string;
-    }
->;
+export type BlockActionManagement = {
+    moveUpHref?: string;
+    moveDownHref?: string;
+    reorderHref?: string;
+    duplicateHref?: string;
+    deleteHref?: string;
+    positionInRegion?: number;
+    totalInRegion?: number;
+    regionLabel?: string;
+    disabled?: boolean;
+    onMoveUpSuccess?: () => void;
+    onMoveDownSuccess?: () => void;
+    onReorderSuccess?: (message: string) => void;
+    onDuplicateSuccess?: () => void;
+    onDeleteSuccess?: () => void;
+};
+
+export type RegisteredBlockEditorSurfaceMetadata = {
+    editor: 'registered_block';
+    entityLabel: string;
+    block: ScriptureContentBlock;
+    updateHref: string;
+    fullEditHref: string;
+};
 
 export type BlockCreateSurfaceMetadata = {
     entityLabel?: string;
@@ -31,25 +44,35 @@ export type BlockCreateSurfaceMetadata = {
     onSelectType: (blockType: string) => void;
 };
 
+export type BlockRegionSurfaceMetadata = {
+    editor: 'block_region';
+    entityLabel: string;
+    fullEditHref: string;
+};
+
 export type BlockActionSurfaceMetadata = {
-    management: ScriptureContentBlockManagementCapability | null;
+    management: BlockActionManagement | null;
     dragHandleProps?: ComponentProps<'button'>;
     isDragging?: boolean;
     fullEditHref?: string | null;
 };
 
-export function getTextBlockEditorMetadata(
+export function getRegisteredBlockEditorMetadata(
     surface: AdminSurfaceContract,
-): TextBlockEditorSurfaceMetadata | null {
+): RegisteredBlockEditorSurfaceMetadata | null {
     if (!isSurfaceMetadataObject(surface.metadata)) {
         return null;
     }
 
-    const candidate = surface.metadata as Partial<TextBlockEditorSurfaceMetadata>;
+    const candidate = surface.metadata as Partial<RegisteredBlockEditorSurfaceMetadata>;
 
-    return typeof candidate.entityLabel === 'string' &&
-        typeof candidate.onCancel === 'function'
-        ? (candidate as TextBlockEditorSurfaceMetadata)
+    return candidate.editor === 'registered_block' &&
+        typeof candidate.entityLabel === 'string' &&
+        typeof candidate.updateHref === 'string' &&
+        typeof candidate.fullEditHref === 'string' &&
+        typeof candidate.block === 'object' &&
+        candidate.block !== null
+        ? (candidate as RegisteredBlockEditorSurfaceMetadata)
         : null;
 }
 
@@ -79,5 +102,21 @@ export function getBlockActionMetadata(
 
     return candidate.management || candidate.fullEditHref
         ? (candidate as BlockActionSurfaceMetadata)
+        : null;
+}
+
+export function getBlockRegionMetadata(
+    surface: AdminSurfaceContract,
+): BlockRegionSurfaceMetadata | null {
+    if (!isSurfaceMetadataObject(surface.metadata)) {
+        return null;
+    }
+
+    const candidate = surface.metadata as Partial<BlockRegionSurfaceMetadata>;
+
+    return candidate.editor === 'block_region' &&
+        typeof candidate.entityLabel === 'string' &&
+        typeof candidate.fullEditHref === 'string'
+        ? (candidate as BlockRegionSurfaceMetadata)
         : null;
 }

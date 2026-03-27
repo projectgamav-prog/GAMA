@@ -5,8 +5,10 @@ import { ScriptureInlineRegionEditor } from '@/components/scripture/scripture-in
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { BOOK_INTRO_SURFACE_KEY } from '@/admin/modules/shared/surface-keys';
 import { defineAdminModule } from '@/admin/modules/shared/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/modules/shared/module-types';
+import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
 import { getBookIdentityMetadata } from './surface-types';
 
 type BookIdentityFormData = {
@@ -27,6 +29,11 @@ function BookIdentityEditor({ surface }: AdminModuleComponentProps) {
     if (metadata === null) {
         return null;
     }
+
+    const fullEditHref = buildScriptureAdminSectionHref(
+        metadata.fullEditHref,
+        'identity',
+    );
 
     if (!isOpen) {
         return (
@@ -53,7 +60,7 @@ function BookIdentityEditor({ surface }: AdminModuleComponentProps) {
                     variant="outline"
                     className="h-8 rounded-full px-3"
                 >
-                    <Link href={metadata.fullEditHref}>Full Edit</Link>
+                    <Link href={fullEditHref}>Full Edit</Link>
                 </Button>
             </>
         );
@@ -64,7 +71,7 @@ function BookIdentityEditor({ surface }: AdminModuleComponentProps) {
             <ScriptureInlineRegionEditor
                 title="Book identity"
                 description="Update the canonical book slug, number, and title without leaving the public page context."
-                fullEditHref={metadata.fullEditHref}
+                fullEditHref={fullEditHref}
                 onCancel={() => {
                     form.reset();
                     form.clearErrors();
@@ -125,9 +132,9 @@ function BookIdentityEditor({ surface }: AdminModuleComponentProps) {
 
 export const bookIdentityEditorModule = defineAdminModule({
     key: 'book-identity-editor',
+    surfaceKeys: BOOK_INTRO_SURFACE_KEY,
     entityScope: 'book',
     surfaceSlots: 'inline_editor',
-    regionScope: 'book_intro',
     requiredCapabilities: ['edit'],
     EditorComponent: BookIdentityEditor,
     order: 10,

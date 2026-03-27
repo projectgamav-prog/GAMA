@@ -18,3 +18,9 @@ export function useCanSeeAdminControls(): boolean {
 
     return adminContext.canAccess && adminContext.isVisible;
 }
+
+export function useVisibleAdminControls(): boolean {
+    const adminContext = useAdminContext();
+
+    return adminContext.canAccess && adminContext.isVisible;
+}

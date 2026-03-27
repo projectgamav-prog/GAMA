@@ -8,7 +8,7 @@ use App\Models\Chapter;
 use App\Models\ContentBlock;
 use App\Support\Scripture\Admin\ChapterAdminRouteContext;
 
-class ChapterContentBlockStoreRequest extends OrderedRegistryTextContentBlockStoreRequest
+class ChapterContentBlockStoreRequest extends OrderedRegistryContentBlockStoreRequest
 {
     protected function adminEntityKey(): string
     {

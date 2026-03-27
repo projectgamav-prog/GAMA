@@ -4,12 +4,15 @@ import type {
     AdminSurfaceContract,
     AdminSurfaceIdentifier,
     AdminSurfaceOwner,
+    AdminSurfacePresentation,
     AdminSurfaceSlot,
 } from './surface-contracts';
+import type { AdminSurfaceKey } from './surface-keys';
 import type {
     InlineEditorSurfaceMetadata,
     SheetEditorSurfaceMetadata,
 } from './surface-metadata';
+import { resolveSemanticSurfaceKey } from './surface-keys';
 
 export const EDITOR_SURFACE_CAPABILITIES = ['edit', 'full_edit'] as const;
 export const BLOCK_CREATE_SURFACE_CAPABILITIES = [
@@ -20,6 +23,7 @@ export const BLOCK_CREATE_SURFACE_CAPABILITIES = [
 type AdminSurfaceCallback = (...args: any[]) => void;
 
 type BuildSurfaceArgs<TMetadata> = {
+    surfaceKey?: AdminSurfaceKey | null;
     entity: ScriptureEntityType;
     entityId: AdminSurfaceIdentifier;
     slot: AdminSurfaceSlot;
@@ -27,6 +31,7 @@ type BuildSurfaceArgs<TMetadata> = {
     regionKey?: string | null;
     blockType?: string | null;
     owner?: AdminSurfaceOwner | null;
+    presentation?: AdminSurfacePresentation | null;
     label?: string | null;
     metadata?: TMetadata;
 };
@@ -70,6 +75,7 @@ export function createSurfaceOwner(
  * Lowest-level builder for module-host surfaces.
  */
 export function createAdminSurface<TMetadata>({
+    surfaceKey = null,
     entity,
     entityId,
     slot,
@@ -77,10 +83,12 @@ export function createAdminSurface<TMetadata>({
     regionKey = null,
     blockType = null,
     owner = null,
+    presentation = null,
     label = null,
     metadata,
 }: BuildSurfaceArgs<TMetadata>): AdminSurfaceContract<TMetadata> {
     return {
+        surfaceKey: surfaceKey ?? resolveSemanticSurfaceKey(entity, regionKey),
         entity,
         entityId,
         slot,
@@ -88,6 +96,7 @@ export function createAdminSurface<TMetadata>({
         blockType,
         owner,
         capabilities,
+        presentation,
         label,
         metadata,
     };
@@ -99,6 +108,10 @@ export function createInlineEditorSurface<TMetadata>(
     return createAdminSurface({
         ...args,
         slot: 'inline_editor',
+        presentation: args.presentation ?? {
+            placement: 'inline',
+            variant: 'full',
+        },
     });
 }
 
@@ -132,6 +145,10 @@ export function createSheetEditorSurface<TMetadata>(
     return createAdminSurface({
         ...args,
         slot: 'sheet_editor',
+        presentation: args.presentation ?? {
+            placement: 'drawer',
+            variant: 'full',
+        },
     });
 }
 
@@ -165,6 +182,10 @@ export function createInsertControlSurface<TMetadata>(
     return createAdminSurface({
         ...args,
         slot: 'insert_control',
+        presentation: args.presentation ?? {
+            placement: 'inline',
+            variant: 'compact',
+        },
     });
 }
 
@@ -174,5 +195,9 @@ export function createBlockActionsSurface<TMetadata>(
     return createAdminSurface({
         ...args,
         slot: 'block_actions',
+        presentation: args.presentation ?? {
+            placement: 'inline',
+            variant: 'compact',
+        },
     });
 }

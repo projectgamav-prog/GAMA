@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { useScriptureAdminTargetNavigation } from '@/hooks/use-scripture-admin-target-navigation';
 import { scriptureAdminStartCase } from '@/lib/scripture-admin-field-display';
 import { getBookMediaSlotOptions } from '@/lib/book-media-slot-meta';
 import ScriptureLayout from '@/layouts/scripture-layout';
@@ -47,7 +48,7 @@ function BookDescriptionEditorCard({
     });
 
     return (
-        <Card id="details-editor">
+        <Card>
             <CardHeader className="gap-3">
                 <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="outline">Editorial</Badge>
@@ -112,6 +113,7 @@ export default function BookFullEdit({
     const mediaSlotGuide = getBookMediaSlotOptions(
         fields.media_assignment_role.options,
     );
+    useScriptureAdminTargetNavigation();
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: book.title,
@@ -298,6 +300,7 @@ export default function BookFullEdit({
             </ScriptureSection>
 
             <ScriptureSection
+                adminTargetSection="details"
                 title="Page Intro Copy"
                 description="Registered editorial copy for the shared public page intro region on the Book overview and show pages."
                 action={<Badge variant="outline">book_intro</Badge>}
@@ -310,9 +313,9 @@ export default function BookFullEdit({
             </ScriptureSection>
 
             <ScriptureSection
-                id="content-blocks"
+                adminTargetSection="content_blocks"
                 title="Editorial Block Regions"
-                description="Structured long-form Book copy lives here. Use registered regions intentionally, and keep video out of raw content blocks."
+                description="Structured Book text, quote, and image blocks live here. Use registered regions intentionally, and keep video out of raw content blocks."
                 action={
                     <div className="flex flex-wrap gap-2">
                         <Badge variant="outline">
@@ -331,6 +334,8 @@ export default function BookFullEdit({
                         blockTypeField={fields.content_block_type}
                         titleField={fields.content_block_title}
                         bodyField={fields.content_block_body}
+                        mediaUrlField={fields.content_block_media_url}
+                        altTextField={fields.content_block_alt_text}
                         regionField={fields.content_block_region}
                         sortOrderField={fields.content_block_sort_order}
                         statusField={fields.content_block_status}
@@ -343,6 +348,8 @@ export default function BookFullEdit({
                             blockTypeField={fields.content_block_type}
                             titleField={fields.content_block_title}
                             bodyField={fields.content_block_body}
+                            mediaUrlField={fields.content_block_media_url}
+                            altTextField={fields.content_block_alt_text}
                             regionField={fields.content_block_region}
                             sortOrderField={fields.content_block_sort_order}
                             statusField={fields.content_block_status}
@@ -359,7 +366,7 @@ export default function BookFullEdit({
             </ScriptureSection>
 
             <ScriptureSection
-                id="media-slots"
+                adminTargetSection="media_slots"
                 title="Public Media Slots"
                 description="Registered slots make Book media behavior explicit across library cards, overview pages, and supporting media cards."
                 action={

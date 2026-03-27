@@ -1,6 +1,4 @@
 import type { ReactNode } from 'react';
-import type { ScriptureAdminSurfaceOptions } from '@/components/scripture/scripture-admin-surface';
-import { ScriptureAdminSurface } from '@/components/scripture/scripture-admin-surface';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { ScriptureContentBlock } from '@/types/scripture';
@@ -9,7 +7,6 @@ import { ScriptureEntityRegion } from './scripture-entity-region';
 type Props = {
     block: ScriptureContentBlock;
     headerAction?: ReactNode;
-    adminSurface?: ScriptureAdminSurfaceOptions | null;
     inlineEditor?: ReactNode;
 };
 
@@ -29,7 +26,6 @@ const getDataValue = (
 export function ContentBlockRenderer({
     block,
     headerAction,
-    adminSurface,
     inlineEditor,
 }: Props) {
     const mediaUrl = getDataValue(block.data_json, 'url');
@@ -46,13 +42,7 @@ export function ContentBlockRenderer({
 
     const renderCard = (card: ReactNode) => (
         <ScriptureEntityRegion meta={entityMeta} asChild>
-            {adminSurface ? (
-                <ScriptureAdminSurface {...adminSurface}>
-                    {card}
-                </ScriptureAdminSurface>
-            ) : (
-                card
-            )}
+            {card}
         </ScriptureEntityRegion>
     );
 
@@ -149,10 +139,10 @@ export function ContentBlockRenderer({
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex items-center gap-2">
                         <Badge variant="outline">{block.region}</Badge>
-                            <Badge variant="secondary">Text</Badge>
-                        </div>
-                        {headerAction}
+                        <Badge variant="secondary">Text</Badge>
                     </div>
+                    {headerAction}
+                </div>
                 {!inlineEditor && block.title && (
                     <CardTitle>{block.title}</CardTitle>
                 )}

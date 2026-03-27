@@ -1,8 +1,6 @@
 import type { AdminSurfaceContract } from '@/admin/modules/shared/surface-contracts';
 import { isSurfaceMetadataObject } from '@/admin/modules/shared/surface-metadata';
 import type {
-    ScriptureContentBlock,
-    ScriptureContentBlockInsertionPoint,
     ScriptureVerse,
     ScriptureVerseCharacterAssignment,
     ScriptureVerseMeta,
@@ -19,22 +17,6 @@ export type VerseMetaSurfaceMetadata = {
     updateHref: string;
     fullEditHref: string;
     characters: ScriptureVerseCharacterAssignment[];
-};
-
-export type VerseNoteBlockSurfaceMetadata = {
-    entityLabel: string;
-    block: ScriptureContentBlock;
-    updateHref: string;
-    fullEditHref: string;
-};
-
-export type VerseBlockRegionSurfaceMetadata = {
-    entityLabel: string;
-    storeHref: string;
-    fullEditHref: string;
-    defaultRegion: string;
-    blockTypes: string[];
-    insertionPoint: ScriptureContentBlockInsertionPoint;
 };
 
 function getSurfaceMetadata<TMetadata>(
@@ -72,35 +54,5 @@ export function getVerseMetaMetadata(
             typeof metadata.updateHref === 'string' &&
             typeof metadata.fullEditHref === 'string' &&
             Array.isArray(metadata.characters),
-    );
-}
-
-export function getVerseNoteBlockMetadata(
-    surface: AdminSurfaceContract,
-): VerseNoteBlockSurfaceMetadata | null {
-    return getSurfaceMetadata<VerseNoteBlockSurfaceMetadata>(
-        surface,
-        (metadata) =>
-            typeof metadata.entityLabel === 'string' &&
-            typeof metadata.updateHref === 'string' &&
-            typeof metadata.fullEditHref === 'string' &&
-            typeof metadata.block === 'object' &&
-            metadata.block !== null,
-    );
-}
-
-export function getVerseBlockRegionMetadata(
-    surface: AdminSurfaceContract,
-): VerseBlockRegionSurfaceMetadata | null {
-    return getSurfaceMetadata<VerseBlockRegionSurfaceMetadata>(
-        surface,
-        (metadata) =>
-            typeof metadata.entityLabel === 'string' &&
-            typeof metadata.storeHref === 'string' &&
-            typeof metadata.fullEditHref === 'string' &&
-            typeof metadata.defaultRegion === 'string' &&
-            Array.isArray(metadata.blockTypes) &&
-            typeof metadata.insertionPoint === 'object' &&
-            metadata.insertionPoint !== null,
     );
 }

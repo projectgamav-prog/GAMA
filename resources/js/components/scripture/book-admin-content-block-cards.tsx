@@ -13,6 +13,8 @@ type SharedProps = {
     blockTypeField: ScriptureRegisteredAdminField;
     titleField: ScriptureRegisteredAdminField;
     bodyField: ScriptureRegisteredAdminField;
+    mediaUrlField?: ScriptureRegisteredAdminField | null;
+    altTextField?: ScriptureRegisteredAdminField | null;
     regionField: ScriptureRegisteredAdminField;
     sortOrderField: ScriptureRegisteredAdminField;
     statusField: ScriptureRegisteredAdminField;
@@ -24,6 +26,8 @@ export function CreateBookContentBlockCard({
     blockTypeField,
     titleField,
     bodyField,
+    mediaUrlField,
+    altTextField,
     regionField,
     sortOrderField,
     statusField,
@@ -38,6 +42,8 @@ export function CreateBookContentBlockCard({
             blockTypeField={blockTypeField}
             titleField={titleField}
             bodyField={bodyField}
+            mediaUrlField={mediaUrlField}
+            altTextField={altTextField}
             regionField={regionField}
             sortOrderField={sortOrderField}
             statusField={statusField}
@@ -54,6 +60,8 @@ export function BookContentBlockEditorCard({
     blockTypeField,
     titleField,
     bodyField,
+    mediaUrlField,
+    altTextField,
     regionField,
     sortOrderField,
     statusField,
@@ -66,6 +74,8 @@ export function BookContentBlockEditorCard({
             blockTypeField={blockTypeField}
             titleField={titleField}
             bodyField={bodyField}
+            mediaUrlField={mediaUrlField}
+            altTextField={altTextField}
             regionField={regionField}
             sortOrderField={sortOrderField}
             statusField={statusField}

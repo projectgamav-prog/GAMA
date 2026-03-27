@@ -10,12 +10,13 @@ import {
     Tag,
     Users,
 } from 'lucide-react';
-import { AdminModuleHost } from '@/admin/modules/shared';
+import { AdminModuleHost } from '@/admin/modules/shared/AdminModuleHost';
 import {
     createVerseIdentitySurface,
     createVerseMetaSurface,
 } from '@/admin/modules/verses/surface-builders';
 import { ScriptureActionRow } from '@/components/scripture/scripture-action-row';
+import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
@@ -30,6 +31,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { useVisibleAdminControls } from '@/hooks/use-admin-context';
 import ScriptureLayout from '@/layouts/scripture-layout';
 import { chapterLabel, sectionLabel, verseLabel } from '@/lib/scripture';
 import { cn } from '@/lib/utils';
@@ -69,6 +71,7 @@ export default function VerseShow({
 }: VerseShowProps) {
     const adminPanelClassName =
         'flex flex-wrap items-center gap-2 rounded-2xl border border-border/70 bg-muted/20 p-3';
+    const showAdminControls = useVisibleAdminControls();
     const chapterTitle = chapterLabel(chapter.number, chapter.title);
     const bookSectionTitle = sectionLabel(
         book_section.number,
@@ -128,7 +131,7 @@ export default function VerseShow({
             keywords.length > 0 ||
             studyFlags.length > 0);
     const verseIntroSurface =
-        isAdmin && admin
+        showAdminControls && admin
             ? createVerseIdentitySurface({
                   verse,
                   updateHref: admin.identity_update_href,
@@ -136,7 +139,7 @@ export default function VerseShow({
               })
             : null;
     const verseNotesSurface =
-        isAdmin && admin
+        showAdminControls && admin
             ? createVerseMetaSurface({
                   verse,
                   verseMeta: verse_meta,
@@ -173,6 +176,8 @@ export default function VerseShow({
             title={`${verseTitle} - ${chapterTitle}`}
             breadcrumbs={breadcrumbs}
         >
+            <ScriptureAdminModeBar />
+
             <ScripturePageIntroCard
                 entityMeta={{
                     ...verseEntity,
@@ -928,7 +933,7 @@ export default function VerseShow({
                 verse={verse}
                 verseTitle={verseTitle}
                 blocks={content_blocks}
-                isAdmin={isAdmin}
+                showAdminControls={showAdminControls}
                 admin={admin}
             />
         </ScriptureLayout>

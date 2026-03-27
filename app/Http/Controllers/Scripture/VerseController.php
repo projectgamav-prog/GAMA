@@ -131,7 +131,7 @@ class VerseController extends Controller
                 $contentBlocks,
                 $visibleSequence,
                 fn (ContentBlock $block): bool => $adminRouteContext->isEditableNoteBlock($block),
-                fn (ContentBlock $block): bool => $adminRouteContext->isEditableNoteBlock($block),
+                fn (ContentBlock $block): bool => $adminRouteContext->isDuplicableNoteBlock($block),
                 fn (ContentBlock $block): string => $adminRouteContext->contentBlockUpdateHref($block),
                 fn (ContentBlock $block): string => $adminRouteContext->contentBlockMoveUpHref($block),
                 fn (ContentBlock $block): string => $adminRouteContext->contentBlockMoveDownHref($block),

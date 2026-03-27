@@ -1,4 +1,4 @@
-import { AdminModuleHost } from '@/admin/modules/shared';
+import { AdminModuleHost } from '@/admin/modules/shared/AdminModuleHost';
 import {
     createVerseBlockRegionSurface,
     createVerseNoteBlockActionsSurface,
@@ -18,7 +18,7 @@ type Props = {
     verse: ScriptureVerse;
     verseTitle: string;
     blocks: ScriptureContentBlock[];
-    isAdmin: boolean;
+    showAdminControls: boolean;
     admin?: ScriptureVerseAdmin | null;
 };
 
@@ -29,10 +29,10 @@ export function ScriptureVerseContentBlockRegion({
     verse,
     verseTitle,
     blocks,
-    isAdmin,
+    showAdminControls,
     admin,
 }: Props) {
-    if (blocks.length === 0 && (!isAdmin || !admin)) {
+    if (blocks.length === 0 && (!showAdminControls || !admin)) {
         return null;
     }
 
@@ -45,7 +45,7 @@ export function ScriptureVerseContentBlockRegion({
     );
     const seenBlocksByRegion = new Map<string, number>();
     const regionSurface =
-        isAdmin && admin
+        showAdminControls && admin
             ? createVerseBlockRegionSurface({
                   verse,
                   entityLabel: verseTitle,
@@ -98,21 +98,21 @@ export function ScriptureVerseContentBlockRegion({
                             null;
 
                         const editorSurface =
-                            isAdmin && admin && updateHref
+                            showAdminControls && admin && updateHref
                                 ? createVerseNoteBlockSurface({
                                       verse,
                                       entityLabel: verseTitle,
                                       block,
                                       updateHref,
-                                      fullEditHref: `${admin.full_edit_href}#block-${block.id}`,
+                                      fullEditHref: admin.full_edit_href,
                                   })
                                 : null;
                         const actionsSurface =
-                            isAdmin && admin && updateHref
+                            showAdminControls && admin && updateHref
                                 ? createVerseNoteBlockActionsSurface({
                                       verse,
                                       block,
-                                      fullEditHref: `${admin.full_edit_href}#block-${block.id}`,
+                                      fullEditHref: admin.full_edit_href,
                                       moveUpHref:
                                           admin.content_block_move_up_hrefs[
                                               String(block.id)
@@ -123,6 +123,10 @@ export function ScriptureVerseContentBlockRegion({
                                           ],
                                       reorderHref:
                                           admin.content_block_reorder_hrefs[
+                                              String(block.id)
+                                          ],
+                                      duplicateHref:
+                                          admin.content_block_duplicate_hrefs[
                                               String(block.id)
                                           ],
                                       deleteHref:

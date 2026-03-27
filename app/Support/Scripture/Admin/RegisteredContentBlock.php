@@ -87,9 +87,10 @@ class RegisteredContentBlock
         ?string $forcedBlockType = null,
         bool $includeDataJson = false,
     ): array {
+        $blockType = self::resolvedBlockType($validated, $forcedBlockType);
         $attributes = [
             'region' => trim((string) $validated['region']),
-            'block_type' => self::resolvedBlockType($validated, $forcedBlockType),
+            'block_type' => $blockType,
             'title' => self::nullableString($validated['title'] ?? null),
             'body' => trim((string) $validated['body']),
             'sort_order' => $validated['sort_order'] ?? null,
@@ -97,7 +98,10 @@ class RegisteredContentBlock
         ];
 
         if ($includeDataJson) {
-            $attributes['data_json'] = null;
+            $attributes['data_json'] = RegisteredContentBlockDataJson::fromValidated(
+                $validated,
+                $blockType,
+            );
         }
 
         return $attributes;
@@ -113,7 +117,9 @@ class RegisteredContentBlock
         array $validated,
         ?string $forcedBlockType = null,
         bool $allowBlockTypeUpdate = true,
+        bool $includeDataJson = false,
     ): array {
+        $blockType = self::resolvedBlockType($validated, $forcedBlockType);
         $attributes = [
             'region' => trim((string) $validated['region']),
             'title' => self::nullableString($validated['title'] ?? null),
@@ -123,9 +129,13 @@ class RegisteredContentBlock
         ];
 
         if ($allowBlockTypeUpdate) {
-            $attributes['block_type'] = self::resolvedBlockType(
+            $attributes['block_type'] = $blockType;
+        }
+
+        if ($includeDataJson) {
+            $attributes['data_json'] = RegisteredContentBlockDataJson::fromValidated(
                 $validated,
-                $forcedBlockType,
+                $blockType,
             );
         }
 

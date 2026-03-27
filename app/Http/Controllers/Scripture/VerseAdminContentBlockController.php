@@ -13,7 +13,7 @@ use App\Models\ChapterSection;
 use App\Models\ContentBlock;
 use App\Models\Verse;
 use App\Support\Scripture\Admin\ContentBlockDuplicate;
-use App\Support\Scripture\Admin\FixedTypeContentBlock;
+use App\Support\Scripture\Admin\RegisteredContentBlock;
 use App\Support\Scripture\Admin\RegisteredContentBlockOrdering;
 use App\Support\Scripture\Admin\VisibleContentBlockSequence;
 use App\Support\Scripture\Admin\VerseAdminRouteContext;
@@ -21,8 +21,6 @@ use Illuminate\Http\RedirectResponse;
 
 class VerseAdminContentBlockController extends Controller
 {
-    private const BLOCK_TYPE = 'text';
-
     /**
      * Create a new verse-owned editorial note block.
      */
@@ -54,9 +52,9 @@ class VerseAdminContentBlockController extends Controller
 
         $contentBlockOrdering->create(
             $verse,
-            FixedTypeContentBlock::createAttributes(
+            RegisteredContentBlock::createAttributes(
                 $validated,
-                self::BLOCK_TYPE,
+                includeDataJson: true,
             ),
             insertionMode: $this->nullableString(
                 $validated['insertion_mode'] ?? null,
@@ -68,7 +66,7 @@ class VerseAdminContentBlockController extends Controller
     }
 
     /**
-     * Update a verse-owned text note block.
+     * Update a verse-owned registered textual note block.
      */
     public function update(
         VerseContentBlockUpdateRequest $request,
@@ -90,7 +88,7 @@ class VerseAdminContentBlockController extends Controller
         $adminRouteContext->abortUnlessEditableNoteBlock($contentBlock);
 
         $contentBlock->update(
-            FixedTypeContentBlock::updateAttributes($request->validated()),
+            RegisteredContentBlock::updateAttributes($request->validated()),
         );
 
         return redirect()->back(status: 303);
@@ -115,7 +113,7 @@ class VerseAdminContentBlockController extends Controller
 
         $adminRouteContext->abortUnlessEditableNoteBlock($contentBlock);
 
-        $visibleSequence = $this->visibleSequence($verse);
+        $visibleSequence = $this->visibleSequence($verse, $adminRouteContext);
 
         abort_unless($visibleSequence->contains($contentBlock), 404);
 
@@ -147,7 +145,7 @@ class VerseAdminContentBlockController extends Controller
 
         $adminRouteContext->abortUnlessEditableNoteBlock($contentBlock);
 
-        $visibleSequence = $this->visibleSequence($verse);
+        $visibleSequence = $this->visibleSequence($verse, $adminRouteContext);
 
         abort_unless($visibleSequence->contains($contentBlock), 404);
 
@@ -180,7 +178,7 @@ class VerseAdminContentBlockController extends Controller
 
         $adminRouteContext->abortUnlessEditableNoteBlock($contentBlock);
 
-        $visibleSequence = $this->visibleSequence($verse);
+        $visibleSequence = $this->visibleSequence($verse, $adminRouteContext);
 
         abort_unless($visibleSequence->contains($contentBlock), 404);
 
@@ -220,13 +218,13 @@ class VerseAdminContentBlockController extends Controller
 
         $adminRouteContext->abortUnlessDuplicableNoteBlock($contentBlock);
 
-        $visibleSequence = $this->visibleSequence($verse);
+        $visibleSequence = $this->visibleSequence($verse, $adminRouteContext);
 
         abort_unless($visibleSequence->contains($contentBlock), 404);
 
         $contentBlockOrdering->create(
             $verse,
-            ContentBlockDuplicate::attributes($contentBlock, self::BLOCK_TYPE),
+            ContentBlockDuplicate::attributes($contentBlock),
             insertionMode: 'after',
             relativeBlock: $contentBlock,
         );
@@ -253,7 +251,7 @@ class VerseAdminContentBlockController extends Controller
 
         $adminRouteContext->abortUnlessEditableNoteBlock($contentBlock);
 
-        $visibleSequence = $this->visibleSequence($verse);
+        $visibleSequence = $this->visibleSequence($verse, $adminRouteContext);
 
         abort_unless($visibleSequence->contains($contentBlock), 404);
 
@@ -273,12 +271,23 @@ class VerseAdminContentBlockController extends Controller
         return $trimmed === '' ? null : $trimmed;
     }
 
-    private function visibleSequence(Verse $verse): VisibleContentBlockSequence
+    private function visibleSequence(
+        Verse $verse,
+        ?VerseAdminRouteContext $adminRouteContext = null,
+    ): VisibleContentBlockSequence
     {
+        $adminRouteContext ??= new VerseAdminRouteContext(
+            $verse->chapterSection->chapter->bookSection->book,
+            $verse->chapterSection->chapter->bookSection,
+            $verse->chapterSection->chapter,
+            $verse->chapterSection,
+            $verse,
+        );
+
         return new VisibleContentBlockSequence(
             $verse->contentBlocks()
                 ->published()
-                ->where('block_type', self::BLOCK_TYPE)
+                ->whereIn('block_type', $adminRouteContext->contentBlockTypes())
                 ->orderBy('sort_order')
                 ->orderBy('id')
                 ->get(),

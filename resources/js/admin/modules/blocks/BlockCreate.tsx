@@ -3,26 +3,31 @@ import { ScriptureContentBlockInsertControl } from '@/components/scripture/scrip
 import { ScriptureTextContentBlockInlineEditor } from '@/components/scripture/scripture-text-content-block-inline-editor';
 import { defineAdminModule } from '@/admin/modules/shared/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/modules/shared/module-types';
-import { createInlineTextContentBlockCreateSession } from '@/lib/scripture-inline-text-content-block';
+import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
+import {
+    createInlineTextContentBlockCreateSession,
+    isInlineTextualContentBlockType,
+} from '@/lib/scripture-inline-text-content-block';
 import { getBlockCreateMetadata } from './surface-types';
 
 function BlockCreate({ surface }: AdminModuleComponentProps) {
     const metadata = getBlockCreateMetadata(surface);
     const [isOpen, setIsOpen] = useState(false);
+    const [selectedBlockType, setSelectedBlockType] = useState('text');
 
     if (metadata === null) {
         return null;
     }
 
-    const canCreateInlineTextBlock =
+    const canCreateInlineBlock = Boolean(
         metadata.storeHref &&
-        metadata.fullEditHref &&
-        metadata.defaultRegion &&
-        metadata.insertionPoint &&
-        metadata.entityLabel &&
-        metadata.blockTypes.includes('text');
+            metadata.fullEditHref &&
+            metadata.defaultRegion &&
+            metadata.insertionPoint &&
+            metadata.entityLabel,
+    );
 
-    if (isOpen && canCreateInlineTextBlock) {
+    if (isOpen && canCreateInlineBlock) {
         const {
             storeHref,
             fullEditHref,
@@ -46,10 +51,13 @@ function BlockCreate({ surface }: AdminModuleComponentProps) {
                 <ScriptureTextContentBlockInlineEditor
                     session={createInlineTextContentBlockCreateSession({
                         storeHref,
-                        fullEditHref,
+                        fullEditHref: buildScriptureAdminSectionHref(
+                            fullEditHref,
+                            'content_blocks',
+                        ),
                         defaultRegion,
                         insertionPoint,
-                        blockType: 'text',
+                        blockType: selectedBlockType,
                     })}
                     entityLabel={entityLabel}
                     onCancel={() => setIsOpen(false)}
@@ -59,6 +67,11 @@ function BlockCreate({ surface }: AdminModuleComponentProps) {
         );
     }
 
+    const openInlineCreate = (blockType: string) => {
+        setSelectedBlockType(blockType);
+        setIsOpen(true);
+    };
+
     return (
         <ScriptureContentBlockInsertControl
             blockTypes={metadata.blockTypes}
@@ -66,11 +79,17 @@ function BlockCreate({ surface }: AdminModuleComponentProps) {
             label={metadata.label}
             placementLabel={metadata.placementLabel}
             onSelectType={(blockType) => {
-                metadata.onSelectType(blockType);
+                if (
+                    canCreateInlineBlock &&
+                    metadata.blockTypes.includes(blockType) &&
+                    isInlineTextualContentBlockType(blockType)
+                ) {
+                    openInlineCreate(blockType);
 
-                if (blockType === 'text' && canCreateInlineTextBlock) {
-                    setIsOpen(true);
+                    return;
                 }
+
+                metadata.onSelectType(blockType);
             }}
         />
     );
@@ -85,5 +104,5 @@ export const blockCreateModule = defineAdminModule({
     EditorComponent: BlockCreate,
     order: 10,
     description:
-        'Renders the existing block-type picker at valid insertion points in block-backed scripture regions.',
+        'Renders the shared block-type picker and inline textual create flow at valid insertion points in block-backed scripture regions.',
 });

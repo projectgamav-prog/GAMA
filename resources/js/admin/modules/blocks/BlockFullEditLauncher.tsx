@@ -3,6 +3,7 @@ import { SquareArrowOutUpRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { defineAdminModule } from '@/admin/modules/shared/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/modules/shared/module-types';
+import { buildScriptureAdminBlockHref } from '@/lib/scripture-admin-navigation';
 import { getBlockActionMetadata } from './surface-types';
 
 function BlockFullEditLauncher({ surface }: AdminModuleComponentProps) {
@@ -12,6 +13,11 @@ function BlockFullEditLauncher({ surface }: AdminModuleComponentProps) {
         return null;
     }
 
+    const fullEditHref = buildScriptureAdminBlockHref(
+        metadata.fullEditHref,
+        surface.entityId,
+    );
+
     return (
         <Button
             asChild
@@ -19,7 +25,7 @@ function BlockFullEditLauncher({ surface }: AdminModuleComponentProps) {
             variant="outline"
             className="h-8 rounded-full px-3"
         >
-            <Link href={metadata.fullEditHref}>
+            <Link href={fullEditHref}>
                 <SquareArrowOutUpRight className="size-3.5" />
                 Full edit
             </Link>

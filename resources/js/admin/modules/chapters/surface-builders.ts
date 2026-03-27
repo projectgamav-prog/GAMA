@@ -1,7 +1,6 @@
 import {
-    VERSE_INTRO_SURFACE_KEY,
-    VERSE_META_SURFACE_KEY,
-    VERSE_NOTES_SURFACE_KEY,
+    CHAPTER_CONTENT_BLOCKS_SURFACE_KEY,
+    CHAPTER_INTRO_SURFACE_KEY,
 } from '@/admin/modules/shared/surface-keys';
 import {
     createBlockActionsSurface,
@@ -20,32 +19,23 @@ import {
     createSectionStartContentBlockInsertionPoint,
 } from '@/lib/scripture-content-block-insertion';
 import type {
+    ScriptureChapter,
     ScriptureContentBlock,
-    ScriptureVerse,
-    ScriptureVerseCharacterAssignment,
-    ScriptureVerseMeta,
 } from '@/types';
 import type {
-    VerseIdentitySurfaceMetadata,
-    VerseMetaSurfaceMetadata,
+    ChapterIntroSurfaceMetadata,
 } from './surface-types';
 
-type VerseIdentitySurfaceArgs = {
-    verse: ScriptureVerse;
-    updateHref: string;
+type ChapterIntroSurfaceArgs = {
+    chapter: ScriptureChapter;
+    chapterTitle: string;
+    block: ScriptureContentBlock | null;
+    updateHref: string | null;
     fullEditHref: string;
 };
 
-type VerseMetaSurfaceArgs = {
-    verse: ScriptureVerse;
-    verseMeta: ScriptureVerseMeta | null;
-    characters: ScriptureVerseCharacterAssignment[];
-    updateHref: string;
-    fullEditHref: string;
-};
-
-type VerseBlockRegionSurfaceArgs = {
-    verse: ScriptureVerse;
+type ChapterBlockRegionSurfaceArgs = {
+    chapter: ScriptureChapter;
     entityLabel: string;
     blocks: ScriptureContentBlock[];
     storeHref: string;
@@ -54,16 +44,16 @@ type VerseBlockRegionSurfaceArgs = {
     blockTypes: string[];
 };
 
-type VerseNoteBlockSurfaceArgs = {
-    verse: ScriptureVerse;
+type ChapterContentBlockSurfaceArgs = {
+    chapter: ScriptureChapter;
     entityLabel: string;
     block: ScriptureContentBlock;
     updateHref: string;
     fullEditHref: string;
 };
 
-type VerseBlockActionsSurfaceArgs = {
-    verse: ScriptureVerse;
+type ChapterBlockActionsSurfaceArgs = {
+    chapter: ScriptureChapter;
     block: ScriptureContentBlock;
     fullEditHref: string;
     moveUpHref?: string;
@@ -76,67 +66,49 @@ type VerseBlockActionsSurfaceArgs = {
     regionLabel?: string;
 };
 
-export function createVerseIdentitySurface({
-    verse,
+export function createChapterIntroSurface({
+    chapter,
+    chapterTitle,
+    block,
     updateHref,
     fullEditHref,
-}: VerseIdentitySurfaceArgs): AdminSurfaceContract<VerseIdentitySurfaceMetadata> {
+}: ChapterIntroSurfaceArgs): AdminSurfaceContract<ChapterIntroSurfaceMetadata> {
     return createInlineEditorSurface({
-        surfaceKey: VERSE_INTRO_SURFACE_KEY,
-        entity: 'verse',
-        entityId: verse.id,
-        regionKey: 'verse_intro',
-        capabilities: ['edit', 'full_edit'],
+        surfaceKey: CHAPTER_INTRO_SURFACE_KEY,
+        entity: 'chapter',
+        entityId: chapter.id,
+        regionKey: 'page_intro',
+        capabilities: updateHref ? ['edit', 'full_edit'] : ['full_edit'],
         metadata: {
-            verse,
+            chapter,
+            chapterTitle,
+            block,
             updateHref,
             fullEditHref,
         },
     });
 }
 
-export function createVerseMetaSurface({
-    verse,
-    verseMeta,
-    characters,
-    updateHref,
-    fullEditHref,
-}: VerseMetaSurfaceArgs): AdminSurfaceContract<VerseMetaSurfaceMetadata> {
-    return createInlineEditorSurface({
-        surfaceKey: VERSE_META_SURFACE_KEY,
-        entity: 'verse',
-        entityId: verse.id,
-        regionKey: 'verse_notes',
-        capabilities: ['edit', 'full_edit'],
-        metadata: {
-            verseMeta,
-            updateHref,
-            fullEditHref,
-            characters,
-        },
-    });
-}
-
-export function createVerseBlockRegionSurface({
-    verse,
+export function createChapterBlockRegionSurface({
+    chapter,
     entityLabel,
     blocks,
     storeHref,
     fullEditHref,
     defaultRegion,
     blockTypes,
-}: VerseBlockRegionSurfaceArgs): AdminSurfaceContract<BlockRegionSurfaceMetadata> {
+}: ChapterBlockRegionSurfaceArgs): AdminSurfaceContract<BlockRegionSurfaceMetadata> {
     const insertionPoint =
         blocks.length > 0
             ? createAfterLastContentBlockInsertionPoint(blocks[blocks.length - 1])
             : createSectionStartContentBlockInsertionPoint(defaultRegion);
 
     return createInsertControlSurface({
-        surfaceKey: VERSE_NOTES_SURFACE_KEY,
-        entity: 'verse',
-        entityId: verse.id,
+        surfaceKey: CHAPTER_CONTENT_BLOCKS_SURFACE_KEY,
+        entity: 'chapter',
+        entityId: chapter.id,
         regionKey: 'content_blocks',
-        owner: createSurfaceOwner('verse', verse.id),
+        owner: createSurfaceOwner('chapter', chapter.id),
         capabilities: ['add_block', 'full_edit'],
         metadata: {
             editor: 'block_region',
@@ -153,20 +125,20 @@ export function createVerseBlockRegionSurface({
     });
 }
 
-export function createVerseNoteBlockSurface({
-    verse,
+export function createChapterContentBlockSurface({
+    chapter,
     entityLabel,
     block,
     updateHref,
     fullEditHref,
-}: VerseNoteBlockSurfaceArgs): AdminSurfaceContract<RegisteredBlockEditorSurfaceMetadata> {
+}: ChapterContentBlockSurfaceArgs): AdminSurfaceContract<RegisteredBlockEditorSurfaceMetadata> {
     return createInlineEditorSurface({
-        surfaceKey: VERSE_NOTES_SURFACE_KEY,
+        surfaceKey: CHAPTER_CONTENT_BLOCKS_SURFACE_KEY,
         entity: 'content_block',
         entityId: block.id,
         regionKey: 'content_blocks',
         blockType: block.block_type,
-        owner: createSurfaceOwner('verse', verse.id),
+        owner: createSurfaceOwner('chapter', chapter.id),
         capabilities: ['edit'],
         metadata: {
             editor: 'registered_block',
@@ -178,8 +150,8 @@ export function createVerseNoteBlockSurface({
     });
 }
 
-export function createVerseNoteBlockActionsSurface({
-    verse,
+export function createChapterContentBlockActionsSurface({
+    chapter,
     block,
     fullEditHref,
     moveUpHref,
@@ -190,7 +162,7 @@ export function createVerseNoteBlockActionsSurface({
     positionInRegion,
     totalInRegion,
     regionLabel,
-}: VerseBlockActionsSurfaceArgs) {
+}: ChapterBlockActionsSurfaceArgs) {
     const capabilities: Array<'reorder' | 'duplicate' | 'delete' | 'full_edit'> = [];
     const management: BlockActionManagement = {
         moveUpHref,
@@ -220,12 +192,12 @@ export function createVerseNoteBlockActionsSurface({
     }
 
     return createBlockActionsSurface({
-        surfaceKey: VERSE_NOTES_SURFACE_KEY,
+        surfaceKey: CHAPTER_CONTENT_BLOCKS_SURFACE_KEY,
         entity: 'content_block',
         entityId: block.id,
         regionKey: 'content_blocks',
         blockType: block.block_type,
-        owner: createSurfaceOwner('verse', verse.id),
+        owner: createSurfaceOwner('chapter', chapter.id),
         capabilities,
         metadata: {
             management,

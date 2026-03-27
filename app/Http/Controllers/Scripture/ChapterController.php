@@ -35,7 +35,7 @@ class ChapterController extends Controller
             ->orderBy('sort_order')
             ->orderBy('id')
             ->get();
-        $adminVisibilityEnabled = AdminContext::isVisible($request);
+        $isAdmin = AdminContext::canAccess($request->user());
         $adminRouteContext = new ChapterAdminRouteContext($book, $bookSection, $chapter);
         $primaryEditableBlock = $this->primaryPublishedEditableBlock(
             $contentBlocks,
@@ -52,7 +52,8 @@ class ChapterController extends Controller
             'book_section' => $publicScriptureData->bookSection($book, $bookSection),
             'chapter' => $publicScriptureData->chapter($book, $bookSection, $chapter),
             'content_blocks' => $publicScriptureData->contentBlocks($contentBlocks),
-            'admin' => $adminVisibilityEnabled
+            'isAdmin' => $isAdmin,
+            'admin' => $isAdmin
                 ? $this->chapterAdminPayload(
                     $adminRouteContext,
                     $contentBlocks,
@@ -122,7 +123,7 @@ class ChapterController extends Controller
                 $contentBlocks,
                 $visibleSequence,
                 fn (ContentBlock $block): bool => $adminRouteContext->isEditableNoteBlock($block),
-                fn (ContentBlock $block): bool => $adminRouteContext->isEditableNoteBlock($block),
+                fn (ContentBlock $block): bool => $adminRouteContext->isDuplicableNoteBlock($block),
                 fn (ContentBlock $block): string => $adminRouteContext->contentBlockUpdateHref($block),
                 fn (ContentBlock $block): string => $adminRouteContext->contentBlockMoveUpHref($block),
                 fn (ContentBlock $block): string => $adminRouteContext->contentBlockMoveDownHref($block),

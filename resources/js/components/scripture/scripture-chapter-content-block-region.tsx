@@ -1,16 +1,13 @@
-import type { ReactNode } from 'react';
-import { router } from '@inertiajs/react';
 import { AdminModuleHost } from '@/admin/modules/shared/AdminModuleHost';
 import {
-    createBookBlockRegionSurface,
-    createBookContentBlockActionsSurface,
-    createBookContentBlockSurface,
-} from '@/admin/modules/books/surface-builders';
-import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
+    createChapterBlockRegionSurface,
+    createChapterContentBlockActionsSurface,
+    createChapterContentBlockSurface,
+} from '@/admin/modules/chapters/surface-builders';
 import { scriptureInlineRegionLabel } from '@/lib/scripture-inline-admin';
 import type {
-    ScriptureBook,
-    ScriptureBookAdmin,
+    ScriptureChapter,
+    ScriptureChapterAdmin,
     ScriptureContentBlock,
 } from '@/types';
 import { Badge } from '@/components/ui/badge';
@@ -18,28 +15,24 @@ import { ContentBlockRenderer } from './content-block-renderer';
 import { ScriptureSection } from './scripture-section';
 
 type Props = {
-    book: ScriptureBook;
+    chapter: ScriptureChapter;
+    chapterTitle: string;
     blocks: ScriptureContentBlock[];
-    isAdmin: boolean;
-    admin?: ScriptureBookAdmin | null;
-    title?: string;
-    description?: string;
-    emptyState?: ReactNode;
+    showAdminControls: boolean;
+    admin?: ScriptureChapterAdmin | null;
 };
 
 const PANEL_CLASS_NAME =
     'flex flex-wrap items-center gap-2 rounded-2xl border border-border/70 bg-muted/20 p-3';
 
-export function ScriptureBookContentBlockRegion({
-    book,
+export function ScriptureChapterContentBlockRegion({
+    chapter,
+    chapterTitle,
     blocks,
-    isAdmin,
+    showAdminControls,
     admin,
-    title = 'Reading Notes',
-    description = 'Published study content attached to this book.',
-    emptyState,
 }: Props) {
-    if (blocks.length === 0 && (!isAdmin || !admin)) {
+    if (blocks.length === 0 && (!showAdminControls || !admin)) {
         return null;
     }
 
@@ -52,40 +45,30 @@ export function ScriptureBookContentBlockRegion({
     );
     const seenBlocksByRegion = new Map<string, number>();
     const regionSurface =
-        isAdmin && admin
-            ? createBookBlockRegionSurface({
-                  book,
-                  entityLabel: book.title,
+        showAdminControls && admin
+            ? createChapterBlockRegionSurface({
+                  chapter,
+                  entityLabel: chapterTitle,
                   blocks,
                   storeHref: admin.content_block_store_href,
                   fullEditHref: admin.full_edit_href,
                   defaultRegion: admin.content_block_default_region,
                   blockTypes: admin.content_block_types,
-                  onSelectType: (blockType) => {
-                      if (blockType !== 'text') {
-                          router.visit(
-                              buildScriptureAdminSectionHref(
-                                  admin.full_edit_href,
-                                  'content_blocks',
-                              ),
-                          );
-                      }
-                  },
               })
             : null;
 
     return (
         <ScriptureSection
-            id="reading-notes"
+            id="published-notes"
             entityMeta={{
-                entityType: 'book',
-                entityId: book.id,
-                entityLabel: book.title,
+                entityType: 'chapter',
+                entityId: chapter.id,
+                entityLabel: chapterTitle,
                 region: 'content_blocks',
                 capabilityHint: 'content_blocks',
             }}
-            title={title}
-            description={description}
+            title="Published Notes"
+            description="Study content attached to this chapter."
             action={
                 <Badge variant="outline">
                     {blocks.length} block{blocks.length === 1 ? '' : 's'}
@@ -101,12 +84,10 @@ export function ScriptureBookContentBlockRegion({
                 )}
 
                 {blocks.length === 0 ? (
-                    emptyState ?? (
-                        <div className="rounded-2xl border border-dashed border-border/80 bg-muted/20 px-5 py-5 text-sm leading-6 text-muted-foreground sm:px-6 sm:py-6">
-                            Published content blocks have not been added to
-                            this book yet.
-                        </div>
-                    )
+                    <div className="rounded-2xl border border-dashed border-border/80 bg-muted/20 px-5 py-5 text-sm leading-6 text-muted-foreground sm:px-6 sm:py-6">
+                        Published note blocks have not been added to this
+                        chapter yet.
+                    </div>
                 ) : (
                     blocks.map((block) => {
                         const positionInRegion =
@@ -116,19 +97,19 @@ export function ScriptureBookContentBlockRegion({
                             admin?.content_block_update_hrefs[String(block.id)] ??
                             null;
                         const editorSurface =
-                            isAdmin && admin && updateHref
-                                ? createBookContentBlockSurface({
-                                      book,
-                                      entityLabel: book.title,
+                            showAdminControls && admin && updateHref
+                                ? createChapterContentBlockSurface({
+                                      chapter,
+                                      entityLabel: chapterTitle,
                                       block,
                                       updateHref,
                                       fullEditHref: admin.full_edit_href,
                                   })
                                 : null;
                         const actionsSurface =
-                            isAdmin && admin && updateHref
-                                ? createBookContentBlockActionsSurface({
-                                      book,
+                            showAdminControls && admin && updateHref
+                                ? createChapterContentBlockActionsSurface({
+                                      chapter,
                                       block,
                                       fullEditHref: admin.full_edit_href,
                                       moveUpHref:

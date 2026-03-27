@@ -64,7 +64,10 @@ class BookAdminContentBlockController extends Controller
         $adminRouteContext->abortUnlessEditableContentBlock($contentBlock);
 
         $contentBlock->update(
-            RegisteredContentBlock::updateAttributes($request->validated()),
+            RegisteredContentBlock::updateAttributes(
+                $request->validated(),
+                includeDataJson: true,
+            ),
         );
 
         return redirect()->back(status: 303);

@@ -4,11 +4,12 @@ import type {
 } from '@/types';
 
 /**
- * Shared session helpers for inline text-block creation.
+ * Shared session helpers for inline textual-block creation.
  *
  * These helpers keep the public-page create flow lightweight: once an editor
- * chooses an insertion point and the `text` block type, the page can open a
- * stable inline create session immediately without involving the sheet editor.
+ * chooses an insertion point and a supported textual block type, the page can
+ * open a stable inline create session immediately without involving the
+ * protected full editor.
  */
 type InlineTextContentBlockCreateValues = {
     block_type?: string;
@@ -64,6 +65,6 @@ export function createInlineTextContentBlockCreateSession({
     };
 }
 
-export function isInlineTextContentBlockType(blockType: string): boolean {
-    return blockType === 'text';
+export function isInlineTextualContentBlockType(blockType: string): boolean {
+    return blockType === 'text' || blockType === 'quote';
 }

@@ -7,8 +7,8 @@ use App\Models\ContentBlock;
 /**
  * Shared duplication rules for live public-page block management.
  *
- * The current live scope duplicates only the simple text-style blocks that
- * already fit the safe inline-edit model. Region/body/status are preserved and
+ * The current live scope duplicates the safe registered textual blocks that
+ * already fit the inline-edit model. Region/body/status are preserved and
  * titles receive a friendly "Copy" suffix when present.
  */
 class ContentBlockDuplicate

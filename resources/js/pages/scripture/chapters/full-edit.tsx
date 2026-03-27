@@ -9,6 +9,7 @@ import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-in
 import { ScriptureSection } from '@/components/scripture/scripture-section';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useScriptureAdminTargetNavigation } from '@/hooks/use-scripture-admin-target-navigation';
 import ScriptureLayout from '@/layouts/scripture-layout';
 import {
     chapterLabel,
@@ -53,6 +54,7 @@ export default function ChapterFullEdit({
             href: chapter.admin_full_edit_href,
         },
     ];
+    useScriptureAdminTargetNavigation();
 
     return (
         <ScriptureLayout
@@ -67,7 +69,7 @@ export default function ChapterFullEdit({
                     </>
                 }
                 title={`Full edit: ${chapterTitle}`}
-                description="Use this deeper editorial workspace to manage chapter-owned text note blocks without changing canonical chapter identity or navigation."
+                description="Use this deeper editorial workspace to manage chapter-owned text and quote note blocks without changing canonical chapter identity or navigation."
                 headerAction={
                     <Button asChild variant="outline" size="sm">
                         <Link href={chapter.href}>
@@ -95,9 +97,9 @@ export default function ChapterFullEdit({
             </ScripturePageIntroCard>
 
             <ScriptureSection
-                id="block-manager"
+                adminTargetSection="content_blocks"
                 title="Note Blocks"
-                description="Manage chapter-owned text note blocks, including drafts that stay hidden from the public chapter page."
+                description="Manage chapter-owned text and quote note blocks, including drafts that stay hidden from the public chapter page."
                 action={
                     <div className="flex flex-wrap gap-2">
                         <Badge variant="outline">
@@ -113,6 +115,7 @@ export default function ChapterFullEdit({
                     <CreateChapterContentBlockCard
                         storeHref={admin_content_block_store_href}
                         nextSortOrder={next_content_block_sort_order}
+                        blockTypeField={fields.content_block_type}
                         titleField={fields.content_block_title}
                         bodyField={fields.content_block_body}
                         regionField={fields.content_block_region}
@@ -124,6 +127,7 @@ export default function ChapterFullEdit({
                         <ChapterContentBlockEditorCard
                             key={block.id}
                             block={block}
+                            blockTypeField={fields.content_block_type}
                             titleField={fields.content_block_title}
                             bodyField={fields.content_block_body}
                             regionField={fields.content_block_region}

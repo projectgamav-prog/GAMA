@@ -49,7 +49,6 @@ class CharacterController extends Controller
                 $character->verseAssignments,
             ),
             'content_blocks' => $publicScriptureData->contentBlocks($contentBlocks),
-            'admin' => null,
         ]);
     }
 }

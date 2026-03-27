@@ -111,6 +111,14 @@ class BookAdminRouteContext
     /**
      * @return list<string>
      */
+    public function duplicableContentBlockTypes(): array
+    {
+        return TextualContentBlockSchema::editableTypes();
+    }
+
+    /**
+     * @return list<string>
+     */
     public function creatableContentBlockRegions(): array
     {
         return BookContentBlockSchema::creatableRegions();
@@ -144,8 +152,11 @@ class BookAdminRouteContext
 
     public function isDuplicableContentBlock(ContentBlock $contentBlock): bool
     {
-        return $this->isEditableContentBlock($contentBlock)
-            && $contentBlock->block_type === 'text';
+        return RegisteredContentBlock::isEditableFor(
+            $this->book,
+            $contentBlock,
+            $this->duplicableContentBlockTypes(),
+        );
     }
 
     public function abortUnlessEditableContentBlock(ContentBlock $contentBlock): void

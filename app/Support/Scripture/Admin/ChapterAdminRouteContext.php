@@ -9,7 +9,6 @@ use App\Models\ContentBlock;
 
 class ChapterAdminRouteContext
 {
-    private const EDITABLE_BLOCK_TYPE = 'text';
     private const DEFAULT_CONTENT_BLOCK_REGION = 'study';
 
     public function __construct(
@@ -93,7 +92,7 @@ class ChapterAdminRouteContext
      */
     public function contentBlockTypes(): array
     {
-        return [self::EDITABLE_BLOCK_TYPE];
+        return TextualContentBlockSchema::editableTypes();
     }
 
     public function defaultContentBlockRegion(): string
@@ -103,47 +102,57 @@ class ChapterAdminRouteContext
 
     public function ownsContentBlock(ContentBlock $contentBlock): bool
     {
-        return FixedTypeContentBlock::owns($this->chapter, $contentBlock);
+        return RegisteredContentBlock::owns($this->chapter, $contentBlock);
     }
 
     public function isEditableNoteBlock(ContentBlock $contentBlock): bool
     {
-        return FixedTypeContentBlock::isEditableFor(
+        return RegisteredContentBlock::isEditableFor(
             $this->chapter,
             $contentBlock,
-            self::EDITABLE_BLOCK_TYPE,
+            $this->contentBlockTypes(),
         );
+    }
+
+    public function isDuplicableNoteBlock(ContentBlock $contentBlock): bool
+    {
+        return $this->isEditableNoteBlock($contentBlock);
     }
 
     public function abortUnlessEditableNoteBlock(ContentBlock $contentBlock): void
     {
-        FixedTypeContentBlock::abortUnlessEditableFor(
+        RegisteredContentBlock::abortUnlessEditableFor(
             $this->chapter,
             $contentBlock,
-            self::EDITABLE_BLOCK_TYPE,
+            $this->contentBlockTypes(),
         );
     }
 
     public function abortUnlessDuplicableNoteBlock(ContentBlock $contentBlock): void
     {
-        $this->abortUnlessEditableNoteBlock($contentBlock);
+        abort_unless($this->isDuplicableNoteBlock($contentBlock), 404);
     }
 
     public function isContextualInsertionAnchor(ContentBlock $contentBlock): bool
     {
-        return FixedTypeContentBlock::isInsertionAnchorFor(
+        return RegisteredContentBlock::isInsertionAnchorFor(
             $this->chapter,
             $contentBlock,
-            self::EDITABLE_BLOCK_TYPE,
+            $this->contentBlockTypes(),
         );
     }
 
     public function abortUnlessContextualInsertionAnchor(ContentBlock $contentBlock): void
     {
-        FixedTypeContentBlock::abortUnlessInsertionAnchorFor(
+        RegisteredContentBlock::abortUnlessInsertionAnchorFor(
             $this->chapter,
             $contentBlock,
-            self::EDITABLE_BLOCK_TYPE,
+            $this->contentBlockTypes(),
         );
+    }
+
+    public function contentBlockProtectionReason(): string
+    {
+        return 'Only chapter-owned text and quote note blocks are editable in this phase.';
     }
 }

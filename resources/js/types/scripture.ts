@@ -27,11 +27,6 @@ export type ScriptureContentBlockReorderMeta = {
     regionLabel: string;
 };
 
-export type ScriptureAdminEditTarget =
-    | 'verse_meta'
-    | 'entity_details'
-    | 'content_block';
-
 export type ScriptureAdminEditMode = 'contextual' | 'full' | 'canonical';
 
 export type ScriptureAdminEditModeStatus = 'active' | 'planned' | 'disabled';
@@ -133,14 +128,6 @@ export type ScriptureRegisteredAdminEntity = {
     regions: ScriptureRegisteredAdminRegion[];
 };
 
-export type ScriptureAdminRegionConfig = {
-    supportsEdit: boolean;
-    supportsFullEdit: boolean;
-    editTarget: ScriptureAdminEditTarget;
-    contextualEditHref?: string | null;
-    fullEditHref?: string | null;
-};
-
 export type ScriptureVerseAdmin = {
     identity_update_href: string;
     meta_update_href: string;
@@ -154,12 +141,6 @@ export type ScriptureVerseAdmin = {
     content_block_reorder_hrefs: Record<string, string>;
     content_block_duplicate_hrefs: Record<string, string>;
     content_block_delete_hrefs: Record<string, string>;
-};
-
-export type ScriptureTopicAdmin = {
-    details_update_href: string;
-    full_edit_href: string;
-    content_block_update_hrefs: Record<string, string>;
 };
 
 export type ScriptureBookAdmin = {
@@ -181,12 +162,6 @@ export type ScriptureBookAdmin = {
     media_assignments?: ScriptureAdminMediaAssignment[];
     available_media?: ScriptureAdminMediaSummary[];
     next_media_assignment_sort_order?: number;
-};
-
-export type ScriptureCharacterAdmin = {
-    details_update_href: string;
-    full_edit_href: string;
-    content_block_update_hrefs: Record<string, string>;
 };
 
 export type ScriptureChapterAdmin = {
@@ -549,11 +524,13 @@ export type BookShowProps = {
 export type BookOverviewProps = {
     book: ScriptureBook;
     content_blocks: ScriptureContentBlock[];
+    isAdmin: boolean;
     admin?: ScriptureBookAdmin | null;
 };
 
 export type BooksIndexProps = {
     books: ScriptureBook[];
+    isAdmin: boolean;
 };
 
 export type DictionaryIndexProps = {
@@ -573,7 +550,6 @@ export type TopicShowProps = {
     topic: ScriptureTopic;
     related_verses: ScriptureRelatedVerse[];
     content_blocks: ScriptureContentBlock[];
-    admin?: ScriptureTopicAdmin | null;
 };
 
 export type CharactersIndexProps = {
@@ -584,7 +560,6 @@ export type CharacterShowProps = {
     character: ScriptureCharacter;
     related_verses: ScriptureRelatedVerse[];
     content_blocks: ScriptureContentBlock[];
-    admin?: ScriptureCharacterAdmin | null;
 };
 
 export type ChapterShowProps = {
@@ -593,6 +568,7 @@ export type ChapterShowProps = {
     chapter: ScriptureChapter;
     content_blocks: ScriptureContentBlock[];
     chapter_sections: ScriptureChapterSection[];
+    isAdmin: boolean;
     admin?: ScriptureChapterAdmin | null;
 };
 
@@ -650,26 +626,6 @@ export type VerseFullEditProps = {
     next_content_block_sort_order: number;
     admin_content_blocks: ScriptureAdminContentBlock[];
     protected_content_blocks: ScriptureProtectedAdminContentBlock[];
-};
-
-export type TopicFullEditProps = {
-    topic: ScriptureTopic & {
-        admin_full_edit_href: string;
-    };
-    admin_details_update_href: string;
-    admin_content_block_store_href: string;
-    next_content_block_sort_order: number;
-    admin_content_blocks: ScriptureAdminContentBlock[];
-};
-
-export type CharacterFullEditProps = {
-    character: ScriptureCharacter & {
-        admin_full_edit_href: string;
-    };
-    admin_details_update_href: string;
-    admin_content_block_store_href: string;
-    next_content_block_sort_order: number;
-    admin_content_blocks: ScriptureAdminContentBlock[];
 };
 
 export type ChapterFullEditProps = {

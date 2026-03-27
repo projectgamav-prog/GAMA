@@ -14,9 +14,11 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { BOOK_MEDIA_SLOTS_SURFACE_KEY } from '@/admin/modules/shared/surface-keys';
 import { defineAdminModule } from '@/admin/modules/shared/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/modules/shared/module-types';
 import { getBookMediaSlotMeta } from '@/lib/book-media-slot-meta';
+import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
 import type {
     ScriptureAdminMediaAssignment,
     ScriptureAdminMediaSummary,
@@ -482,6 +484,11 @@ function MediaSlotsEditor({ surface }: AdminModuleComponentProps) {
         return null;
     }
 
+    const fullEditHref = buildScriptureAdminSectionHref(
+        metadata.fullEditHref,
+        'media_slots',
+    );
+
     if (!isOpen) {
         return (
             <>
@@ -499,7 +506,7 @@ function MediaSlotsEditor({ surface }: AdminModuleComponentProps) {
                     variant="outline"
                     className="h-8 rounded-full px-3"
                 >
-                    <Link href={metadata.fullEditHref}>Full Edit</Link>
+                    <Link href={fullEditHref}>Full Edit</Link>
                 </Button>
             </>
         );
@@ -538,7 +545,7 @@ function MediaSlotsEditor({ surface }: AdminModuleComponentProps) {
                         Close
                     </Button>
                     <Button asChild variant="outline">
-                        <Link href={metadata.fullEditHref}>Full edit</Link>
+                        <Link href={fullEditHref}>Full edit</Link>
                     </Button>
                 </div>
 
@@ -562,9 +569,9 @@ function MediaSlotsEditor({ surface }: AdminModuleComponentProps) {
 
 export const mediaSlotsEditorModule = defineAdminModule({
     key: 'book-media-slots-editor',
+    surfaceKeys: BOOK_MEDIA_SLOTS_SURFACE_KEY,
     entityScope: 'book',
     surfaceSlots: 'inline_editor',
-    regionScope: 'book_media_slots',
     requiredCapabilities: ['edit'],
     EditorComponent: MediaSlotsEditor,
     order: 40,

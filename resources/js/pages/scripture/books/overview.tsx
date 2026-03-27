@@ -1,27 +1,24 @@
 import { Link } from '@inertiajs/react';
 import { ArrowRight } from 'lucide-react';
-import {
-    AdminModuleHost,
-    BLOCK_CREATE_SURFACE_CAPABILITIES,
-    EDITOR_SURFACE_CAPABILITIES,
-    createInlineEditorModuleSurface,
-    createSheetEditorModuleSurface,
-    createSurfaceOwner,
-} from '@/admin/modules/shared';
+import { AdminModuleHost } from '@/admin/modules/shared/AdminModuleHost';
+import { createBookIntroSurface } from '@/admin/modules/books/surface-builders';
 import { ScriptureActionRow } from '@/components/scripture/scripture-action-row';
 import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
 import { BookPublicMediaSection } from '@/components/scripture/book-public-media-section';
-import { ScriptureContentBlocksSection } from '@/components/scripture/scripture-content-blocks-section';
+import { ScriptureBookContentBlockRegion } from '@/components/scripture/scripture-book-content-block-region';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useBookAdminEditSession } from '@/hooks/use-book-admin-edit-session';
 import ScriptureLayout from '@/layouts/scripture-layout';
 import type { BookOverviewProps, BreadcrumbItem } from '@/types';
+
+const PANEL_CLASS_NAME =
+    'flex flex-wrap items-center gap-2 rounded-2xl border border-border/70 bg-muted/20 p-3';
 
 export default function BookOverview({
     book,
     content_blocks,
+    isAdmin,
     admin,
 }: BookOverviewProps) {
     const bookEntity = {
@@ -29,22 +26,14 @@ export default function BookOverview({
         entityId: book.id,
         entityLabel: book.title,
     };
-    const {
-        editSession,
-        inlineIntroSession,
-        inlineCreateTextContentBlockSession,
-        getInlineTextContentBlockSession,
-        closeEditSession,
-        introSurface,
-        contentBlocksCapabilities,
-        contentBlocksMeta,
-        handleIntroSaveSuccess,
-        handleContentBlockSaveSuccess,
-        handleContentBlockCreateSuccess,
-    } = useBookAdminEditSession({
-        book,
-        admin,
-    });
+    const introSurface =
+        isAdmin && admin
+            ? createBookIntroSurface({
+                  book,
+                  updateHref: admin.details_update_href,
+                  fullEditHref: admin.full_edit_href,
+              })
+            : null;
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Books',
@@ -70,7 +59,7 @@ export default function BookOverview({
             <ScripturePageIntroCard
                 entityMeta={{
                     ...bookEntity,
-                    region: 'page_intro',
+                    region: 'book_intro',
                     capabilityHint: 'intro',
                 }}
                 badges={
@@ -80,23 +69,15 @@ export default function BookOverview({
                     </>
                 }
                 title={book.title}
-                description={
-                    inlineIntroSession ? undefined : (book.description ?? undefined)
-                }
-                adminSurface={introSurface ?? undefined}
+                description={book.description ?? undefined}
                 contentClassName="space-y-6"
             >
-                <AdminModuleHost
-                    surface={createInlineEditorModuleSurface({
-                        entity: 'book',
-                        entityId: book.id,
-                        regionKey: 'page_intro',
-                        capabilities: EDITOR_SURFACE_CAPABILITIES,
-                        session: inlineIntroSession,
-                        onCancel: closeEditSession,
-                        onSaveSuccess: handleIntroSaveSuccess,
-                    })}
-                />
+                {introSurface && (
+                    <AdminModuleHost
+                        surface={introSurface}
+                        className={PANEL_CLASS_NAME}
+                    />
+                )}
 
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
@@ -116,118 +97,32 @@ export default function BookOverview({
                 </div>
             </ScripturePageIntroCard>
 
-            <BookPublicMediaSection book={book} admin={admin} />
-
-            <ScriptureContentBlocksSection
-                title="Overview Content"
-                description="Curated book-level content published through the existing content block system."
-                blocks={content_blocks}
-                capabilities={contentBlocksCapabilities}
-                pendingInlineCreateInsertionPoint={
-                    inlineCreateTextContentBlockSession?.insertionPoint ?? null
-                }
-                renderPendingInlineCreateEditor={() =>
-                    inlineCreateTextContentBlockSession ? (
-                        <AdminModuleHost
-                            surface={createInlineEditorModuleSurface({
-                                entity: 'book',
-                                entityId: book.id,
-                                regionKey: 'content_blocks',
-                                blockType: 'text',
-                                capabilities:
-                                    BLOCK_CREATE_SURFACE_CAPABILITIES,
-                                session: inlineCreateTextContentBlockSession,
-                                onCancel: closeEditSession,
-                                onSaveSuccess: (result: {
-                                    kind: 'create' | 'edit';
-                                }) => {
-                                    if (result.kind === 'create') {
-                                        handleContentBlockCreateSuccess();
-                                    }
-                                },
-                                metadata: {
-                                    entityLabel: book.title,
-                                },
-                            })}
-                        />
-                    ) : null
-                }
-                renderInlineBlockEditor={(block) => {
-                    const inlineSession = getInlineTextContentBlockSession(
-                        block.id,
-                    );
-
-                    return (
-                        <AdminModuleHost
-                            surface={createInlineEditorModuleSurface({
-                                entity: 'content_block',
-                                entityId: block.id,
-                                regionKey: 'content_blocks',
-                                blockType: block.block_type,
-                                owner: createSurfaceOwner('book', book.id),
-                                capabilities: EDITOR_SURFACE_CAPABILITIES,
-                                session: inlineSession,
-                                onCancel: closeEditSession,
-                                onSaveSuccess: (result: {
-                                    kind: 'create' | 'edit';
-                                    blockId?: number;
-                                }) => {
-                                    if (
-                                        result.kind === 'edit' &&
-                                        result.blockId !== undefined
-                                    ) {
-                                        handleContentBlockSaveSuccess(
-                                            result.blockId,
-                                        );
-                                    }
-                                },
-                                metadata: {
-                                    entityLabel: book.title,
-                                },
-                            })}
-                        />
-                    );
-                }}
-                emptyStateAction={
-                    <div className="flex flex-wrap gap-3">
-                        <Button asChild variant="outline">
-                            <Link href={book.href}>Open Book Structure</Link>
-                        </Button>
-                    </div>
-                }
-                entityMeta={{
-                    ...contentBlocksMeta,
-                    entityId: book.id,
-                }}
+            <BookPublicMediaSection
+                book={book}
+                admin={admin}
+                isAdmin={isAdmin}
             />
 
-            <AdminModuleHost
-                surface={createSheetEditorModuleSurface({
-                    entity: 'book',
-                    entityId: book.id,
-                    regionKey:
-                        editSession?.kind === 'content_block' ||
-                        editSession?.kind === 'create_content_block'
-                            ? 'content_blocks'
-                            : 'page_intro',
-                    blockType:
-                        editSession?.kind === 'content_block'
-                            ? editSession.block.block_type
-                            : editSession?.kind === 'create_content_block'
-                              ? editSession.values.block_type
-                              : null,
-                    capabilities: editSession
-                        ? editSession.kind === 'create_content_block'
-                            ? BLOCK_CREATE_SURFACE_CAPABILITIES
-                            : EDITOR_SURFACE_CAPABILITIES
-                        : [],
-                    session: editSession,
-                    onOpenChange: (open: boolean) => {
-                        if (!open) {
-                            closeEditSession();
-                        }
-                    },
-                })}
+            <ScriptureBookContentBlockRegion
+                book={book}
+                blocks={content_blocks}
+                isAdmin={isAdmin}
+                admin={admin}
+                title="Overview Content"
+                description="Curated book-level content published through the existing content block system."
+                emptyState={
+                    <div className="space-y-4 rounded-2xl border border-dashed border-border/80 bg-muted/20 px-5 py-5 text-sm leading-6 text-muted-foreground sm:px-6 sm:py-6">
+                        <p>
+                            Published content blocks have not been added to this
+                            book overview yet.
+                        </p>
+                        <div className="flex flex-wrap gap-3">
+                            <Button asChild variant="outline">
+                                <Link href={book.href}>Open Book Structure</Link>
+                            </Button>
+                        </div>
+                    </div>
+                }
             />
         </ScriptureLayout>
     );

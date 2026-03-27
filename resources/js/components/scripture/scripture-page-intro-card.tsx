@@ -1,6 +1,4 @@
 import type { ReactNode } from 'react';
-import type { ScriptureAdminSurfaceOptions } from '@/components/scripture/scripture-admin-surface';
-import { ScriptureAdminSurface } from '@/components/scripture/scripture-admin-surface';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import {
     Card,
@@ -22,7 +20,6 @@ type Props = {
     contentClassName?: string;
     titleClassName?: string;
     entityMeta?: ScriptureEntityRegionInput;
-    adminSurface?: ScriptureAdminSurfaceOptions;
 };
 
 export function ScripturePageIntroCard({
@@ -35,7 +32,6 @@ export function ScripturePageIntroCard({
     contentClassName,
     titleClassName,
     entityMeta,
-    adminSurface,
 }: Props) {
     const card = (
         <Card className={className}>
@@ -81,26 +77,12 @@ export function ScripturePageIntroCard({
     );
 
     if (!entityMeta) {
-        if (!adminSurface) {
-            return card;
-        }
-
-        return (
-            <ScriptureAdminSurface {...adminSurface}>
-                {card}
-            </ScriptureAdminSurface>
-        );
+        return card;
     }
 
     return (
         <ScriptureEntityRegion meta={entityMeta} asChild>
-            {adminSurface ? (
-                <ScriptureAdminSurface {...adminSurface}>
-                    {card}
-                </ScriptureAdminSurface>
-            ) : (
-                card
-            )}
+            {card}
         </ScriptureEntityRegion>
     );
 }

@@ -14,8 +14,8 @@ import type {
 } from '@/types';
 
 /**
- * Inline editor for the safest live block flow: published text notes and new
- * inline text-note creation.
+ * Inline editor for the safest live block flow: published textual notes and
+ * new inline text/quote creation.
  *
  * It owns only local form state. The surrounding session hook decides when this
  * editor is active, whether it represents create or edit mode, and what local
@@ -172,20 +172,24 @@ export function ScriptureTextContentBlockInlineEditor({
         <ScriptureInlineRegionEditor
             title={
                 isCreateSession(session)
-                    ? 'Create published note'
-                    : 'Edit published note'
+                    ? `Create published ${form.data.block_type === 'quote' ? 'quote' : 'note'}`
+                    : `Edit published ${session.block.block_type === 'quote' ? 'quote' : 'note'}`
             }
             description={
                 isCreateSession(session)
-                    ? `Add a new ${scriptureInlineRegionLabel(session.values.region).toLowerCase()} note directly in ${entityLabel}. ${session.insertionPoint.label}.`
-                    : `Edit this ${scriptureInlineRegionLabel(session.block.region).toLowerCase()} note directly in ${entityLabel}.`
+                    ? `Add a new ${scriptureInlineRegionLabel(session.values.region).toLowerCase()} ${form.data.block_type === 'quote' ? 'quote' : 'note'} directly in ${entityLabel}. ${session.insertionPoint.label}.`
+                    : `Edit this ${scriptureInlineRegionLabel(session.block.region).toLowerCase()} ${session.block.block_type === 'quote' ? 'quote' : 'note'} directly in ${entityLabel}.`
             }
             fullEditHref={session.fullEditHref}
             onCancel={handleCancel}
             mode={isCreateSession(session) ? 'create' : 'edit'}
             metaSlot={
                 <div className="flex flex-wrap gap-2">
-                    <Badge variant="outline">Text block</Badge>
+                    <Badge variant="outline">
+                        {form.data.block_type === 'quote'
+                            ? 'Quote block'
+                            : 'Text block'}
+                    </Badge>
                     <Badge variant="secondary">
                         {scriptureInlineRegionLabel(
                             isCreateSession(session)
@@ -227,9 +231,10 @@ export function ScriptureTextContentBlockInlineEditor({
                     return;
                 }
 
-                // Existing text blocks keep using the stable update endpoint so
-                // inline editing remains a UI refinement, not a backend fork.
+                // Existing textual blocks keep using the stable update endpoint
+                // so inline editing remains a UI refinement, not a backend fork.
                 form.transform((data) => ({
+                    block_type: data.block_type,
                     title: data.title,
                     body: data.body,
                     region: data.region,
@@ -280,7 +285,11 @@ export function ScriptureTextContentBlockInlineEditor({
                         form.setData('body', event.target.value)
                     }
                     rows={8}
-                    placeholder="Published note copy"
+                    placeholder={
+                        form.data.block_type === 'quote'
+                            ? 'Published quote copy'
+                            : 'Published note copy'
+                    }
                 />
                 <InputError message={formErrors.body} />
             </div>

@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { BookOpenText } from 'lucide-react';
-import { AdminModuleHost } from '@/admin/modules/shared';
+import { AdminModuleHost } from '@/admin/modules/shared/AdminModuleHost';
 import {
     createBookIdentitySurface,
     createBookIntroSurface,
@@ -48,7 +48,7 @@ export default function BookShow({
             ? createBookIdentitySurface({
                   book,
                   updateHref: admin.identity_update_href,
-                  fullEditHref: `${admin.canonical_edit_href}#identity-editor`,
+                  fullEditHref: admin.canonical_edit_href,
               })
             : null;
     const introSurface =
@@ -56,7 +56,7 @@ export default function BookShow({
             ? createBookIntroSurface({
                   book,
                   updateHref: admin.details_update_href,
-                  fullEditHref: `${admin.full_edit_href}#details-editor`,
+                  fullEditHref: admin.full_edit_href,
               })
             : null;
     const breadcrumbs: BreadcrumbItem[] = [

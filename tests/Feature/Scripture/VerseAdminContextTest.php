@@ -174,7 +174,7 @@ test('authorized editors can toggle protected admin visibility and receive verse
             ->where('admin.meta_update_href', $this->metaUpdateRoute)
             ->where('admin.full_edit_href', $this->fullEditRoute)
             ->where('admin.content_block_store_href', $this->contentBlockStoreRoute)
-            ->where('admin.content_block_types', ['text'])
+            ->where('admin.content_block_types', ['text', 'quote'])
             ->where('admin.content_block_default_region', 'study')
             ->where(
                 "admin.content_block_update_hrefs.{$publishedBlock->id}",
@@ -271,6 +271,7 @@ test('authorized editors can manage verse note blocks while public verse page st
     $this->actingAs($editor)
         ->from($this->fullEditRoute)
         ->post($this->contentBlockStoreRoute, [
+            'block_type' => 'quote',
             'title' => 'Fresh draft note',
             'body' => 'Created from the full editor.',
             'region' => 'study',
@@ -289,6 +290,7 @@ test('authorized editors can manage verse note blocks while public verse page st
             ...$this->verseRouteParameters,
             'contentBlock' => $draftBlock,
         ]), [
+            'block_type' => 'text',
             'title' => 'Updated draft verse note',
             'body' => 'Still hidden publicly after update.',
             'region' => 'study',
@@ -309,6 +311,7 @@ test('authorized editors can manage verse note blocks while public verse page st
             ->where('admin_content_blocks.1.title', 'Updated draft verse note')
             ->where('admin_content_blocks.1.status', 'draft')
             ->where('admin_content_blocks.2.title', 'Fresh draft note')
+            ->where('admin_content_blocks.2.block_type', 'quote')
             ->where('admin_content_blocks.2.status', 'draft')
             ->where('protected_content_blocks', []),
         );
@@ -342,6 +345,7 @@ test('content block update hard fails when the block is not owned by the current
             ...$this->verseRouteParameters,
             'contentBlock' => $foreignBlock,
         ]), [
+            'block_type' => 'text',
             'title' => 'Should not update',
             'body' => 'No change should happen.',
             'region' => 'study',
@@ -354,7 +358,7 @@ test('content block update hard fails when the block is not owned by the current
         ->toBe('Other verse block');
 });
 
-test('phase one content block editing is limited to verse owned text notes', function () {
+test('content block editing is limited to verse owned registered textual notes', function () {
     $editor = User::query()->where('email', 'admin@example.com')->firstOrFail();
 
     $textBlock = $this->firstVerse->contentBlocks()->create([
@@ -367,13 +371,23 @@ test('phase one content block editing is limited to verse owned text notes', fun
         'status' => 'published',
     ]);
 
+    $quoteBlock = $this->firstVerse->contentBlocks()->create([
+        'region' => 'study',
+        'block_type' => 'quote',
+        'title' => 'Editable quote note',
+        'body' => 'This quote should stay editable.',
+        'data_json' => null,
+        'sort_order' => 2,
+        'status' => 'published',
+    ]);
+
     $videoBlock = $this->firstVerse->contentBlocks()->create([
         'region' => 'study',
         'block_type' => 'video',
         'title' => 'Protected video block',
         'body' => null,
         'data_json' => ['url' => 'https://example.test/video.mp4'],
-        'sort_order' => 2,
+        'sort_order' => 3,
         'status' => 'published',
     ]);
 
@@ -389,6 +403,13 @@ test('phase one content block editing is limited to verse owned text notes', fun
                     'contentBlock' => $textBlock,
                 ]),
             )
+            ->where(
+                "admin.content_block_update_hrefs.{$quoteBlock->id}",
+                route('scripture.chapters.verses.admin.content-blocks.update', [
+                    ...$this->verseRouteParameters,
+                    'contentBlock' => $quoteBlock,
+                ]),
+            )
             ->missing("admin.content_block_update_hrefs.{$videoBlock->id}"),
         );
 
@@ -396,14 +417,16 @@ test('phase one content block editing is limited to verse owned text notes', fun
         ->get($this->fullEditRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->has('admin_content_blocks', 1)
+            ->has('admin_content_blocks', 2)
             ->where('admin_content_blocks.0.title', 'Editable text note')
             ->where('admin_content_blocks.0.block_type', 'text')
+            ->where('admin_content_blocks.1.title', 'Editable quote note')
+            ->where('admin_content_blocks.1.block_type', 'quote')
             ->has('protected_content_blocks', 1)
             ->where('protected_content_blocks.0.title', 'Protected video block')
             ->where(
                 'protected_content_blocks.0.protection_reason',
-                'Only verse-owned text note blocks are editable in this phase.',
+                'Only verse-owned text and quote note blocks are editable in this phase.',
             ),
         );
 
@@ -412,10 +435,11 @@ test('phase one content block editing is limited to verse owned text notes', fun
             ...$this->verseRouteParameters,
             'contentBlock' => $videoBlock,
         ]), [
+            'block_type' => 'text',
             'title' => 'Should stay protected',
             'body' => 'No update should be allowed.',
             'region' => 'study',
-            'sort_order' => 2,
+            'sort_order' => 3,
             'status' => 'published',
         ])
         ->assertNotFound();
@@ -450,7 +474,8 @@ test('verse note creation uses shared ordering when sort order inserts before ex
     $this->actingAs($editor)
         ->from($this->fullEditRoute)
         ->post($this->contentBlockStoreRoute, [
-            'title' => 'Inserted first note',
+            'block_type' => 'quote',
+            'title' => 'Inserted first quote',
             'body' => 'Inserted ahead of the existing notes.',
             'region' => 'study',
             'sort_order' => 1,
@@ -472,7 +497,7 @@ test('verse note creation uses shared ordering when sort order inserts before ex
         ->all();
 
     expect($orderedTitles)->toBe([
-        'Inserted first note',
+        'Inserted first quote',
         'Existing first note',
         'Existing second note',
     ]);
@@ -483,7 +508,8 @@ test('verse note creation uses shared ordering when sort order inserts before ex
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('next_content_block_sort_order', 4)
-            ->where('admin_content_blocks.0.title', 'Inserted first note')
+            ->where('admin_content_blocks.0.title', 'Inserted first quote')
+            ->where('admin_content_blocks.0.block_type', 'quote')
             ->where('admin_content_blocks.1.title', 'Existing first note')
             ->where('admin_content_blocks.2.title', 'Existing second note'),
         );
@@ -515,7 +541,8 @@ test('verse note creation accepts contextual insertion points and preserves orde
     $this->actingAs($editor)
         ->from($this->verseShowRoute)
         ->post($this->contentBlockStoreRoute, [
-            'title' => 'Inserted note',
+            'block_type' => 'quote',
+            'title' => 'Inserted quote',
             'body' => 'Inserted from the public page flow.',
             'region' => 'study',
             'status' => 'published',
@@ -539,10 +566,16 @@ test('verse note creation accepts contextual insertion points and preserves orde
 
     expect($orderedTitles)->toBe([
         'Existing first note',
-        'Inserted note',
+        'Inserted quote',
         'Existing second note',
     ]);
     expect($orderedSortOrders)->toBe([1, 2, 3]);
+    expect(
+        $this->firstVerse->fresh()
+            ->contentBlocks()
+            ->where('title', 'Inserted quote')
+            ->value('block_type'),
+    )->toBe('quote');
 });
 
 test('authorized editors can manage verse note blocks from the public page', function () {

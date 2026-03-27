@@ -58,7 +58,7 @@ class ChapterFullEditController extends Controller
             'protected_content_blocks' => $protectedContentBlocks
                 ->map(fn (ContentBlock $block) => RegisteredContentBlockData::protected(
                     $block,
-                    'Only chapter-owned text note blocks remain editable in the current chapter workflow.',
+                    $adminRouteContext->contentBlockProtectionReason(),
                 ))
                 ->all(),
         ]);

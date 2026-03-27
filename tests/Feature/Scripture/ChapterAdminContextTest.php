@@ -61,6 +61,7 @@ test('guests and non editors cannot access protected chapter admin context', fun
     $this->get($this->chapterShowRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
+            ->where('isAdmin', false)
             ->where('adminContext.canAccess', false)
             ->where('adminContext.isVisible', false)
             ->where('adminContext.visibilityUrl', null)
@@ -78,6 +79,7 @@ test('guests and non editors cannot access protected chapter admin context', fun
         ->get($this->chapterShowRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
+            ->where('isAdmin', false)
             ->where('adminContext.canAccess', false)
             ->where('adminContext.isVisible', false)
             ->where('adminContext.visibilityUrl', null)
@@ -90,6 +92,7 @@ test('guests and non editors cannot access protected chapter admin context', fun
 
     $this->actingAs($nonEditor)
         ->post($this->contentBlockStoreRoute, [
+            'block_type' => 'text',
             'title' => 'Blocked chapter note',
             'body' => 'This should not be created.',
             'region' => 'study',
@@ -105,7 +108,7 @@ test('guests and non editors cannot access protected chapter admin context', fun
         ->assertForbidden();
 });
 
-test('authorized editors can toggle protected admin visibility and receive chapter admin props', function () {
+test('authorized editors receive chapter admin props without requiring visibility mode', function () {
     $editor = User::query()->where('email', 'editor1@example.com')->firstOrFail();
 
     $primaryBlock = $this->chapter->contentBlocks()->create([
@@ -122,10 +125,29 @@ test('authorized editors can toggle protected admin visibility and receive chapt
         ->get($this->chapterShowRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
+            ->where('isAdmin', true)
             ->where('adminContext.canAccess', true)
             ->where('adminContext.isVisible', false)
             ->where('adminContext.visibilityUrl', $this->visibilityRoute)
-            ->where('admin', null),
+            ->where('admin.full_edit_href', $this->fullEditRoute)
+            ->where('admin.content_block_store_href', $this->contentBlockStoreRoute)
+            ->where('admin.content_block_types', ['text', 'quote'])
+            ->where('admin.content_block_default_region', 'study')
+            ->where('admin.primary_content_block_id', $primaryBlock->id)
+            ->where(
+                'admin.primary_content_block_update_href',
+                route('scripture.chapters.admin.content-blocks.update', [
+                    ...chapterRouteParameters($this->book, $this->bookSection, $this->chapter),
+                    'contentBlock' => $primaryBlock,
+                ]),
+            )
+            ->where(
+                "admin.content_block_update_hrefs.{$primaryBlock->id}",
+                route('scripture.chapters.admin.content-blocks.update', [
+                    ...chapterRouteParameters($this->book, $this->bookSection, $this->chapter),
+                    'contentBlock' => $primaryBlock,
+                ]),
+            ),
         );
 
     $response = $this->actingAs($editor)
@@ -143,28 +165,11 @@ test('authorized editors can toggle protected admin visibility and receive chapt
         ->get($this->chapterShowRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
+            ->where('isAdmin', true)
             ->where('adminContext.canAccess', true)
             ->where('adminContext.isVisible', true)
             ->where('adminContext.visibilityUrl', $this->visibilityRoute)
-            ->where('admin.full_edit_href', $this->fullEditRoute)
-            ->where('admin.content_block_store_href', $this->contentBlockStoreRoute)
-            ->where('admin.content_block_types', ['text'])
-            ->where('admin.content_block_default_region', 'study')
-            ->where('admin.primary_content_block_id', $primaryBlock->id)
-            ->where(
-                'admin.primary_content_block_update_href',
-                route('scripture.chapters.admin.content-blocks.update', [
-                    ...chapterRouteParameters($this->book, $this->bookSection, $this->chapter),
-                    'contentBlock' => $primaryBlock,
-                ]),
-            )
-            ->where(
-                "admin.content_block_update_hrefs.{$primaryBlock->id}",
-                route('scripture.chapters.admin.content-blocks.update', [
-                    ...chapterRouteParameters($this->book, $this->bookSection, $this->chapter),
-                    'contentBlock' => $primaryBlock,
-                ]),
-            ),
+            ->where('admin.full_edit_href', $this->fullEditRoute),
         );
 
     $hideResponse = $this->actingAs($editor)
@@ -264,6 +269,7 @@ test('authorized editors can manage chapter note blocks while public chapter pag
     $this->actingAs($editor)
         ->from($fullEditRoute)
         ->post($storeRoute, [
+            'block_type' => 'quote',
             'title' => 'Fresh draft chapter note',
             'body' => 'Created from the chapter full editor.',
             'region' => 'study',
@@ -282,6 +288,7 @@ test('authorized editors can manage chapter note blocks while public chapter pag
             ...$routeParameters,
             'contentBlock' => $draftBlock,
         ]), [
+            'block_type' => 'text',
             'title' => 'Updated draft chapter note',
             'body' => 'Still hidden publicly after update.',
             'region' => 'study',
@@ -300,6 +307,7 @@ test('authorized editors can manage chapter note blocks while public chapter pag
             ->where('admin_content_blocks.1.title', 'Updated draft chapter note')
             ->where('admin_content_blocks.1.status', 'draft')
             ->where('admin_content_blocks.2.title', 'Fresh draft chapter note')
+            ->where('admin_content_blocks.2.block_type', 'quote')
             ->where('admin_content_blocks.2.status', 'draft'),
         );
 
@@ -339,6 +347,7 @@ test('content block update hard fails when the block is not owned by the current
             ...chapterRouteParameters($this->book, $this->bookSection, $this->chapter),
             'contentBlock' => $foreignBlock,
         ]), [
+            'block_type' => 'text',
             'title' => 'Should not update',
             'body' => 'No change should happen.',
             'region' => 'study',
@@ -351,7 +360,7 @@ test('content block update hard fails when the block is not owned by the current
         ->toBe('Other chapter block');
 });
 
-test('phase one chapter block editing is limited to chapter owned text notes', function () {
+test('chapter block editing is limited to chapter owned registered textual notes', function () {
     $editor = User::query()->where('email', 'admin@example.com')->firstOrFail();
 
     $chapter = Chapter::query()->create([
@@ -375,13 +384,23 @@ test('phase one chapter block editing is limited to chapter owned text notes', f
         'status' => 'published',
     ]);
 
+    $quoteBlock = $chapter->contentBlocks()->create([
+        'region' => 'study',
+        'block_type' => 'quote',
+        'title' => 'Editable quote note',
+        'body' => 'This quote should stay editable.',
+        'data_json' => null,
+        'sort_order' => 2,
+        'status' => 'published',
+    ]);
+
     $videoBlock = $chapter->contentBlocks()->create([
         'region' => 'study',
         'block_type' => 'video',
         'title' => 'Protected video block',
         'body' => null,
         'data_json' => ['url' => 'https://example.test/chapter-video.mp4'],
-        'sort_order' => 2,
+        'sort_order' => 3,
         'status' => 'published',
     ]);
 
@@ -390,12 +409,20 @@ test('phase one chapter block editing is limited to chapter owned text notes', f
         ->get($showRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('admin.primary_content_block_id', $textBlock->id)
+            ->where('admin.primary_content_block_id', null)
+            ->where('admin.primary_content_block_update_href', null)
             ->where(
                 "admin.content_block_update_hrefs.{$textBlock->id}",
                 route('scripture.chapters.admin.content-blocks.update', [
                     ...$routeParameters,
                     'contentBlock' => $textBlock,
+                ]),
+            )
+            ->where(
+                "admin.content_block_update_hrefs.{$quoteBlock->id}",
+                route('scripture.chapters.admin.content-blocks.update', [
+                    ...$routeParameters,
+                    'contentBlock' => $quoteBlock,
                 ]),
             )
             ->missing("admin.content_block_update_hrefs.{$videoBlock->id}"),
@@ -405,10 +432,18 @@ test('phase one chapter block editing is limited to chapter owned text notes', f
         ->get($fullEditRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->has('admin_content_blocks', 1)
+            ->has('admin_content_blocks', 2)
             ->where('admin_content_blocks.0.title', 'Editable text note')
             ->where('admin_content_blocks.0.block_type', 'text')
-            ->where('next_content_block_sort_order', 3),
+            ->where('admin_content_blocks.1.title', 'Editable quote note')
+            ->where('admin_content_blocks.1.block_type', 'quote')
+            ->has('protected_content_blocks', 1)
+            ->where('protected_content_blocks.0.title', 'Protected video block')
+            ->where(
+                'protected_content_blocks.0.protection_reason',
+                'Only chapter-owned text and quote note blocks are editable in this phase.',
+            )
+            ->where('next_content_block_sort_order', 4),
         );
 
     $this->actingAs($editor)
@@ -416,10 +451,11 @@ test('phase one chapter block editing is limited to chapter owned text notes', f
             ...$routeParameters,
             'contentBlock' => $videoBlock,
         ]), [
+            'block_type' => 'text',
             'title' => 'Should stay protected',
             'body' => 'No update should be allowed.',
             'region' => 'study',
-            'sort_order' => 2,
+            'sort_order' => 3,
             'status' => 'published',
         ])
         ->assertNotFound();
@@ -454,7 +490,8 @@ test('chapter note creation accepts contextual insertion points and preserves or
     $this->actingAs($editor)
         ->from($this->chapterShowRoute)
         ->post($this->contentBlockStoreRoute, [
-            'title' => 'Inserted note',
+            'block_type' => 'quote',
+            'title' => 'Inserted quote',
             'body' => 'Inserted from the public page flow.',
             'region' => 'study',
             'status' => 'published',
@@ -478,10 +515,16 @@ test('chapter note creation accepts contextual insertion points and preserves or
 
     expect($orderedTitles)->toBe([
         'Existing first note',
-        'Inserted note',
+        'Inserted quote',
         'Existing second note',
     ]);
     expect($orderedSortOrders)->toBe([1, 2, 3]);
+    expect(
+        $this->chapter->fresh()
+            ->contentBlocks()
+            ->where('title', 'Inserted quote')
+            ->value('block_type'),
+    )->toBe('quote');
 });
 
 test('authorized editors can manage chapter note blocks from the public page', function () {

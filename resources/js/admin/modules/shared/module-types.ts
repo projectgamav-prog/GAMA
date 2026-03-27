@@ -3,8 +3,11 @@ import type { ScriptureEntityType } from '@/types';
 import type {
     AdminSurfaceCapability,
     AdminSurfaceContract,
+    AdminSurfacePlacement,
     AdminSurfaceSlot,
+    AdminSurfaceVariant,
 } from './surface-contracts';
+import type { AdminSurfaceKey } from './surface-keys';
 
 /**
  * A module scope can match a specific value, a fixed set of values, or
@@ -33,10 +36,13 @@ export type AdminModuleComponent = ComponentType<AdminModuleComponentProps>;
  */
 export type AdminModuleDefinition = {
     key: string;
+    surfaceKeys?: AdminModuleScope<AdminSurfaceKey>;
     entityScope: AdminModuleScope<ScriptureEntityType>;
     surfaceSlots?: AdminModuleScope<AdminSurfaceSlot>;
     regionScope?: AdminModuleScope<string>;
     blockTypes?: AdminModuleScope<string>;
+    presentationPlacements?: AdminModuleScope<AdminSurfacePlacement>;
+    presentationVariants?: AdminModuleScope<AdminSurfaceVariant>;
     requiredCapabilities?: readonly AdminSurfaceCapability[];
     EditorComponent: AdminModuleComponent;
     order?: number;

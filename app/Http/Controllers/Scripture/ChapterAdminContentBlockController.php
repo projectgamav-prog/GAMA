@@ -12,15 +12,13 @@ use App\Models\Chapter;
 use App\Models\ContentBlock;
 use App\Support\Scripture\Admin\ChapterAdminRouteContext;
 use App\Support\Scripture\Admin\ContentBlockDuplicate;
-use App\Support\Scripture\Admin\FixedTypeContentBlock;
+use App\Support\Scripture\Admin\RegisteredContentBlock;
 use App\Support\Scripture\Admin\RegisteredContentBlockOrdering;
 use App\Support\Scripture\Admin\VisibleContentBlockSequence;
 use Illuminate\Http\RedirectResponse;
 
 class ChapterAdminContentBlockController extends Controller
 {
-    private const BLOCK_TYPE = 'text';
-
     /**
      * Create a new chapter-owned editorial note block.
      */
@@ -44,9 +42,9 @@ class ChapterAdminContentBlockController extends Controller
 
         $contentBlockOrdering->create(
             $chapter,
-            FixedTypeContentBlock::createAttributes(
+            RegisteredContentBlock::createAttributes(
                 $validated,
-                self::BLOCK_TYPE,
+                includeDataJson: true,
             ),
             insertionMode: $this->nullableString(
                 $validated['insertion_mode'] ?? null,
@@ -58,7 +56,7 @@ class ChapterAdminContentBlockController extends Controller
     }
 
     /**
-     * Update a chapter-owned text note block.
+     * Update a chapter-owned registered textual note block.
      */
     public function update(
         ChapterContentBlockUpdateRequest $request,
@@ -72,7 +70,7 @@ class ChapterAdminContentBlockController extends Controller
         $adminRouteContext->abortUnlessEditableNoteBlock($contentBlock);
 
         $contentBlock->update(
-            FixedTypeContentBlock::updateAttributes($request->validated()),
+            RegisteredContentBlock::updateAttributes($request->validated()),
         );
 
         return redirect()->back(status: 303);
@@ -89,7 +87,7 @@ class ChapterAdminContentBlockController extends Controller
 
         $adminRouteContext->abortUnlessEditableNoteBlock($contentBlock);
 
-        $visibleSequence = $this->visibleSequence($chapter);
+        $visibleSequence = $this->visibleSequence($chapter, $adminRouteContext);
 
         abort_unless($visibleSequence->contains($contentBlock), 404);
 
@@ -113,7 +111,7 @@ class ChapterAdminContentBlockController extends Controller
 
         $adminRouteContext->abortUnlessEditableNoteBlock($contentBlock);
 
-        $visibleSequence = $this->visibleSequence($chapter);
+        $visibleSequence = $this->visibleSequence($chapter, $adminRouteContext);
 
         abort_unless($visibleSequence->contains($contentBlock), 404);
 
@@ -138,7 +136,7 @@ class ChapterAdminContentBlockController extends Controller
 
         $adminRouteContext->abortUnlessEditableNoteBlock($contentBlock);
 
-        $visibleSequence = $this->visibleSequence($chapter);
+        $visibleSequence = $this->visibleSequence($chapter, $adminRouteContext);
 
         abort_unless($visibleSequence->contains($contentBlock), 404);
 
@@ -170,13 +168,13 @@ class ChapterAdminContentBlockController extends Controller
 
         $adminRouteContext->abortUnlessDuplicableNoteBlock($contentBlock);
 
-        $visibleSequence = $this->visibleSequence($chapter);
+        $visibleSequence = $this->visibleSequence($chapter, $adminRouteContext);
 
         abort_unless($visibleSequence->contains($contentBlock), 404);
 
         $contentBlockOrdering->create(
             $chapter,
-            ContentBlockDuplicate::attributes($contentBlock, self::BLOCK_TYPE),
+            ContentBlockDuplicate::attributes($contentBlock),
             insertionMode: 'after',
             relativeBlock: $contentBlock,
         );
@@ -195,7 +193,7 @@ class ChapterAdminContentBlockController extends Controller
 
         $adminRouteContext->abortUnlessEditableNoteBlock($contentBlock);
 
-        $visibleSequence = $this->visibleSequence($chapter);
+        $visibleSequence = $this->visibleSequence($chapter, $adminRouteContext);
 
         abort_unless($visibleSequence->contains($contentBlock), 404);
 
@@ -215,12 +213,21 @@ class ChapterAdminContentBlockController extends Controller
         return $trimmed === '' ? null : $trimmed;
     }
 
-    private function visibleSequence(Chapter $chapter): VisibleContentBlockSequence
+    private function visibleSequence(
+        Chapter $chapter,
+        ?ChapterAdminRouteContext $adminRouteContext = null,
+    ): VisibleContentBlockSequence
     {
+        $adminRouteContext ??= new ChapterAdminRouteContext(
+            $chapter->bookSection->book,
+            $chapter->bookSection,
+            $chapter,
+        );
+
         return new VisibleContentBlockSequence(
             $chapter->contentBlocks()
                 ->published()
-                ->where('block_type', self::BLOCK_TYPE)
+                ->whereIn('block_type', $adminRouteContext->contentBlockTypes())
                 ->orderBy('sort_order')
                 ->orderBy('id')
                 ->get(),

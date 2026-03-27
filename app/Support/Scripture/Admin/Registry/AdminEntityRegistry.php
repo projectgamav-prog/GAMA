@@ -8,6 +8,7 @@ use App\Models\Character;
 use App\Models\Topic;
 use App\Models\Verse;
 use App\Support\Scripture\Admin\BookContentBlockSchema;
+use App\Support\Scripture\Admin\TextualContentBlockSchema;
 
 class AdminEntityRegistry
 {
@@ -99,7 +100,7 @@ class AdminEntityRegistry
                 classification: AdminFieldClassification::EDITORIAL,
                 group: AdminFieldGroup::SUPPORTING,
                 options: BookContentBlockSchema::editableTypes(),
-                helpText: 'Only registered editorial block types belong here. Video belongs in media slots instead of raw block JSON.',
+                helpText: 'Only registered editorial block types belong here. Image stays on registered block JSON, while video belongs in media slots.',
             ),
             'content_block_title' => new AdminFieldDefinition(
                 key: 'content_block_title',
@@ -122,6 +123,28 @@ class AdminEntityRegistry
                 classification: AdminFieldClassification::EDITORIAL,
                 group: AdminFieldGroup::SUPPORTING,
                 helpText: 'Required long-form copy for the registered block.',
+            ),
+            'content_block_media_url' => new AdminFieldDefinition(
+                key: 'content_block_media_url',
+                label: 'Image source URL',
+                source: 'content_blocks.data_json->url',
+                type: 'text',
+                validationRules: ['required_if:block_type,image', 'nullable', 'string', 'max:2048'],
+                editModes: [AdminEditMode::CONTEXTUAL, AdminEditMode::FULL],
+                classification: AdminFieldClassification::EDITORIAL,
+                group: AdminFieldGroup::SUPPORTING,
+                helpText: 'Required when the registered block type is image. Use the public image URL already approved for this surface.',
+            ),
+            'content_block_alt_text' => new AdminFieldDefinition(
+                key: 'content_block_alt_text',
+                label: 'Image alt text',
+                source: 'content_blocks.data_json->alt',
+                type: 'text',
+                validationRules: ['nullable', 'string', 'max:255'],
+                editModes: [AdminEditMode::CONTEXTUAL, AdminEditMode::FULL],
+                classification: AdminFieldClassification::EDITORIAL,
+                group: AdminFieldGroup::SUPPORTING,
+                helpText: 'Optional accessibility text for registered image blocks. When blank, the public renderer falls back to the block title.',
             ),
             'content_block_sort_order' => new AdminFieldDefinition(
                 key: 'content_block_sort_order',
@@ -265,23 +288,29 @@ class AdminEntityRegistry
                         'content_block_type',
                         'content_block_title',
                         'content_block_body',
+                        'content_block_media_url',
+                        'content_block_alt_text',
                         'content_block_sort_order',
                         'content_block_status',
                     ],
                     contextualFieldKeys: [
                         'content_block_title',
                         'content_block_body',
+                        'content_block_media_url',
+                        'content_block_alt_text',
                     ],
                     fullFieldKeys: [
                         'content_block_region',
                         'content_block_type',
                         'content_block_title',
                         'content_block_body',
+                        'content_block_media_url',
+                        'content_block_alt_text',
                         'content_block_sort_order',
                         'content_block_status',
                     ],
                     capabilityHint: 'content_blocks',
-                    helpText: 'Use region keys intentionally. Video belongs in the overview_video media slot rather than block JSON.',
+                    helpText: 'Use region keys intentionally. Registered image blocks are supported here, while video belongs in the overview_video media slot.',
                     methods: [
                         new AdminRegionMethodDefinition(
                             family: AdminMethodFamily::CONTENT_BLOCK_CREATE,
@@ -425,7 +454,7 @@ class AdminEntityRegistry
                     label: 'Chapter title',
                     source: 'chapters.title',
                 ),
-                ...$this->sharedTextBlockFields(),
+                ...$this->sharedTextualNoteBlockFields(),
             ],
             regions: [
                 new AdminRegionDefinition(
@@ -444,15 +473,15 @@ class AdminEntityRegistry
                     label: 'Published notes',
                     surface: 'chapters.show',
                     description: 'Chapter-owned editorial note blocks.',
-                    fieldKeys: array_keys($this->sharedTextBlockFields()),
+                    fieldKeys: array_keys($this->sharedTextualNoteBlockFields()),
                     contextualFieldKeys: ['content_block_title', 'content_block_body'],
-                    fullFieldKeys: array_keys($this->sharedTextBlockFields()),
+                    fullFieldKeys: array_keys($this->sharedTextualNoteBlockFields()),
                     capabilityHint: 'content_blocks',
-                    helpText: 'Chapter currently uses a fixed text-block policy while sharing the registered content-block executor family.',
+                    helpText: 'Chapter uses the shared registered text and quote note workflow while keeping ownership scoped to the current chapter.',
                     methods: [
                         new AdminRegionMethodDefinition(
                             family: AdminMethodFamily::CONTENT_BLOCK_CREATE,
-                            editModes: [AdminEditMode::FULL],
+                            editModes: [AdminEditMode::CONTEXTUAL, AdminEditMode::FULL],
                             label: 'Chapter content-block create',
                         ),
                         new AdminRegionMethodDefinition(
@@ -461,15 +490,20 @@ class AdminEntityRegistry
                             label: 'Chapter content-block edit',
                         ),
                         new AdminRegionMethodDefinition(
+                            family: AdminMethodFamily::ORDERED_INSERTION,
+                            editModes: [AdminEditMode::CONTEXTUAL, AdminEditMode::FULL],
+                            label: 'Chapter ordered insertion',
+                        ),
+                        new AdminRegionMethodDefinition(
                             family: AdminMethodFamily::REORDER,
                             editModes: [AdminEditMode::FULL],
                             label: 'Chapter content-block reorder',
-                            description: 'Uses the shared ordering resolver while Chapter keeps its current fixed text-block policy.',
+                            description: 'Uses the shared ordering resolver while Chapter stays scoped to registered text and quote note blocks.',
                         ),
                     ],
                 ),
             ],
-            notes: 'Chapter remains on the phase-one fixed-type content-block workflow while sharing the registration foundation.',
+            notes: 'Chapter now uses the shared registered textual note-block workflow while keeping canonical chapter identity outside the current edit surface.',
         );
     }
 
@@ -567,7 +601,7 @@ class AdminEntityRegistry
                     classification: AdminFieldClassification::EDITORIAL,
                     group: AdminFieldGroup::EDITORIAL,
                 ),
-                ...$this->sharedTextBlockFields(),
+                ...$this->sharedTextualNoteBlockFields(),
             ],
             regions: [
                 new AdminRegionDefinition(
@@ -614,15 +648,15 @@ class AdminEntityRegistry
                     label: 'Published notes',
                     surface: 'chapters.verses.show',
                     description: 'Verse-owned editorial note blocks.',
-                    fieldKeys: array_keys($this->sharedTextBlockFields()),
+                    fieldKeys: array_keys($this->sharedTextualNoteBlockFields()),
                     contextualFieldKeys: ['content_block_title', 'content_block_body'],
-                    fullFieldKeys: array_keys($this->sharedTextBlockFields()),
+                    fullFieldKeys: array_keys($this->sharedTextualNoteBlockFields()),
                     capabilityHint: 'content_blocks',
-                    helpText: 'Verse currently uses a fixed text-block policy while reusing the shared content-block executor family.',
+                    helpText: 'Verse uses the shared registered text and quote note workflow while keeping ownership scoped to the current verse.',
                     methods: [
                         new AdminRegionMethodDefinition(
                             family: AdminMethodFamily::CONTENT_BLOCK_CREATE,
-                            editModes: [AdminEditMode::FULL],
+                            editModes: [AdminEditMode::CONTEXTUAL, AdminEditMode::FULL],
                             label: 'Verse content-block create',
                         ),
                         new AdminRegionMethodDefinition(
@@ -631,10 +665,15 @@ class AdminEntityRegistry
                             label: 'Verse content-block edit',
                         ),
                         new AdminRegionMethodDefinition(
+                            family: AdminMethodFamily::ORDERED_INSERTION,
+                            editModes: [AdminEditMode::CONTEXTUAL, AdminEditMode::FULL],
+                            label: 'Verse ordered insertion',
+                        ),
+                        new AdminRegionMethodDefinition(
                             family: AdminMethodFamily::REORDER,
                             editModes: [AdminEditMode::FULL],
                             label: 'Verse content-block reorder',
-                            description: 'Uses the shared ordering resolver while Verse keeps its text-note-only schema policy.',
+                            description: 'Uses the shared ordering resolver while Verse stays scoped to registered text and quote note blocks.',
                         ),
                     ],
                 ),
@@ -856,6 +895,28 @@ class AdminEntityRegistry
                 options: ['draft', 'published'],
                 helpText: 'Published blocks render publicly. Draft blocks remain protected in admin.',
             ),
+        ];
+    }
+
+    /**
+     * @return array<string, AdminFieldDefinition>
+     */
+    private function sharedTextualNoteBlockFields(): array
+    {
+        return [
+            'content_block_type' => new AdminFieldDefinition(
+                key: 'content_block_type',
+                label: 'Registered block type',
+                source: 'content_blocks.block_type',
+                type: 'select',
+                validationRules: ['required', TextualContentBlockSchema::typeValidationRule()],
+                editModes: [AdminEditMode::FULL],
+                classification: AdminFieldClassification::EDITORIAL,
+                group: AdminFieldGroup::SUPPORTING,
+                options: TextualContentBlockSchema::editableTypes(),
+                helpText: 'Only registered textual note blocks belong here. Richer media stays on dedicated media surfaces instead of raw block JSON.',
+            ),
+            ...$this->sharedTextBlockFields(),
         ];
     }
 }

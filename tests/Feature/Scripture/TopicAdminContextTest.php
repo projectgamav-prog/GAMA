@@ -46,7 +46,7 @@ test('topic public page no longer exposes topic-specific admin props', function 
             ->where('adminContext.canAccess', true)
             ->where('adminContext.isVisible', true)
             ->where('adminContext.visibilityUrl', $this->visibilityRoute)
-            ->where('admin', null),
+            ->missing('admin'),
         );
 });
 

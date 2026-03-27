@@ -10,12 +10,16 @@ import {
 import { Button } from '@/components/ui/button';
 import { defineAdminModule } from '@/admin/modules/shared/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/modules/shared/module-types';
+import { scriptureAdminStartCase } from '@/lib/scripture-admin-field-display';
 import { getBlockActionMetadata } from './surface-types';
 
 function BlockDuplicate({ surface }: AdminModuleComponentProps) {
     const metadata = getBlockActionMetadata(surface);
     const management = metadata?.management;
     const [processing, setProcessing] = useState(false);
+    const blockTypeLabel = surface.blockType
+        ? scriptureAdminStartCase(surface.blockType)
+        : null;
 
     if (metadata === null || !management?.duplicateHref) {
         return null;
@@ -53,7 +57,11 @@ function BlockDuplicate({ surface }: AdminModuleComponentProps) {
                         <span className="sr-only">Duplicate block</span>
                     </Button>
                 </TooltipTrigger>
-                <TooltipContent>Duplicate text block</TooltipContent>
+                <TooltipContent>
+                    {blockTypeLabel
+                        ? `Duplicate ${blockTypeLabel.toLowerCase()} block`
+                        : 'Duplicate block'}
+                </TooltipContent>
             </Tooltip>
         </TooltipProvider>
     );
@@ -68,5 +76,5 @@ export const blockDuplicateModule = defineAdminModule({
     EditorComponent: BlockDuplicate,
     order: 30,
     description:
-        'Renders the current duplicate action for eligible text-first block flows.',
+        'Renders the shared duplicate action for eligible registered textual blocks.',
 });

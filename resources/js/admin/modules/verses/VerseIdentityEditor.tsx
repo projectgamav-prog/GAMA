@@ -6,8 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { VERSE_INTRO_SURFACE_KEY } from '@/admin/modules/shared/surface-keys';
 import { defineAdminModule } from '@/admin/modules/shared/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/modules/shared/module-types';
+import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
 import { getVerseIdentityMetadata } from './surface-types';
 
 type VerseIdentityFormData = {
@@ -28,6 +30,11 @@ function VerseIdentityEditor({ surface }: AdminModuleComponentProps) {
     if (metadata === null) {
         return null;
     }
+
+    const fullEditHref = buildScriptureAdminSectionHref(
+        metadata.fullEditHref,
+        'identity',
+    );
 
     if (!isOpen) {
         return (
@@ -54,9 +61,7 @@ function VerseIdentityEditor({ surface }: AdminModuleComponentProps) {
                     variant="outline"
                     className="h-8 rounded-full px-3"
                 >
-                    <Link href={`${metadata.fullEditHref}#identity-editor`}>
-                        Full Edit
-                    </Link>
+                    <Link href={fullEditHref}>Full Edit</Link>
                 </Button>
             </>
         );
@@ -67,7 +72,7 @@ function VerseIdentityEditor({ surface }: AdminModuleComponentProps) {
             <ScriptureInlineRegionEditor
                 title="Verse identity"
                 description="Update the canonical verse text, number, and slug for this verse."
-                fullEditHref={`${metadata.fullEditHref}#identity-editor`}
+                fullEditHref={fullEditHref}
                 onCancel={() => {
                     form.reset();
                     form.clearErrors();
@@ -129,9 +134,9 @@ function VerseIdentityEditor({ surface }: AdminModuleComponentProps) {
 
 export const verseIdentityEditorModule = defineAdminModule({
     key: 'verse-identity-editor',
+    surfaceKeys: VERSE_INTRO_SURFACE_KEY,
     entityScope: 'verse',
     surfaceSlots: 'inline_editor',
-    regionScope: 'verse_intro',
     requiredCapabilities: ['edit'],
     EditorComponent: VerseIdentityEditor,
     order: 10,

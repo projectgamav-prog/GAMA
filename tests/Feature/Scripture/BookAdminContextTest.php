@@ -37,16 +37,30 @@ beforeEach(function () {
         'scripture.books.admin.media-assignments.store',
         $this->book,
     );
-    $this->visibilityRoute = route('scripture.admin-context.visibility.update');
 });
 
 test('guests and non editors cannot access protected book admin context', function () {
+    $this->get($this->booksIndexRoute)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('isAdmin', false)
+            ->where('books.0.admin', null),
+        );
+
     $this->get($this->showRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
+            ->where('isAdmin', false)
             ->where('adminContext.canAccess', false)
             ->where('adminContext.isVisible', false)
             ->where('adminContext.visibilityUrl', null)
+            ->where('admin', null),
+        );
+
+    $this->get($this->overviewRoute)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('isAdmin', false)
             ->where('admin', null),
         );
 
@@ -58,12 +72,29 @@ test('guests and non editors cannot access protected book admin context', functi
     ]);
 
     $this->actingAs($nonEditor)
+        ->get($this->booksIndexRoute)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('isAdmin', false)
+            ->where('books.0.admin', null),
+        );
+
+    $this->actingAs($nonEditor)
         ->get($this->showRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
+            ->where('isAdmin', false)
             ->where('adminContext.canAccess', false)
             ->where('adminContext.isVisible', false)
             ->where('adminContext.visibilityUrl', null)
+            ->where('admin', null),
+        );
+
+    $this->actingAs($nonEditor)
+        ->get($this->overviewRoute)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('isAdmin', false)
             ->where('admin', null),
         );
 
@@ -104,7 +135,7 @@ test('guests and non editors cannot access protected book admin context', functi
         ->assertForbidden();
 });
 
-test('authorized editors can toggle protected admin visibility and receive registered book admin props', function () {
+test('authorized editors receive registered book admin props on book detail, overview, and library index', function () {
     $editor = User::query()->where('email', 'editor1@example.com')->firstOrFail();
     $textBlock = $this->book->contentBlocks()
         ->where('block_type', 'text')
@@ -112,6 +143,18 @@ test('authorized editors can toggle protected admin visibility and receive regis
     $quoteBlock = $this->book->contentBlocks()
         ->where('block_type', 'quote')
         ->firstOrFail();
+    $imageBlock = $this->book->contentBlocks()->create([
+        'region' => 'overview',
+        'block_type' => 'image',
+        'title' => 'Editable admin image',
+        'body' => 'Image block shown on the public book page.',
+        'data_json' => [
+            'url' => 'https://example.test/book-admin-image.jpg',
+            'alt' => 'Editable public admin image',
+        ],
+        'sort_order' => 99,
+        'status' => 'published',
+    ]);
     $videoBlock = $this->book->contentBlocks()
         ->where('block_type', 'video')
         ->firstOrFail();
@@ -130,18 +173,25 @@ test('authorized editors can toggle protected admin visibility and receive regis
         );
 
     $this->actingAs($editor)
-        ->from($this->showRoute)
-        ->post($this->visibilityRoute, [
-            'visible' => true,
-        ])
-        ->assertRedirect($this->showRoute)
-        ->assertCookie(AdminContext::VISIBILITY_COOKIE, '1');
+        ->get($this->overviewRoute)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('adminContext.canAccess', true)
+            ->where('adminContext.isVisible', false)
+            ->where('isAdmin', true)
+            ->where('admin.identity_update_href', $this->identityUpdateRoute)
+            ->where('admin.details_update_href', $this->detailsUpdateRoute)
+            ->where('admin.full_edit_href', $this->fullEditRoute)
+            ->where('admin.canonical_edit_href', $this->canonicalEditRoute)
+            ->where('admin.media_assignment_store_href', $this->mediaAssignmentStoreRoute),
+        );
 
     $this->actingAs($editor)
-        ->withCookie(AdminContext::VISIBILITY_COOKIE, '1')
         ->get($this->booksIndexRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
+            ->where('adminContext.canAccess', true)
+            ->where('isAdmin', true)
             ->where(
                 'books.0.admin.details_update_href',
                 route('scripture.books.admin.details.update', $this->book),
@@ -165,7 +215,7 @@ test('authorized editors can toggle protected admin visibility and receive regis
             ->where('admin.full_edit_href', $this->fullEditRoute)
             ->where('admin.canonical_edit_href', $this->canonicalEditRoute)
             ->where('admin.content_block_store_href', $this->contentBlockStoreRoute)
-            ->where('admin.content_block_types', ['text', 'quote'])
+            ->where('admin.content_block_types', ['text', 'quote', 'image'])
             ->where('admin.content_block_default_region', 'overview')
             ->where('admin.content_block_regions', ['overview', 'highlights'])
             ->where(
@@ -182,18 +232,26 @@ test('authorized editors can toggle protected admin visibility and receive regis
                     'contentBlock' => $quoteBlock,
                 ]),
             )
+            ->where(
+                "admin.content_block_update_hrefs.{$imageBlock->id}",
+                route('scripture.books.admin.content-blocks.update', [
+                    'book' => $this->book,
+                    'contentBlock' => $imageBlock,
+                ]),
+            )
+            ->missing("admin.content_block_duplicate_hrefs.{$imageBlock->id}")
             ->missing("admin.content_block_update_hrefs.{$videoBlock->id}"),
         );
 
     $this->actingAs($editor)
-        ->withCookie(AdminContext::VISIBILITY_COOKIE, '1')
         ->get($this->overviewRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
+            ->where('isAdmin', true)
             ->where('admin.full_edit_href', $this->fullEditRoute)
             ->where('admin.canonical_edit_href', $this->canonicalEditRoute)
             ->where('admin.content_block_store_href', $this->contentBlockStoreRoute)
-            ->where('admin.content_block_types', ['text', 'quote'])
+            ->where('admin.content_block_types', ['text', 'quote', 'image'])
             ->where('admin.content_block_default_region', 'overview')
             ->where('admin.content_block_regions', ['overview', 'highlights'])
             ->where(
@@ -202,7 +260,15 @@ test('authorized editors can toggle protected admin visibility and receive regis
                     'book' => $this->book,
                     'contentBlock' => $quoteBlock,
                 ]),
-            ),
+            )
+            ->where(
+                "admin.content_block_update_hrefs.{$imageBlock->id}",
+                route('scripture.books.admin.content-blocks.update', [
+                    'book' => $this->book,
+                    'contentBlock' => $imageBlock,
+                ]),
+            )
+            ->where('admin.media_assignment_store_href', $this->mediaAssignmentStoreRoute),
         );
 });
 
@@ -264,30 +330,45 @@ test('authorized editors can manage registered book content blocks while unregis
         'status' => 'published',
     ]);
 
+    $imageBlock = $book->contentBlocks()->create([
+        'region' => 'overview',
+        'block_type' => 'image',
+        'title' => 'Published admin image',
+        'body' => 'Existing image caption.',
+        'data_json' => [
+            'url' => 'https://example.test/original-book-image.jpg',
+            'alt' => 'Original book image alt',
+        ],
+        'sort_order' => 2,
+        'status' => 'published',
+    ]);
+
     $videoBlock = $book->contentBlocks()->create([
         'region' => 'overview',
         'block_type' => 'video',
         'title' => 'Protected legacy video',
         'body' => 'Still rendered publicly but not editable through the registered block editor.',
         'data_json' => ['url' => 'https://example.test/book-video.mp4'],
-        'sort_order' => 2,
+        'sort_order' => 3,
         'status' => 'published',
     ]);
 
     $this->actingAs($editor)
         ->from($fullEditRoute)
         ->post($storeRoute, [
-            'block_type' => 'quote',
-            'title' => 'Fresh draft quote',
+            'block_type' => 'image',
+            'title' => 'Fresh draft image',
             'body' => 'Created through the Book full editor.',
+            'media_url' => 'https://example.test/fresh-book-image.jpg',
+            'alt_text' => 'Fresh book image alt text',
             'region' => 'highlights',
-            'sort_order' => 3,
+            'sort_order' => 4,
             'status' => 'draft',
         ])
         ->assertRedirect($fullEditRoute);
 
-    $newQuote = $book->contentBlocks()
-        ->where('title', 'Fresh draft quote')
+    $newImage = $book->contentBlocks()
+        ->where('title', 'Fresh draft image')
         ->firstOrFail();
 
     $this->actingAs($editor)
@@ -301,6 +382,23 @@ test('authorized editors can manage registered book content blocks while unregis
             'body' => 'Visible publicly after update.',
             'region' => 'overview',
             'sort_order' => 1,
+            'status' => 'published',
+        ])
+        ->assertRedirect($fullEditRoute);
+
+    $this->actingAs($editor)
+        ->from($fullEditRoute)
+        ->patch(route('scripture.books.admin.content-blocks.update', [
+            'book' => $book,
+            'contentBlock' => $imageBlock,
+        ]), [
+            'block_type' => 'image',
+            'title' => 'Updated published image',
+            'body' => 'Updated image caption.',
+            'media_url' => 'https://example.test/updated-book-image.jpg',
+            'alt_text' => 'Updated book image alt text',
+            'region' => 'overview',
+            'sort_order' => 2,
             'status' => 'published',
         ])
         ->assertRedirect($fullEditRoute);
@@ -337,12 +435,17 @@ test('authorized editors can manage registered book content blocks while unregis
             ->where('admin_entity.regions.3.method_families', [
                 'media_slot_edit',
             ])
-            ->has('admin_entity.methods_by_mode.contextual', 7)
-            ->has('admin_entity.methods_by_mode.full', 18)
-            ->has('admin_content_blocks', 2)
+            ->has('admin_entity.methods_by_mode.contextual', 9)
+            ->has('admin_entity.methods_by_mode.full', 20)
+            ->has('admin_content_blocks', 3)
             ->where('admin_content_blocks.0.title', 'Updated published book note')
-            ->where('admin_content_blocks.1.title', 'Fresh draft quote')
-            ->where('admin_content_blocks.1.block_type', 'quote')
+            ->where('admin_content_blocks.1.title', 'Updated published image')
+            ->where('admin_content_blocks.1.block_type', 'image')
+            ->where('admin_content_blocks.1.data_json.url', 'https://example.test/updated-book-image.jpg')
+            ->where('admin_content_blocks.1.data_json.alt', 'Updated book image alt text')
+            ->where('admin_content_blocks.2.title', 'Fresh draft image')
+            ->where('admin_content_blocks.2.block_type', 'image')
+            ->where('admin_content_blocks.2.data_json.url', 'https://example.test/fresh-book-image.jpg')
             ->has('protected_content_blocks', 1)
             ->where('protected_content_blocks.0.title', 'Protected legacy video'),
         );
@@ -350,8 +453,11 @@ test('authorized editors can manage registered book content blocks while unregis
     $this->get($showRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->has('content_blocks', 1)
+            ->has('content_blocks', 2)
             ->where('content_blocks.0.title', 'Updated published book note')
+            ->where('content_blocks.1.title', 'Updated published image')
+            ->where('content_blocks.1.data_json.url', 'https://example.test/updated-book-image.jpg')
+            ->where('content_blocks.1.data_json.alt', 'Updated book image alt text')
             ->where('book.media_slots.overview_video.title', 'Protected legacy video')
             ->where(
                 'book.media_slots.overview_video.media.url',
@@ -359,7 +465,16 @@ test('authorized editors can manage registered book content blocks while unregis
             ),
         );
 
-    expect($newQuote->status)->toBe('draft');
+    expect($newImage->status)->toBe('draft');
+    expect($newImage->data_json)->toBe([
+        'url' => 'https://example.test/fresh-book-image.jpg',
+        'alt' => 'Fresh book image alt text',
+    ]);
+    expect(ContentBlock::query()->findOrFail($imageBlock->id)->data_json)
+        ->toBe([
+            'url' => 'https://example.test/updated-book-image.jpg',
+            'alt' => 'Updated book image alt text',
+        ]);
     expect(ContentBlock::query()->findOrFail($videoBlock->id)->title)
         ->toBe('Protected legacy video');
 });
@@ -567,7 +682,13 @@ test('authorized editors can manage visible book blocks from the public page', f
                     'contentBlock' => $firstBlock,
                 ]),
             )
-            ->missing("admin.content_block_duplicate_hrefs.{$quoteBlock->id}")
+            ->where(
+                "admin.content_block_duplicate_hrefs.{$quoteBlock->id}",
+                route('scripture.books.admin.content-blocks.duplicate', [
+                    'book' => $book,
+                    'contentBlock' => $quoteBlock,
+                ]),
+            )
             ->where(
                 "admin.content_block_delete_hrefs.{$quoteBlock->id}",
                 route('scripture.books.admin.content-blocks.destroy', [

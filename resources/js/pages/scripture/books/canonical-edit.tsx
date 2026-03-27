@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useScriptureAdminTargetNavigation } from '@/hooks/use-scripture-admin-target-navigation';
 import ScriptureLayout from '@/layouts/scripture-layout';
 import type { BookCanonicalEditProps, BreadcrumbItem } from '@/types';
 
@@ -33,7 +34,7 @@ function BookIdentityEditorCard({
     });
 
     return (
-        <Card id="identity-editor">
+        <Card>
             <CardHeader className="gap-3">
                 <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="outline">Canonical</Badge>
@@ -113,6 +114,7 @@ export default function BookCanonicalEdit({
     const canonicalBrowseRegion = admin_entity.regions.find(
         (region) => region.key === 'canonical_browse',
     );
+    useScriptureAdminTargetNavigation();
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: book.title,
@@ -170,7 +172,7 @@ export default function BookCanonicalEdit({
             </ScripturePageIntroCard>
 
             <ScriptureSection
-                id="identity-editor"
+                adminTargetSection="identity"
                 title="Canonical Identity"
                 description="Slug, number, and title remain intentionally separate from editorial modules."
             >
