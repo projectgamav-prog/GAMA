@@ -1,5 +1,6 @@
-import { Link } from '@inertiajs/react';
+import { Link, useForm } from '@inertiajs/react';
 import { ShieldAlert, SquareArrowOutUpRight } from 'lucide-react';
+import InputError from '@/components/input-error';
 import { ScriptureAdminMethodFamilyGrid } from '@/components/scripture/scripture-admin-method-family-grid';
 import { ScriptureAdminFieldMeta } from '@/components/scripture/scripture-admin-field-meta';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
@@ -7,24 +8,107 @@ import { ScriptureSection } from '@/components/scripture/scripture-section';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import ScriptureLayout from '@/layouts/scripture-layout';
 import type { BookCanonicalEditProps, BreadcrumbItem } from '@/types';
 
-const CANONICAL_FIELD_VALUES = (
-    book: BookCanonicalEditProps['book'],
-): Record<string, string> => ({
-    canonical_slug: book.slug,
-    canonical_number: book.number ?? 'Unnumbered',
-    canonical_title: book.title,
-});
+type BookIdentityFormData = {
+    slug: string;
+    number: string;
+    title: string;
+};
+
+function BookIdentityEditorCard({
+    book,
+    updateHref,
+}: {
+    book: BookCanonicalEditProps['book'];
+    updateHref: string;
+}) {
+    const form = useForm<BookIdentityFormData>({
+        slug: book.slug,
+        number: book.number ?? '',
+        title: book.title,
+    });
+
+    return (
+        <Card id="identity-editor">
+            <CardHeader className="gap-3">
+                <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant="outline">Canonical</Badge>
+                    <Badge variant="secondary">Protected workflow</Badge>
+                </div>
+                <CardTitle>Book Identity</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-5">
+                <div className="grid gap-2">
+                    <Label htmlFor="canonical_book_slug">Slug</Label>
+                    <Input
+                        id="canonical_book_slug"
+                        value={form.data.slug}
+                        onChange={(event) =>
+                            form.setData('slug', event.target.value)
+                        }
+                        placeholder="book-slug"
+                    />
+                    <InputError message={form.errors.slug} />
+                </div>
+
+                <div className="grid gap-2">
+                    <Label htmlFor="canonical_book_number">Number</Label>
+                    <Input
+                        id="canonical_book_number"
+                        value={form.data.number}
+                        onChange={(event) =>
+                            form.setData('number', event.target.value)
+                        }
+                        placeholder="1"
+                    />
+                    <InputError message={form.errors.number} />
+                </div>
+
+                <div className="grid gap-2">
+                    <Label htmlFor="canonical_book_title">Title</Label>
+                    <Input
+                        id="canonical_book_title"
+                        value={form.data.title}
+                        onChange={(event) =>
+                            form.setData('title', event.target.value)
+                        }
+                        placeholder="Book title"
+                    />
+                    <InputError message={form.errors.title} />
+                </div>
+
+                <div className="flex items-center gap-3">
+                    <Button
+                        type="button"
+                        onClick={() =>
+                            form.patch(updateHref, {
+                                preserveScroll: true,
+                            })
+                        }
+                        disabled={form.processing}
+                    >
+                        Save book identity
+                    </Button>
+                    {form.recentlySuccessful && (
+                        <p className="text-sm text-muted-foreground">Saved.</p>
+                    )}
+                </div>
+            </CardContent>
+        </Card>
+    );
+}
 
 export default function BookCanonicalEdit({
     book,
+    admin_identity_update_href,
     admin_entity,
 }: BookCanonicalEditProps) {
     const canonicalFields = admin_entity.field_groups.identity;
     const canonicalMethods = admin_entity.methods_by_mode.canonical;
-    const fieldValues = CANONICAL_FIELD_VALUES(book);
     const canonicalMode = admin_entity.edit_modes.canonical;
     const canonicalBrowseRegion = admin_entity.regions.find(
         (region) => region.key === 'canonical_browse',
@@ -53,7 +137,7 @@ export default function BookCanonicalEdit({
                     </>
                 }
                 title={`Canonical protected edit: ${book.title}`}
-                description="This workflow is reserved for canonical book identity and protected browse structure. In the current phase, those fields remain intentionally read-only."
+                description="Use this protected workflow for canonical book identity. Editorial copy, public blocks, and media assignments stay on their separate editorial surfaces."
                 headerAction={
                     <Button asChild variant="outline" size="sm">
                         <Link href={book.admin_full_edit_href}>
@@ -86,8 +170,19 @@ export default function BookCanonicalEdit({
             </ScripturePageIntroCard>
 
             <ScriptureSection
-                title="Protected Identity Fields"
-                description="These fields define Book identity and stay explicitly separated from editorial forms."
+                id="identity-editor"
+                title="Canonical Identity"
+                description="Slug, number, and title remain intentionally separate from editorial modules."
+            >
+                <BookIdentityEditorCard
+                    book={book}
+                    updateHref={admin_identity_update_href}
+                />
+            </ScriptureSection>
+
+            <ScriptureSection
+                title="Identity Field Contract"
+                description="These are the canonical fields registered for the Book identity layer."
             >
                 <div className="grid gap-4 lg:grid-cols-3">
                     {canonicalFields.map((field) => (
@@ -97,19 +192,8 @@ export default function BookCanonicalEdit({
                                     {field.label}
                                 </CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-4">
-                                <ScriptureAdminFieldMeta
-                                    field={field}
-                                    showModes
-                                />
-                                <div className="rounded-xl border border-border/70 bg-muted/20 px-4 py-4">
-                                    <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-                                        Current value
-                                    </p>
-                                    <p className="mt-3 text-sm leading-7 break-words text-foreground">
-                                        {fieldValues[field.key] ?? 'Not set'}
-                                    </p>
-                                </div>
+                            <CardContent>
+                                <ScriptureAdminFieldMeta field={field} showModes />
                             </CardContent>
                         </Card>
                     ))}
@@ -118,7 +202,7 @@ export default function BookCanonicalEdit({
 
             <ScriptureSection
                 title="Canonical Method Layer"
-                description="These shared methods are attached from the registered Book schema and define what the protected canonical workflow is allowed to expose."
+                description="These shared methods are attached from the registered Book schema and define what the protected canonical workflow can expose."
             >
                 <ScriptureAdminMethodFamilyGrid
                     methods={canonicalMethods}
@@ -130,7 +214,7 @@ export default function BookCanonicalEdit({
             {canonicalBrowseRegion && (
                 <ScriptureSection
                     title="Canonical Browse Structure"
-                    description="Browse hierarchy behavior is documented here and kept outside contextual or editorial workflows."
+                    description="Browse hierarchy behavior remains documented here and stays outside editorial workflows."
                 >
                     <Card>
                         <CardHeader className="gap-3">
@@ -147,10 +231,7 @@ export default function BookCanonicalEdit({
                                 {canonicalBrowseRegion.supported_modes.map(
                                     (mode) => (
                                         <Badge key={mode} variant="secondary">
-                                            {
-                                                admin_entity.edit_modes[mode]
-                                                    .label
-                                            }
+                                            {admin_entity.edit_modes[mode].label}
                                         </Badge>
                                     ),
                                 )}

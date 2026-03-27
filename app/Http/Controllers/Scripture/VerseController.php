@@ -57,7 +57,7 @@ class VerseController extends Controller
             ->orderBy('id')
             ->get();
 
-        $adminVisibilityEnabled = AdminContext::isVisible($request);
+        $isAdmin = AdminContext::canAccess($request->user());
         $adminRouteContext = new VerseAdminRouteContext(
             $book,
             $bookSection,
@@ -103,7 +103,8 @@ class VerseController extends Controller
             'topics' => $publicScriptureData->topics($verse->topicAssignments),
             'characters' => $publicScriptureData->characters($verse->characterAssignments),
             'content_blocks' => $publicScriptureData->contentBlocks($contentBlocks),
-            'admin' => $adminVisibilityEnabled
+            'isAdmin' => $isAdmin,
+            'admin' => $isAdmin
                 ? $this->verseAdminPayload($adminRouteContext, $contentBlocks)
                 : null,
         ]);
@@ -120,6 +121,7 @@ class VerseController extends Controller
         $visibleSequence = new VisibleContentBlockSequence($contentBlocks);
 
         return [
+            'identity_update_href' => $adminRouteContext->identityUpdateHref(),
             'meta_update_href' => $adminRouteContext->metaUpdateHref(),
             'full_edit_href' => $adminRouteContext->fullEditHref(),
             'content_block_store_href' => $adminRouteContext->contentBlockStoreHref(),

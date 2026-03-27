@@ -22,6 +22,7 @@ import type {
  * success feedback should appear after a successful mutation.
  */
 type TextContentBlockFormData = {
+    block_type?: string;
     title: string;
     body: string;
     region: string;
@@ -36,6 +37,7 @@ export type InlineTextContentBlockSession = {
     fullEditHref: string;
     block: ScriptureContentBlock;
     values: {
+        block_type?: string;
         title: string;
         body: string;
         region: string;
@@ -78,6 +80,7 @@ export function ScriptureTextContentBlockInlineEditor({
     onSaveSuccess,
 }: Props) {
     const form = useForm<TextContentBlockFormData>({
+        block_type: 'text',
         title: '',
         body: '',
         region: 'study',
@@ -105,6 +108,7 @@ export function ScriptureTextContentBlockInlineEditor({
 
             if (isCreateSession(currentSession)) {
                 form.setData({
+                    block_type: currentSession.values.block_type,
                     title: currentSession.values.title,
                     body: currentSession.values.body,
                     region: currentSession.values.region,
@@ -115,6 +119,9 @@ export function ScriptureTextContentBlockInlineEditor({
                 });
             } else {
                 form.setData({
+                    block_type:
+                        currentSession.values.block_type ??
+                        currentSession.block.block_type,
                     title: currentSession.values.title,
                     body: currentSession.values.body,
                     region: currentSession.values.region,
@@ -199,6 +206,7 @@ export function ScriptureTextContentBlockInlineEditor({
                     // context and lets the session hook decide what feedback to
                     // show after the block is saved.
                     form.transform((data) => ({
+                        block_type: data.block_type,
                         title: data.title,
                         body: data.body,
                         region: data.region,

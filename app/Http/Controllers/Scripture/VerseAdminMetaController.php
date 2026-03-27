@@ -35,6 +35,16 @@ class VerseAdminMetaController extends Controller
             $attributes['summary_short'] = $this->nullableString($validated['summary_short']);
         }
 
+        if (array_key_exists('primary_speaker_character_id', $validated)) {
+            $attributes['primary_speaker_character_id'] =
+                $validated['primary_speaker_character_id'];
+        }
+
+        if (array_key_exists('primary_listener_character_id', $validated)) {
+            $attributes['primary_listener_character_id'] =
+                $validated['primary_listener_character_id'];
+        }
+
         if (array_key_exists('scene_location', $validated)) {
             $attributes['scene_location'] = $this->nullableString($validated['scene_location']);
         }

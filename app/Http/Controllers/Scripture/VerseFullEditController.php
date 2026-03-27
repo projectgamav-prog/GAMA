@@ -30,7 +30,10 @@ class VerseFullEditController extends Controller
         PublicScriptureData $publicScriptureData,
         AdminEntityRegistry $adminEntityRegistry,
     ): Response {
-        $verse->load('verseMeta');
+        $verse->load([
+            'verseMeta',
+            'characterAssignments.character',
+        ]);
 
         $contentBlocks = $verse->contentBlocks()
             ->orderBy('sort_order')
@@ -68,6 +71,8 @@ class VerseFullEditController extends Controller
                 'admin_full_edit_href' => $adminRouteContext->fullEditHref(),
             ],
             'admin_entity' => $adminEntityRegistry->definition('verse')->toArray(),
+            'characters' => $publicScriptureData->characters($verse->characterAssignments),
+            'admin_identity_update_href' => $adminRouteContext->identityUpdateHref(),
             'verse_meta' => $publicScriptureData->verseMeta($verse->verseMeta),
             'admin_meta_update_href' => $adminRouteContext->metaUpdateHref(),
             'admin_content_block_store_href' => $adminRouteContext->contentBlockStoreHref(),

@@ -11,6 +11,7 @@ import type {
  * stable inline create session immediately without involving the sheet editor.
  */
 type InlineTextContentBlockCreateValues = {
+    block_type?: string;
     title: string;
     body: string;
     region: string;
@@ -32,6 +33,7 @@ type CreateInlineTextContentBlockSessionInput = {
     fullEditHref: string;
     defaultRegion: string;
     insertionPoint: ScriptureContentBlockInsertionPoint;
+    blockType?: string;
 };
 
 export function createInlineTextContentBlockCreateSession({
@@ -39,6 +41,7 @@ export function createInlineTextContentBlockCreateSession({
     fullEditHref,
     defaultRegion,
     insertionPoint,
+    blockType,
 }: CreateInlineTextContentBlockSessionInput): InlineTextContentBlockCreateSession {
     // The insertion point carries both ordering context and the most useful
     // default region for the new inline block.
@@ -50,6 +53,7 @@ export function createInlineTextContentBlockCreateSession({
         editorKey: `new-${insertionPoint.insertion_mode}-${insertionPoint.relative_block_id ?? 'section'}-${region}`,
         insertionPoint,
         values: {
+            block_type: blockType,
             title: '',
             body: '',
             region,

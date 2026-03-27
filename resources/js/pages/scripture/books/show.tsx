@@ -1,21 +1,16 @@
 import { Link } from '@inertiajs/react';
 import { BookOpenText } from 'lucide-react';
+import { AdminModuleHost } from '@/admin/modules/shared';
 import {
-    AdminModuleHost,
-    BLOCK_CREATE_SURFACE_CAPABILITIES,
-    EDITOR_SURFACE_CAPABILITIES,
-    createInlineEditorModuleSurface,
-    createSheetEditorModuleSurface,
-    createSurfaceOwner,
-} from '@/admin/modules/shared';
-import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
+    createBookIdentitySurface,
+    createBookIntroSurface,
+} from '@/admin/modules/books/surface-builders';
 import { BookPublicMediaSection } from '@/components/scripture/book-public-media-section';
-import { ScriptureContentBlocksSection } from '@/components/scripture/scripture-content-blocks-section';
+import { ScriptureBookContentBlockRegion } from '@/components/scripture/scripture-book-content-block-region';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
 import { Badge } from '@/components/ui/badge';
-import { useBookAdminEditSession } from '@/hooks/use-book-admin-edit-session';
 import {
     Card,
     CardContent,
@@ -32,9 +27,13 @@ import {
 } from '@/lib/scripture';
 import type { BookShowProps, BreadcrumbItem } from '@/types';
 
+const PANEL_CLASS_NAME =
+    'flex flex-wrap items-center gap-2 rounded-2xl border border-border/70 bg-muted/20 p-3';
+
 export default function BookShow({
     book,
     content_blocks,
+    isAdmin,
     admin,
     book_sections,
 }: BookShowProps) {
@@ -44,23 +43,22 @@ export default function BookShow({
         entityId: book.id,
         entityLabel: book.title,
     };
-    const {
-        editSession,
-        inlineIntroSession,
-        inlineCreateTextContentBlockSession,
-        getInlineTextContentBlockSession,
-        closeEditSession,
-        introSurface,
-        contentBlocksCapabilities,
-        contentBlocksMeta,
-        handleIntroSaveSuccess,
-        handleContentBlockSaveSuccess,
-        handleContentBlockCreateSuccess,
-    } = useBookAdminEditSession({
-        book,
-        admin,
-    });
-
+    const identitySurface =
+        isAdmin && admin
+            ? createBookIdentitySurface({
+                  book,
+                  updateHref: admin.identity_update_href,
+                  fullEditHref: `${admin.canonical_edit_href}#identity-editor`,
+              })
+            : null;
+    const introSurface =
+        isAdmin && admin
+            ? createBookIntroSurface({
+                  book,
+                  updateHref: admin.details_update_href,
+                  fullEditHref: `${admin.full_edit_href}#details-editor`,
+              })
+            : null;
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: book.title,
@@ -70,12 +68,10 @@ export default function BookShow({
 
     return (
         <ScriptureLayout title={book.title} breadcrumbs={breadcrumbs}>
-            <ScriptureAdminModeBar />
-
             <ScripturePageIntroCard
                 entityMeta={{
                     ...bookEntity,
-                    region: 'page_intro',
+                    region: 'book_intro',
                     capabilityHint: 'intro',
                 }}
                 badges={
@@ -88,100 +84,38 @@ export default function BookShow({
                     </>
                 }
                 title={book.title}
-                description={
-                    inlineIntroSession ? undefined : (book.description ?? undefined)
-                }
-                adminSurface={introSurface ?? undefined}
+                description={book.description ?? undefined}
+                contentClassName="space-y-4"
             >
-                <AdminModuleHost
-                    surface={createInlineEditorModuleSurface({
-                        entity: 'book',
-                        entityId: book.id,
-                        regionKey: 'page_intro',
-                        capabilities: EDITOR_SURFACE_CAPABILITIES,
-                        session: inlineIntroSession,
-                        onCancel: closeEditSession,
-                        onSaveSuccess: handleIntroSaveSuccess,
-                    })}
-                />
+                {(identitySurface || introSurface) && (
+                    <div className="space-y-3">
+                        {identitySurface && (
+                            <AdminModuleHost
+                                surface={identitySurface}
+                                className={PANEL_CLASS_NAME}
+                            />
+                        )}
+                        {introSurface && (
+                            <AdminModuleHost
+                                surface={introSurface}
+                                className={PANEL_CLASS_NAME}
+                            />
+                        )}
+                    </div>
+                )}
             </ScripturePageIntroCard>
 
-            <BookPublicMediaSection book={book} admin={admin} />
+            <BookPublicMediaSection
+                book={book}
+                admin={admin}
+                isAdmin={isAdmin}
+            />
 
-            <ScriptureContentBlocksSection
-                title="Reading Notes"
-                description="Published study content attached to this book."
+            <ScriptureBookContentBlockRegion
+                book={book}
                 blocks={content_blocks}
-                capabilities={contentBlocksCapabilities}
-                pendingInlineCreateInsertionPoint={
-                    inlineCreateTextContentBlockSession?.insertionPoint ?? null
-                }
-                renderPendingInlineCreateEditor={() =>
-                    inlineCreateTextContentBlockSession ? (
-                        <AdminModuleHost
-                            surface={createInlineEditorModuleSurface({
-                                entity: 'book',
-                                entityId: book.id,
-                                regionKey: 'content_blocks',
-                                blockType: 'text',
-                                capabilities:
-                                    BLOCK_CREATE_SURFACE_CAPABILITIES,
-                                session: inlineCreateTextContentBlockSession,
-                                onCancel: closeEditSession,
-                                onSaveSuccess: (result: {
-                                    kind: 'create' | 'edit';
-                                }) => {
-                                    if (result.kind === 'create') {
-                                        handleContentBlockCreateSuccess();
-                                    }
-                                },
-                                metadata: {
-                                    entityLabel: book.title,
-                                },
-                            })}
-                        />
-                    ) : null
-                }
-                renderInlineBlockEditor={(block) => {
-                    const inlineSession = getInlineTextContentBlockSession(
-                        block.id,
-                    );
-
-                    return (
-                        <AdminModuleHost
-                            surface={createInlineEditorModuleSurface({
-                                entity: 'content_block',
-                                entityId: block.id,
-                                regionKey: 'content_blocks',
-                                blockType: block.block_type,
-                                owner: createSurfaceOwner('book', book.id),
-                                capabilities: EDITOR_SURFACE_CAPABILITIES,
-                                session: inlineSession,
-                                onCancel: closeEditSession,
-                                onSaveSuccess: (result: {
-                                    kind: 'create' | 'edit';
-                                    blockId?: number;
-                                }) => {
-                                    if (
-                                        result.kind === 'edit' &&
-                                        result.blockId !== undefined
-                                    ) {
-                                        handleContentBlockSaveSuccess(
-                                            result.blockId,
-                                        );
-                                    }
-                                },
-                                metadata: {
-                                    entityLabel: book.title,
-                                },
-                            })}
-                        />
-                    );
-                }}
-                entityMeta={{
-                    ...contentBlocksMeta,
-                    entityId: book.id,
-                }}
+                isAdmin={isAdmin}
+                admin={admin}
             />
 
             <ScriptureSection
@@ -283,34 +217,6 @@ export default function BookShow({
                     ))}
                 </div>
             </ScriptureSection>
-
-            <AdminModuleHost
-                surface={createSheetEditorModuleSurface({
-                    entity: 'book',
-                    entityId: book.id,
-                    regionKey:
-                        editSession?.kind === 'entity_details'
-                            ? 'page_intro'
-                            : 'content_blocks',
-                    blockType:
-                        editSession?.kind === 'content_block'
-                            ? editSession.block.block_type
-                            : editSession?.kind === 'create_content_block'
-                              ? editSession.values.block_type
-                              : null,
-                    capabilities: editSession
-                        ? editSession.kind === 'create_content_block'
-                            ? BLOCK_CREATE_SURFACE_CAPABILITIES
-                            : EDITOR_SURFACE_CAPABILITIES
-                        : [],
-                    session: editSession,
-                    onOpenChange: (open: boolean) => {
-                        if (!open) {
-                            closeEditSession();
-                        }
-                    },
-                })}
-            />
         </ScriptureLayout>
     );
 }

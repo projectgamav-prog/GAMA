@@ -142,6 +142,7 @@ export type ScriptureAdminRegionConfig = {
 };
 
 export type ScriptureVerseAdmin = {
+    identity_update_href: string;
     meta_update_href: string;
     full_edit_href: string;
     content_block_store_href: string;
@@ -162,6 +163,7 @@ export type ScriptureTopicAdmin = {
 };
 
 export type ScriptureBookAdmin = {
+    identity_update_href: string;
     details_update_href: string;
     full_edit_href: string;
     canonical_edit_href: string;
@@ -175,6 +177,10 @@ export type ScriptureBookAdmin = {
     content_block_reorder_hrefs: Record<string, string>;
     content_block_duplicate_hrefs: Record<string, string>;
     content_block_delete_hrefs: Record<string, string>;
+    media_assignment_store_href?: string;
+    media_assignments?: ScriptureAdminMediaAssignment[];
+    available_media?: ScriptureAdminMediaSummary[];
+    next_media_assignment_sort_order?: number;
 };
 
 export type ScriptureCharacterAdmin = {
@@ -531,6 +537,7 @@ export type ScriptureVerseCharacterAssignment = {
 export type BookShowProps = {
     book: ScriptureBook;
     content_blocks: ScriptureContentBlock[];
+    isAdmin: boolean;
     admin?: ScriptureBookAdmin | null;
     book_sections: Array<
         ScriptureBookSection & {
@@ -620,6 +627,7 @@ export type VerseShowProps = {
     topics: ScriptureVerseTopicAssignment[];
     characters: ScriptureVerseCharacterAssignment[];
     content_blocks: ScriptureContentBlock[];
+    isAdmin: boolean;
     admin?: ScriptureVerseAdmin | null;
 };
 
@@ -634,6 +642,8 @@ export type VerseFullEditProps = {
         admin_full_edit_href: string;
     };
     admin_entity: ScriptureRegisteredAdminEntity;
+    characters: ScriptureVerseCharacterAssignment[];
+    admin_identity_update_href: string;
     verse_meta: ScriptureVerseMeta | null;
     admin_meta_update_href: string;
     admin_content_block_store_href: string;
@@ -697,5 +707,6 @@ export type BookCanonicalEditProps = {
         admin_full_edit_href: string;
         admin_canonical_edit_href: string;
     };
+    admin_identity_update_href: string;
     admin_entity: ScriptureRegisteredAdminEntity;
 };

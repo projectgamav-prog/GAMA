@@ -1,3 +1,5 @@
+import { AdminModuleHost } from '@/admin/modules/shared';
+import { createBookMediaSlotsSurface } from '@/admin/modules/books/surface-builders';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,7 +16,11 @@ import { ScriptureSection } from './scripture-section';
 type Props = {
     book: ScriptureBook;
     admin?: ScriptureBookAdmin | null;
+    isAdmin?: boolean;
 };
+
+const PANEL_CLASS_NAME =
+    'flex flex-wrap items-center gap-2 rounded-2xl border border-border/70 bg-muted/20 p-3';
 
 function BookMediaSlotCard({ slot }: { slot: ScriptureBookMediaSlot }) {
     const mediaUrl = slot.media.url ?? slot.media.path;
@@ -73,13 +79,13 @@ function BookMediaSlotCard({ slot }: { slot: ScriptureBookMediaSlot }) {
     );
 }
 
-export function BookPublicMediaSection({ book, admin }: Props) {
+export function BookPublicMediaSection({ book, admin, isAdmin = false }: Props) {
     const { overview_video, hero_media, supporting_media } = book.media_slots;
     const hasMedia =
         overview_video !== null ||
         hero_media !== null ||
         supporting_media.length > 0;
-    const mediaAdminConfig: ScriptureAdminRegionConfig | null = admin
+    const mediaAdminConfig: ScriptureAdminRegionConfig | null = !isAdmin && admin
         ? {
               supportsEdit: false,
               supportsFullEdit: true,
@@ -87,6 +93,21 @@ export function BookPublicMediaSection({ book, admin }: Props) {
               fullEditHref: `${admin.full_edit_href}#media-slots`,
           }
         : null;
+    const mediaSurface =
+        isAdmin &&
+        admin?.media_assignment_store_href &&
+        admin.media_assignments &&
+        admin.available_media &&
+        admin.next_media_assignment_sort_order !== undefined
+            ? createBookMediaSlotsSurface({
+                  book,
+                  storeHref: admin.media_assignment_store_href,
+                  fullEditHref: `${admin.full_edit_href}#media-slots`,
+                  assignments: admin.media_assignments,
+                  availableMedia: admin.available_media,
+                  nextSortOrder: admin.next_media_assignment_sort_order,
+              })
+            : null;
 
     if (!hasMedia) {
         return null;
@@ -100,7 +121,7 @@ export function BookPublicMediaSection({ book, admin }: Props) {
                 entityType: 'book',
                 entityId: book.id,
                 entityLabel: book.title,
-                region: 'media_slots',
+                region: 'book_media_slots',
                 capabilityHint: 'media',
             }}
             adminSurface={{
@@ -110,6 +131,13 @@ export function BookPublicMediaSection({ book, admin }: Props) {
             }}
         >
             <div className="space-y-4">
+                {mediaSurface && (
+                    <AdminModuleHost
+                        surface={mediaSurface}
+                        className={PANEL_CLASS_NAME}
+                    />
+                )}
+
                 {overview_video && (
                     <BookOverviewVideoDisclosure slot={overview_video} />
                 )}

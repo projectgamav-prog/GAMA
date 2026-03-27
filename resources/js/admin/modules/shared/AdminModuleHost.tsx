@@ -2,10 +2,12 @@ import { adminModuleRegistry } from './module-registry';
 import type { AdminModuleDefinition } from './module-types';
 import type { AdminSurfaceContract } from './surface-contracts';
 import { getQualifyingAdminModules } from './qualify-module';
+import { cn } from '@/lib/utils';
 
 type Props = {
     surface: AdminSurfaceContract;
     modules?: readonly AdminModuleDefinition[];
+    className?: string;
 };
 
 /**
@@ -18,6 +20,7 @@ type Props = {
 export function AdminModuleHost({
     surface,
     modules = adminModuleRegistry,
+    className,
 }: Props) {
     const qualifyingModules = getQualifyingAdminModules(surface, modules);
 
@@ -25,19 +28,25 @@ export function AdminModuleHost({
         return null;
     }
 
-    return (
-        <>
-            {qualifyingModules.map((module) => {
-                const EditorComponent = module.EditorComponent;
+    const content = qualifyingModules.map((module) => {
+        const EditorComponent = module.EditorComponent;
 
-                return (
-                    <EditorComponent
-                        key={module.key}
-                        module={module}
-                        surface={surface}
-                    />
-                );
-            })}
-        </>
+        return (
+            <EditorComponent
+                key={module.key}
+                module={module}
+                surface={surface}
+            />
+        );
+    });
+
+    if (!className) {
+        return <>{content}</>;
+    }
+
+    return (
+        <div className={cn(className)}>
+            {content}
+        </div>
     );
 }

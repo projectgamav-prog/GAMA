@@ -47,6 +47,11 @@ class VerseAdminRouteContext
         return route('scripture.chapters.verses.admin.full-edit', $this->routeParameters());
     }
 
+    public function identityUpdateHref(): string
+    {
+        return route('scripture.chapters.verses.admin.identity.update', $this->routeParameters());
+    }
+
     public function metaUpdateHref(): string
     {
         return route('scripture.chapters.verses.admin.meta.update', $this->routeParameters());

@@ -206,9 +206,10 @@ export default function BookOverview({
                     entity: 'book',
                     entityId: book.id,
                     regionKey:
-                        editSession?.kind === 'entity_details'
-                            ? 'page_intro'
-                            : 'content_blocks',
+                        editSession?.kind === 'content_block' ||
+                        editSession?.kind === 'create_content_block'
+                            ? 'content_blocks'
+                            : 'page_intro',
                     blockType:
                         editSession?.kind === 'content_block'
                             ? editSession.block.block_type

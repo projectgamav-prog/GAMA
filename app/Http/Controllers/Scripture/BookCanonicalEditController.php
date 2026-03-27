@@ -28,6 +28,7 @@ class BookCanonicalEditController extends Controller
                 'admin_full_edit_href' => $adminRouteContext->fullEditHref(),
                 'admin_canonical_edit_href' => $adminRouteContext->canonicalEditHref(),
             ],
+            'admin_identity_update_href' => $adminRouteContext->identityUpdateHref(),
             'admin_entity' => $adminEntityRegistry
                 ->definition('book')
                 ->toArray(),

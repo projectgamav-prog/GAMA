@@ -59,19 +59,21 @@ export function VerseContentBlockEditorCard({
     block: ScriptureAdminContentBlock;
 }) {
     return (
-        <ScriptureAdminContentBlockEditorCard
-            block={block}
-            fixedBlockType="text"
-            titleField={titleField}
-            bodyField={bodyField}
-            regionField={regionField}
-            sortOrderField={sortOrderField}
-            statusField={statusField}
-            saveActionLabel="Save block"
-            editorTitle={(currentBlock) =>
-                currentBlock.title ?? `Verse note ${currentBlock.id}`
-            }
-        />
+        <div id={`block-${block.id}`}>
+            <ScriptureAdminContentBlockEditorCard
+                block={block}
+                fixedBlockType="text"
+                titleField={titleField}
+                bodyField={bodyField}
+                regionField={regionField}
+                sortOrderField={sortOrderField}
+                statusField={statusField}
+                saveActionLabel="Save block"
+                editorTitle={(currentBlock) =>
+                    currentBlock.title ?? `Verse note ${currentBlock.id}`
+                }
+            />
+        </div>
     );
 }
 

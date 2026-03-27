@@ -8,7 +8,13 @@ export function useAdminContext(): AdminContext {
 }
 
 export function useCanSeeAdminControls(): boolean {
-    const adminContext = useAdminContext();
+    const page = usePage<{ adminContext: AdminContext; isAdmin?: boolean }>();
+
+    if (page.props.isAdmin === true) {
+        return true;
+    }
+
+    const adminContext = page.props.adminContext;
 
     return adminContext.canAccess && adminContext.isVisible;
 }

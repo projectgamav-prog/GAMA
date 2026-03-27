@@ -56,6 +56,10 @@ beforeEach(function () {
         'scripture.chapters.verses.admin.meta.update',
         $this->verseRouteParameters,
     );
+    $this->identityUpdateRoute = route(
+        'scripture.chapters.verses.admin.identity.update',
+        $this->verseRouteParameters,
+    );
     $this->fullEditRoute = route(
         'scripture.chapters.verses.admin.full-edit',
         $this->verseRouteParameters,
@@ -142,7 +146,10 @@ test('authorized editors can toggle protected admin visibility and receive verse
             ->where('adminContext.canAccess', true)
             ->where('adminContext.isVisible', false)
             ->where('adminContext.visibilityUrl', $this->visibilityRoute)
-            ->where('admin', null),
+            ->where('isAdmin', true)
+            ->where('admin.identity_update_href', $this->identityUpdateRoute)
+            ->where('admin.meta_update_href', $this->metaUpdateRoute)
+            ->where('admin.full_edit_href', $this->fullEditRoute),
         );
 
     $response = $this->actingAs($editor)

@@ -26,12 +26,14 @@ export function scriptureInlineRegionLabel(
 
     switch (region) {
         case 'page_intro':
+        case 'book_intro':
             return 'Intro';
         case 'content_blocks':
             return 'Content blocks';
         case 'study_notes':
             return 'Verse notes';
         case 'media_slots':
+        case 'book_media_slots':
             return 'Media slots';
         default:
             return scriptureAdminStartCase(region);

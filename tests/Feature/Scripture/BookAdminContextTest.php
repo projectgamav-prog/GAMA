@@ -26,6 +26,7 @@ beforeEach(function () {
     $this->showRoute = route('scripture.books.show', $this->book);
     $this->overviewRoute = route('scripture.books.overview', $this->book);
     $this->detailsUpdateRoute = route('scripture.books.admin.details.update', $this->book);
+    $this->identityUpdateRoute = route('scripture.books.admin.identity.update', $this->book);
     $this->fullEditRoute = route('scripture.books.admin.full-edit', $this->book);
     $this->canonicalEditRoute = route('scripture.books.admin.canonical-edit', $this->book);
     $this->contentBlockStoreRoute = route(
@@ -121,7 +122,11 @@ test('authorized editors can toggle protected admin visibility and receive regis
         ->assertInertia(fn (Assert $page) => $page
             ->where('adminContext.canAccess', true)
             ->where('adminContext.isVisible', false)
-            ->where('admin', null),
+            ->where('isAdmin', true)
+            ->where('admin.identity_update_href', $this->identityUpdateRoute)
+            ->where('admin.details_update_href', $this->detailsUpdateRoute)
+            ->where('admin.full_edit_href', $this->fullEditRoute)
+            ->where('admin.canonical_edit_href', $this->canonicalEditRoute),
         );
 
     $this->actingAs($editor)
@@ -328,7 +333,7 @@ test('authorized editors can manage registered book content blocks while unregis
                 'ordered_insertion',
                 'reorder',
             ])
-            ->where('admin_entity.regions.3.key', 'media_slots')
+            ->where('admin_entity.regions.3.key', 'book_media_slots')
             ->where('admin_entity.regions.3.method_families', [
                 'media_slot_edit',
             ])

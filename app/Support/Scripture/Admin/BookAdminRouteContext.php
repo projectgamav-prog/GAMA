@@ -38,6 +38,11 @@ class BookAdminRouteContext
         return route('scripture.books.admin.details.update', $this->routeParameters());
     }
 
+    public function identityUpdateHref(): string
+    {
+        return route('scripture.books.admin.identity.update', $this->routeParameters());
+    }
+
     public function fullEditHref(): string
     {
         return route('scripture.books.admin.full-edit', $this->routeParameters());

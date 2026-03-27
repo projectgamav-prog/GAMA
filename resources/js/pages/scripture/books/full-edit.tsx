@@ -300,7 +300,7 @@ export default function BookFullEdit({
             <ScriptureSection
                 title="Page Intro Copy"
                 description="Registered editorial copy for the shared public page intro region on the Book overview and show pages."
-                action={<Badge variant="outline">page_intro</Badge>}
+                action={<Badge variant="outline">book_intro</Badge>}
             >
                 <BookDescriptionEditorCard
                     bookDescription={book.description}

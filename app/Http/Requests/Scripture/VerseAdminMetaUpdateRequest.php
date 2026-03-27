@@ -24,6 +24,16 @@ class VerseAdminMetaUpdateRequest extends FormRequest
     {
         return [
             'summary_short' => ['nullable', 'string'],
+            'primary_speaker_character_id' => [
+                'nullable',
+                'integer',
+                'exists:characters,id',
+            ],
+            'primary_listener_character_id' => [
+                'nullable',
+                'integer',
+                'exists:characters,id',
+            ],
             'scene_location' => ['nullable', 'string', 'max:255'],
             'narrative_phase' => ['nullable', 'string', 'max:255'],
             'teaching_mode' => ['nullable', 'string', 'max:255'],

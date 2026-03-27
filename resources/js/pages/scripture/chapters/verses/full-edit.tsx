@@ -28,6 +28,8 @@ import { formatAdminList, parseAdminList } from '@/lib/scripture-admin';
 import type { BreadcrumbItem, VerseFullEditProps } from '@/types';
 
 type VerseMetaEditorFormData = {
+    primary_speaker_character_id: string;
+    primary_listener_character_id: string;
     summary_short: string;
     scene_location: string;
     narrative_phase: string;
@@ -39,14 +41,120 @@ type VerseMetaEditorFormData = {
     study_flags_text: string;
 };
 
+type VerseIdentityEditorFormData = {
+    slug: string;
+    number: string;
+    text: string;
+};
+
+const NONE_VALUE = '__none__';
+
+function VerseIdentityEditorCard({
+    updateHref,
+    verse,
+}: {
+    updateHref: string;
+    verse: VerseFullEditProps['verse'];
+}) {
+    const form = useForm<VerseIdentityEditorFormData>({
+        slug: verse.slug,
+        number: verse.number ?? '',
+        text: verse.text,
+    });
+
+    const submit = () => {
+        form.patch(updateHref, {
+            preserveScroll: true,
+        });
+    };
+
+    return (
+        <Card id="identity-editor">
+            <CardHeader className="gap-3">
+                <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant="outline">Verse identity</Badge>
+                    <Badge variant="secondary">Canonical</Badge>
+                </div>
+                <CardTitle>Verse Identity</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-5">
+                <div className="grid gap-2">
+                    <Label htmlFor="identity_slug">Slug</Label>
+                    <Input
+                        id="identity_slug"
+                        value={form.data.slug}
+                        onChange={(event) =>
+                            form.setData('slug', event.target.value)
+                        }
+                        placeholder="verse-slug"
+                    />
+                    <InputError message={form.errors.slug} />
+                </div>
+
+                <div className="grid gap-2">
+                    <Label htmlFor="identity_number">Number</Label>
+                    <Input
+                        id="identity_number"
+                        value={form.data.number}
+                        onChange={(event) =>
+                            form.setData('number', event.target.value)
+                        }
+                        placeholder="1"
+                    />
+                    <InputError message={form.errors.number} />
+                </div>
+
+                <div className="grid gap-2">
+                    <Label htmlFor="identity_text">Verse text</Label>
+                    <Textarea
+                        id="identity_text"
+                        value={form.data.text}
+                        onChange={(event) =>
+                            form.setData('text', event.target.value)
+                        }
+                        rows={7}
+                        placeholder="Canonical verse text"
+                    />
+                    <InputError message={form.errors.text} />
+                </div>
+
+                <div className="flex items-center gap-3">
+                    <Button
+                        type="button"
+                        onClick={submit}
+                        disabled={form.processing}
+                    >
+                        Save verse identity
+                    </Button>
+                    {form.recentlySuccessful && (
+                        <p className="text-sm text-muted-foreground">Saved.</p>
+                    )}
+                </div>
+            </CardContent>
+        </Card>
+    );
+}
+
 function VerseMetaEditorCard({
     updateHref,
     verseMeta,
+    characters,
 }: {
     updateHref: string;
     verseMeta: VerseFullEditProps['verse_meta'];
+    characters: VerseFullEditProps['characters'];
 }) {
     const form = useForm<VerseMetaEditorFormData>({
+        primary_speaker_character_id:
+            verseMeta?.primary_speaker_character_id !== null &&
+            verseMeta?.primary_speaker_character_id !== undefined
+                ? String(verseMeta.primary_speaker_character_id)
+                : NONE_VALUE,
+        primary_listener_character_id:
+            verseMeta?.primary_listener_character_id !== null &&
+            verseMeta?.primary_listener_character_id !== undefined
+                ? String(verseMeta.primary_listener_character_id)
+                : NONE_VALUE,
         summary_short: verseMeta?.summary_short ?? '',
         scene_location: verseMeta?.scene_location ?? '',
         narrative_phase: verseMeta?.narrative_phase ?? '',
@@ -58,9 +166,27 @@ function VerseMetaEditorCard({
         study_flags_text: formatAdminList(verseMeta?.study_flags_json ?? null),
     });
     const errors = form.errors as Record<string, string>;
+    const characterOptions = characters
+        .map((assignment) => assignment.character)
+        .filter((character): character is NonNullable<typeof character> =>
+            character !== null,
+        )
+        .filter(
+            (character, index, list) =>
+                list.findIndex((candidate) => candidate.id === character.id) ===
+                index,
+        );
 
     const submit = () => {
         form.transform((data) => ({
+            primary_speaker_character_id:
+                data.primary_speaker_character_id === NONE_VALUE
+                    ? null
+                    : Number(data.primary_speaker_character_id),
+            primary_listener_character_id:
+                data.primary_listener_character_id === NONE_VALUE
+                    ? null
+                    : Number(data.primary_listener_character_id),
             summary_short: data.summary_short,
             scene_location: data.scene_location,
             narrative_phase: data.narrative_phase,
@@ -105,6 +231,76 @@ function VerseMetaEditorCard({
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
+                    <div className="grid gap-2">
+                        <Label htmlFor="primary_speaker_character_id">
+                            Speaker
+                        </Label>
+                        <Select
+                            value={form.data.primary_speaker_character_id}
+                            onValueChange={(value) =>
+                                form.setData(
+                                    'primary_speaker_character_id',
+                                    value,
+                                )
+                            }
+                        >
+                            <SelectTrigger id="primary_speaker_character_id">
+                                <SelectValue placeholder="Select speaker" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value={NONE_VALUE}>
+                                    Unassigned
+                                </SelectItem>
+                                {characterOptions.map((character) => (
+                                    <SelectItem
+                                        key={character.id}
+                                        value={String(character.id)}
+                                    >
+                                        {character.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <InputError
+                            message={errors.primary_speaker_character_id}
+                        />
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label htmlFor="primary_listener_character_id">
+                            Listener
+                        </Label>
+                        <Select
+                            value={form.data.primary_listener_character_id}
+                            onValueChange={(value) =>
+                                form.setData(
+                                    'primary_listener_character_id',
+                                    value,
+                                )
+                            }
+                        >
+                            <SelectTrigger id="primary_listener_character_id">
+                                <SelectValue placeholder="Select listener" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value={NONE_VALUE}>
+                                    Unassigned
+                                </SelectItem>
+                                {characterOptions.map((character) => (
+                                    <SelectItem
+                                        key={character.id}
+                                        value={String(character.id)}
+                                    >
+                                        {character.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <InputError
+                            message={errors.primary_listener_character_id}
+                        />
+                    </div>
+
                     <div className="grid gap-2">
                         <Label htmlFor="scene_location">Scene location</Label>
                         <Input
@@ -282,6 +478,8 @@ export default function VerseFullEdit({
     chapter_section,
     verse,
     admin_entity,
+    characters,
+    admin_identity_update_href,
     verse_meta,
     admin_meta_update_href,
     admin_content_block_store_href,
@@ -337,7 +535,7 @@ export default function VerseFullEdit({
                     </>
                 }
                 title={`Full edit: ${verseTitle}`}
-                description="Use this deeper editorial workspace to manage verse meta and attached note blocks without changing the canonical verse record."
+                description="Use this deeper workspace to manage canonical verse identity, verse meta, and attached note blocks in one protected place."
                 headerAction={
                     <Button asChild variant="outline" size="sm">
                         <Link href={verse.href}>
@@ -359,13 +557,25 @@ export default function VerseFullEdit({
             </ScripturePageIntroCard>
 
             <ScriptureSection
+                id="identity-editor"
+                title="Verse Identity"
+                description="Canonical verse identity and text for this verse."
+            >
+                <VerseIdentityEditorCard
+                    updateHref={admin_identity_update_href}
+                    verse={verse}
+                />
+            </ScriptureSection>
+
+            <ScriptureSection
                 id="meta-editor"
                 title="Verse Meta"
-                description="Broader editorial metadata for this verse. Canonical verse text remains read-only."
+                description="Broader editorial metadata for this verse."
             >
                 <VerseMetaEditorCard
                     updateHref={admin_meta_update_href}
                     verseMeta={verse_meta}
+                    characters={characters}
                 />
             </ScriptureSection>
 

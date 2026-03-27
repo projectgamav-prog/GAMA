@@ -8,6 +8,7 @@ import type { InlineEditorSurfaceMetadata } from '@/admin/modules/shared/surface
 import { isSurfaceMetadataObject } from '@/admin/modules/shared/surface-metadata';
 import type { ScriptureContentBlockManagementCapability } from '@/lib/scripture-admin-capabilities';
 import type { AdminSurfaceContract } from '@/admin/modules/shared/surface-contracts';
+import type { ScriptureContentBlockInsertionPoint } from '@/types';
 
 export type TextBlockEditorSurfaceMetadata = InlineEditorSurfaceMetadata<
     InlineTextContentBlockSession | InlineTextContentBlockCreateSession,
@@ -18,6 +19,11 @@ export type TextBlockEditorSurfaceMetadata = InlineEditorSurfaceMetadata<
 >;
 
 export type BlockCreateSurfaceMetadata = {
+    entityLabel?: string;
+    storeHref?: string;
+    fullEditHref?: string;
+    defaultRegion?: string;
+    insertionPoint?: ScriptureContentBlockInsertionPoint;
     blockTypes: string[];
     disabled?: boolean;
     label?: string;

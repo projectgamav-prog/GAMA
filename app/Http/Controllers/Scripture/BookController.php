@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Scripture;
 use App\Http\Controllers\Controller;
 use App\Models\Book;
 use App\Models\ContentBlock;
+use App\Models\Media;
+use App\Models\MediaAssignment;
 use App\Support\AdminContext\AdminContext;
 use App\Support\Scripture\Admin\BookAdminRouteContext;
 use App\Support\Scripture\Admin\ContentBlockCapabilityPayload;
@@ -60,11 +62,9 @@ class BookController extends Controller
         return Inertia::render('scripture/books/overview', [
             'book' => $publicScriptureData->book($book),
             'content_blocks' => $publicScriptureData->contentBlocks($contentBlocks),
-            'admin' => $this->bookAdminPayload(
-                $book,
-                $contentBlocks,
-                $adminVisibilityEnabled,
-            ),
+            'admin' => $adminVisibilityEnabled
+                ? $this->bookAdminPayload($book, $contentBlocks)
+                : null,
         ]);
     }
 
@@ -86,16 +86,19 @@ class BookController extends Controller
         $this->loadPublicBookMediaRelations($book);
 
         $contentBlocks = $this->publicBookContentBlocks($book);
-        $adminVisibilityEnabled = AdminContext::isVisible($request);
+        $isAdmin = AdminContext::canAccess($request->user());
 
         return Inertia::render('scripture/books/show', [
             'book' => $publicScriptureData->book($book),
             'content_blocks' => $publicScriptureData->contentBlocks($contentBlocks),
-            'admin' => $this->bookAdminPayload(
-                $book,
-                $contentBlocks,
-                $adminVisibilityEnabled,
-            ),
+            'isAdmin' => $isAdmin,
+            'admin' => $isAdmin
+                ? $this->bookAdminPayload(
+                    $book,
+                    $contentBlocks,
+                    includeMediaManagement: true,
+                )
+                : null,
             'book_sections' => $publicScriptureData->bookSectionsWithChapters(
                 $book,
                 $book->bookSections,
@@ -140,21 +143,17 @@ class BookController extends Controller
 
     /**
      * @param  Collection<int, ContentBlock>  $contentBlocks
-     * @return array<string, mixed>|null
+     * @return array<string, mixed>
      */
     private function bookAdminPayload(
         Book $book,
         Collection $contentBlocks,
-        bool $adminVisibilityEnabled,
-    ): ?array {
-        if (! $adminVisibilityEnabled) {
-            return null;
-        }
-
+        bool $includeMediaManagement = false,
+    ): array {
         $adminRouteContext = new BookAdminRouteContext($book);
         $visibleSequence = new VisibleContentBlockSequence($contentBlocks);
-
-        return [
+        $payload = [
+            'identity_update_href' => $adminRouteContext->identityUpdateHref(),
             'details_update_href' => $adminRouteContext->detailsUpdateHref(),
             'full_edit_href' => $adminRouteContext->fullEditHref(),
             'canonical_edit_href' => $adminRouteContext->canonicalEditHref(),
@@ -174,6 +173,65 @@ class BookController extends Controller
                 fn (ContentBlock $block): string => $adminRouteContext->contentBlockDuplicateHref($block),
                 fn (ContentBlock $block): string => $adminRouteContext->contentBlockDestroyHref($block),
             ),
+        ];
+
+        if (! $includeMediaManagement) {
+            return $payload;
+        }
+
+        $mediaAssignments = $book->mediaAssignments()
+            ->with('media')
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+        $availableMedia = Media::query()
+            ->orderBy('sort_order')
+            ->orderBy('title')
+            ->orderBy('id')
+            ->get();
+
+        return [
+            ...$payload,
+            'media_assignment_store_href' => $adminRouteContext->mediaAssignmentStoreHref(),
+            'media_assignments' => $mediaAssignments
+                ->map(fn (MediaAssignment $mediaAssignment) => [
+                    'id' => $mediaAssignment->id,
+                    'media_id' => $mediaAssignment->media_id,
+                    'role' => $mediaAssignment->role,
+                    'title_override' => $mediaAssignment->title_override,
+                    'caption_override' => $mediaAssignment->caption_override,
+                    'sort_order' => $mediaAssignment->sort_order,
+                    'status' => $mediaAssignment->status,
+                    'update_href' => $adminRouteContext->mediaAssignmentUpdateHref($mediaAssignment),
+                    'media' => $mediaAssignment->media
+                        ? [
+                            'id' => $mediaAssignment->media->id,
+                            'media_type' => $mediaAssignment->media->media_type,
+                            'title' => $mediaAssignment->media->title,
+                            'alt_text' => $mediaAssignment->media->alt_text,
+                            'caption' => $mediaAssignment->media->caption,
+                            'url' => $mediaAssignment->media->url,
+                            'path' => $mediaAssignment->media->path,
+                        ]
+                        : null,
+                ])
+                ->values()
+                ->all(),
+            'available_media' => $availableMedia
+                ->map(fn (Media $media) => [
+                    'id' => $media->id,
+                    'media_type' => $media->media_type,
+                    'title' => $media->title,
+                    'alt_text' => $media->alt_text,
+                    'caption' => $media->caption,
+                    'url' => $media->url,
+                    'path' => $media->path,
+                ])
+                ->values()
+                ->all(),
+            'next_media_assignment_sort_order' => $mediaAssignments->isEmpty()
+                ? 1
+                : ((int) $mediaAssignments->max('sort_order')) + 1,
         ];
     }
 

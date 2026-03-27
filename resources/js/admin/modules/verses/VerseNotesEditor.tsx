@@ -1,41 +1,62 @@
-import { ScriptureVerseNotesInlineEditor } from '@/components/scripture/scripture-verse-notes-inline-editor';
-import type { ScriptureVerseAdminEditSession } from '@/components/scripture/scripture-verse-admin-edit-sheet';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { ScriptureTextContentBlockInlineEditor } from '@/components/scripture/scripture-text-content-block-inline-editor';
 import { defineAdminModule } from '@/admin/modules/shared/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/modules/shared/module-types';
-import { getInlineEditorSurfaceMetadata } from '@/admin/modules/shared/surface-metadata';
-
-type InlineVerseNotesSession = Extract<
-    ScriptureVerseAdminEditSession,
-    { kind: 'verse_meta' }
->;
+import { getVerseNoteBlockMetadata } from './surface-types';
 
 function VerseNotesEditor({ surface }: AdminModuleComponentProps) {
-    const metadata =
-        getInlineEditorSurfaceMetadata<InlineVerseNotesSession, () => void>(
-            surface,
-        );
+    const metadata = getVerseNoteBlockMetadata(surface);
+    const [isOpen, setIsOpen] = useState(false);
 
     if (metadata === null) {
         return null;
     }
 
+    if (!isOpen) {
+        return (
+            <Button
+                type="button"
+                size="sm"
+                className="h-8 rounded-full px-3"
+                onClick={() => setIsOpen(true)}
+            >
+                Edit
+            </Button>
+        );
+    }
+
     return (
-        <ScriptureVerseNotesInlineEditor
-            session={metadata.session}
-            onCancel={metadata.onCancel}
-            onSaveSuccess={metadata.onSaveSuccess}
-        />
+        <div className="basis-full pt-2">
+            <ScriptureTextContentBlockInlineEditor
+                session={{
+                    updateHref: metadata.updateHref,
+                    fullEditHref: metadata.fullEditHref,
+                    block: metadata.block,
+                    values: {
+                        title: metadata.block.title ?? '',
+                        body: metadata.block.body ?? '',
+                        region: metadata.block.region,
+                        sort_order: metadata.block.sort_order,
+                        status: 'published',
+                    },
+                }}
+                entityLabel={metadata.entityLabel}
+                onCancel={() => setIsOpen(false)}
+            />
+        </div>
     );
 }
 
 export const verseNotesEditorModule = defineAdminModule({
     key: 'verse-notes-editor',
-    entityScope: 'verse',
+    entityScope: 'content_block',
     surfaceSlots: 'inline_editor',
-    regionScope: ['page_intro', 'study_notes'],
+    regionScope: 'content_blocks',
+    blockTypes: 'text',
     requiredCapabilities: ['edit'],
     EditorComponent: VerseNotesEditor,
-    order: 10,
+    order: 30,
     description:
-        'Renders the current inline verse-notes editor for intro and study-note surfaces.',
+        'Renders the attached verse note editor for text blocks on the verse page.',
 });

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Scripture\AdminContextVisibilityController;
 use App\Http\Controllers\Scripture\BookAdminContentBlockController;
 use App\Http\Controllers\Scripture\BookAdminDetailsController;
+use App\Http\Controllers\Scripture\BookAdminIdentityController;
 use App\Http\Controllers\Scripture\BookAdminMediaAssignmentController;
 use App\Http\Controllers\Scripture\BookCanonicalEditController;
 use App\Http\Controllers\Scripture\BookController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Scripture\DictionaryEntryController;
 use App\Http\Controllers\Scripture\PostponedAdminSurfaceController;
 use App\Http\Controllers\Scripture\TopicController;
 use App\Http\Controllers\Scripture\VerseAdminContentBlockController;
+use App\Http\Controllers\Scripture\VerseAdminIdentityController;
 use App\Http\Controllers\Scripture\VerseAdminMetaController;
 use App\Http\Controllers\Scripture\VerseController;
 use App\Http\Controllers\Scripture\VerseFullEditController;
@@ -112,6 +114,9 @@ Route::prefix('books')
 
                 Route::get('canonical-edit', [BookCanonicalEditController::class, 'show'])
                     ->name('canonical-edit');
+
+                Route::patch('identity', [BookAdminIdentityController::class, 'update'])
+                    ->name('identity.update');
 
                 Route::patch('details', [BookAdminDetailsController::class, 'update'])
                     ->name('details.update');
@@ -224,6 +229,9 @@ Route::prefix('books')
             ->group(function () {
                 Route::get('full-edit', [VerseFullEditController::class, 'show'])
                     ->name('full-edit');
+
+                Route::patch('identity', [VerseAdminIdentityController::class, 'update'])
+                    ->name('identity.update');
 
                 Route::patch('meta', [VerseAdminMetaController::class, 'update'])
                     ->name('meta.update');
