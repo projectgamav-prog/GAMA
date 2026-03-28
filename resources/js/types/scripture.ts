@@ -321,7 +321,6 @@ export type ScriptureChapter = {
     number: string | null;
     title: string | null;
     href: string;
-    verses_href?: string;
 };
 
 export type ScriptureChapterSection = {
@@ -587,23 +586,15 @@ export type ChapterShowProps = {
     book_section: ScriptureBookSection;
     chapter: ScriptureChapter;
     content_blocks: ScriptureContentBlock[];
-    chapter_sections: ScriptureChapterSection[];
-    isAdmin: boolean;
-    admin?: ScriptureChapterAdmin | null;
-};
-
-export type ChapterVersesIndexProps = {
-    book: ScriptureBook;
-    book_section: ScriptureBookSection;
-    chapter: ScriptureChapter;
     reader_languages: ScriptureReaderLanguage[];
     default_language: ScriptureReaderLanguage | null;
-    admin?: Pick<ScriptureChapterAdmin, 'chapter_section_store_href'> | null;
     chapter_sections: Array<
         ScriptureChapterSection & {
             cards: ScriptureReaderCard[];
         }
     >;
+    isAdmin: boolean;
+    admin?: ScriptureChapterAdmin | null;
 };
 
 export type VerseShowProps = {

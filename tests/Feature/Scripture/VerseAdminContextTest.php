@@ -219,20 +219,20 @@ test('authorized editors can toggle protected admin visibility and receive verse
 
 test('authorized editors can create canonical verse rows from chapter section group surfaces', function () {
     $editor = User::query()->where('email', 'admin@example.com')->firstOrFail();
-    $readerRoute = route('scripture.chapters.verses.index', [
+    $verseListRoute = route('scripture.chapters.show', [
         'book' => $this->book,
         'bookSection' => $this->bookSection,
         'chapter' => $this->chapter,
     ]);
 
     $this->actingAs($editor)
-        ->from($readerRoute)
+        ->from($verseListRoute)
         ->post($this->verseStoreRoute, [
             'slug' => 'created-verse-row',
             'number' => '99',
             'text' => 'Created verse text from the chapter section group surface.',
         ])
-        ->assertRedirect($readerRoute);
+        ->assertRedirect($verseListRoute);
 
     $createdVerse = $this->chapterSection->fresh()
         ->verses()

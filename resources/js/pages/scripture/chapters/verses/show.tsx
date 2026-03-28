@@ -1,8 +1,5 @@
 import { Link } from '@inertiajs/react';
 import {
-    ArrowLeft,
-    ArrowRight,
-    BookOpenText,
     Headphones,
     Languages,
     MessageSquareQuote,
@@ -14,10 +11,10 @@ import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import {
     resolveVerseHeaderSurfaces,
 } from '@/admin/integrations/scripture/verses';
-import { ScriptureActionRow } from '@/components/scripture/scripture-action-row';
 import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
+import { ScriptureReadingNavigationActions } from '@/components/scripture/scripture-reading-navigation-actions';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
 import { ScriptureVerseContentBlockRegion } from '@/components/scripture/scripture-verse-content-block-region';
 import { Badge } from '@/components/ui/badge';
@@ -208,36 +205,34 @@ export default function VerseShow({
 
                 <Separator />
 
-                <ScriptureActionRow>
-                    {previous_verse && (
-                        <Button asChild variant="outline">
-                            <Link href={previous_verse.href}>
-                                <ArrowLeft className="size-4" />
-                                Previous Verse
-                            </Link>
-                        </Button>
-                    )}
-                    {next_verse && (
-                        <Button asChild>
-                            <Link href={next_verse.href}>
-                                Next Verse
-                                <ArrowRight className="size-4" />
-                            </Link>
-                        </Button>
-                    )}
-                    <Button asChild variant="outline">
-                        <Link href={chapter.verses_href ?? chapter.href}>
-                            <ArrowLeft className="size-4" />
-                            Back to Reader
-                        </Link>
-                    </Button>
-                    <Button asChild variant="outline">
-                        <Link href={chapter.href}>
-                            <BookOpenText className="size-4" />
-                            Back to Chapter
-                        </Link>
-                    </Button>
-                </ScriptureActionRow>
+                <ScriptureReadingNavigationActions
+                    actions={[
+                        ...(previous_verse
+                            ? [
+                                  {
+                                      kind: 'previous_verse' as const,
+                                      href: previous_verse.href,
+                                  },
+                              ]
+                            : []),
+                        ...(next_verse
+                            ? [
+                                  {
+                                      kind: 'next_verse' as const,
+                                      href: next_verse.href,
+                                  },
+                              ]
+                            : []),
+                        {
+                            kind: 'back_to_verse_list' as const,
+                            href: chapter_section.href,
+                        },
+                        {
+                            kind: 'back_to_chapter_list' as const,
+                            href: book_section.href,
+                        },
+                    ]}
+                />
             </ScripturePageIntroCard>
 
             {hasCompanionSections && (

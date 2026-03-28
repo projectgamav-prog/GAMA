@@ -308,7 +308,6 @@ class BookController extends Controller
                         $book,
                         $section,
                         $chapter,
-                        includeReaderLink: false,
                     ))
                     ->values()
                     ->all(),

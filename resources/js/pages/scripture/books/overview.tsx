@@ -1,14 +1,11 @@
-import { Link } from '@inertiajs/react';
-import { ArrowRight } from 'lucide-react';
 import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import { resolveBookHeaderSurfaces } from '@/admin/integrations/scripture/books';
-import { ScriptureActionRow } from '@/components/scripture/scripture-action-row';
 import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
 import { BookPublicMediaSection } from '@/components/scripture/book-public-media-section';
 import { ScriptureBookContentBlockRegion } from '@/components/scripture/scripture-book-content-block-region';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
+import { ScriptureReadingNavigationActions } from '@/components/scripture/scripture-reading-navigation-actions';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import ScriptureLayout from '@/layouts/scripture-layout';
 import type { BookOverviewProps, BreadcrumbItem } from '@/types';
 
@@ -83,14 +80,15 @@ export default function BookOverview({
                         scripture structure when you are ready.
                     </p>
 
-                    <ScriptureActionRow className="shrink-0">
-                        <Button asChild>
-                            <Link href={book.href}>
-                                Continue to Scripture Structure
-                                <ArrowRight className="size-4" />
-                            </Link>
-                        </Button>
-                    </ScriptureActionRow>
+                    <ScriptureReadingNavigationActions
+                        className="shrink-0"
+                        actions={[
+                            {
+                                kind: 'continue_to_structure',
+                                href: book.href,
+                            },
+                        ]}
+                    />
                 </div>
             </ScripturePageIntroCard>
 
@@ -113,11 +111,14 @@ export default function BookOverview({
                             Published content blocks have not been added to this
                             book overview yet.
                         </p>
-                        <div className="flex flex-wrap gap-3">
-                            <Button asChild variant="outline">
-                                <Link href={book.href}>Open Book Structure</Link>
-                            </Button>
-                        </div>
+                        <ScriptureReadingNavigationActions
+                            actions={[
+                                {
+                                    kind: 'continue_to_structure',
+                                    href: book.href,
+                                },
+                            ]}
+                        />
                     </div>
                 }
             />

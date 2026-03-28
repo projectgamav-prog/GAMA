@@ -79,23 +79,13 @@ class PublicScriptureData
         Book $book,
         BookSection $bookSection,
         Chapter $chapter,
-        bool $includeReaderLink = true,
     ): array {
-        $data = [
+        return [
             'id' => $chapter->id,
             'slug' => $chapter->slug,
             'number' => $chapter->number,
             'title' => $chapter->title,
             'href' => $this->chapterHref($book, $bookSection, $chapter),
-        ];
-
-        if (! $includeReaderLink) {
-            return $data;
-        }
-
-        return [
-            ...$data,
-            'verses_href' => $this->chapterReaderHref($book, $bookSection, $chapter),
         ];
     }
 
@@ -829,22 +819,13 @@ class PublicScriptureData
         ]);
     }
 
-    private function chapterReaderHref(Book $book, BookSection $bookSection, Chapter $chapter): string
-    {
-        return route('scripture.chapters.verses.index', [
-            'book' => $book,
-            'bookSection' => $bookSection,
-            'chapter' => $chapter,
-        ]);
-    }
-
     private function chapterSectionHref(
         Book $book,
         BookSection $bookSection,
         Chapter $chapter,
         ChapterSection $section,
     ): string {
-        return $this->chapterReaderHref($book, $bookSection, $chapter).'#'.$section->slug;
+        return $this->chapterHref($book, $bookSection, $chapter).'#'.$section->slug;
     }
 
     private function verseHref(

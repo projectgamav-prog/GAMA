@@ -49,10 +49,7 @@ beforeEach(function () {
         'scripture.chapters.show',
         chapterRouteParameters($this->book, $this->bookSection, $this->chapter),
     );
-    $this->readerRoute = route(
-        'scripture.chapters.verses.index',
-        chapterRouteParameters($this->book, $this->bookSection, $this->chapter),
-    );
+    $this->verseListRoute = $this->chapterShowRoute;
     $this->chapterSectionDetailsUpdateRoute = route(
         'scripture.chapter-sections.admin.details.update',
         [
@@ -249,7 +246,7 @@ test('authorized editors receive chapter admin props without requiring visibilit
         );
 
     $this->actingAs($editor)
-        ->get($this->readerRoute)
+        ->get($this->verseListRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('admin.chapter_section_store_href', $this->chapterSectionStoreRoute)
@@ -364,7 +361,7 @@ test('authorized editors can update basic chapter section row details across gro
         );
 
     $this->actingAs($editor)
-        ->get($this->readerRoute)
+        ->get($this->verseListRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('chapter_sections.0.number', '0')
@@ -397,7 +394,7 @@ test('authorized editors can manage chapter section intro blocks across grouped 
         ->firstOrFail();
 
     $this->actingAs($editor)
-        ->from($this->readerRoute)
+        ->from($this->verseListRoute)
         ->patch(route('scripture.chapter-sections.admin.content-blocks.update', [
             ...chapterRouteParameters($this->book, $this->bookSection, $this->chapter),
             'chapterSection' => $this->chapterSection,
@@ -412,7 +409,7 @@ test('authorized editors can manage chapter section intro blocks across grouped 
             'sort_order' => 1,
             'status' => 'published',
         ])
-        ->assertRedirect($this->readerRoute);
+        ->assertRedirect($this->verseListRoute);
 
     expect($createdIntroBlock->fresh()->data_json)->toBe([
         'url' => 'https://example.test/chapter-section-intro.jpg',
@@ -442,7 +439,7 @@ test('authorized editors can manage chapter section intro blocks across grouped 
         );
 
     $this->actingAs($editor)
-        ->get($this->readerRoute)
+        ->get($this->verseListRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where(

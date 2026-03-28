@@ -340,7 +340,7 @@ test('chapter page is displayed and supports zero published content blocks', fun
 });
 
 test('chapter verse reader page is displayed in canonical order', function () {
-    $response = $this->get(route('scripture.chapters.verses.index', [
+    $response = $this->get(route('scripture.chapters.show', [
         'book' => $this->book,
         'bookSection' => $this->bookSection,
         'chapter' => $this->chapter,
@@ -349,7 +349,7 @@ test('chapter verse reader page is displayed in canonical order', function () {
     $response
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('scripture/chapters/verses/index')
+            ->component('scripture/chapters/show')
             ->where('chapter.number', $this->chapter->number)
             ->where(
                 'book_section.href',
@@ -1032,14 +1032,14 @@ test('multi-section books browse through the same public canonical flow', functi
             ->has('chapter_sections', 1),
         );
 
-    $this->get(route('scripture.chapters.verses.index', [
+    $this->get(route('scripture.chapters.show', [
         'book' => $book,
         'bookSection' => $bookSection,
         'chapter' => $chapter,
     ]))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('scripture/chapters/verses/index')
+            ->component('scripture/chapters/show')
             ->where('book_section.slug', 'ayodhya-kanda')
             ->where(
                 'book_section.href',
@@ -1069,7 +1069,7 @@ test('multi-section books browse through the same public canonical flow', functi
             )
             ->where(
                 'chapter_section.href',
-                route('scripture.chapters.verses.index', [
+                route('scripture.chapters.show', [
                     'book' => $book,
                     'bookSection' => $bookSection,
                     'chapter' => $chapter,

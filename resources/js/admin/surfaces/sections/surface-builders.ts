@@ -44,7 +44,6 @@ type ChapterVerseGroupsSurfaceArgs = {
     chapter: ScriptureChapter;
     groupCount: number;
     verseCount: number;
-    readerHref: string | null;
     chapterSectionStoreHref: string | null;
 };
 
@@ -188,7 +187,7 @@ export function createBookChapterGroupsSurface({
         contractKey: 'section_collection',
         entity: 'book',
         entityId: book.id,
-        regionKey: 'canonical_browse',
+        regionKey: 'chapter_list',
         capabilities: [
             'full_edit',
             ...(bookSectionStoreHref === null ? [] : ['create_row' as const]),
@@ -240,7 +239,7 @@ export function createBookSectionChapterGroupSurface({
         contractKey: 'section_group',
         entity: 'book_section',
         entityId: bookSection.id,
-        regionKey: 'chapter_group',
+        regionKey: 'chapter_list_section',
         capabilities: [
             ...(hasEditCapability ? (['edit'] as const) : []),
             ...(hasCreateCapability ? (['create_row'] as const) : []),
@@ -282,7 +281,6 @@ export function createChapterVerseGroupsSurface({
     chapter,
     groupCount,
     verseCount,
-    readerHref,
     chapterSectionStoreHref,
 }: ChapterVerseGroupsSurfaceArgs): AdminSurfaceContract<SectionCollectionSurfaceMetadata> {
     return createInlineEditorSurface({
@@ -290,7 +288,7 @@ export function createChapterVerseGroupsSurface({
         contractKey: 'section_collection',
         entity: 'chapter',
         entityId: chapter.id,
-        regionKey: 'chapter_sections',
+        regionKey: 'verse_list',
         capabilities:
             chapterSectionStoreHref === null ? [] : ['create_row'],
         presentation: {
@@ -298,13 +296,13 @@ export function createChapterVerseGroupsSurface({
             variant: 'compact',
         },
         metadata: {
-            title: 'Reader section groups',
+            title: 'Verse list groups',
             groupLabel: 'chapter sections',
             groupCount,
             itemLabel: 'verses',
             itemCount: verseCount,
-            openHref: readerHref,
-            openLabel: 'Open Reader',
+            openHref: null,
+            openLabel: null,
             structureHref: null,
             structureLabel: null,
             create: createSectionCreateMetadata(
@@ -339,7 +337,7 @@ export function createChapterSectionVerseGroupSurface({
         contractKey: 'section_group',
         entity: 'chapter_section',
         entityId: chapterSection.id,
-        regionKey: 'verse_group',
+        regionKey: 'verse_list_section',
         capabilities: [
             ...(hasEditCapability ? (['edit'] as const) : []),
             ...(hasCreateCapability ? (['create_row'] as const) : []),

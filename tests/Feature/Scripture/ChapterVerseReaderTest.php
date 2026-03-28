@@ -93,7 +93,7 @@ test('reader renders grouped and ungrouped verses as backend-prepared cards', fu
     $secondGroup->items()->create(['verse_id' => $verseFour->id]);
     $secondGroup->items()->create(['verse_id' => $verseFive->id]);
 
-    $response = $this->get(route('scripture.chapters.verses.index', [
+    $response = $this->get(route('scripture.chapters.show', [
         'book' => $this->book,
         'bookSection' => $this->bookSection,
         'chapter' => $this->chapter,
@@ -102,7 +102,7 @@ test('reader renders grouped and ungrouped verses as backend-prepared cards', fu
     $response
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('scripture/chapters/verses/index')
+            ->component('scripture/chapters/show')
             ->has('chapter_sections.0.cards', 3)
             ->where('chapter_sections.0.cards.0.type', 'group')
             ->where('chapter_sections.0.cards.0.label', 'Verses 1-2')
@@ -154,7 +154,7 @@ test('one malformed group falls back to single cards without breaking other vali
     $invalidGroup->items()->create(['verse_id' => $verseThree->id]);
     $invalidGroup->items()->create(['verse_id' => $verseFive->id]);
 
-    $response = $this->get(route('scripture.chapters.verses.index', [
+    $response = $this->get(route('scripture.chapters.show', [
         'book' => $this->book,
         'bookSection' => $this->bookSection,
         'chapter' => $this->chapter,
@@ -163,7 +163,7 @@ test('one malformed group falls back to single cards without breaking other vali
     $response
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('scripture/chapters/verses/index')
+            ->component('scripture/chapters/show')
             ->has('chapter_sections.0.cards', 4)
             ->where('chapter_sections.0.cards.0.type', 'group')
             ->where('chapter_sections.0.cards.0.verses.0.number', '1')
@@ -210,7 +210,7 @@ test('reader builds cards independently for each chapter section', function () {
     $secondGroup->items()->create(['verse_id' => $verseSix->id]);
     $secondGroup->items()->create(['verse_id' => $verseSeven->id]);
 
-    $response = $this->get(route('scripture.chapters.verses.index', [
+    $response = $this->get(route('scripture.chapters.show', [
         'book' => $this->book,
         'bookSection' => $this->bookSection,
         'chapter' => $this->chapter,
@@ -219,7 +219,7 @@ test('reader builds cards independently for each chapter section', function () {
     $response
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('scripture/chapters/verses/index')
+            ->component('scripture/chapters/show')
             ->has('chapter_sections', 2)
             ->where('chapter_sections.0.cards.0.type', 'group')
             ->where('chapter_sections.0.cards.0.label', 'Verses 1-2')
@@ -253,7 +253,7 @@ test('reader includes a video link only for verses with published video blocks',
         'status' => 'draft',
     ]);
 
-    $response = $this->get(route('scripture.chapters.verses.index', [
+    $response = $this->get(route('scripture.chapters.show', [
         'book' => $this->book,
         'bookSection' => $this->bookSection,
         'chapter' => $this->chapter,
@@ -262,7 +262,7 @@ test('reader includes a video link only for verses with published video blocks',
     $response
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('scripture/chapters/verses/index')
+            ->component('scripture/chapters/show')
             ->where('chapter_sections.0.cards.0.verses.0.video_href', null)
             ->where(
                 'chapter_sections.0.cards.1.verses.0.video_href',
@@ -284,7 +284,7 @@ test('reader exposes only languages available in the current chapter', function 
             ->delete();
     });
 
-    $response = $this->get(route('scripture.chapters.verses.index', [
+    $response = $this->get(route('scripture.chapters.show', [
         'book' => $this->book,
         'bookSection' => $this->bookSection,
         'chapter' => $this->chapter,
@@ -293,7 +293,7 @@ test('reader exposes only languages available in the current chapter', function 
     $response
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('scripture/chapters/verses/index')
+            ->component('scripture/chapters/show')
             ->has('reader_languages', 1)
             ->where('reader_languages.0', 'en')
             ->where('default_language', 'en'),

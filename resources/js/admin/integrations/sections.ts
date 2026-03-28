@@ -132,7 +132,6 @@ export function resolveChapterVerseGroupsSurface({
         chapter,
         groupCount: chapterSections.length,
         verseCount,
-        readerHref: chapter.verses_href ?? chapter.href,
         chapterSectionStoreHref: admin.chapter_section_store_href,
     });
 }

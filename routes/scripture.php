@@ -20,7 +20,6 @@ use App\Http\Controllers\Scripture\ChapterSectionAdminContentBlockController;
 use App\Http\Controllers\Scripture\ChapterSectionAdminDetailsController;
 use App\Http\Controllers\Scripture\ChapterController;
 use App\Http\Controllers\Scripture\ChapterFullEditController;
-use App\Http\Controllers\Scripture\ChapterVerseController;
 use App\Http\Controllers\Scripture\CharacterController;
 use App\Http\Controllers\Scripture\DictionaryEntryController;
 use App\Http\Controllers\Scripture\PostponedAdminSurfaceController;
@@ -295,11 +294,6 @@ Route::prefix('books')
                     [ChapterSectionAdminContentBlockController::class, 'update'],
                 )->name('content-blocks.update');
             });
-
-        Route::get(
-            '{book:slug}/sections/{bookSection:slug}/chapters/{chapter:slug}/verses',
-            [ChapterVerseController::class, 'index'],
-        )->name('chapters.verses.index');
 
         Route::get(
             '{book:slug}/sections/{bookSection:slug}/chapters/{chapter:slug}/sections/{chapterSection:slug}/verses/{verse:slug}',

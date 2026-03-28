@@ -73,32 +73,25 @@ export function resolveSemanticSurfaceKey(
     }
 
     switch (`${entity}:${regionKey}`) {
-        case 'book:page_intro':
         case 'book:book_intro':
             return BOOK_INTRO_SURFACE_KEY;
         case 'book:books_collection':
-        case 'book:library_collection':
             return BOOKS_COLLECTION_SURFACE_KEY;
         case 'book:content_blocks':
             return BOOK_CONTENT_BLOCKS_SURFACE_KEY;
         case 'book:book_media_slots':
             return BOOK_MEDIA_SLOTS_SURFACE_KEY;
-        case 'book:canonical_browse':
-        case 'book:chapter_groups':
+        case 'book:chapter_list':
             return BOOK_CHAPTER_GROUPS_SURFACE_KEY;
-        case 'book_section:canonical_browse_section':
-        case 'book_section:chapter_group':
+        case 'book_section:chapter_list_section':
             return BOOK_SECTION_CHAPTER_GROUP_SURFACE_KEY;
         case 'chapter:page_intro':
-        case 'chapter:chapter_intro':
             return CHAPTER_INTRO_SURFACE_KEY;
         case 'chapter:content_blocks':
             return CHAPTER_CONTENT_BLOCKS_SURFACE_KEY;
-        case 'chapter:chapter_sections':
-        case 'chapter:verse_groups':
+        case 'chapter:verse_list':
             return CHAPTER_VERSE_GROUPS_SURFACE_KEY;
-        case 'chapter_section:reader_section':
-        case 'chapter_section:verse_group':
+        case 'chapter_section:verse_list_section':
             return CHAPTER_SECTION_VERSE_GROUP_SURFACE_KEY;
         case 'verse:verse_intro':
             return VERSE_INTRO_SURFACE_KEY;

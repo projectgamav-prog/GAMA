@@ -1,7 +1,5 @@
 import { Link } from '@inertiajs/react';
 import {
-    ArrowLeft,
-    BookOpenText,
     Languages,
     MessageSquareQuote,
     PlayCircle,
@@ -12,70 +10,62 @@ import {
     resolveChapterSectionVerseGroupSurface,
     resolveChapterVerseGroupsSurface,
 } from '@/admin/integrations/sections';
-import { ScriptureActionRow } from '@/components/scripture/scripture-action-row';
-import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
-import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { useVisibleAdminControls } from '@/hooks/use-admin-context';
-import ScriptureLayout from '@/layouts/scripture-layout';
 import {
-    chapterLabel,
     hidesSingleGenericSection,
-    isGenericSectionLabel,
     languageLabel,
     sectionLabel,
     verseLabel,
 } from '@/lib/scripture';
-import type { BreadcrumbItem, ChapterVersesIndexProps } from '@/types';
+import type {
+    ScriptureChapter,
+    ScriptureChapterAdmin,
+    ScriptureChapterSection,
+    ScriptureReaderCard,
+    ScriptureReaderLanguage,
+} from '@/types';
 
-export default function ChapterVersesIndex({
-    book,
-    book_section,
+const DEFAULT_PANEL_CLASS_NAME =
+    'flex flex-wrap items-center gap-2 rounded-2xl border border-border/70 bg-muted/20 p-3';
+
+type Props = {
+    chapter: ScriptureChapter;
+    chapterSections: Array<
+        ScriptureChapterSection & {
+            cards: ScriptureReaderCard[];
+        }
+    >;
+    readerLanguages: ScriptureReaderLanguage[];
+    defaultLanguage: ScriptureReaderLanguage | null;
+    showAdminControls: boolean;
+    admin?: Pick<ScriptureChapterAdmin, 'chapter_section_store_href'> | null;
+    panelClassName?: string;
+};
+
+export function ScriptureChapterVerseList({
     chapter,
-    reader_languages,
-    default_language,
+    chapterSections,
+    readerLanguages,
+    defaultLanguage,
+    showAdminControls,
     admin,
-    chapter_sections,
-}: ChapterVersesIndexProps) {
-    const adminPanelClassName =
-        'flex flex-wrap items-center gap-2 rounded-2xl border border-border/70 bg-muted/20 p-3';
-    const [language, setLanguage] = useState<'en' | 'hi'>(
-        default_language ?? reader_languages[0] ?? 'en',
+    panelClassName = DEFAULT_PANEL_CLASS_NAME,
+}: Props) {
+    const [language, setLanguage] = useState<ScriptureReaderLanguage>(
+        defaultLanguage ?? readerLanguages[0] ?? 'en',
     );
-    const showAdminControls = useVisibleAdminControls();
-    const hasReaderLanguages = reader_languages.length > 0;
-    const showsLanguageToggle = reader_languages.length > 1;
-
-    const totalCards = chapter_sections.reduce(
-        (sum, section) => sum + section.cards.length,
-        0,
-    );
-    const hidesGenericBookSection = isGenericSectionLabel(
-        book_section.slug,
-        book_section.title,
-    );
+    const hasReaderLanguages = readerLanguages.length > 0;
+    const showsLanguageToggle = readerLanguages.length > 1;
     const hidesGenericChapterSection =
-        hidesSingleGenericSection(chapter_sections);
-    const chapterTitle = chapterLabel(chapter.number, chapter.title);
-    const bookSectionTitle = sectionLabel(
-        book_section.number,
-        book_section.title,
-    );
-    const chapterEntity = {
-        entityType: 'chapter' as const,
-        entityId: chapter.id,
-        entityLabel: chapterTitle,
-        parentEntityType: 'book_section' as const,
-        parentEntityId: book_section.id,
-    };
-    const verseGroupsSurface = resolveChapterVerseGroupsSurface({
+        hidesSingleGenericSection(chapterSections);
+    const chapterVerseGroupsSurface = resolveChapterVerseGroupsSurface({
         chapter,
-        chapterSections: chapter_sections.map((section) => ({
+        chapterSections: chapterSections.map((section) => ({
             ...section,
             verses_count: section.cards.reduce(
                 (sum, card) => sum + card.verses.length,
@@ -85,106 +75,97 @@ export default function ChapterVersesIndex({
         admin,
         enabled: showAdminControls,
     });
-
-    const breadcrumbs: BreadcrumbItem[] = [
-        {
-            title: book.title,
-            href: book.href,
-        },
-        {
-            title: bookSectionTitle,
-            href: book_section.href,
-        },
-        {
-            title: chapterTitle,
-            href: chapter.href,
-        },
-        {
-            title: 'Reader',
-            href: chapter.verses_href ?? chapter.href,
-        },
-    ];
+    const totalCardCount = chapterSections.reduce(
+        (sum, section) => sum + section.cards.length,
+        0,
+    );
+    const totalVerseCount = chapterSections.reduce(
+        (sum, section) =>
+            sum +
+            section.cards.reduce(
+                (cardSum, card) => cardSum + card.verses.length,
+                0,
+            ),
+        0,
+    );
 
     return (
-        <ScriptureLayout
-            title={`${chapterTitle} Reader`}
-            breadcrumbs={breadcrumbs}
+        <ScriptureSection
+            entityMeta={{
+                entityType: 'chapter',
+                entityId: chapter.id,
+                entityLabel: chapter.title ?? chapter.number ?? 'Chapter',
+                region: 'verse_list',
+                capabilityHint: 'reader',
+            }}
+            title="Verse List"
+            description={
+                hidesGenericChapterSection
+                    ? 'Read this chapter as one continuous verse list.'
+                    : 'Verses grouped by their canonical chapter section.'
+            }
+            action={
+                <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant="outline">
+                        {totalCardCount} card
+                        {totalCardCount === 1 ? '' : 's'}
+                    </Badge>
+                    <Badge variant="secondary">
+                        {totalVerseCount} verse
+                        {totalVerseCount === 1 ? '' : 's'}
+                    </Badge>
+                </div>
+            }
         >
-            <ScriptureAdminModeBar />
+            <div className="space-y-6">
+                {chapterVerseGroupsSurface && (
+                    <AdminModuleHost
+                        surface={chapterVerseGroupsSurface}
+                        className={panelClassName}
+                    />
+                )}
 
-            <ScripturePageIntroCard
-                entityMeta={{
-                    ...chapterEntity,
-                    region: 'page_intro',
-                    capabilityHint: 'reader',
-                }}
-                badges={
-                    <>
-                        <Badge variant="outline">Reader</Badge>
-                        <Badge variant="secondary">{book.title}</Badge>
-                        {!hidesGenericBookSection && (
-                            <Badge variant="secondary">
-                                {bookSectionTitle}
-                            </Badge>
-                        )}
-                        <Badge variant="secondary">
-                            {totalCards} card{totalCards === 1 ? '' : 's'}
-                        </Badge>
-                    </>
-                }
-                title={chapterTitle}
-                description="Canonical verses are rendered in reading order, while valid helper-layer groupings stay inside their own chapter section."
-                contentClassName="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"
-            >
-                <div className="space-y-2">
-                    {verseGroupsSurface && (
-                        <AdminModuleHost
-                            surface={verseGroupsSurface}
-                            className={adminPanelClassName}
-                        />
-                    )}
-                    <p className="text-sm font-medium">Reader Controls</p>
-                    <div className="flex flex-wrap items-center gap-3">
+                <div className="rounded-2xl border border-border/70 bg-muted/20 px-5 py-4 sm:px-6">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-sm font-medium">
+                                <Languages className="size-4 text-muted-foreground" />
+                                <span>Reader Translation</span>
+                            </div>
+                            {showsLanguageToggle && (
+                                <p className="text-sm text-muted-foreground">
+                                    Sanskrit stays fixed. This only switches the
+                                    supporting translation line below each verse.
+                                </p>
+                            )}
+                        </div>
                         {hasReaderLanguages ? (
-                            <>
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                    <Languages className="size-4" />
-                                    <span>Translation</span>
-                                </div>
-                                {showsLanguageToggle ? (
-                                    <ToggleGroup
-                                        type="single"
-                                        value={language}
-                                        variant="outline"
-                                        onValueChange={(value) => {
-                                            if (
-                                                value === 'en' ||
-                                                value === 'hi'
-                                            ) {
-                                                setLanguage(value);
-                                            }
-                                        }}
-                                    >
-                                        {reader_languages.map(
-                                            (readerLanguage) => (
-                                                <ToggleGroupItem
-                                                    key={readerLanguage}
-                                                    value={readerLanguage}
-                                                >
-                                                    {languageLabel(
-                                                        readerLanguage,
-                                                    )}
-                                                </ToggleGroupItem>
-                                            ),
-                                        )}
-                                    </ToggleGroup>
-                                ) : (
-                                    <Badge variant="outline">
-                                        {languageLabel(reader_languages[0])}{' '}
-                                        Translation
-                                    </Badge>
-                                )}
-                            </>
+                            showsLanguageToggle ? (
+                                <ToggleGroup
+                                    type="single"
+                                    value={language}
+                                    variant="outline"
+                                    onValueChange={(value) => {
+                                        if (value === 'en' || value === 'hi') {
+                                            setLanguage(value);
+                                        }
+                                    }}
+                                >
+                                    {readerLanguages.map((readerLanguage) => (
+                                        <ToggleGroupItem
+                                            key={readerLanguage}
+                                            value={readerLanguage}
+                                        >
+                                            {languageLabel(readerLanguage)}
+                                        </ToggleGroupItem>
+                                    ))}
+                                </ToggleGroup>
+                            ) : (
+                                <Badge variant="outline">
+                                    {languageLabel(readerLanguages[0])}{' '}
+                                    Translation
+                                </Badge>
+                            )
                         ) : (
                             <p className="text-sm text-muted-foreground">
                                 No supporting translations are available for
@@ -192,25 +173,9 @@ export default function ChapterVersesIndex({
                             </p>
                         )}
                     </div>
-                    {showsLanguageToggle && (
-                        <p className="text-sm text-muted-foreground">
-                            Sanskrit remains visible. The control only switches
-                            the supporting translation line below each verse.
-                        </p>
-                    )}
                 </div>
-                <ScriptureActionRow className="shrink-0">
-                    <Button asChild variant="outline">
-                        <Link href={chapter.href}>
-                            <ArrowLeft className="size-4" />
-                            Back to Chapter
-                        </Link>
-                    </Button>
-                </ScriptureActionRow>
-            </ScripturePageIntroCard>
 
-            <div className="space-y-6">
-                {chapter_sections.map((section) => {
+                {chapterSections.map((section) => {
                     const verseCount = section.cards.reduce(
                         (sum, card) => sum + card.verses.length,
                         0,
@@ -226,8 +191,7 @@ export default function ChapterVersesIndex({
                             primaryLabel: 'cards',
                             secondaryCount: verseCount,
                             secondaryLabel: 'verses',
-                            openHref: section.href ?? null,
-                            openLabel: 'Jump to Group',
+                            openHref: null,
                             enabled: showAdminControls,
                         });
 
@@ -241,7 +205,7 @@ export default function ChapterVersesIndex({
                                 entityLabel: sectionTitle,
                                 parentEntityType: 'chapter',
                                 parentEntityId: chapter.id,
-                                region: 'reader_section',
+                                region: 'verse_list_section',
                                 capabilityHint: 'reader',
                             }}
                             title={sectionTitle}
@@ -249,7 +213,9 @@ export default function ChapterVersesIndex({
                                 <div className="flex flex-wrap items-center gap-2">
                                     <Badge variant="outline">
                                         {section.cards.length} card
-                                        {section.cards.length === 1 ? '' : 's'}
+                                        {section.cards.length === 1
+                                            ? ''
+                                            : 's'}
                                     </Badge>
                                     <Badge variant="secondary">
                                         {verseCount} verse
@@ -262,9 +228,10 @@ export default function ChapterVersesIndex({
                                 {sectionGroupSurface && (
                                     <AdminModuleHost
                                         surface={sectionGroupSurface}
-                                        className={adminPanelClassName}
+                                        className={panelClassName}
                                     />
                                 )}
+
                                 {section.cards.map((card) => (
                                     <Card key={card.id}>
                                         <CardHeader className="gap-3">
@@ -292,7 +259,7 @@ export default function ChapterVersesIndex({
                                                         entityLabel: verseLabel(
                                                             verse.number,
                                                         ),
-                                                        region: 'reader_verse',
+                                                        region: 'verse_list_verse',
                                                         capabilityHint:
                                                             'reader',
                                                     }}
@@ -383,7 +350,8 @@ export default function ChapterVersesIndex({
                                                                     are
                                                                     available
                                                                     for this
-                                                                    chapter yet.
+                                                                    chapter
+                                                                    yet.
                                                                 </p>
                                                             ) : (
                                                                 <p className="text-sm text-muted-foreground">
@@ -410,26 +378,6 @@ export default function ChapterVersesIndex({
                     );
                 })}
             </div>
-
-            <Card>
-                <CardContent className="py-6">
-                    <ScriptureActionRow>
-                        <Button asChild variant="outline">
-                            <Link href={chapter.href}>
-                                <ArrowLeft className="size-4" />
-                                Back to Chapter
-                            </Link>
-                        </Button>
-                        <Button asChild variant="outline">
-                            <Link href={book.href}>
-                                <BookOpenText className="size-4" />
-                                Back to Book
-                            </Link>
-                        </Button>
-                    </ScriptureActionRow>
-                </CardContent>
-            </Card>
-        </ScriptureLayout>
+        </ScriptureSection>
     );
 }
-
