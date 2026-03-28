@@ -135,7 +135,6 @@ export const bookIdentityEditorModule = defineAdminModule({
     actions: [
         {
             actionKey: 'edit_identity',
-            defaultLabel: 'Edit Details',
             placement: 'inline',
             openMode: 'inline',
             priority: 10,
@@ -146,7 +145,7 @@ export const bookIdentityEditorModule = defineAdminModule({
     EditorComponent: BookIdentityEditor,
     order: 10,
     description:
-        'Renders the canonical book identity editor for the public book intro surface.',
+        'Renders the canonical book identity editor for the semantic book identity surface.',
 });
 
 

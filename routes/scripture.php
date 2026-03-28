@@ -25,9 +25,11 @@ use App\Http\Controllers\Scripture\DictionaryEntryController;
 use App\Http\Controllers\Scripture\PostponedAdminSurfaceController;
 use App\Http\Controllers\Scripture\TopicController;
 use App\Http\Controllers\Scripture\VerseAdminContentBlockController;
+use App\Http\Controllers\Scripture\VerseAdminCommentaryController;
 use App\Http\Controllers\Scripture\VerseAdminCreateController;
 use App\Http\Controllers\Scripture\VerseAdminIdentityController;
 use App\Http\Controllers\Scripture\VerseAdminMetaController;
+use App\Http\Controllers\Scripture\VerseAdminTranslationController;
 use App\Http\Controllers\Scripture\VerseController;
 use App\Http\Controllers\Scripture\VerseFullEditController;
 use App\Http\Middleware\EnsureCanAccessAdminContext;
@@ -324,6 +326,32 @@ Route::prefix('books')
 
                 Route::patch('meta', [VerseAdminMetaController::class, 'update'])
                     ->name('meta.update');
+
+                Route::post('translations', [VerseAdminTranslationController::class, 'store'])
+                    ->name('translations.store');
+
+                Route::patch(
+                    'translations/{translation}',
+                    [VerseAdminTranslationController::class, 'update'],
+                )->name('translations.update');
+
+                Route::delete(
+                    'translations/{translation}',
+                    [VerseAdminTranslationController::class, 'destroy'],
+                )->name('translations.destroy');
+
+                Route::post('commentaries', [VerseAdminCommentaryController::class, 'store'])
+                    ->name('commentaries.store');
+
+                Route::patch(
+                    'commentaries/{commentary}',
+                    [VerseAdminCommentaryController::class, 'update'],
+                )->name('commentaries.update');
+
+                Route::delete(
+                    'commentaries/{commentary}',
+                    [VerseAdminCommentaryController::class, 'destroy'],
+                )->name('commentaries.destroy');
 
                 Route::post('content-blocks', [VerseAdminContentBlockController::class, 'store'])
                     ->name('content-blocks.store');

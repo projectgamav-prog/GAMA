@@ -43,12 +43,6 @@ export const sectionIntroEditorModule = defineAdminModule({
     actions: [
         {
             actionKey: 'edit_intro',
-            defaultLabel: 'Edit Intro',
-            dynamicLabel: (surface) => {
-                const metadata = getSectionGroupMetadata(surface);
-
-                return metadata?.introBlock ? 'Edit Intro' : 'Add Intro';
-            },
             placement: 'inline',
             openMode: 'inline',
             priority: 25,

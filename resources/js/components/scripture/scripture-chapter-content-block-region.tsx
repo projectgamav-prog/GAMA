@@ -5,6 +5,7 @@ import {
     createRegisteredBlockRegionSurface,
 } from '@/admin/surfaces/blocks/surface-builders';
 import { CHAPTER_CONTENT_BLOCKS_SURFACE_KEY } from '@/admin/surfaces/core/surface-keys';
+import { SCRIPTURE_INLINE_ADMIN_PANEL_CLASS_NAME } from '@/components/scripture/scripture-section-group-wrapper';
 import { scriptureInlineRegionLabel } from '@/lib/scripture-inline-admin';
 import type {
     ScriptureChapter,
@@ -23,8 +24,7 @@ type Props = {
     admin?: ScriptureChapterAdmin | null;
 };
 
-const PANEL_CLASS_NAME =
-    'flex flex-wrap items-center gap-2 rounded-2xl border border-border/70 bg-muted/20 p-3';
+const PANEL_CLASS_NAME = SCRIPTURE_INLINE_ADMIN_PANEL_CLASS_NAME;
 
 export function ScriptureChapterContentBlockRegion({
     chapter,
@@ -153,7 +153,7 @@ export function ScriptureChapterContentBlockRegion({
                         return (
                             <div key={block.id} className="space-y-3">
                                 {(editorSurface || actionsSurface) && (
-                                    <div className="space-y-2 rounded-2xl border border-border/70 bg-muted/20 p-3">
+                                    <div className="space-y-2">
                                         {editorSurface && (
                                             <AdminModuleHost
                                                 surface={editorSurface}

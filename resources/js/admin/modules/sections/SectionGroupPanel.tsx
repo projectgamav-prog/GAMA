@@ -33,7 +33,12 @@ function SectionGroupPanel({ surface }: AdminModuleComponentProps) {
                 </Badge>
             )}
             {metadata.openHref && metadata.openLabel && (
-                <Button asChild size="sm" variant="outline" className="h-8 rounded-full px-3">
+                <Button
+                    asChild
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 rounded-md px-2.5 text-xs font-medium text-muted-foreground shadow-none hover:text-foreground"
+                >
                     <Link href={metadata.openHref}>{metadata.openLabel}</Link>
                 </Button>
             )}

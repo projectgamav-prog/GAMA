@@ -9,6 +9,7 @@ use App\Models\ContentBlock;
 
 class ChapterAdminRouteContext
 {
+    private const DEFAULT_INTRO_BLOCK_REGION = 'overview';
     private const DEFAULT_CONTENT_BLOCK_REGION = 'study';
 
     public function __construct(
@@ -113,6 +114,11 @@ class ChapterAdminRouteContext
         return self::DEFAULT_CONTENT_BLOCK_REGION;
     }
 
+    public function defaultIntroBlockRegion(): string
+    {
+        return self::DEFAULT_INTRO_BLOCK_REGION;
+    }
+
     public function ownsContentBlock(ContentBlock $contentBlock): bool
     {
         return RegisteredContentBlock::owns($this->chapter, $contentBlock);
@@ -125,6 +131,16 @@ class ChapterAdminRouteContext
             $contentBlock,
             $this->contentBlockTypes(),
         );
+    }
+
+    public function isEditableIntroBlock(ContentBlock $contentBlock): bool
+    {
+        return $contentBlock->region === $this->defaultIntroBlockRegion()
+            && RegisteredContentBlock::isEditableFor(
+                $this->chapter,
+                $contentBlock,
+                $this->contentBlockTypes(),
+            );
     }
 
     public function isDuplicableNoteBlock(ContentBlock $contentBlock): bool
@@ -143,6 +159,11 @@ class ChapterAdminRouteContext
             $contentBlock,
             $this->contentBlockTypes(),
         );
+    }
+
+    public function abortUnlessEditableIntroBlock(ContentBlock $contentBlock): void
+    {
+        abort_unless($this->isEditableIntroBlock($contentBlock), 404);
     }
 
     public function abortUnlessDuplicableNoteBlock(ContentBlock $contentBlock): void
@@ -170,6 +191,6 @@ class ChapterAdminRouteContext
 
     public function contentBlockProtectionReason(): string
     {
-        return 'Only chapter-owned registered note blocks (text, quote, and image) are editable in this phase.';
+        return 'Only chapter-owned registered intro and note blocks (text, quote, and image) are editable in this phase.';
     }
 }

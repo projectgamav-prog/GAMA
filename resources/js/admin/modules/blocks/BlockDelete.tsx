@@ -80,7 +80,6 @@ export const blockDeleteModule = defineAdminModule({
     actions: [
         {
             actionKey: 'delete_block',
-            defaultLabel: 'Delete',
             placement: 'dropdown',
             openMode: 'inline',
             priority: 50,

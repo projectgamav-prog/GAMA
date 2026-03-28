@@ -65,11 +65,12 @@ class BookSectionAdminRouteContext
 
     public function isEditableIntroBlock(ContentBlock $contentBlock): bool
     {
-        return RegisteredContentBlock::isEditableFor(
-            $this->bookSection,
-            $contentBlock,
-            $this->contentBlockTypes(),
-        );
+        return $contentBlock->region === $this->defaultContentBlockRegion()
+            && RegisteredContentBlock::isEditableFor(
+                $this->bookSection,
+                $contentBlock,
+                $this->contentBlockTypes(),
+            );
     }
 
     public function abortUnlessEditableIntroBlock(ContentBlock $contentBlock): void
@@ -83,11 +84,12 @@ class BookSectionAdminRouteContext
 
     public function isContextualInsertionAnchor(ContentBlock $contentBlock): bool
     {
-        return RegisteredContentBlock::isInsertionAnchorFor(
-            $this->bookSection,
-            $contentBlock,
-            $this->contentBlockTypes(),
-        );
+        return $contentBlock->region === $this->defaultContentBlockRegion()
+            && RegisteredContentBlock::isInsertionAnchorFor(
+                $this->bookSection,
+                $contentBlock,
+                $this->contentBlockTypes(),
+            );
     }
 
     public function abortUnlessContextualInsertionAnchor(ContentBlock $contentBlock): void

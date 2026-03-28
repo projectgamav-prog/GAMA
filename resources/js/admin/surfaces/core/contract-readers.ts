@@ -1,7 +1,12 @@
 import type {
+    ScriptureAdminVerseCommentary,
+    ScriptureAdminVerseTranslation,
     ScriptureAdminMediaAssignment,
     ScriptureAdminMediaSummary,
+    ScriptureCommentarySourceOption,
     ScriptureContentBlock,
+    ScriptureRegisteredAdminField,
+    ScriptureTranslationSourceOption,
 } from '@/types';
 import type {
     AdminSurfaceContract,
@@ -62,6 +67,32 @@ export type MediaSlotsContractMetadata = {
     availableMedia: ScriptureAdminMediaSummary[];
     nextSortOrder: number;
 };
+
+export type RelationRowsContractMetadata<
+    TRow = unknown,
+    TSource = unknown,
+    TFields = Record<string, ScriptureRegisteredAdminField>,
+> = {
+    relationKey: string;
+    relationLabel: string;
+    entityLabel: string;
+    storeHref: string;
+    fullEditHref?: string | null;
+    rows: TRow[];
+    sourceOptions: TSource[];
+    nextSortOrder: number;
+    fields: TFields;
+};
+
+export type VerseTranslationsContractMetadata = RelationRowsContractMetadata<
+    ScriptureAdminVerseTranslation,
+    ScriptureTranslationSourceOption
+>;
+
+export type VerseCommentariesContractMetadata = RelationRowsContractMetadata<
+    ScriptureAdminVerseCommentary,
+    ScriptureCommentarySourceOption
+>;
 
 export function getIdentityContractMetadata<TEntity>(
     surface: AdminSurfaceContract,
@@ -132,5 +163,33 @@ export function getMediaSlotsContractMetadata(
             Array.isArray(metadata.assignments) &&
             Array.isArray(metadata.availableMedia) &&
             typeof metadata.nextSortOrder === 'number',
+    );
+}
+
+export function getRelationRowsContractMetadata<
+    TRow = unknown,
+    TSource = unknown,
+    TFields = Record<string, ScriptureRegisteredAdminField>,
+>(
+    surface: AdminSurfaceContract,
+): RelationRowsContractMetadata<TRow, TSource, TFields> | null {
+    return getContractMetadata<
+        RelationRowsContractMetadata<TRow, TSource, TFields>
+    >(
+        surface,
+        'relation_rows',
+        (metadata) =>
+            typeof metadata.relationKey === 'string' &&
+            typeof metadata.relationLabel === 'string' &&
+            typeof metadata.entityLabel === 'string' &&
+            typeof metadata.storeHref === 'string' &&
+            (typeof metadata.fullEditHref === 'string' ||
+                metadata.fullEditHref === null ||
+                metadata.fullEditHref === undefined) &&
+            typeof metadata.nextSortOrder === 'number' &&
+            Array.isArray(metadata.rows) &&
+            Array.isArray(metadata.sourceOptions) &&
+            typeof metadata.fields === 'object' &&
+            metadata.fields !== null,
     );
 }

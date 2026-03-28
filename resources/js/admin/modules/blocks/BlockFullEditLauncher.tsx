@@ -44,7 +44,6 @@ export const blockFullEditLauncherModule = defineAdminModule({
     actions: [
         {
             actionKey: 'full_edit_block',
-            defaultLabel: 'Full Edit',
             placement: 'inline',
             openMode: 'inline',
             priority: 80,

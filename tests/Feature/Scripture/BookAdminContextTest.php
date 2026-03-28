@@ -251,6 +251,7 @@ test('authorized editors receive registered book admin props on book detail, ove
             ->where('admin.canonical_edit_href', $this->canonicalEditRoute),
         )
         ->assertInertia(fn (Assert $page) => $page
+            ->where('book_sections.0.intro_block.id', $sectionIntroBlock->id)
             ->where(
                 'book_sections.0.admin.details_update_href',
                 $this->bookSectionDetailsUpdateRoute,
@@ -550,6 +551,22 @@ test('authorized editors can manage book section intro blocks from grouped book 
         ->get($this->showRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
+            ->where(
+                'book_sections.0.intro_block.title',
+                'Updated book section intro image',
+            )
+            ->where(
+                'book_sections.0.intro_block.block_type',
+                'image',
+            )
+            ->where(
+                'book_sections.0.intro_block.data_json.url',
+                'https://example.test/book-section-intro-updated.jpg',
+            )
+            ->where(
+                'book_sections.0.intro_block.data_json.alt',
+                'Updated book section intro illustration',
+            )
             ->where(
                 'book_sections.0.admin.primary_intro_block.title',
                 'Updated book section intro image',

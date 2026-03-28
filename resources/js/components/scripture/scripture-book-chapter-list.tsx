@@ -6,20 +6,18 @@ import {
     resolveBookSectionChapterGroupSurface,
 } from '@/admin/integrations/sections';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
-import { ScriptureSection } from '@/components/scripture/scripture-section';
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+    SCRIPTURE_INLINE_ADMIN_PANEL_CLASS_NAME,
+    ScriptureSectionGroupWrapper,
+} from '@/components/scripture/scripture-section-group-wrapper';
+import { ScriptureSection } from '@/components/scripture/scripture-section';
 import {
     chapterLabel,
     hidesSingleGenericSection,
     sectionAnchorId,
     sectionLabel,
 } from '@/lib/scripture';
+import { resolveScriptureNavigationAction } from '@/lib/scripture-navigation-actions';
 import type {
     ScriptureBook,
     ScriptureBookAdmin,
@@ -27,8 +25,7 @@ import type {
     ScriptureChapter,
 } from '@/types';
 
-const DEFAULT_PANEL_CLASS_NAME =
-    'flex flex-wrap items-center gap-2 rounded-2xl border border-border/70 bg-muted/20 p-3';
+const DEFAULT_PANEL_CLASS_NAME = SCRIPTURE_INLINE_ADMIN_PANEL_CLASS_NAME;
 
 type Props = {
     book: ScriptureBook;
@@ -94,80 +91,82 @@ export function ScriptureBookChapterList({
                         });
 
                     return (
-                        <ScriptureEntityRegion
+                        <ScriptureSectionGroupWrapper
                             key={section.id}
-                            meta={{
+                            id={sectionAnchorId(section.slug)}
+                            entityMeta={{
                                 entityType: 'book_section',
                                 entityId: section.id,
                                 entityLabel: sectionTitle,
                                 region: 'chapter_list_section',
                                 capabilityHint: 'navigation',
                             }}
-                            asChild
+                            title={sectionTitle}
+                            meta={
+                                <span>
+                                    {section.chapters.length} chapter
+                                    {section.chapters.length === 1 ? '' : 's'}
+                                </span>
+                            }
+                            introBlock={section.intro_block}
+                            adminSurface={sectionGroupSurface}
+                            panelClassName={panelClassName}
                         >
-                            <Card id={sectionAnchorId(section.slug)}>
-                                <CardHeader className="space-y-3">
-                                    {sectionGroupSurface && (
-                                        <AdminModuleHost
-                                            surface={sectionGroupSurface}
-                                            className={panelClassName}
-                                        />
-                                    )}
-                                    <div className="space-y-2">
-                                        <CardTitle>{sectionTitle}</CardTitle>
-                                        <CardDescription>
-                                            {section.chapters.length} chapter
-                                            {section.chapters.length === 1
-                                                ? ''
-                                                : 's'}
-                                        </CardDescription>
-                                    </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="grid gap-3 md:grid-cols-2">
-                                        {section.chapters.map((chapter) => (
-                                            <ScriptureEntityRegion
-                                                key={chapter.id}
-                                                meta={{
-                                                    entityType: 'chapter',
-                                                    entityId: chapter.id,
-                                                    entityLabel: chapterLabel(
-                                                        chapter.number,
-                                                        chapter.title,
-                                                    ),
-                                                    region: 'chapter_list_row',
-                                                    capabilityHint:
-                                                        'navigation',
-                                                }}
-                                                asChild
+                            <div className="grid gap-3 md:grid-cols-2">
+                                {section.chapters.map((chapter) => {
+                                    const chapterAction =
+                                        resolveScriptureNavigationAction({
+                                            actionKey: 'open_chapter',
+                                            href: chapter.href,
+                                        });
+
+                                    if (chapterAction === null) {
+                                        return null;
+                                    }
+
+                                    return (
+                                        <ScriptureEntityRegion
+                                            key={chapter.id}
+                                            meta={{
+                                                entityType: 'chapter',
+                                                entityId: chapter.id,
+                                                entityLabel: chapterLabel(
+                                                    chapter.number,
+                                                    chapter.title,
+                                                ),
+                                                region: 'chapter_list_row',
+                                                capabilityHint: 'navigation',
+                                            }}
+                                            asChild
+                                        >
+                                            <Link
+                                                href={chapterAction.href}
+                                                className="group rounded-lg border p-4 transition-colors hover:border-primary"
                                             >
-                                                <Link
-                                                    href={chapter.href}
-                                                    className="group rounded-lg border p-4 transition-colors hover:border-primary"
-                                                >
-                                                    <div className="flex items-start gap-3">
-                                                        <div className="rounded-md bg-primary/10 p-2 text-primary">
-                                                            <BookOpenText className="size-4" />
-                                                        </div>
-                                                        <div className="space-y-1">
-                                                            <p className="font-medium group-hover:text-primary">
-                                                                {chapterLabel(
-                                                                    chapter.number,
-                                                                    chapter.title,
-                                                                )}
-                                                            </p>
-                                                            <p className="text-sm text-muted-foreground">
-                                                                Read Chapter
-                                                            </p>
-                                                        </div>
+                                                <div className="flex items-start gap-3">
+                                                    <div className="rounded-md bg-primary/10 p-2 text-primary">
+                                                        <BookOpenText className="size-4" />
                                                     </div>
-                                                </Link>
-                                            </ScriptureEntityRegion>
-                                        ))}
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </ScriptureEntityRegion>
+                                                    <div className="space-y-1">
+                                                        <p className="font-medium group-hover:text-primary">
+                                                            {chapterLabel(
+                                                                chapter.number,
+                                                                chapter.title,
+                                                            )}
+                                                        </p>
+                                                        <p className="text-sm text-muted-foreground">
+                                                            {
+                                                                chapterAction.label
+                                                            }
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </Link>
+                                        </ScriptureEntityRegion>
+                                    );
+                                })}
+                            </div>
+                        </ScriptureSectionGroupWrapper>
                     );
                 })}
             </div>

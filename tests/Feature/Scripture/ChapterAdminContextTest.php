@@ -194,23 +194,21 @@ test('authorized editors receive chapter admin props without requiring visibilit
             ->where('admin.content_block_store_href', $this->contentBlockStoreRoute)
             ->where('admin.content_block_types', ['text', 'quote', 'image'])
             ->where('admin.content_block_default_region', 'study')
-            ->where('admin.primary_content_block_id', $primaryBlock->id)
+            ->where('chapter.intro_block.id', $primaryBlock->id)
+            ->where('admin.intro_store_href', $this->contentBlockStoreRoute)
+            ->where('admin.primary_intro_block.id', $primaryBlock->id)
             ->where(
-                'admin.primary_content_block_update_href',
+                'admin.primary_intro_update_href',
                 route('scripture.chapters.admin.content-blocks.update', [
                     ...chapterRouteParameters($this->book, $this->bookSection, $this->chapter),
                     'contentBlock' => $primaryBlock,
                 ]),
             )
-            ->where(
-                "admin.content_block_update_hrefs.{$primaryBlock->id}",
-                route('scripture.chapters.admin.content-blocks.update', [
-                    ...chapterRouteParameters($this->book, $this->bookSection, $this->chapter),
-                    'contentBlock' => $primaryBlock,
-                ]),
-            ),
+            ->where('admin.intro_block_types', ['text', 'quote', 'image'])
+            ->where('admin.intro_default_region', 'overview'),
         )
         ->assertInertia(fn (Assert $page) => $page
+            ->where('chapter_sections.0.intro_block.id', $chapterSectionIntroBlock->id)
             ->where(
                 'chapter_sections.0.admin.details_update_href',
                 $this->chapterSectionDetailsUpdateRoute,
@@ -421,6 +419,22 @@ test('authorized editors can manage chapter section intro blocks across grouped 
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where(
+                'chapter_sections.0.intro_block.title',
+                'Updated chapter section intro image',
+            )
+            ->where(
+                'chapter_sections.0.intro_block.block_type',
+                'image',
+            )
+            ->where(
+                'chapter_sections.0.intro_block.data_json.url',
+                'https://example.test/chapter-section-intro.jpg',
+            )
+            ->where(
+                'chapter_sections.0.intro_block.data_json.alt',
+                'Chapter section intro illustration',
+            )
+            ->where(
                 'chapter_sections.0.admin.primary_intro_block.title',
                 'Updated chapter section intro image',
             )
@@ -442,6 +456,14 @@ test('authorized editors can manage chapter section intro blocks across grouped 
         ->get($this->verseListRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
+            ->where(
+                'chapter_sections.0.intro_block.block_type',
+                'image',
+            )
+            ->where(
+                'chapter_sections.0.intro_block.data_json.url',
+                'https://example.test/chapter-section-intro.jpg',
+            )
             ->where(
                 'chapter_sections.0.admin.primary_intro_block.block_type',
                 'image',
@@ -482,8 +504,9 @@ test('page intro edit is hidden when no clear primary published chapter note exi
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('admin.full_edit_href', $this->fullEditRoute)
-            ->where('admin.primary_content_block_id', null)
-            ->where('admin.primary_content_block_update_href', null)
+            ->where('chapter.intro_block', null)
+            ->where('admin.primary_intro_block', null)
+            ->where('admin.primary_intro_update_href', null)
             ->where(
                 "admin.content_block_update_hrefs.{$firstBlock->id}",
                 route('scripture.chapters.admin.content-blocks.update', [
@@ -692,8 +715,9 @@ test('chapter block editing is limited to chapter owned registered note blocks',
         ->get($showRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('admin.primary_content_block_id', null)
-            ->where('admin.primary_content_block_update_href', null)
+            ->where('chapter.intro_block', null)
+            ->where('admin.primary_intro_block', null)
+            ->where('admin.primary_intro_update_href', null)
             ->where(
                 "admin.content_block_update_hrefs.{$textBlock->id}",
                 route('scripture.chapters.admin.content-blocks.update', [
@@ -753,7 +777,7 @@ test('chapter block editing is limited to chapter owned registered note blocks',
             ->where('protected_content_blocks.0.title', 'Protected video block')
             ->where(
                 'protected_content_blocks.0.protection_reason',
-                'Only chapter-owned registered note blocks (text, quote, and image) are editable in this phase.',
+                'Only chapter-owned registered intro and note blocks (text, quote, and image) are editable in this phase.',
             )
             ->where('next_content_block_sort_order', 5),
         );
@@ -875,14 +899,15 @@ test('authorized editors can create chapter image note blocks from the public pa
     $this->get($this->chapterShowRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('content_blocks.0.block_type', 'image')
-            ->where('content_blocks.0.title', 'Chapter overview image')
+            ->where('chapter.intro_block.block_type', 'image')
+            ->where('chapter.intro_block.title', 'Chapter overview image')
+            ->where('content_blocks', [])
             ->where(
-                'content_blocks.0.data_json.url',
+                'chapter.intro_block.data_json.url',
                 'https://example.test/chapter-overview-image.jpg',
             )
             ->where(
-                'content_blocks.0.data_json.alt',
+                'chapter.intro_block.data_json.alt',
                 'Bhagavad Gita Chapter 6 overview illustration',
             ),
         );

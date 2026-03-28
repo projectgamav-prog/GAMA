@@ -1,5 +1,7 @@
 import { Link, useForm } from '@inertiajs/react';
 import { SquareArrowOutUpRight } from 'lucide-react';
+import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
+import { resolveVerseRelationSurfaces } from '@/admin/integrations/scripture/verses';
 import InputError from '@/components/input-error';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
@@ -475,6 +477,8 @@ export default function VerseFullEdit({
     admin_identity_update_href,
     verse_meta,
     admin_meta_update_href,
+    admin_translations,
+    admin_commentaries,
     admin_content_block_store_href,
     next_content_block_sort_order,
     admin_content_blocks,
@@ -491,6 +495,14 @@ export default function VerseFullEdit({
         chapter_section.title,
     );
     const verseTitle = verseLabel(verse.number);
+    const { translationsSurface, commentariesSurface } =
+        resolveVerseRelationSurfaces({
+            verse,
+            verseTitle,
+            translationsAdmin: admin_translations,
+            commentariesAdmin: admin_commentaries,
+            fullEditHref: null,
+        });
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: book.title,
@@ -529,7 +541,7 @@ export default function VerseFullEdit({
                     </>
                 }
                 title={`Full edit: ${verseTitle}`}
-                description="Use this deeper workspace to manage canonical verse identity, verse meta, and attached note blocks in one protected place."
+                description="Use this deeper workspace to manage canonical verse identity, verse meta, and attached intro or note blocks in one protected place."
                 headerAction={
                     <Button asChild variant="outline" size="sm">
                         <Link href={verse.href}>
@@ -574,9 +586,47 @@ export default function VerseFullEdit({
             </ScriptureSection>
 
             <ScriptureSection
+                adminTargetSection="translations"
+                title="Verse Translations"
+                description="Manage verse-owned translation rows from the real `verse_translations` table."
+                action={
+                    <Badge variant="outline">
+                        {admin_translations.rows.length} row
+                        {admin_translations.rows.length === 1 ? '' : 's'}
+                    </Badge>
+                }
+            >
+                {translationsSurface && (
+                    <AdminModuleHost
+                        surface={translationsSurface}
+                        className="flex flex-wrap items-start gap-1.5"
+                    />
+                )}
+            </ScriptureSection>
+
+            <ScriptureSection
+                adminTargetSection="commentaries"
+                title="Verse Commentaries"
+                description="Manage verse-owned commentary rows from the real `verse_commentaries` table."
+                action={
+                    <Badge variant="outline">
+                        {admin_commentaries.rows.length} row
+                        {admin_commentaries.rows.length === 1 ? '' : 's'}
+                    </Badge>
+                }
+            >
+                {commentariesSurface && (
+                    <AdminModuleHost
+                        surface={commentariesSurface}
+                        className="flex flex-wrap items-start gap-1.5"
+                    />
+                )}
+            </ScriptureSection>
+
+            <ScriptureSection
                 adminTargetSection="content_blocks"
-                title="Note Blocks"
-                description="Manage verse-owned text, quote, and image note blocks, including drafts that stay hidden from the public page."
+                title="Intro & Note Blocks"
+                description="Manage verse-owned text, quote, and image intro or note blocks, including drafts that stay hidden from the public page."
                 action={
                     <div className="flex flex-wrap gap-2">
                         <Badge variant="outline">

@@ -42,10 +42,17 @@ class ChapterController extends Controller
             ->get();
         $isAdmin = AdminContext::canAccess($request->user());
         $adminRouteContext = new ChapterAdminRouteContext($book, $bookSection, $chapter);
-        $primaryEditableBlock = $this->primaryPublishedEditableBlock(
+        $primaryIntroBlock = $this->primaryPublishedIntroBlock(
             $contentBlocks,
             $adminRouteContext,
         );
+        $noteBlocks = $primaryIntroBlock instanceof ContentBlock
+            ? $contentBlocks
+                ->reject(
+                    fn (ContentBlock $block): bool => (int) $block->getKey() === (int) $primaryIntroBlock->getKey(),
+                )
+                ->values()
+            : $contentBlocks;
         $readerData = $buildChapterVerseReaderData->handle(
             $book,
             $bookSection,
@@ -57,16 +64,22 @@ class ChapterController extends Controller
         return Inertia::render('scripture/chapters/show', [
             'book' => $publicScriptureData->book($book),
             'book_section' => $publicScriptureData->bookSection($book, $bookSection),
-            'chapter' => $publicScriptureData->chapter($book, $bookSection, $chapter),
-            'content_blocks' => $publicScriptureData->contentBlocks($contentBlocks),
+            'chapter' => [
+                ...$publicScriptureData->chapter($book, $bookSection, $chapter),
+                'intro_block' => $primaryIntroBlock
+                    ? $publicScriptureData->contentBlock($primaryIntroBlock)
+                    : null,
+            ],
+            'content_blocks' => $publicScriptureData->contentBlocks($noteBlocks),
             'reader_languages' => $readerData['reader_languages'],
             'default_language' => $readerData['default_language'],
             'isAdmin' => $isAdmin,
             'admin' => $isAdmin
                 ? $this->chapterAdminPayload(
                     $adminRouteContext,
-                    $contentBlocks,
-                    $primaryEditableBlock,
+                    $noteBlocks,
+                    $primaryIntroBlock,
+                    $publicScriptureData,
                 )
                 : null,
             'chapter_sections' => $this->chapterSectionsPayload(
@@ -82,17 +95,17 @@ class ChapterController extends Controller
     }
 
     /**
-     * Resolve a single clear primary published note block for page-intro editing.
+     * Resolve the primary published overview intro block for page-intro editing.
      *
      * @param  Collection<int, ContentBlock>  $contentBlocks
      */
-    private function primaryPublishedEditableBlock(
+    private function primaryPublishedIntroBlock(
         Collection $contentBlocks,
         ChapterAdminRouteContext $adminRouteContext,
     ): ?ContentBlock {
         return PrimaryPublishedEditableContentBlock::resolve(
             $contentBlocks,
-            fn (ContentBlock $block): bool => $adminRouteContext->isEditableNoteBlock($block),
+            fn (ContentBlock $block): bool => $adminRouteContext->isEditableIntroBlock($block),
         );
     }
 
@@ -103,7 +116,8 @@ class ChapterController extends Controller
     private function chapterAdminPayload(
         ChapterAdminRouteContext $adminRouteContext,
         Collection $contentBlocks,
-        ?ContentBlock $primaryEditableBlock,
+        ?ContentBlock $primaryIntroBlock,
+        PublicScriptureData $publicScriptureData,
     ): array {
         $visibleSequence = new VisibleContentBlockSequence($contentBlocks);
 
@@ -114,13 +128,18 @@ class ChapterController extends Controller
                 'scripture.chapter-sections.admin.store',
                 $adminRouteContext->routeParameters(),
             ),
+            'intro_store_href' => $adminRouteContext->contentBlockStoreHref(),
+            'primary_intro_block' => $primaryIntroBlock
+                ? $publicScriptureData->contentBlock($primaryIntroBlock)
+                : null,
+            'primary_intro_update_href' => $primaryIntroBlock
+                ? $adminRouteContext->contentBlockUpdateHref($primaryIntroBlock)
+                : null,
+            'intro_block_types' => $adminRouteContext->contentBlockTypes(),
+            'intro_default_region' => $adminRouteContext->defaultIntroBlockRegion(),
             'content_block_store_href' => $adminRouteContext->contentBlockStoreHref(),
             'content_block_types' => $adminRouteContext->contentBlockTypes(),
             'content_block_default_region' => $adminRouteContext->defaultContentBlockRegion(),
-            'primary_content_block_id' => $primaryEditableBlock?->id,
-            'primary_content_block_update_href' => $primaryEditableBlock
-                ? $adminRouteContext->contentBlockUpdateHref($primaryEditableBlock)
-                : null,
             ...ContentBlockCapabilityPayload::build(
                 $contentBlocks,
                 $visibleSequence,
@@ -169,6 +188,23 @@ class ChapterController extends Controller
                             ? count($card['verses'])
                             : 0,
                     );
+                $adminRouteContext = new ChapterSectionAdminRouteContext(
+                    $book,
+                    $bookSection,
+                    $chapter,
+                    $chapterSection,
+                );
+                $contentBlocks = $chapterSection->relationLoaded('contentBlocks')
+                    ? collect($chapterSection->contentBlocks)
+                    : $chapterSection->contentBlocks()
+                        ->published()
+                        ->orderBy('sort_order')
+                        ->orderBy('id')
+                        ->get();
+                $primaryIntroBlock = PrimaryPublishedEditableContentBlock::resolve(
+                    $contentBlocks,
+                    fn (ContentBlock $block): bool => $adminRouteContext->isEditableIntroBlock($block),
+                );
 
                 return [
                     ...$publicScriptureData->chapterSection(
@@ -178,6 +214,9 @@ class ChapterController extends Controller
                         $chapterSection,
                         $versesCount,
                     ),
+                    'intro_block' => $primaryIntroBlock
+                        ? $publicScriptureData->contentBlock($primaryIntroBlock)
+                        : null,
                     'admin' => $isAdmin
                         ? $this->chapterSectionAdminPayload(
                             $book,
@@ -185,6 +224,8 @@ class ChapterController extends Controller
                             $chapter,
                             $chapterSection,
                             $publicScriptureData,
+                            $contentBlocks,
+                            $primaryIntroBlock,
                         )
                         : null,
                     'cards' => $cards,
@@ -203,23 +244,14 @@ class ChapterController extends Controller
         Chapter $chapter,
         ChapterSection $chapterSection,
         PublicScriptureData $publicScriptureData,
+        Collection $contentBlocks,
+        ?ContentBlock $primaryIntroBlock,
     ): array {
         $adminRouteContext = new ChapterSectionAdminRouteContext(
             $book,
             $bookSection,
             $chapter,
             $chapterSection,
-        );
-        $contentBlocks = $chapterSection->relationLoaded('contentBlocks')
-            ? collect($chapterSection->contentBlocks)
-            : $chapterSection->contentBlocks()
-                ->published()
-                ->orderBy('sort_order')
-                ->orderBy('id')
-                ->get();
-        $primaryIntroBlock = PrimaryPublishedEditableContentBlock::resolve(
-            $contentBlocks,
-            fn (ContentBlock $block): bool => $adminRouteContext->isEditableIntroBlock($block),
         );
 
         return [

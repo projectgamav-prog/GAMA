@@ -2,6 +2,7 @@ import { router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { defineAdminModule } from '@/admin/core/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/core/module-types';
+import { resolveBlockCreatePrompt } from '@/admin/core/semantic-action-labels';
 import { getBlockCreateMetadata } from '@/admin/surfaces/blocks/surface-types';
 import type { AdminSurfaceContract } from '@/admin/surfaces/core/surface-contracts';
 import { ScriptureImageContentBlockInlineEditor } from '@/components/scripture/scripture-image-content-block-inline-editor';
@@ -139,9 +140,7 @@ function BlockCreate({
                 <div className="space-y-1">
                     <h3 className="text-sm font-semibold">Choose block type</h3>
                     <p className="text-sm leading-6 text-muted-foreground">
-                        {metadata.placementLabel
-                            ? `Insert published content ${metadata.placementLabel.toLowerCase()} without leaving the current public surface.`
-                            : 'Insert published content without leaving the current public surface.'}
+                        {resolveBlockCreatePrompt(surface)}
                     </p>
                 </div>
 
@@ -191,7 +190,6 @@ export const blockCreateModule = defineAdminModule({
     actions: [
         {
             actionKey: 'create_block',
-            defaultLabel: 'Add Block',
             placement: 'inline',
             openMode: 'inline',
             priority: 10,

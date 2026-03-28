@@ -66,8 +66,8 @@ function VerseIdentityEditor({
     return (
         <div className="basis-full pt-2">
             <ScriptureInlineRegionEditor
-                title="Verse intro"
-                description="Update the canonical verse text, number, and slug for the verse intro context shown on the public verse page."
+                title="Verse identity"
+                description="Update the canonical verse text, number, and slug without leaving the public verse detail page."
                 fullEditHref={fullEditHref}
                 onCancel={() => {
                     form.reset();
@@ -136,8 +136,7 @@ export const verseIdentityEditorModule = defineAdminModule({
     requiredCapabilities: ['edit'],
     actions: [
         {
-            actionKey: 'edit_intro',
-            defaultLabel: 'Edit Intro',
+            actionKey: 'edit_identity',
             placement: 'inline',
             openMode: 'inline',
             priority: 10,
@@ -148,7 +147,7 @@ export const verseIdentityEditorModule = defineAdminModule({
     EditorComponent: VerseIdentityEditor,
     order: 10,
     description:
-        'Renders the canonical verse identity editor for the verse intro surface.',
+        'Renders the canonical verse identity editor for the semantic verse identity surface.',
 });
 
 

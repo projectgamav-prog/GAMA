@@ -558,7 +558,6 @@ export const mediaSlotsEditorModule = defineAdminModule({
     actions: [
         {
             actionKey: 'edit_media',
-            defaultLabel: 'Edit Media',
             placement: 'inline',
             openMode: 'inline',
             priority: 40,

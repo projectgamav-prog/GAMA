@@ -59,7 +59,6 @@ export const imageBlockEditorModule = defineAdminModule({
     actions: [
         {
             actionKey: 'edit_block',
-            defaultLabel: 'Edit',
             placement: 'inline',
             openMode: 'inline',
             priority: 22,

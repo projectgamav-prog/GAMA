@@ -81,8 +81,8 @@ export function RegisteredIntroBlockEditor({
             <Button
                 asChild
                 size="sm"
-                variant="outline"
-                className="h-8 rounded-full px-3"
+                variant="ghost"
+                className="h-7 rounded-md px-2.5 text-xs font-medium text-muted-foreground shadow-none hover:text-foreground"
             >
                 <Link href={fullEditHref}>Full Edit</Link>
             </Button>

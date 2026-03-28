@@ -16,8 +16,8 @@ use App\Support\Scripture\Admin\ContentBlockCapabilityPayload;
 use App\Support\Scripture\Admin\PrimaryPublishedEditableContentBlock;
 use App\Support\Scripture\Admin\VisibleContentBlockSequence;
 use App\Support\Scripture\PublicScriptureData;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -294,48 +294,67 @@ class BookController extends Controller
         bool $isAdmin,
     ): array {
         return $sections
-            ->map(fn (BookSection $section) => [
-                ...$publicScriptureData->bookSection($book, $section),
-                'admin' => $isAdmin
-                    ? $this->bookSectionAdminPayload(
-                        $book,
-                        $section,
-                        $publicScriptureData,
-                    )
-                    : null,
-                'chapters' => collect($section->chapters)
-                    ->map(fn (Chapter $chapter) => $publicScriptureData->chapter(
-                        $book,
-                        $section,
-                        $chapter,
-                    ))
-                    ->values()
-                    ->all(),
-            ])
+            ->map(function (BookSection $section) use (
+                $book,
+                $publicScriptureData,
+                $isAdmin,
+            ): array {
+                $adminRouteContext = new BookSectionAdminRouteContext(
+                    $book,
+                    $section,
+                );
+                $contentBlocks = $section->relationLoaded('contentBlocks')
+                    ? collect($section->contentBlocks)
+                    : $section->contentBlocks()
+                        ->published()
+                        ->orderBy('sort_order')
+                        ->orderBy('id')
+                        ->get();
+                $primaryIntroBlock = PrimaryPublishedEditableContentBlock::resolve(
+                    $contentBlocks,
+                    fn (ContentBlock $block): bool => $adminRouteContext->isEditableIntroBlock($block),
+                );
+
+                return [
+                    ...$publicScriptureData->bookSection($book, $section),
+                    'intro_block' => $primaryIntroBlock
+                        ? $publicScriptureData->contentBlock($primaryIntroBlock)
+                        : null,
+                    'admin' => $isAdmin
+                        ? $this->bookSectionAdminPayload(
+                            $book,
+                            $section,
+                            $publicScriptureData,
+                            $contentBlocks,
+                            $primaryIntroBlock,
+                        )
+                        : null,
+                    'chapters' => collect($section->chapters)
+                        ->map(fn (Chapter $chapter) => $publicScriptureData->chapter(
+                            $book,
+                            $section,
+                            $chapter,
+                        ))
+                        ->values()
+                        ->all(),
+                ];
+            })
             ->values()
             ->all();
     }
 
     /**
+     * @param  Collection<int, ContentBlock>  $contentBlocks
      * @return array<string, mixed>
      */
     private function bookSectionAdminPayload(
         Book $book,
         BookSection $bookSection,
         PublicScriptureData $publicScriptureData,
+        Collection $contentBlocks,
+        ?ContentBlock $primaryIntroBlock,
     ): array {
         $adminRouteContext = new BookSectionAdminRouteContext($book, $bookSection);
-        $contentBlocks = $bookSection->relationLoaded('contentBlocks')
-            ? collect($bookSection->contentBlocks)
-            : $bookSection->contentBlocks()
-                ->published()
-                ->orderBy('sort_order')
-                ->orderBy('id')
-                ->get();
-        $primaryIntroBlock = PrimaryPublishedEditableContentBlock::resolve(
-            $contentBlocks,
-            fn (ContentBlock $block): bool => $adminRouteContext->isEditableIntroBlock($block),
-        );
 
         return [
             'details_update_href' => route(

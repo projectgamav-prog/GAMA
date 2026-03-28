@@ -1,5 +1,6 @@
 import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import { resolveBookMediaSurface } from '@/admin/integrations/scripture/books';
+import { SCRIPTURE_INLINE_ADMIN_PANEL_CLASS_NAME } from '@/components/scripture/scripture-section-group-wrapper';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,8 +19,7 @@ type Props = {
     admin?: ScriptureBookAdmin | null;
 };
 
-const PANEL_CLASS_NAME =
-    'flex flex-wrap items-center gap-2 rounded-2xl border border-border/70 bg-muted/20 p-3';
+const PANEL_CLASS_NAME = SCRIPTURE_INLINE_ADMIN_PANEL_CLASS_NAME;
 
 function BookMediaSlotCard({ slot }: { slot: ScriptureBookMediaSlot }) {
     const mediaUrl = slot.media.url ?? slot.media.path;

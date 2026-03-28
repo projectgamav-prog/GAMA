@@ -1,8 +1,12 @@
 <?php
 
 use App\Models\Book;
+use App\Models\CommentarySource;
 use App\Models\ContentBlock;
+use App\Models\TranslationSource;
 use App\Models\User;
+use App\Models\VerseCommentary;
+use App\Models\VerseTranslation;
 use App\Support\AdminContext\AdminContext;
 use Database\Seeders\BhagavadGitaDevelopmentSeeder;
 use Database\Seeders\DevelopmentUserSeeder;
@@ -66,6 +70,14 @@ beforeEach(function () {
     );
     $this->contentBlockStoreRoute = route(
         'scripture.chapters.verses.admin.content-blocks.store',
+        $this->verseRouteParameters,
+    );
+    $this->translationStoreRoute = route(
+        'scripture.chapters.verses.admin.translations.store',
+        $this->verseRouteParameters,
+    );
+    $this->commentaryStoreRoute = route(
+        'scripture.chapters.verses.admin.commentaries.store',
         $this->verseRouteParameters,
     );
     $this->verseStoreRoute = route(
@@ -141,6 +153,21 @@ test('guests and non editors cannot access protected verse admin context', funct
 
 test('authorized editors can toggle protected admin visibility and receive verse admin props', function () {
     $editor = User::query()->where('email', 'editor1@example.com')->firstOrFail();
+    $translationSource = TranslationSource::query()->create([
+        'slug' => 'gita-press',
+        'name' => 'Gita Press',
+        'language_code' => 'en',
+        'sort_order' => 1,
+        'is_published' => true,
+    ]);
+    $commentarySource = CommentarySource::query()->create([
+        'slug' => 'sridhara',
+        'name' => 'Sridhara',
+        'author_name' => 'Sridhara Swami',
+        'language_code' => 'en',
+        'sort_order' => 1,
+        'is_published' => true,
+    ]);
 
     $this->firstVerse->verseMeta()->create([
         'summary_short' => 'Study notes visible in admin mode.',
@@ -158,6 +185,24 @@ test('authorized editors can toggle protected admin visibility and receive verse
         'data_json' => null,
         'sort_order' => 1,
         'status' => 'published',
+    ]);
+    $translation = $this->firstVerse->translations()->create([
+        'source_key' => 'gita-press',
+        'source_name' => 'Gita Press',
+        'translation_source_id' => $translationSource->id,
+        'language_code' => 'en',
+        'text' => 'Translation row shown through verse admin.',
+        'sort_order' => 1,
+    ]);
+    $commentary = $this->firstVerse->commentaries()->create([
+        'source_key' => 'sridhara',
+        'source_name' => 'Sridhara',
+        'commentary_source_id' => $commentarySource->id,
+        'author_name' => 'Sridhara Swami',
+        'language_code' => 'en',
+        'title' => 'Opening note',
+        'body' => 'Commentary row shown through verse admin.',
+        'sort_order' => 1,
     ]);
 
     $this->actingAs($editor)
@@ -194,6 +239,30 @@ test('authorized editors can toggle protected admin visibility and receive verse
             ->where('verse_meta.summary_short', 'Study notes visible in admin mode.')
             ->where('admin.meta_update_href', $this->metaUpdateRoute)
             ->where('admin.full_edit_href', $this->fullEditRoute)
+            ->where('admin.translations.store_href', $this->translationStoreRoute)
+            ->where('admin.translations.next_sort_order', 3)
+            ->where('admin.translations.rows', fn ($rows): bool => collect($rows)->contains(
+                fn (array $row): bool => $row['id'] === $translation->id
+                    && $row['translation_source_id'] === $translationSource->id
+                    && $row['update_href'] === route(
+                        'scripture.chapters.verses.admin.translations.update',
+                        [...$this->verseRouteParameters, 'translation' => $translation],
+                    ),
+            ))
+            ->where('admin.translations.sources.0.id', $translationSource->id)
+            ->where('admin.translations.sources.0.slug', 'gita-press')
+            ->where('admin.commentaries.store_href', $this->commentaryStoreRoute)
+            ->where('admin.commentaries.next_sort_order', 2)
+            ->where('admin.commentaries.rows', fn ($rows): bool => collect($rows)->contains(
+                fn (array $row): bool => $row['id'] === $commentary->id
+                    && $row['commentary_source_id'] === $commentarySource->id
+                    && $row['update_href'] === route(
+                        'scripture.chapters.verses.admin.commentaries.update',
+                        [...$this->verseRouteParameters, 'commentary' => $commentary],
+                    ),
+            ))
+            ->where('admin.commentaries.sources.0.id', $commentarySource->id)
+            ->where('admin.commentaries.sources.0.slug', 'sridhara')
             ->where('admin.content_block_store_href', $this->contentBlockStoreRoute)
             ->where('admin.content_block_types', ['text', 'quote', 'image'])
             ->where('admin.content_block_default_region', 'study')
@@ -215,6 +284,270 @@ test('authorized editors can toggle protected admin visibility and receive verse
     $hideResponse
         ->assertRedirect($this->verseShowRoute)
         ->assertCookieExpired(AdminContext::VISIBILITY_COOKIE);
+});
+
+test('authorized editors can manage verse translations through verse relation admin routes', function () {
+    $editor = User::query()->where('email', 'admin@example.com')->firstOrFail();
+    $translationSource = TranslationSource::query()->create([
+        'slug' => 'gambhirananda',
+        'name' => 'Swami Gambhirananda',
+        'author_name' => 'Swami Gambhirananda',
+        'language_code' => 'en',
+        'sort_order' => 1,
+        'is_published' => true,
+    ]);
+
+    $this->actingAs($editor)
+        ->from($this->fullEditRoute)
+        ->post($this->translationStoreRoute, [
+            'source_key' => 'gambhirananda',
+            'source_name' => 'Swami Gambhirananda',
+            'translation_source_id' => $translationSource->id,
+            'language_code' => 'en',
+            'text' => 'First admin-managed translation row.',
+            'sort_order' => 1,
+        ])
+        ->assertRedirect($this->fullEditRoute);
+
+    $translation = $this->firstVerse->fresh()
+        ->translations()
+        ->where('source_key', 'gambhirananda')
+        ->firstOrFail();
+
+    $this->actingAs($editor)
+        ->from($this->fullEditRoute)
+        ->patch(route('scripture.chapters.verses.admin.translations.update', [
+            ...$this->verseRouteParameters,
+            'translation' => $translation,
+        ]), [
+            'source_key' => 'gambhirananda',
+            'source_name' => 'Swami Gambhirananda',
+            'translation_source_id' => $translationSource->id,
+            'language_code' => 'en',
+            'text' => 'Updated admin-managed translation row.',
+            'sort_order' => 2,
+        ])
+        ->assertRedirect($this->fullEditRoute);
+
+    $this->actingAs($editor)
+        ->get($this->fullEditRoute)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('admin_translations.store_href', $this->translationStoreRoute)
+            ->where('admin_translations.next_sort_order', 3)
+            ->where('admin_translations.rows', fn ($rows): bool => collect($rows)->contains(
+                fn (array $row): bool => $row['id'] === $translation->id
+                    && $row['translation_source_id'] === $translationSource->id
+                    && $row['text'] === 'Updated admin-managed translation row.'
+                    && $row['sort_order'] === 2,
+            ))
+            ->where('admin_translations.sources.0.slug', 'gambhirananda')
+            ->where('admin_translations.fields.source_key.key', 'translation_source_key')
+            ->where('admin_translations.fields.source_name.key', 'translation_source_name')
+            ->where('admin_translations.fields.translation_source_id.key', 'translation_source_id')
+            ->where('admin_translations.fields.language_code.key', 'translation_language_code')
+            ->where('admin_translations.fields.text.key', 'translation_text')
+            ->where('admin_translations.fields.sort_order.key', 'translation_sort_order'),
+        );
+
+    $this->actingAs($editor)
+        ->from($this->fullEditRoute)
+        ->delete(route('scripture.chapters.verses.admin.translations.destroy', [
+            ...$this->verseRouteParameters,
+            'translation' => $translation,
+        ]))
+        ->assertRedirect($this->fullEditRoute);
+
+    expect(VerseTranslation::query()->find($translation->id))->toBeNull();
+});
+
+test('authorized editors can manage verse commentaries through verse relation admin routes', function () {
+    $editor = User::query()->where('email', 'admin@example.com')->firstOrFail();
+    $commentarySource = CommentarySource::query()->create([
+        'slug' => 'madhusudana',
+        'name' => 'Madhusudana Sarasvati',
+        'author_name' => 'Madhusudana Sarasvati',
+        'language_code' => 'en',
+        'sort_order' => 1,
+        'is_published' => true,
+    ]);
+
+    $this->actingAs($editor)
+        ->from($this->fullEditRoute)
+        ->post($this->commentaryStoreRoute, [
+            'source_key' => 'madhusudana',
+            'source_name' => 'Madhusudana Sarasvati',
+            'commentary_source_id' => $commentarySource->id,
+            'author_name' => 'Madhusudana Sarasvati',
+            'language_code' => 'en',
+            'title' => 'Context note',
+            'body' => 'First admin-managed commentary row.',
+            'sort_order' => 1,
+        ])
+        ->assertRedirect($this->fullEditRoute);
+
+    $commentary = $this->firstVerse->fresh()
+        ->commentaries()
+        ->where('source_key', 'madhusudana')
+        ->firstOrFail();
+
+    $this->actingAs($editor)
+        ->from($this->fullEditRoute)
+        ->patch(route('scripture.chapters.verses.admin.commentaries.update', [
+            ...$this->verseRouteParameters,
+            'commentary' => $commentary,
+        ]), [
+            'source_key' => 'madhusudana',
+            'source_name' => 'Madhusudana Sarasvati',
+            'commentary_source_id' => $commentarySource->id,
+            'author_name' => 'Updated commentator',
+            'language_code' => 'en',
+            'title' => 'Updated context note',
+            'body' => 'Updated admin-managed commentary row.',
+            'sort_order' => 2,
+        ])
+        ->assertRedirect($this->fullEditRoute);
+
+    $this->actingAs($editor)
+        ->get($this->fullEditRoute)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('admin_commentaries.store_href', $this->commentaryStoreRoute)
+            ->where('admin_commentaries.next_sort_order', 3)
+            ->where('admin_commentaries.rows', fn ($rows): bool => collect($rows)->contains(
+                fn (array $row): bool => $row['id'] === $commentary->id
+                    && $row['commentary_source_id'] === $commentarySource->id
+                    && $row['author_name'] === 'Updated commentator'
+                    && $row['title'] === 'Updated context note'
+                    && $row['body'] === 'Updated admin-managed commentary row.'
+                    && $row['sort_order'] === 2,
+            ))
+            ->where('admin_commentaries.sources.0.slug', 'madhusudana')
+            ->where('admin_commentaries.fields.source_key.key', 'commentary_source_key')
+            ->where('admin_commentaries.fields.source_name.key', 'commentary_source_name')
+            ->where('admin_commentaries.fields.commentary_source_id.key', 'commentary_source_id')
+            ->where('admin_commentaries.fields.author_name.key', 'commentary_author_name')
+            ->where('admin_commentaries.fields.language_code.key', 'commentary_language_code')
+            ->where('admin_commentaries.fields.title.key', 'commentary_title')
+            ->where('admin_commentaries.fields.body.key', 'commentary_body')
+            ->where('admin_commentaries.fields.sort_order.key', 'commentary_sort_order'),
+        );
+
+    $this->actingAs($editor)
+        ->from($this->fullEditRoute)
+        ->delete(route('scripture.chapters.verses.admin.commentaries.destroy', [
+            ...$this->verseRouteParameters,
+            'commentary' => $commentary,
+        ]))
+        ->assertRedirect($this->fullEditRoute);
+
+    expect(VerseCommentary::query()->find($commentary->id))->toBeNull();
+});
+
+test('translation and commentary updates hard fail when the rows are not owned by the current verse', function () {
+    $editor = User::query()->where('email', 'admin@example.com')->firstOrFail();
+
+    $foreignTranslation = $this->secondVerse->translations()->create([
+        'source_key' => 'foreign-translation',
+        'source_name' => 'Foreign Translation',
+        'language_code' => 'en',
+        'text' => 'Not owned by the current verse.',
+        'sort_order' => 1,
+    ]);
+    $foreignCommentary = $this->secondVerse->commentaries()->create([
+        'source_key' => 'foreign-commentary',
+        'source_name' => 'Foreign Commentary',
+        'author_name' => 'Other Author',
+        'language_code' => 'en',
+        'title' => 'Foreign note',
+        'body' => 'Not owned by the current verse.',
+        'sort_order' => 1,
+    ]);
+
+    $this->actingAs($editor)
+        ->patch(route('scripture.chapters.verses.admin.translations.update', [
+            ...$this->verseRouteParameters,
+            'translation' => $foreignTranslation,
+        ]), [
+            'source_key' => 'foreign-translation',
+            'source_name' => 'Foreign Translation',
+            'language_code' => 'en',
+            'text' => 'Should not update.',
+            'sort_order' => 1,
+        ])
+        ->assertNotFound();
+
+    $this->actingAs($editor)
+        ->patch(route('scripture.chapters.verses.admin.commentaries.update', [
+            ...$this->verseRouteParameters,
+            'commentary' => $foreignCommentary,
+        ]), [
+            'source_key' => 'foreign-commentary',
+            'source_name' => 'Foreign Commentary',
+            'author_name' => 'Other Author',
+            'language_code' => 'en',
+            'title' => 'Should stay protected',
+            'body' => 'Should not update.',
+            'sort_order' => 1,
+        ])
+        ->assertNotFound();
+
+    expect(VerseTranslation::query()->findOrFail($foreignTranslation->id)->text)
+        ->toBe('Not owned by the current verse.');
+    expect(VerseCommentary::query()->findOrFail($foreignCommentary->id)->title)
+        ->toBe('Foreign note');
+});
+
+test('authorized editors can manage verse intro blocks separately from verse identity and notes', function () {
+    $editor = User::query()->where('email', 'editor3@example.com')->firstOrFail();
+
+    $this->actingAs($editor)
+        ->from($this->verseShowRoute)
+        ->post($this->contentBlockStoreRoute, [
+            'block_type' => 'image',
+            'title' => 'Verse intro image',
+            'body' => 'Intro caption shown above the canonical verse text.',
+            'media_url' => 'https://example.test/verse-intro-image.jpg',
+            'alt_text' => 'Verse intro illustration',
+            'region' => 'overview',
+            'status' => 'published',
+            'insertion_mode' => 'start',
+        ])
+        ->assertRedirect($this->verseShowRoute);
+
+    $introBlock = $this->firstVerse->fresh()
+        ->contentBlocks()
+        ->where('title', 'Verse intro image')
+        ->firstOrFail();
+
+    $this->actingAs($editor)
+        ->withCookie(AdminContext::VISIBILITY_COOKIE, '1')
+        ->get($this->verseShowRoute)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('verse.intro_block.id', $introBlock->id)
+            ->where('verse.intro_block.block_type', 'image')
+            ->where(
+                'verse.intro_block.data_json.url',
+                'https://example.test/verse-intro-image.jpg',
+            )
+            ->where(
+                'verse.intro_block.data_json.alt',
+                'Verse intro illustration',
+            )
+            ->where('content_blocks', [])
+            ->where('admin.intro_store_href', $this->contentBlockStoreRoute)
+            ->where('admin.primary_intro_block.id', $introBlock->id)
+            ->where(
+                'admin.primary_intro_update_href',
+                route('scripture.chapters.verses.admin.content-blocks.update', [
+                    ...$this->verseRouteParameters,
+                    'contentBlock' => $introBlock,
+                ]),
+            )
+            ->where('admin.intro_block_types', ['text', 'quote', 'image'])
+            ->where('admin.intro_default_region', 'overview'),
+        );
 });
 
 test('authorized editors can create canonical verse rows from chapter section group surfaces', function () {
@@ -516,7 +849,7 @@ test('content block editing is limited to verse owned registered note blocks', f
             ->where('protected_content_blocks.0.title', 'Protected video block')
             ->where(
                 'protected_content_blocks.0.protection_reason',
-                'Only verse-owned registered note blocks (text, quote, and image) are editable in this phase.',
+                'Only verse-owned registered intro and note blocks (text, quote, and image) are editable in this phase.',
             ),
         );
 

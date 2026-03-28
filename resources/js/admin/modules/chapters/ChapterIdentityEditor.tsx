@@ -135,7 +135,6 @@ export const chapterIdentityEditorModule = defineAdminModule({
     actions: [
         {
             actionKey: 'edit_identity',
-            defaultLabel: 'Edit Chapter',
             placement: 'inline',
             openMode: 'inline',
             priority: 10,
@@ -146,7 +145,7 @@ export const chapterIdentityEditorModule = defineAdminModule({
     EditorComponent: ChapterIdentityEditor,
     order: 10,
     description:
-        'Renders the canonical chapter identity editor for the public chapter intro surface.',
+        'Renders the canonical chapter identity editor for the semantic chapter identity surface.',
 });
 
 

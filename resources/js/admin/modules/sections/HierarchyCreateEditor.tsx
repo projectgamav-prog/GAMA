@@ -135,14 +135,6 @@ export const hierarchyCreateEditorModule = defineAdminModule({
     actions: [
         {
             actionKey: 'create_row',
-            defaultLabel: 'Add Row',
-            dynamicLabel: (surface) => {
-                const metadata = getSectionCreateMetadata(surface);
-
-                return metadata
-                    ? `Add ${metadata.entityLabel}`
-                    : 'Add Row';
-            },
             placement: 'inline',
             openMode: 'inline',
             priority: 15,

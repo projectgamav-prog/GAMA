@@ -1,4 +1,4 @@
-import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
+import { AdminModuleHostGroup } from '@/admin/core/AdminModuleHostGroup';
 import {
     resolveBookHeaderSurfaces,
 } from '@/admin/integrations/scripture/books';
@@ -9,9 +9,6 @@ import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-in
 import { Badge } from '@/components/ui/badge';
 import ScriptureLayout from '@/layouts/scripture-layout';
 import type { BookShowProps, BreadcrumbItem } from '@/types';
-
-const PANEL_CLASS_NAME =
-    'flex flex-wrap items-center gap-2 rounded-2xl border border-border/70 bg-muted/20 p-3';
 
 export default function BookShow({
     book,
@@ -58,22 +55,9 @@ export default function BookShow({
                 description={book.description ?? undefined}
                 contentClassName="space-y-4"
             >
-                {(identitySurface || introSurface) && (
-                    <div className="space-y-3">
-                        {identitySurface && (
-                            <AdminModuleHost
-                                surface={identitySurface}
-                                className={PANEL_CLASS_NAME}
-                            />
-                        )}
-                        {introSurface && (
-                            <AdminModuleHost
-                                surface={introSurface}
-                                className={PANEL_CLASS_NAME}
-                            />
-                        )}
-                    </div>
-                )}
+                <AdminModuleHostGroup
+                    surfaces={[identitySurface, introSurface]}
+                />
             </ScripturePageIntroCard>
 
             <BookPublicMediaSection
@@ -94,7 +78,6 @@ export default function BookShow({
                 bookSections={book_sections}
                 showAdminControls={isAdmin}
                 admin={admin}
-                panelClassName={PANEL_CLASS_NAME}
             />
         </ScriptureLayout>
     );

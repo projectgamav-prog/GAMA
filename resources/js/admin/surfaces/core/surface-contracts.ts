@@ -26,6 +26,7 @@ export type AdminSurfaceContractKey =
     | 'identity'
     | 'intro'
     | 'structured_meta'
+    | 'relation_rows'
     | 'block_region'
     | 'registered_block'
     | 'block_actions'

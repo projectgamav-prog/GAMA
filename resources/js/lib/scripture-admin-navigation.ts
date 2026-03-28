@@ -5,6 +5,8 @@ const SCRIPTURE_ADMIN_SECTION_IDS = {
     identity: 'identity-editor',
     details: 'details-editor',
     meta: 'meta-editor',
+    translations: 'translations-editor',
+    commentaries: 'commentaries-editor',
     content_blocks: 'content-blocks',
     media_slots: 'media-slots',
     canonical_browse: 'canonical-browse',

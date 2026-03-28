@@ -680,7 +680,7 @@ class PublicScriptureData
     /**
      * @return array<string, mixed>
      */
-    private function contentBlock(ContentBlock $block): array
+    public function contentBlock(ContentBlock $block): array
     {
         return [
             'id' => $block->id,

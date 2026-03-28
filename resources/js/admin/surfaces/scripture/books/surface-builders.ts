@@ -1,5 +1,6 @@
 import {
     BOOK_CONTENT_BLOCKS_SURFACE_KEY,
+    BOOK_IDENTITY_SURFACE_KEY,
     BOOK_INTRO_SURFACE_KEY,
     BOOK_MEDIA_SLOTS_SURFACE_KEY,
 } from '@/admin/surfaces/core/surface-keys';
@@ -49,11 +50,11 @@ export function createBookIdentitySurface({
     fullEditHref,
 }: BookIdentitySurfaceArgs): AdminSurfaceContract<IdentityContractMetadata<ScriptureBook>> {
     return createInlineEditorSurface({
-        surfaceKey: BOOK_INTRO_SURFACE_KEY,
+        surfaceKey: BOOK_IDENTITY_SURFACE_KEY,
         contractKey: 'identity',
         entity: 'book',
         entityId: book.id,
-        regionKey: 'book_intro',
+        regionKey: 'book_identity',
         capabilities: ['edit', 'full_edit'],
         metadata: {
             entityRecord: book,

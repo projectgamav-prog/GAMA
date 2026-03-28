@@ -6,11 +6,14 @@ use App\Models\Book;
 use App\Models\BookSection;
 use App\Models\Chapter;
 use App\Models\ChapterSection;
+use App\Models\VerseCommentary;
+use App\Models\VerseTranslation;
 use App\Models\ContentBlock;
 use App\Models\Verse;
 
 class VerseAdminRouteContext
 {
+    private const DEFAULT_INTRO_BLOCK_REGION = 'overview';
     private const DEFAULT_CONTENT_BLOCK_REGION = 'study';
 
     public function __construct(
@@ -54,6 +57,44 @@ class VerseAdminRouteContext
     public function metaUpdateHref(): string
     {
         return route('scripture.chapters.verses.admin.meta.update', $this->routeParameters());
+    }
+
+    public function translationStoreHref(): string
+    {
+        return route('scripture.chapters.verses.admin.translations.store', $this->routeParameters());
+    }
+
+    public function translationUpdateHref(VerseTranslation $translation): string
+    {
+        return route('scripture.chapters.verses.admin.translations.update', $this->routeParameters([
+            'translation' => $translation,
+        ]));
+    }
+
+    public function translationDestroyHref(VerseTranslation $translation): string
+    {
+        return route('scripture.chapters.verses.admin.translations.destroy', $this->routeParameters([
+            'translation' => $translation,
+        ]));
+    }
+
+    public function commentaryStoreHref(): string
+    {
+        return route('scripture.chapters.verses.admin.commentaries.store', $this->routeParameters());
+    }
+
+    public function commentaryUpdateHref(VerseCommentary $commentary): string
+    {
+        return route('scripture.chapters.verses.admin.commentaries.update', $this->routeParameters([
+            'commentary' => $commentary,
+        ]));
+    }
+
+    public function commentaryDestroyHref(VerseCommentary $commentary): string
+    {
+        return route('scripture.chapters.verses.admin.commentaries.destroy', $this->routeParameters([
+            'commentary' => $commentary,
+        ]));
     }
 
     public function contentBlockStoreHref(): string
@@ -124,6 +165,11 @@ class VerseAdminRouteContext
         return self::DEFAULT_CONTENT_BLOCK_REGION;
     }
 
+    public function defaultIntroBlockRegion(): string
+    {
+        return self::DEFAULT_INTRO_BLOCK_REGION;
+    }
+
     public function ownsContentBlock(ContentBlock $contentBlock): bool
     {
         return RegisteredContentBlock::owns($this->verse, $contentBlock);
@@ -136,6 +182,16 @@ class VerseAdminRouteContext
             $contentBlock,
             $this->contentBlockTypes(),
         );
+    }
+
+    public function isEditableIntroBlock(ContentBlock $contentBlock): bool
+    {
+        return $contentBlock->region === $this->defaultIntroBlockRegion()
+            && RegisteredContentBlock::isEditableFor(
+                $this->verse,
+                $contentBlock,
+                $this->contentBlockTypes(),
+            );
     }
 
     public function isDuplicableNoteBlock(ContentBlock $contentBlock): bool
@@ -170,6 +226,11 @@ class VerseAdminRouteContext
         );
     }
 
+    public function abortUnlessEditableIntroBlock(ContentBlock $contentBlock): void
+    {
+        abort_unless($this->isEditableIntroBlock($contentBlock), 404);
+    }
+
     public function abortUnlessDuplicableNoteBlock(ContentBlock $contentBlock): void
     {
         abort_unless($this->isDuplicableNoteBlock($contentBlock), 404);
@@ -186,6 +247,6 @@ class VerseAdminRouteContext
 
     public function contentBlockProtectionReason(): string
     {
-        return 'Only verse-owned registered note blocks (text, quote, and image) are editable in this phase.';
+        return 'Only verse-owned registered intro and note blocks (text, quote, and image) are editable in this phase.';
     }
 }

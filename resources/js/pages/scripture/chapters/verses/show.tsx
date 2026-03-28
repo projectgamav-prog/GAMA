@@ -8,11 +8,14 @@ import {
     Users,
 } from 'lucide-react';
 import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
+import { AdminModuleHostGroup } from '@/admin/core/AdminModuleHostGroup';
 import {
     resolveVerseHeaderSurfaces,
+    resolveVerseRelationSurfaces,
 } from '@/admin/integrations/scripture/verses';
 import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
+import { ScriptureIntroBlock } from '@/components/scripture/scripture-intro-block';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { ScriptureReadingNavigationActions } from '@/components/scripture/scripture-reading-navigation-actions';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
@@ -62,11 +65,8 @@ export default function VerseShow({
     topics,
     characters,
     content_blocks,
-    isAdmin,
     admin,
 }: VerseShowProps) {
-    const adminPanelClassName =
-        'flex flex-wrap items-center gap-2 rounded-2xl border border-border/70 bg-muted/20 p-3';
     const showAdminControls = useVisibleAdminControls();
     const chapterTitle = chapterLabel(chapter.number, chapter.title);
     const bookSectionTitle = sectionLabel(
@@ -127,13 +127,26 @@ export default function VerseShow({
             keywords.length > 0 ||
             studyFlags.length > 0);
     const {
+        identitySurface: verseIdentitySurface,
         introSurface: verseIntroSurface,
-        metaSurface: verseNotesSurface,
+        metaSurface: verseMetaSurface,
     } = resolveVerseHeaderSurfaces({
         verse,
+        verseTitle,
         verseMeta: verse_meta,
         characters,
         admin,
+        enabled: showAdminControls,
+    });
+    const {
+        translationsSurface,
+        commentariesSurface,
+    } = resolveVerseRelationSurfaces({
+        verse,
+        verseTitle,
+        translationsAdmin: admin?.translations,
+        commentariesAdmin: admin?.commentaries,
+        fullEditHref: admin?.full_edit_href ?? null,
         enabled: showAdminControls,
     });
     const hasCompanionSections =
@@ -142,7 +155,7 @@ export default function VerseShow({
         recitations.length > 0 ||
         topics.length > 0 ||
         characters.length > 0 ||
-        verseNotesSurface !== null;
+        verseMetaSurface !== null;
     const formatDuration = (durationSeconds: number | null): string | null => {
         if (durationSeconds === null || durationSeconds < 0) {
             return null;
@@ -169,7 +182,7 @@ export default function VerseShow({
             <ScripturePageIntroCard
                 entityMeta={{
                     ...verseEntity,
-                    region: 'verse_intro',
+                    region: 'page_intro',
                     capabilityHint: 'intro',
                 }}
                 className="overflow-hidden"
@@ -187,12 +200,14 @@ export default function VerseShow({
                 description={`${chapterTitle}. Read the canonical verse first, then move through translations, commentary, and attached study references in a calmer reading flow.`}
                 contentClassName="space-y-6"
             >
-                {verseIntroSurface && (
-                    <AdminModuleHost
-                        surface={verseIntroSurface}
-                        className={adminPanelClassName}
-                    />
-                )}
+                <AdminModuleHostGroup
+                    surfaces={[verseIdentitySurface, verseIntroSurface]}
+                />
+
+                <ScriptureIntroBlock
+                    label="Verse Introduction"
+                    block={verse.intro_block}
+                />
 
                 <div className="rounded-2xl border border-border/70 bg-muted/20 px-5 py-5 sm:px-6 sm:py-6">
                     <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
@@ -210,7 +225,7 @@ export default function VerseShow({
                         ...(previous_verse
                             ? [
                                   {
-                                      kind: 'previous_verse' as const,
+                                      actionKey: 'go_to_previous_verse' as const,
                                       href: previous_verse.href,
                                   },
                               ]
@@ -218,17 +233,17 @@ export default function VerseShow({
                         ...(next_verse
                             ? [
                                   {
-                                      kind: 'next_verse' as const,
+                                      actionKey: 'go_to_next_verse' as const,
                                       href: next_verse.href,
                                   },
                               ]
                             : []),
                         {
-                            kind: 'back_to_verse_list' as const,
+                            actionKey: 'back_to_verse_list' as const,
                             href: chapter_section.href,
                         },
                         {
-                            kind: 'back_to_chapter_list' as const,
+                            actionKey: 'back_to_chapter_list' as const,
                             href: book_section.href,
                         },
                     ]}
@@ -246,7 +261,7 @@ export default function VerseShow({
                     description="Supporting metadata and reference material grouped separately from the main reading flow."
                 >
                     <div className="grid gap-4 xl:grid-cols-2">
-                        {(hasVerseMeta || verseNotesSurface) && (
+                        {(hasVerseMeta || verseMetaSurface) && (
                             <ScriptureEntityRegion
                                 meta={{
                                     ...verseEntity,
@@ -267,12 +282,10 @@ export default function VerseShow({
                                         </CardDescription>
                                     </CardHeader>
                                     <CardContent className="space-y-5">
-                                        {verseNotesSurface && (
+                                        {verseMetaSurface && (
                                             <AdminModuleHost
-                                                surface={verseNotesSurface}
-                                                className={
-                                                    adminPanelClassName
-                                                }
+                                                surface={verseMetaSurface}
+                                                className="flex flex-wrap items-center gap-1.5"
                                             />
                                         )}
 
@@ -782,7 +795,7 @@ export default function VerseShow({
                 </ScriptureSection>
             )}
 
-            {translations.length > 0 && (
+            {(translations.length > 0 || translationsSurface) && (
                 <ScriptureSection
                     entityMeta={{
                         ...verseEntity,
@@ -800,6 +813,21 @@ export default function VerseShow({
                     }
                 >
                     <div className="space-y-4">
+                        {translationsSurface && (
+                            <AdminModuleHost
+                                surface={translationsSurface}
+                                className="flex flex-wrap items-start gap-1.5"
+                            />
+                        )}
+
+                        {translations.length === 0 && translationsSurface && (
+                            <div className="rounded-2xl border border-dashed border-border/80 bg-muted/20 px-5 py-5 text-sm leading-6 text-muted-foreground sm:px-6 sm:py-6">
+                                No translation rows are attached to this verse
+                                yet. The semantic verse translation surface
+                                still stays available for admin modules.
+                            </div>
+                        )}
+
                         {translations.map((translation) => (
                             <ScriptureEntityRegion
                                 key={translation.id}
@@ -841,7 +869,7 @@ export default function VerseShow({
                 </ScriptureSection>
             )}
 
-            {commentaries.length > 0 && (
+            {(commentaries.length > 0 || commentariesSurface) && (
                 <ScriptureSection
                     entityMeta={{
                         ...verseEntity,
@@ -859,6 +887,21 @@ export default function VerseShow({
                     }
                 >
                     <div className="space-y-4">
+                        {commentariesSurface && (
+                            <AdminModuleHost
+                                surface={commentariesSurface}
+                                className="flex flex-wrap items-start gap-1.5"
+                            />
+                        )}
+
+                        {commentaries.length === 0 && commentariesSurface && (
+                            <div className="rounded-2xl border border-dashed border-border/80 bg-muted/20 px-5 py-5 text-sm leading-6 text-muted-foreground sm:px-6 sm:py-6">
+                                No commentary rows are attached to this verse
+                                yet. The semantic verse commentary surface
+                                still stays available for admin modules.
+                            </div>
+                        )}
+
                         {commentaries.map((commentary) => (
                             <ScriptureEntityRegion
                                 key={commentary.id}

@@ -240,14 +240,6 @@ export const verseMetaEditorModule = defineAdminModule({
     actions: [
         {
             actionKey: 'edit_meta',
-            defaultLabel: 'Edit Meta',
-            dynamicLabel: (surface) =>
-                getStructuredMetaContractMetadata<
-                    ScriptureVerseMeta,
-                    { characters: ScriptureVerseCharacterAssignment[] }
-                >(surface)?.value
-                    ? 'Edit Meta'
-                    : 'Add Meta',
             placement: 'inline',
             openMode: 'inline',
             priority: 20,

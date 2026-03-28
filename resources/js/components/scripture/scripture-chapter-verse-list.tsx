@@ -1,9 +1,5 @@
 import { Link } from '@inertiajs/react';
-import {
-    Languages,
-    MessageSquareQuote,
-    PlayCircle,
-} from 'lucide-react';
+import { Languages } from 'lucide-react';
 import { useState } from 'react';
 import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import {
@@ -11,6 +7,10 @@ import {
     resolveChapterVerseGroupsSurface,
 } from '@/admin/integrations/sections';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
+import {
+    SCRIPTURE_INLINE_ADMIN_PANEL_CLASS_NAME,
+    ScriptureSectionGroupWrapper,
+} from '@/components/scripture/scripture-section-group-wrapper';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -22,16 +22,20 @@ import {
     sectionLabel,
     verseLabel,
 } from '@/lib/scripture';
+import { resolveScriptureNavigationAction } from '@/lib/scripture-navigation-actions';
+import { cn } from '@/lib/utils';
 import type {
     ScriptureChapter,
     ScriptureChapterAdmin,
     ScriptureChapterSection,
     ScriptureReaderCard,
     ScriptureReaderLanguage,
+    ScriptureReaderVerse,
 } from '@/types';
 
-const DEFAULT_PANEL_CLASS_NAME =
-    'flex flex-wrap items-center gap-2 rounded-2xl border border-border/70 bg-muted/20 p-3';
+const DEFAULT_PANEL_CLASS_NAME = SCRIPTURE_INLINE_ADMIN_PANEL_CLASS_NAME;
+const LOCAL_ACTION_BUTTON_CLASS_NAME =
+    'h-7 rounded-md px-2.5 text-xs font-medium shadow-none';
 
 type Props = {
     chapter: ScriptureChapter;
@@ -46,6 +50,179 @@ type Props = {
     admin?: Pick<ScriptureChapterAdmin, 'chapter_section_store_href'> | null;
     panelClassName?: string;
 };
+
+type VerseReaderRowProps = {
+    verse: ScriptureReaderVerse;
+    index: number;
+    language: ScriptureReaderLanguage;
+    hasReaderLanguages: boolean;
+};
+
+type VerseReaderCardPanelProps = {
+    card: ScriptureReaderCard;
+    language: ScriptureReaderLanguage;
+    hasReaderLanguages: boolean;
+};
+
+function ScriptureVerseReaderRow({
+    verse,
+    index,
+    language,
+    hasReaderLanguages,
+}: VerseReaderRowProps) {
+    const verseDetailAction = resolveScriptureNavigationAction({
+        actionKey: 'open_verse_detail',
+        href: verse.explanation_href,
+    });
+    const verseMediaAction =
+        verse.video_href === null
+            ? null
+            : resolveScriptureNavigationAction({
+                  actionKey: 'open_verse_notes_video',
+                  href: verse.video_href,
+              });
+    const VerseDetailIcon = verseDetailAction?.icon;
+    const VerseMediaIcon = verseMediaAction?.icon;
+
+    return (
+        <ScriptureEntityRegion
+            meta={{
+                entityType: 'verse',
+                entityId: verse.id,
+                entityLabel: verseLabel(verse.number),
+                region: 'verse_list_verse',
+                capabilityHint: 'reader',
+            }}
+            asChild
+        >
+            <div
+                className={cn(
+                    'space-y-3',
+                    index > 0 && 'border-t border-border/60 pt-4',
+                )}
+            >
+                <div className="flex flex-col gap-2.5 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-sm font-semibold">
+                            {verseLabel(verse.number)}
+                        </p>
+                        <p className="text-[10px] tracking-[0.16em] text-muted-foreground uppercase">
+                            Sanskrit
+                        </p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1.5">
+                        {verseDetailAction && (
+                            <Button
+                                asChild
+                                size="sm"
+                                variant="ghost"
+                                className={cn(
+                                    LOCAL_ACTION_BUTTON_CLASS_NAME,
+                                    'text-muted-foreground hover:text-foreground',
+                                )}
+                            >
+                                <Link href={verseDetailAction.href}>
+                                    {VerseDetailIcon && (
+                                        <VerseDetailIcon className="size-4" />
+                                    )}
+                                    {verseDetailAction.label}
+                                </Link>
+                            </Button>
+                        )}
+
+                        {verseMediaAction && (
+                            <Button
+                                asChild
+                                size="sm"
+                                variant="ghost"
+                                className={cn(
+                                    LOCAL_ACTION_BUTTON_CLASS_NAME,
+                                    'text-muted-foreground hover:text-foreground',
+                                )}
+                            >
+                                <Link href={verseMediaAction.href}>
+                                    {VerseMediaIcon && (
+                                        <VerseMediaIcon className="size-4" />
+                                    )}
+                                    {verseMediaAction.label}
+                                </Link>
+                            </Button>
+                        )}
+                    </div>
+                </div>
+
+                <p className="text-[1.02rem] leading-8">{verse.text}</p>
+
+                <div className="rounded-lg bg-muted/35 px-3.5 py-3">
+                    <p className="mb-1.5 text-[10px] tracking-[0.16em] text-muted-foreground uppercase">
+                        {hasReaderLanguages
+                            ? `${languageLabel(language)} Translation`
+                            : 'Translation'}
+                    </p>
+                    {hasReaderLanguages && verse.translations[language] ? (
+                        <p className="leading-7 text-muted-foreground">
+                            {verse.translations[language]}
+                        </p>
+                    ) : !hasReaderLanguages ? (
+                        <p className="text-sm text-muted-foreground">
+                            No supporting translations are available for this
+                            chapter yet.
+                        </p>
+                    ) : (
+                        <p className="text-sm text-muted-foreground">
+                            No {languageLabel(language).toLowerCase()}{' '}
+                            translation is available for this verse yet.
+                        </p>
+                    )}
+                </div>
+            </div>
+        </ScriptureEntityRegion>
+    );
+}
+
+function ScriptureVerseReaderCardPanel({
+    card,
+    language,
+    hasReaderLanguages,
+}: VerseReaderCardPanelProps) {
+    const showsHeader = card.type === 'group' || card.verses.length > 1;
+
+    return (
+        <Card className="border-border/70">
+            {showsHeader && (
+                <CardHeader className="gap-2 px-5 py-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <Badge variant="outline">
+                            {card.type === 'group'
+                                ? 'Grouped Card'
+                                : 'Verse Card'}
+                        </Badge>
+                        <Badge variant="secondary">{card.label}</Badge>
+                    </div>
+                    <CardTitle className="text-lg">{card.label}</CardTitle>
+                </CardHeader>
+            )}
+
+            <CardContent
+                className={cn(
+                    'space-y-4 px-5',
+                    showsHeader ? 'pb-5 pt-0' : 'py-5',
+                )}
+            >
+                {card.verses.map((verse, index) => (
+                    <ScriptureVerseReaderRow
+                        key={verse.id}
+                        verse={verse}
+                        index={index}
+                        language={language}
+                        hasReaderLanguages={hasReaderLanguages}
+                    />
+                ))}
+            </CardContent>
+        </Card>
+    );
+}
 
 export function ScriptureChapterVerseList({
     chapter,
@@ -117,7 +294,7 @@ export function ScriptureChapterVerseList({
                 </div>
             }
         >
-            <div className="space-y-6">
+            <div className="space-y-5">
                 {chapterVerseGroupsSurface && (
                     <AdminModuleHost
                         surface={chapterVerseGroupsSurface}
@@ -196,7 +373,7 @@ export function ScriptureChapterVerseList({
                         });
 
                     return (
-                        <ScriptureSection
+                        <ScriptureSectionGroupWrapper
                             key={section.id}
                             id={section.slug}
                             entityMeta={{
@@ -209,172 +386,30 @@ export function ScriptureChapterVerseList({
                                 capabilityHint: 'reader',
                             }}
                             title={sectionTitle}
-                            description={
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <Badge variant="outline">
-                                        {section.cards.length} card
-                                        {section.cards.length === 1
-                                            ? ''
-                                            : 's'}
-                                    </Badge>
-                                    <Badge variant="secondary">
-                                        {verseCount} verse
-                                        {verseCount === 1 ? '' : 's'}
-                                    </Badge>
-                                </div>
+                            meta={
+                                <span>
+                                    {section.cards.length} card
+                                    {section.cards.length === 1 ? '' : 's'}
+                                    {' | '}
+                                    {verseCount} verse
+                                    {verseCount === 1 ? '' : 's'}
+                                </span>
                             }
+                            introBlock={section.intro_block}
+                            adminSurface={sectionGroupSurface}
+                            panelClassName={panelClassName}
                         >
-                            <div className="space-y-4">
-                                {sectionGroupSurface && (
-                                    <AdminModuleHost
-                                        surface={sectionGroupSurface}
-                                        className={panelClassName}
-                                    />
-                                )}
-
+                            <div className="space-y-3">
                                 {section.cards.map((card) => (
-                                    <Card key={card.id}>
-                                        <CardHeader className="gap-3">
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                <Badge variant="outline">
-                                                    {card.type === 'group'
-                                                        ? 'Grouped Card'
-                                                        : 'Single Verse'}
-                                                </Badge>
-                                                <Badge variant="secondary">
-                                                    {card.label}
-                                                </Badge>
-                                            </div>
-                                            <CardTitle className="text-xl">
-                                                {card.label}
-                                            </CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="space-y-6">
-                                            {card.verses.map((verse, index) => (
-                                                <ScriptureEntityRegion
-                                                    key={verse.id}
-                                                    meta={{
-                                                        entityType: 'verse',
-                                                        entityId: verse.id,
-                                                        entityLabel: verseLabel(
-                                                            verse.number,
-                                                        ),
-                                                        region: 'verse_list_verse',
-                                                        capabilityHint:
-                                                            'reader',
-                                                    }}
-                                                    asChild
-                                                >
-                                                    <div
-                                                        className={
-                                                            index === 0
-                                                                ? 'space-y-4'
-                                                                : 'space-y-4 border-t pt-6'
-                                                        }
-                                                    >
-                                                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                                                            <div className="space-y-1">
-                                                                <p className="text-sm font-medium text-muted-foreground">
-                                                                    {verseLabel(
-                                                                        verse.number,
-                                                                    )}
-                                                                </p>
-                                                                <p className="text-xs tracking-[0.18em] text-muted-foreground uppercase">
-                                                                    Sanskrit
-                                                                </p>
-                                                            </div>
-                                                            <div className="flex flex-wrap gap-2">
-                                                                <Button
-                                                                    asChild
-                                                                    size="sm"
-                                                                    variant="outline"
-                                                                >
-                                                                    <Link
-                                                                        href={
-                                                                            verse.explanation_href
-                                                                        }
-                                                                    >
-                                                                        <MessageSquareQuote className="size-4" />
-                                                                        Verse
-                                                                        Details
-                                                                    </Link>
-                                                                </Button>
-                                                                {verse.video_href && (
-                                                                    <Button
-                                                                        asChild
-                                                                        size="sm"
-                                                                        variant="outline"
-                                                                    >
-                                                                        <Link
-                                                                            href={
-                                                                                verse.video_href
-                                                                            }
-                                                                        >
-                                                                            <PlayCircle className="size-4" />
-                                                                            Notes
-                                                                            &
-                                                                            Video
-                                                                        </Link>
-                                                                    </Button>
-                                                                )}
-                                                            </div>
-                                                        </div>
-
-                                                        <p className="text-lg leading-9">
-                                                            {verse.text}
-                                                        </p>
-
-                                                        <div className="rounded-lg bg-muted/40 px-4 py-4">
-                                                            <p className="mb-2 text-xs tracking-[0.18em] text-muted-foreground uppercase">
-                                                                {hasReaderLanguages
-                                                                    ? `${languageLabel(language)} Translation`
-                                                                    : 'Translation'}
-                                                            </p>
-                                                            {hasReaderLanguages &&
-                                                            verse.translations[
-                                                                language
-                                                            ] ? (
-                                                                <p className="leading-8 text-muted-foreground">
-                                                                    {
-                                                                        verse
-                                                                            .translations[
-                                                                            language
-                                                                        ]
-                                                                    }
-                                                                </p>
-                                                            ) : !hasReaderLanguages ? (
-                                                                <p className="text-sm text-muted-foreground">
-                                                                    No
-                                                                    supporting
-                                                                    translations
-                                                                    are
-                                                                    available
-                                                                    for this
-                                                                    chapter
-                                                                    yet.
-                                                                </p>
-                                                            ) : (
-                                                                <p className="text-sm text-muted-foreground">
-                                                                    No{' '}
-                                                                    {languageLabel(
-                                                                        language,
-                                                                    ).toLowerCase()}{' '}
-                                                                    translation
-                                                                    is
-                                                                    available
-                                                                    for this
-                                                                    verse yet.
-                                                                </p>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </ScriptureEntityRegion>
-                                            ))}
-                                        </CardContent>
-                                    </Card>
+                                    <ScriptureVerseReaderCardPanel
+                                        key={card.id}
+                                        card={card}
+                                        language={language}
+                                        hasReaderLanguages={hasReaderLanguages}
+                                    />
                                 ))}
                             </div>
-                        </ScriptureSection>
+                        </ScriptureSectionGroupWrapper>
                     );
                 })}
             </div>

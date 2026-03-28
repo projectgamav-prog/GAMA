@@ -113,12 +113,6 @@ export const sectionRowDetailEditorModule = defineAdminModule({
     actions: [
         {
             actionKey: 'edit_details',
-            defaultLabel: 'Edit Details',
-            dynamicLabel: (surface) => {
-                const metadata = getSectionGroupMetadata(surface);
-
-                return metadata ? `Edit ${metadata.groupLabel}` : 'Edit Details';
-            },
             placement: 'inline',
             openMode: 'inline',
             priority: 20,

@@ -35,7 +35,6 @@ export const blockRegionFullEditModule = defineAdminModule({
     actions: [
         {
             actionKey: 'full_edit_region',
-            defaultLabel: 'Full Edit',
             placement: 'inline',
             openMode: 'inline',
             priority: 90,

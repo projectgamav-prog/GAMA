@@ -108,11 +108,6 @@ export const bookIntroEditorModule = defineAdminModule({
     actions: [
         {
             actionKey: 'edit_intro',
-            defaultLabel: 'Edit Intro',
-            dynamicLabel: (surface) =>
-                getIntroContractMetadata<ScriptureBook>(surface)?.textValue?.trim()
-                    ? 'Edit Intro'
-                    : 'Add Intro',
             placement: 'inline',
             openMode: 'inline',
             priority: 20,

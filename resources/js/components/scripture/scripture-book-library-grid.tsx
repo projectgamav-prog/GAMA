@@ -1,9 +1,10 @@
 import { Link } from '@inertiajs/react';
-import { ArrowRight, BookOpenText } from 'lucide-react';
+import { BookOpenText } from 'lucide-react';
 import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import { resolveBookCardIntroSurface } from '@/admin/integrations/scripture/books';
 import { BookOverviewVideoDisclosure } from '@/components/scripture/book-overview-video-disclosure';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
+import { SCRIPTURE_INLINE_ADMIN_PANEL_CLASS_NAME } from '@/components/scripture/scripture-section-group-wrapper';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -13,10 +14,12 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import {
+    resolveScriptureNavigationAction,
+} from '@/lib/scripture-navigation-actions';
 import type { ScriptureBook } from '@/types';
 
-const DEFAULT_PANEL_CLASS_NAME =
-    'flex flex-wrap items-center gap-2 rounded-2xl border border-border/70 bg-muted/20 p-3';
+const DEFAULT_PANEL_CLASS_NAME = SCRIPTURE_INLINE_ADMIN_PANEL_CLASS_NAME;
 
 type Props = {
     books: ScriptureBook[];
@@ -38,6 +41,16 @@ function ScriptureBookLibraryCard({
         book,
         enabled: showAdminControls,
     });
+    const overviewAction = resolveScriptureNavigationAction({
+        actionKey: 'open_book_overview',
+        href: book.overview_href,
+    });
+    const bookAction = resolveScriptureNavigationAction({
+        actionKey: 'open_book',
+        href: book.href,
+    });
+    const OverviewIcon = overviewAction?.icon;
+    const BookActionIcon = bookAction?.icon;
 
     return (
         <ScriptureEntityRegion
@@ -78,17 +91,34 @@ function ScriptureBookLibraryCard({
                 </CardContent>
 
                 <CardFooter className="flex flex-wrap items-center gap-3">
-                    <Button asChild variant="outline" size="sm">
-                        <Link href={book.overview_href}>Read Overview</Link>
-                    </Button>
+                    {overviewAction && (
+                        <Button asChild variant="outline" size="sm">
+                            <Link href={overviewAction.href}>
+                                {overviewAction.iconPosition === 'start' &&
+                                    OverviewIcon && (
+                                        <OverviewIcon className="size-4" />
+                                    )}
+                                {overviewAction.label}
+                                {overviewAction.iconPosition === 'end' &&
+                                    OverviewIcon && (
+                                        <OverviewIcon className="size-4" />
+                                    )}
+                            </Link>
+                        </Button>
+                    )}
 
-                    <Link
-                        href={book.href}
-                        className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
-                    >
-                        Open Book
-                        <ArrowRight className="size-4" />
-                    </Link>
+                    {bookAction && (
+                        <Link
+                            href={bookAction.href}
+                            className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+                        >
+                            {bookAction.label}
+                            {bookAction.iconPosition === 'end' &&
+                                BookActionIcon && (
+                                    <BookActionIcon className="size-4" />
+                                )}
+                        </Link>
+                    )}
                 </CardFooter>
             </Card>
         </ScriptureEntityRegion>

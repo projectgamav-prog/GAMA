@@ -32,9 +32,36 @@ export type AdminModuleActionVariant =
     | 'ghost'
     | 'destructive';
 
+export type AdminSemanticActionKey =
+    | 'edit_intro'
+    | 'edit_identity'
+    | 'edit_details'
+    | 'edit_meta'
+    | 'edit_translations'
+    | 'edit_commentaries'
+    | 'edit_media'
+    | 'create_row'
+    | 'create_block'
+    | 'manage_blocks'
+    | 'reorder_blocks'
+    | 'edit_block'
+    | 'duplicate_block'
+    | 'delete_block'
+    | 'full_edit_block'
+    | 'full_edit_region';
+
+export type AdminModuleActionFamily =
+    | 'edit'
+    | 'create'
+    | 'manage'
+    | 'full_edit'
+    | 'danger'
+    | 'utility';
+
 export type AdminModuleActionDefinition = {
-    actionKey: string;
-    defaultLabel: string;
+    actionKey: AdminSemanticActionKey | (string & {});
+    actionFamily?: AdminModuleActionFamily;
+    defaultLabel?: string;
     dynamicLabel?: (surface: AdminSurfaceContract) => string;
     priority?: number;
     placement?: AdminModuleActionPlacement;

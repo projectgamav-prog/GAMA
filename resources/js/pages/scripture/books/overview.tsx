@@ -84,7 +84,7 @@ export default function BookOverview({
                         className="shrink-0"
                         actions={[
                             {
-                                kind: 'continue_to_structure',
+                                actionKey: 'go_to_structure_overview',
                                 href: book.href,
                             },
                         ]}
@@ -114,7 +114,7 @@ export default function BookOverview({
                         <ScriptureReadingNavigationActions
                             actions={[
                                 {
-                                    kind: 'continue_to_structure',
+                                    actionKey: 'go_to_structure_overview',
                                     href: book.href,
                                 },
                             ]}

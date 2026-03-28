@@ -3,6 +3,7 @@ import type {
     AdminModuleDefinition,
     AdminResolvedModuleAction,
 } from './module-types';
+import { resolveAdminActionLabel } from './semantic-action-labels';
 
 function hasCapabilities(
     capabilities: readonly AdminSurfaceCapability[],
@@ -42,11 +43,11 @@ export function resolveAdminModuleActions(
                         key: `${module.key}:${action.actionKey}`,
                         module,
                         action,
-                        label: action.dynamicLabel?.(surface) ?? action.defaultLabel,
+                        label: resolveAdminActionLabel(surface, action),
                         priority: action.priority ?? module.order ?? 0,
                         placement: action.placement ?? 'inline',
                         openMode: action.openMode ?? 'inline',
-                        variant: action.variant ?? 'default',
+                        variant: action.variant ?? 'ghost',
                     } satisfies AdminResolvedModuleAction,
                 ];
             }),

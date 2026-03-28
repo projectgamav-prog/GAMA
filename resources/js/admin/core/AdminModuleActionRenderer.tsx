@@ -6,6 +6,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
 import type { AdminResolvedModuleAction } from './module-types';
 
 type Props = {
@@ -43,7 +44,14 @@ export function AdminModuleActionRenderer({
                             ? 'secondary'
                             : action.variant
                     }
-                    className="h-8 rounded-full px-3"
+                    className={cn(
+                        'h-7 rounded-md border border-border/80 bg-background px-2.5 text-xs font-medium text-foreground shadow-sm hover:bg-background',
+                        activeActionKey === action.key &&
+                            'border-border bg-foreground text-background hover:bg-foreground/90',
+                        activeActionKey !== action.key &&
+                            action.variant === 'ghost' &&
+                            'bg-background text-foreground hover:bg-muted',
+                    )}
                     aria-pressed={activeActionKey === action.key}
                     onClick={() => onAction(action)}
                 >
@@ -58,7 +66,7 @@ export function AdminModuleActionRenderer({
                             type="button"
                             size="sm"
                             variant="outline"
-                            className="h-8 rounded-full px-3"
+                            className="h-7 rounded-md border border-border/80 bg-background px-2.5 text-xs font-medium text-foreground shadow-sm hover:bg-muted"
                         >
                             <MoreHorizontal className="size-3.5" />
                             More

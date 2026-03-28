@@ -165,7 +165,7 @@ export default function ChapterFullEdit({
                     </>
                 }
                 title={`Full edit: ${chapterTitle}`}
-                description="Use this deeper editorial workspace to manage chapter-owned text, quote, and image note blocks without changing canonical chapter identity or navigation."
+                description="Use this deeper editorial workspace to manage chapter-owned intro and note blocks without changing canonical chapter identity or navigation."
                 headerAction={
                     <Button asChild variant="outline" size="sm">
                         <Link href={chapter.href}>
@@ -205,8 +205,8 @@ export default function ChapterFullEdit({
 
             <ScriptureSection
                 adminTargetSection="content_blocks"
-                title="Note Blocks"
-                description="Manage chapter-owned text, quote, and image note blocks, including drafts that stay hidden from the public chapter page."
+                title="Intro & Note Blocks"
+                description="Manage chapter-owned text, quote, and image intro or note blocks, including drafts that stay hidden from the public chapter page."
                 action={
                     <div className="flex flex-wrap gap-2">
                         <Badge variant="outline">

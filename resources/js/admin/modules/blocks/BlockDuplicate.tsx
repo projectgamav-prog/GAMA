@@ -2,7 +2,6 @@ import { router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { defineAdminModule } from '@/admin/core/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/core/module-types';
-import { scriptureAdminStartCase } from '@/lib/scripture-admin-field-display';
 import { getBlockActionMetadata } from '@/admin/surfaces/blocks/surface-types';
 
 function BlockDuplicate({
@@ -57,11 +56,6 @@ export const blockDuplicateModule = defineAdminModule({
     actions: [
         {
             actionKey: 'duplicate_block',
-            defaultLabel: 'Duplicate',
-            dynamicLabel: (surface) =>
-                surface.blockType
-                    ? `Duplicate ${scriptureAdminStartCase(surface.blockType)}`
-                    : 'Duplicate',
             placement: 'dropdown',
             openMode: 'inline',
             priority: 40,

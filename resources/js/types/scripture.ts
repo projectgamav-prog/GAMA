@@ -132,6 +132,13 @@ export type ScriptureVerseAdmin = {
     identity_update_href: string;
     meta_update_href: string;
     full_edit_href: string;
+    translations: ScriptureVerseTranslationsAdmin;
+    commentaries: ScriptureVerseCommentariesAdmin;
+    intro_store_href: string;
+    primary_intro_block: ScriptureContentBlock | null;
+    primary_intro_update_href: string | null;
+    intro_block_types: string[];
+    intro_default_region: string;
     content_block_store_href: string;
     content_block_types: string[];
     content_block_default_region: string;
@@ -169,11 +176,14 @@ export type ScriptureChapterAdmin = {
     full_edit_href: string;
     identity_update_href: string;
     chapter_section_store_href: string;
+    intro_store_href: string;
+    primary_intro_block: ScriptureContentBlock | null;
+    primary_intro_update_href: string | null;
+    intro_block_types: string[];
+    intro_default_region: string;
     content_block_store_href: string;
     content_block_types: string[];
     content_block_default_region: string;
-    primary_content_block_id: number | null;
-    primary_content_block_update_href: string | null;
     content_block_update_hrefs: Record<string, string>;
     content_block_move_up_hrefs: Record<string, string>;
     content_block_move_down_hrefs: Record<string, string>;
@@ -312,6 +322,7 @@ export type ScriptureBookSection = {
     number: string | null;
     title: string | null;
     href: string;
+    intro_block?: ScriptureContentBlock | null;
     admin?: ScriptureSectionRowAdmin | null;
 };
 
@@ -321,6 +332,7 @@ export type ScriptureChapter = {
     number: string | null;
     title: string | null;
     href: string;
+    intro_block?: ScriptureContentBlock | null;
 };
 
 export type ScriptureChapterSection = {
@@ -330,6 +342,7 @@ export type ScriptureChapterSection = {
     title: string | null;
     verses_count?: number;
     href?: string;
+    intro_block?: ScriptureContentBlock | null;
     admin?: ScriptureSectionRowAdmin | null;
 };
 
@@ -339,6 +352,7 @@ export type ScriptureVerse = {
     number: string | null;
     text: string;
     href?: string;
+    intro_block?: ScriptureContentBlock | null;
 };
 
 export type ScriptureReaderLanguage = 'en' | 'hi';
@@ -378,6 +392,96 @@ export type ScriptureVerseCommentary = {
     title: string | null;
     body: string;
     sort_order: number;
+};
+
+export type ScriptureTranslationSourceOption = {
+    id: number;
+    slug: string;
+    name: string;
+    short_name: string | null;
+    author_name: string | null;
+    language_code: string | null;
+    tradition: string | null;
+    description: string | null;
+    website_url: string | null;
+    sort_order: number;
+    is_published: boolean;
+};
+
+export type ScriptureCommentarySourceOption = {
+    id: number;
+    slug: string;
+    name: string;
+    short_name: string | null;
+    author_name: string | null;
+    language_code: string | null;
+    tradition: string | null;
+    description: string | null;
+    website_url: string | null;
+    sort_order: number;
+    is_published: boolean;
+};
+
+export type ScriptureAdminVerseTranslation = {
+    id: number;
+    source_key: string;
+    source_name: string;
+    translation_source_id: number | null;
+    language_code: string;
+    text: string;
+    sort_order: number;
+    update_href: string;
+    destroy_href: string;
+};
+
+export type ScriptureAdminVerseCommentary = {
+    id: number;
+    source_key: string;
+    source_name: string;
+    commentary_source_id: number | null;
+    author_name: string | null;
+    language_code: string;
+    title: string | null;
+    body: string;
+    sort_order: number;
+    update_href: string;
+    destroy_href: string;
+};
+
+export type ScriptureVerseTranslationsAdminFields = {
+    source_key: ScriptureRegisteredAdminField;
+    source_name: ScriptureRegisteredAdminField;
+    translation_source_id: ScriptureRegisteredAdminField;
+    language_code: ScriptureRegisteredAdminField;
+    text: ScriptureRegisteredAdminField;
+    sort_order: ScriptureRegisteredAdminField;
+};
+
+export type ScriptureVerseCommentariesAdminFields = {
+    source_key: ScriptureRegisteredAdminField;
+    source_name: ScriptureRegisteredAdminField;
+    commentary_source_id: ScriptureRegisteredAdminField;
+    author_name: ScriptureRegisteredAdminField;
+    language_code: ScriptureRegisteredAdminField;
+    title: ScriptureRegisteredAdminField;
+    body: ScriptureRegisteredAdminField;
+    sort_order: ScriptureRegisteredAdminField;
+};
+
+export type ScriptureVerseTranslationsAdmin = {
+    store_href: string;
+    next_sort_order: number;
+    rows: ScriptureAdminVerseTranslation[];
+    sources: ScriptureTranslationSourceOption[];
+    fields: ScriptureVerseTranslationsAdminFields;
+};
+
+export type ScriptureVerseCommentariesAdmin = {
+    store_href: string;
+    next_sort_order: number;
+    rows: ScriptureAdminVerseCommentary[];
+    sources: ScriptureCommentarySourceOption[];
+    fields: ScriptureVerseCommentariesAdminFields;
 };
 
 export type ScriptureVerseMeta = {
@@ -634,6 +738,8 @@ export type VerseFullEditProps = {
     admin_identity_update_href: string;
     verse_meta: ScriptureVerseMeta | null;
     admin_meta_update_href: string;
+    admin_translations: ScriptureVerseTranslationsAdmin;
+    admin_commentaries: ScriptureVerseCommentariesAdmin;
     admin_content_block_store_href: string;
     next_content_block_sort_order: number;
     admin_content_blocks: ScriptureAdminContentBlock[];

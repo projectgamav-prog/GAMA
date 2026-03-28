@@ -7,10 +7,15 @@ use App\Models\Book;
 use App\Models\BookSection;
 use App\Models\Chapter;
 use App\Models\ChapterSection;
+use App\Models\CommentarySource;
 use App\Models\ContentBlock;
+use App\Models\TranslationSource;
 use App\Models\Verse;
 use App\Support\AdminContext\AdminContext;
 use App\Support\Scripture\Admin\ContentBlockCapabilityPayload;
+use App\Support\Scripture\Admin\PrimaryPublishedEditableContentBlock;
+use App\Support\Scripture\Admin\Registry\AdminEntityRegistry;
+use App\Support\Scripture\Admin\VerseRelationAdminData;
 use App\Support\Scripture\Admin\VisibleContentBlockSequence;
 use App\Support\Scripture\Admin\VerseAdminRouteContext;
 use App\Support\Scripture\PublicScriptureData;
@@ -32,6 +37,7 @@ class VerseController extends Controller
         ChapterSection $chapterSection,
         Verse $verse,
         PublicScriptureData $publicScriptureData,
+        AdminEntityRegistry $adminEntityRegistry,
     ): Response {
         $verse->load([
             'translations',
@@ -65,6 +71,18 @@ class VerseController extends Controller
             $chapterSection,
             $verse,
         );
+        $adminEntityDefinition = $adminEntityRegistry->definition('verse');
+        $primaryIntroBlock = PrimaryPublishedEditableContentBlock::resolve(
+            $contentBlocks,
+            fn (ContentBlock $block): bool => $adminRouteContext->isEditableIntroBlock($block),
+        );
+        $noteBlocks = $primaryIntroBlock instanceof ContentBlock
+            ? $contentBlocks
+                ->reject(
+                    fn (ContentBlock $block): bool => (int) $block->getKey() === (int) $primaryIntroBlock->getKey(),
+                )
+                ->values()
+            : $contentBlocks;
 
         return Inertia::render('scripture/chapters/verses/show', [
             'book' => $publicScriptureData->book($book),
@@ -76,7 +94,12 @@ class VerseController extends Controller
                 $chapter,
                 $chapterSection,
             ),
-            'verse' => $publicScriptureData->verse($verse),
+            'verse' => [
+                ...$publicScriptureData->verse($verse),
+                'intro_block' => $primaryIntroBlock
+                    ? $publicScriptureData->contentBlock($primaryIntroBlock)
+                    : null,
+            ],
             'previous_verse' => $currentVerseIndex === false
                 ? null
                 : $publicScriptureData->adjacentVerse(
@@ -102,10 +125,17 @@ class VerseController extends Controller
             'recitations' => $publicScriptureData->recitations($verse->recitations),
             'topics' => $publicScriptureData->topics($verse->topicAssignments),
             'characters' => $publicScriptureData->characters($verse->characterAssignments),
-            'content_blocks' => $publicScriptureData->contentBlocks($contentBlocks),
+            'content_blocks' => $publicScriptureData->contentBlocks($noteBlocks),
             'isAdmin' => $isAdmin,
             'admin' => $isAdmin
-                ? $this->verseAdminPayload($adminRouteContext, $contentBlocks)
+                ? $this->verseAdminPayload(
+                    $verse,
+                    $adminRouteContext,
+                    $noteBlocks,
+                    $primaryIntroBlock,
+                    $publicScriptureData,
+                    $adminEntityDefinition,
+                )
                 : null,
         ]);
     }
@@ -115,15 +145,72 @@ class VerseController extends Controller
      * @return array<string, mixed>
      */
     private function verseAdminPayload(
+        Verse $verse,
         VerseAdminRouteContext $adminRouteContext,
         Collection $contentBlocks,
+        ?ContentBlock $primaryIntroBlock,
+        PublicScriptureData $publicScriptureData,
+        \App\Support\Scripture\Admin\Registry\AdminEntityDefinition $adminEntityDefinition,
     ): array {
         $visibleSequence = new VisibleContentBlockSequence($contentBlocks);
+        $translationSources = TranslationSource::query()
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+        $commentarySources = CommentarySource::query()
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
 
         return [
             'identity_update_href' => $adminRouteContext->identityUpdateHref(),
             'meta_update_href' => $adminRouteContext->metaUpdateHref(),
             'full_edit_href' => $adminRouteContext->fullEditHref(),
+            'translations' => [
+                'store_href' => $adminRouteContext->translationStoreHref(),
+                'next_sort_order' => VerseRelationAdminData::nextTranslationSortOrder(
+                    $verse->translations,
+                ),
+                'rows' => collect($verse->translations)
+                    ->map(
+                        fn (\App\Models\VerseTranslation $translation) => VerseRelationAdminData::translation(
+                            $translation,
+                            $adminRouteContext->translationUpdateHref($translation),
+                            $adminRouteContext->translationDestroyHref($translation),
+                        ),
+                    )
+                    ->values()
+                    ->all(),
+                'sources' => VerseRelationAdminData::translationSources($translationSources),
+                'fields' => VerseRelationAdminData::translationFields($adminEntityDefinition),
+            ],
+            'commentaries' => [
+                'store_href' => $adminRouteContext->commentaryStoreHref(),
+                'next_sort_order' => VerseRelationAdminData::nextCommentarySortOrder(
+                    $verse->commentaries,
+                ),
+                'rows' => collect($verse->commentaries)
+                    ->map(
+                        fn (\App\Models\VerseCommentary $commentary) => VerseRelationAdminData::commentary(
+                            $commentary,
+                            $adminRouteContext->commentaryUpdateHref($commentary),
+                            $adminRouteContext->commentaryDestroyHref($commentary),
+                        ),
+                    )
+                    ->values()
+                    ->all(),
+                'sources' => VerseRelationAdminData::commentarySources($commentarySources),
+                'fields' => VerseRelationAdminData::commentaryFields($adminEntityDefinition),
+            ],
+            'intro_store_href' => $adminRouteContext->contentBlockStoreHref(),
+            'primary_intro_block' => $primaryIntroBlock
+                ? $publicScriptureData->contentBlock($primaryIntroBlock)
+                : null,
+            'primary_intro_update_href' => $primaryIntroBlock
+                ? $adminRouteContext->contentBlockUpdateHref($primaryIntroBlock)
+                : null,
+            'intro_block_types' => $adminRouteContext->contentBlockTypes(),
+            'intro_default_region' => $adminRouteContext->defaultIntroBlockRegion(),
             'content_block_store_href' => $adminRouteContext->contentBlockStoreHref(),
             'content_block_types' => $adminRouteContext->contentBlockTypes(),
             'content_block_default_region' => $adminRouteContext->defaultContentBlockRegion(),

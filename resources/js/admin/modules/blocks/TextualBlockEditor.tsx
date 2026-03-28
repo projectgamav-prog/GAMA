@@ -54,7 +54,6 @@ export const textualBlockEditorModule = defineAdminModule({
     actions: [
         {
             actionKey: 'edit_block',
-            defaultLabel: 'Edit',
             placement: 'inline',
             openMode: 'inline',
             priority: 30,
