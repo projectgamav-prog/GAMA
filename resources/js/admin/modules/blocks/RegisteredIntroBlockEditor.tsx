@@ -1,8 +1,7 @@
 import { Link, useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import InputError from '@/components/input-error';
 import { ScriptureInlineRegionEditor } from '@/components/scripture/scripture-inline-region-editor';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -36,6 +35,8 @@ type Props = {
     storeHref: string | null;
     fullEditHref?: string | null;
     defaultRegion?: string | null;
+    onCancel?: () => void;
+    onSaveSuccess?: () => void;
 };
 
 export function RegisteredIntroBlockEditor({
@@ -47,8 +48,9 @@ export function RegisteredIntroBlockEditor({
     storeHref,
     fullEditHref = null,
     defaultRegion = 'overview',
+    onCancel,
+    onSaveSuccess,
 }: Props) {
-    const [isOpen, setIsOpen] = useState(false);
     const isCreateMode = block === null && storeHref !== null;
     const resolvedDefaultRegion = defaultRegion ?? 'overview';
     const mediaUrl =
@@ -98,50 +100,6 @@ export function RegisteredIntroBlockEditor({
         .replace(/[^a-z0-9]+/g, '_')
         .replace(/^_+|_+$/g, '');
 
-    if (!isOpen) {
-        return (
-            <>
-                <Button
-                    type="button"
-                    size="sm"
-                    className="h-8 rounded-full px-3"
-                    onClick={() => {
-                        form.setData({
-                            block_type: block?.block_type ?? blockTypes[0] ?? 'text',
-                            title: block?.title ?? '',
-                            body: block?.body ?? '',
-                            media_url:
-                                typeof block?.data_json?.['url'] === 'string'
-                                    ? block.data_json['url']
-                                    : '',
-                            alt_text:
-                                typeof block?.data_json?.['alt'] === 'string'
-                                    ? block.data_json['alt']
-                                    : '',
-                            region: block?.region ?? resolvedDefaultRegion,
-                            sort_order: block?.sort_order ?? 0,
-                            status: 'published',
-                        });
-                        form.clearErrors();
-                        setIsOpen(true);
-                    }}
-                >
-                    {isCreateMode ? 'Add Intro' : 'Edit Intro'}
-                </Button>
-                {fullEditHref && (
-                    <Button
-                        asChild
-                        size="sm"
-                        variant="outline"
-                        className="h-8 rounded-full px-3"
-                    >
-                        <Link href={fullEditHref}>Full Edit</Link>
-                    </Button>
-                )}
-            </>
-        );
-    }
-
     return (
         <div className="basis-full pt-2">
             <ScriptureInlineRegionEditor
@@ -156,7 +114,7 @@ export function RegisteredIntroBlockEditor({
                 onCancel={() => {
                     form.reset();
                     form.clearErrors();
-                    setIsOpen(false);
+                    onCancel?.();
                 }}
                 onSave={() => {
                     const payload = {
@@ -183,7 +141,7 @@ export function RegisteredIntroBlockEditor({
 
                         form.post(storeHref!, {
                             preserveScroll: true,
-                            onSuccess: () => setIsOpen(false),
+                            onSuccess: () => onSaveSuccess?.(),
                         });
 
                         return;
@@ -196,7 +154,7 @@ export function RegisteredIntroBlockEditor({
 
                     form.patch(updateHref!, {
                         preserveScroll: true,
-                        onSuccess: () => setIsOpen(false),
+                        onSuccess: () => onSaveSuccess?.(),
                     });
                 }}
                 isDirty={form.isDirty}

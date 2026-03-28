@@ -1,60 +1,56 @@
-import { Link, useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import { useForm } from '@inertiajs/react';
+import { useEffect } from 'react';
 import InputError from '@/components/input-error';
 import { ScriptureInlineRegionEditor } from '@/components/scripture/scripture-inline-region-editor';
-import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { defineAdminModule } from '@/admin/core/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/core/module-types';
+import { getIntroContractMetadata } from '@/admin/surfaces/core/contract-readers';
 import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
-import { getBookIntroMetadata } from '@/admin/surfaces/scripture/books/surface-types';
+import type { ScriptureBook } from '@/types';
 
-function BookIntroEditor({ surface }: AdminModuleComponentProps) {
-    const metadata = getBookIntroMetadata(surface);
-    const [isOpen, setIsOpen] = useState(false);
+function BookIntroEditor({
+    surface,
+    activation,
+}: AdminModuleComponentProps) {
+    const metadata = getIntroContractMetadata<ScriptureBook>(surface);
     const isCompact = surface.presentation?.variant === 'compact';
-    const hasIntro = Boolean(metadata?.book.description?.trim());
+    const hasIntro = Boolean(metadata?.textValue?.trim());
     const form = useForm<{ description: string }>({
-        description: metadata?.book.description ?? '',
+        description: '',
     });
 
     if (metadata === null) {
         return null;
     }
 
+    useEffect(() => {
+        if (!activation.isActive) {
+            form.clearErrors();
+            form.reset();
+
+            return;
+        }
+
+        form.setData({
+            description: metadata.textValue ?? '',
+        });
+        form.clearErrors();
+    }, [activation.isActive, form, metadata.textValue]);
+
     const fullEditHref = buildScriptureAdminSectionHref(
         metadata.fullEditHref,
         'details',
     );
+    const updateHref = metadata.updateHref;
 
-    if (!isOpen) {
-        return (
-            <>
-                <Button
-                    type="button"
-                    size="sm"
-                    className="h-8 rounded-full px-3"
-                    onClick={() => {
-                        form.setData({
-                            description: metadata.book.description ?? '',
-                        });
-                        form.clearErrors();
-                        setIsOpen(true);
-                    }}
-                >
-                    {hasIntro ? 'Edit Intro' : 'Add Intro'}
-                </Button>
-                <Button
-                    asChild
-                    size="sm"
-                    variant="outline"
-                    className="h-8 rounded-full px-3"
-                >
-                    <Link href={fullEditHref}>Full Edit</Link>
-                </Button>
-            </>
-        );
+    if (updateHref === null) {
+        return null;
+    }
+
+    if (!activation.isActive) {
+        return null;
     }
 
     return (
@@ -71,12 +67,12 @@ function BookIntroEditor({ surface }: AdminModuleComponentProps) {
                 onCancel={() => {
                     form.reset();
                     form.clearErrors();
-                    setIsOpen(false);
+                    activation.deactivate();
                 }}
                 onSave={() => {
-                    form.patch(metadata.updateHref, {
+                    form.patch(updateHref, {
                         preserveScroll: true,
-                        onSuccess: () => setIsOpen(false),
+                        onSuccess: () => activation.deactivate(),
                     });
                 }}
                 isDirty={form.isDirty}
@@ -109,7 +105,22 @@ export const bookIntroEditorModule = defineAdminModule({
     entityScope: 'book',
     surfaceSlots: 'inline_editor',
     requiredCapabilities: ['edit'],
-    qualifies: (surface) => getBookIntroMetadata(surface) !== null,
+    actions: [
+        {
+            actionKey: 'edit_intro',
+            defaultLabel: 'Edit Intro',
+            dynamicLabel: (surface) =>
+                getIntroContractMetadata<ScriptureBook>(surface)?.textValue?.trim()
+                    ? 'Edit Intro'
+                    : 'Add Intro',
+            placement: 'inline',
+            openMode: 'inline',
+            priority: 20,
+        },
+    ],
+    qualifies: (surface) =>
+        getIntroContractMetadata<ScriptureBook>(surface)?.introKind ===
+        'field',
     EditorComponent: BookIntroEditor,
     order: 20,
     description:

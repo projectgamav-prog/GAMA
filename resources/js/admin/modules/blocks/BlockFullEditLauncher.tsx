@@ -1,36 +1,37 @@
-import { Link } from '@inertiajs/react';
-import { SquareArrowOutUpRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { router } from '@inertiajs/react';
+import { useEffect } from 'react';
 import { defineAdminModule } from '@/admin/core/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/core/module-types';
-import { buildScriptureAdminBlockHref } from '@/lib/scripture-admin-navigation';
 import { getBlockActionMetadata } from '@/admin/surfaces/blocks/surface-types';
+import { buildScriptureAdminBlockHref } from '@/lib/scripture-admin-navigation';
 
-function BlockFullEditLauncher({ surface }: AdminModuleComponentProps) {
+function BlockFullEditLauncher({
+    surface,
+    activation,
+}: AdminModuleComponentProps) {
     const metadata = getBlockActionMetadata(surface);
 
-    if (metadata === null || !metadata.fullEditHref) {
-        return null;
-    }
+    useEffect(() => {
+        if (
+            metadata === null ||
+            !metadata.fullEditHref ||
+            !activation.isActive
+        ) {
+            return;
+        }
 
-    const fullEditHref = buildScriptureAdminBlockHref(
-        metadata.fullEditHref,
+        activation.deactivate();
+        router.visit(
+            buildScriptureAdminBlockHref(metadata.fullEditHref, surface.entityId),
+        );
+    }, [
+        activation.deactivate,
+        activation.isActive,
+        metadata,
         surface.entityId,
-    );
+    ]);
 
-    return (
-        <Button
-            asChild
-            size="sm"
-            variant="outline"
-            className="h-8 rounded-full px-3"
-        >
-            <Link href={fullEditHref}>
-                <SquareArrowOutUpRight className="size-3.5" />
-                Full edit
-            </Link>
-        </Button>
-    );
+    return null;
 }
 
 export const blockFullEditLauncherModule = defineAdminModule({
@@ -40,10 +41,20 @@ export const blockFullEditLauncherModule = defineAdminModule({
     surfaceSlots: 'block_actions',
     regionScope: '*',
     requiredCapabilities: ['full_edit'],
+    actions: [
+        {
+            actionKey: 'full_edit_block',
+            defaultLabel: 'Full Edit',
+            placement: 'inline',
+            openMode: 'inline',
+            priority: 80,
+            variant: 'outline',
+        },
+    ],
+    qualifies: (surface) =>
+        Boolean(getBlockActionMetadata(surface)?.fullEditHref),
     EditorComponent: BlockFullEditLauncher,
-    order: 50,
+    order: 80,
     description:
-        'Renders the shared full-edit fallback entry in the block action cluster.',
+        'Provides the block-level full-edit fallback as a module-defined action on semantic block-action surfaces.',
 });
-
-

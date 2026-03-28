@@ -1,10 +1,9 @@
 import { useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { defineAdminModule } from '@/admin/core/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/core/module-types';
 import InputError from '@/components/input-error';
 import { ScriptureInlineRegionEditor } from '@/components/scripture/scripture-inline-region-editor';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -27,14 +26,23 @@ const EMPTY_CREATE_FORM: HierarchyCreateFormData = {
     text: '',
 };
 
-function HierarchyCreateEditor({ surface }: AdminModuleComponentProps) {
+function HierarchyCreateEditor({
+    surface,
+    activation,
+}: AdminModuleComponentProps) {
     const metadata = getSectionCreateMetadata(surface);
-    const [isOpen, setIsOpen] = useState(false);
     const form = useForm<HierarchyCreateFormData>(EMPTY_CREATE_FORM);
 
     if (metadata === null) {
         return null;
     }
+
+    useEffect(() => {
+        if (!activation.isActive) {
+            form.clearErrors();
+            form.reset();
+        }
+    }, [activation.isActive, form]);
 
     const editorTitle = `Create ${metadata.entityLabel}`;
     const description = metadata.parentLabel
@@ -44,28 +52,15 @@ function HierarchyCreateEditor({ surface }: AdminModuleComponentProps) {
     function resetAndClose(): void {
         form.reset();
         form.clearErrors();
-        setIsOpen(false);
+        activation.deactivate();
     }
 
     function setFieldValue(key: SectionCreateFieldKey, value: string): void {
         form.setData(key, value);
     }
 
-    if (!isOpen) {
-        return (
-            <Button
-                type="button"
-                size="sm"
-                className="h-8 rounded-full px-3"
-                onClick={() => {
-                    form.reset();
-                    form.clearErrors();
-                    setIsOpen(true);
-                }}
-            >
-                Add {metadata.entityLabel}
-            </Button>
-        );
+    if (!activation.isActive) {
+        return null;
     }
 
     return (
@@ -79,7 +74,7 @@ function HierarchyCreateEditor({ surface }: AdminModuleComponentProps) {
                         preserveScroll: true,
                         onSuccess: () => {
                             form.reset();
-                            setIsOpen(false);
+                            activation.deactivate();
                         },
                     });
                 }}
@@ -137,6 +132,22 @@ export const hierarchyCreateEditorModule = defineAdminModule({
     surfaceSlots: 'inline_editor',
     presentationVariants: 'compact',
     requiredCapabilities: ['create_row'],
+    actions: [
+        {
+            actionKey: 'create_row',
+            defaultLabel: 'Add Row',
+            dynamicLabel: (surface) => {
+                const metadata = getSectionCreateMetadata(surface);
+
+                return metadata
+                    ? `Add ${metadata.entityLabel}`
+                    : 'Add Row';
+            },
+            placement: 'inline',
+            openMode: 'inline',
+            priority: 15,
+        },
+    ],
     qualifies: (surface) => getSectionCreateMetadata(surface) !== null,
     EditorComponent: HierarchyCreateEditor,
     order: 15,

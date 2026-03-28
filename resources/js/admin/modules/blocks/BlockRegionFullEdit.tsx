@@ -1,32 +1,28 @@
-import { Link } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
+import { router } from '@inertiajs/react';
+import { useEffect } from 'react';
 import { defineAdminModule } from '@/admin/core/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/core/module-types';
-import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
 import { getBlockRegionMetadata } from '@/admin/surfaces/blocks/surface-types';
+import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
 
-function BlockRegionFullEdit({ surface }: AdminModuleComponentProps) {
+function BlockRegionFullEdit({
+    surface,
+    activation,
+}: AdminModuleComponentProps) {
     const metadata = getBlockRegionMetadata(surface);
 
-    if (metadata === null) {
-        return null;
-    }
+    useEffect(() => {
+        if (metadata === null || !activation.isActive) {
+            return;
+        }
 
-    const fullEditHref = buildScriptureAdminSectionHref(
-        metadata.fullEditHref,
-        'content_blocks',
-    );
+        activation.deactivate();
+        router.visit(
+            buildScriptureAdminSectionHref(metadata.fullEditHref, 'content_blocks'),
+        );
+    }, [activation.deactivate, activation.isActive, metadata]);
 
-    return (
-        <Button
-            asChild
-            size="sm"
-            variant="outline"
-            className="h-8 rounded-full px-3"
-        >
-            <Link href={fullEditHref}>Full Edit</Link>
-        </Button>
-    );
+    return null;
 }
 
 export const blockRegionFullEditModule = defineAdminModule({
@@ -36,10 +32,19 @@ export const blockRegionFullEditModule = defineAdminModule({
     surfaceSlots: 'insert_control',
     regionScope: 'content_blocks',
     requiredCapabilities: ['full_edit'],
+    actions: [
+        {
+            actionKey: 'full_edit_region',
+            defaultLabel: 'Full Edit',
+            placement: 'inline',
+            openMode: 'inline',
+            priority: 90,
+            variant: 'outline',
+        },
+    ],
+    qualifies: (surface) => getBlockRegionMetadata(surface) !== null,
     EditorComponent: BlockRegionFullEdit,
-    order: 10,
+    order: 90,
     description:
-        'Renders the shared region-level full-edit entry for block-backed scripture surfaces.',
+        'Provides the region-level full-edit fallback as a module-owned action on semantic block-region surfaces.',
 });
-
-

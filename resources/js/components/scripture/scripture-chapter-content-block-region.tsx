@@ -1,9 +1,10 @@
 import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import {
-    createChapterBlockRegionSurface,
-    createChapterContentBlockActionsSurface,
-    createChapterContentBlockSurface,
-} from '@/admin/surfaces/scripture/chapters/surface-builders';
+    createRegisteredBlockActionsSurface,
+    createRegisteredBlockEditorSurface,
+    createRegisteredBlockRegionSurface,
+} from '@/admin/surfaces/blocks/surface-builders';
+import { CHAPTER_CONTENT_BLOCKS_SURFACE_KEY } from '@/admin/surfaces/core/surface-keys';
 import { scriptureInlineRegionLabel } from '@/lib/scripture-inline-admin';
 import type {
     ScriptureChapter,
@@ -46,8 +47,10 @@ export function ScriptureChapterContentBlockRegion({
     const seenBlocksByRegion = new Map<string, number>();
     const regionSurface =
         showAdminControls && admin
-            ? createChapterBlockRegionSurface({
-                  chapter,
+            ? createRegisteredBlockRegionSurface({
+                  surfaceKey: CHAPTER_CONTENT_BLOCKS_SURFACE_KEY,
+                  ownerEntity: 'chapter',
+                  ownerEntityId: chapter.id,
                   entityLabel: chapterTitle,
                   blocks,
                   storeHref: admin.content_block_store_href,
@@ -98,8 +101,11 @@ export function ScriptureChapterContentBlockRegion({
                             null;
                         const editorSurface =
                             showAdminControls && admin && updateHref
-                                ? createChapterContentBlockSurface({
-                                      chapter,
+                                ? createRegisteredBlockEditorSurface({
+                                      surfaceKey:
+                                          CHAPTER_CONTENT_BLOCKS_SURFACE_KEY,
+                                      ownerEntity: 'chapter',
+                                      ownerEntityId: chapter.id,
                                       entityLabel: chapterTitle,
                                       block,
                                       updateHref,
@@ -108,8 +114,11 @@ export function ScriptureChapterContentBlockRegion({
                                 : null;
                         const actionsSurface =
                             showAdminControls && admin && updateHref
-                                ? createChapterContentBlockActionsSurface({
-                                      chapter,
+                                ? createRegisteredBlockActionsSurface({
+                                      surfaceKey:
+                                          CHAPTER_CONTENT_BLOCKS_SURFACE_KEY,
+                                      ownerEntity: 'chapter',
+                                      ownerEntityId: chapter.id,
                                       block,
                                       fullEditHref: admin.full_edit_href,
                                       moveUpHref:

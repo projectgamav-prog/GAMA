@@ -21,9 +21,52 @@ export type AdminModuleScope<T extends string> =
     | null
     | undefined;
 
+export type AdminModuleActionPlacement = 'inline' | 'header' | 'dropdown';
+
+export type AdminModuleActionOpenMode = 'inline' | 'drawer' | 'modal';
+
+export type AdminModuleActionVariant =
+    | 'default'
+    | 'secondary'
+    | 'outline'
+    | 'ghost'
+    | 'destructive';
+
+export type AdminModuleActionDefinition = {
+    actionKey: string;
+    defaultLabel: string;
+    dynamicLabel?: (surface: AdminSurfaceContract) => string;
+    priority?: number;
+    placement?: AdminModuleActionPlacement;
+    openMode?: AdminModuleActionOpenMode;
+    variant?: AdminModuleActionVariant;
+    requiredCapabilities?: readonly AdminSurfaceCapability[];
+    visibility?: (surface: AdminSurfaceContract) => boolean;
+};
+
+export type AdminResolvedModuleAction = {
+    key: string;
+    module: AdminModuleDefinition;
+    action: AdminModuleActionDefinition;
+    label: string;
+    priority: number;
+    placement: AdminModuleActionPlacement;
+    openMode: AdminModuleActionOpenMode;
+    variant: AdminModuleActionVariant;
+};
+
+export type AdminModuleActivation = {
+    activeActionKey: string | null;
+    isActive: boolean;
+    action: AdminResolvedModuleAction | null;
+    activate: (actionKey?: string) => void;
+    deactivate: () => void;
+};
+
 export type AdminModuleComponentProps = {
     surface: AdminSurfaceContract;
     module: AdminModuleDefinition;
+    activation: AdminModuleActivation;
 };
 
 export type AdminModuleComponent = ComponentType<AdminModuleComponentProps>;
@@ -46,6 +89,7 @@ export type AdminModuleDefinition = {
     presentationPlacements?: AdminModuleScope<AdminSurfacePlacement>;
     presentationVariants?: AdminModuleScope<AdminSurfaceVariant>;
     requiredCapabilities?: readonly AdminSurfaceCapability[];
+    actions?: readonly AdminModuleActionDefinition[];
     qualifies?: (surface: AdminSurfaceContract) => boolean;
     EditorComponent: AdminModuleComponent;
     order?: number;

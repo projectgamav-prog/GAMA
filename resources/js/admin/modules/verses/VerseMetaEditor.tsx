@@ -1,8 +1,7 @@
-import { Link, useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import { useForm } from '@inertiajs/react';
+import { useEffect } from 'react';
 import InputError from '@/components/input-error';
 import { ScriptureInlineRegionEditor } from '@/components/scripture/scripture-inline-region-editor';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -15,9 +14,13 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { defineAdminModule } from '@/admin/core/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/core/module-types';
+import { getStructuredMetaContractMetadata } from '@/admin/surfaces/core/contract-readers';
 import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
 import { getUniqueVerseCharacterOptions } from '@/lib/scripture-character-options';
-import { getVerseMetaMetadata } from '@/admin/surfaces/scripture/verses/surface-types';
+import type {
+    ScriptureVerseCharacterAssignment,
+    ScriptureVerseMeta,
+} from '@/types';
 
 type VerseMetaFormData = {
     primary_speaker_character_id: string;
@@ -28,86 +31,67 @@ type VerseMetaFormData = {
 
 const NONE_VALUE = '__none__';
 
-function VerseMetaEditor({ surface }: AdminModuleComponentProps) {
-    const metadata = getVerseMetaMetadata(surface);
-    const [isOpen, setIsOpen] = useState(false);
+function VerseMetaEditor({
+    surface,
+    activation,
+}: AdminModuleComponentProps) {
+    const metadata = getStructuredMetaContractMetadata<
+        ScriptureVerseMeta,
+        { characters: ScriptureVerseCharacterAssignment[] }
+    >(surface);
     const form = useForm<VerseMetaFormData>({
-        primary_speaker_character_id:
-            metadata?.verseMeta?.primary_speaker_character_id !== null &&
-            metadata?.verseMeta?.primary_speaker_character_id !== undefined
-                ? String(metadata.verseMeta.primary_speaker_character_id)
-                : NONE_VALUE,
-        primary_listener_character_id:
-            metadata?.verseMeta?.primary_listener_character_id !== null &&
-            metadata?.verseMeta?.primary_listener_character_id !== undefined
-                ? String(metadata.verseMeta.primary_listener_character_id)
-                : NONE_VALUE,
-        difficulty_level: metadata?.verseMeta?.difficulty_level ?? '',
-        summary_short: metadata?.verseMeta?.summary_short ?? '',
+        primary_speaker_character_id: NONE_VALUE,
+        primary_listener_character_id: NONE_VALUE,
+        difficulty_level: '',
+        summary_short: '',
     });
 
     if (metadata === null) {
         return null;
     }
 
-    const characterOptions = getUniqueVerseCharacterOptions(metadata.characters);
+    useEffect(() => {
+        if (!activation.isActive) {
+            form.clearErrors();
+            form.reset();
+
+            return;
+        }
+
+        form.setData({
+            primary_speaker_character_id:
+                metadata.value?.primary_speaker_character_id !== null &&
+                metadata.value?.primary_speaker_character_id !== undefined
+                    ? String(metadata.value.primary_speaker_character_id)
+                    : NONE_VALUE,
+            primary_listener_character_id:
+                metadata.value?.primary_listener_character_id !== null &&
+                metadata.value?.primary_listener_character_id !== undefined
+                    ? String(metadata.value.primary_listener_character_id)
+                    : NONE_VALUE,
+            difficulty_level: metadata.value?.difficulty_level ?? '',
+            summary_short: metadata.value?.summary_short ?? '',
+        });
+        form.clearErrors();
+    }, [
+        activation.isActive,
+        form,
+        metadata.value?.difficulty_level,
+        metadata.value?.primary_listener_character_id,
+        metadata.value?.primary_speaker_character_id,
+        metadata.value?.summary_short,
+    ]);
+
+    const characterOptions = getUniqueVerseCharacterOptions(
+        metadata.options.characters,
+    );
     const fullEditHref = buildScriptureAdminSectionHref(
         metadata.fullEditHref,
         'meta',
     );
 
-    if (!isOpen) {
-        return (
-            <>
-                <Button
-                    type="button"
-                    size="sm"
-                    className="h-8 rounded-full px-3"
-                    onClick={() => {
-                        form.setData({
-                            primary_speaker_character_id:
-                                metadata.verseMeta
-                                    ?.primary_speaker_character_id !== null &&
-                                metadata.verseMeta
-                                    ?.primary_speaker_character_id !==
-                                    undefined
-                                    ? String(
-                                          metadata.verseMeta
-                                              .primary_speaker_character_id,
-                                      )
-                                    : NONE_VALUE,
-                            primary_listener_character_id:
-                                metadata.verseMeta
-                                    ?.primary_listener_character_id !== null &&
-                                metadata.verseMeta
-                                    ?.primary_listener_character_id !==
-                                    undefined
-                                    ? String(
-                                          metadata.verseMeta
-                                              .primary_listener_character_id,
-                                      )
-                                    : NONE_VALUE,
-                            difficulty_level:
-                                metadata.verseMeta?.difficulty_level ?? '',
-                            summary_short:
-                                metadata.verseMeta?.summary_short ?? '',
-                        });
-                        form.clearErrors();
-                        setIsOpen(true);
-                    }}
-                >
-                    Edit
-                </Button>
-                <Button
-                    asChild
-                    size="sm"
-                    variant="outline"
-                    className="h-8 rounded-full px-3"
-                >
-                    <Link href={fullEditHref}>Full Edit</Link>
-                </Button>
-            </>
-        );
+    if (!activation.isActive) {
+        return null;
     }
 
     return (
@@ -119,7 +103,7 @@ function VerseMetaEditor({ surface }: AdminModuleComponentProps) {
                 onCancel={() => {
                     form.reset();
                     form.clearErrors();
-                    setIsOpen(false);
+                    activation.deactivate();
                 }}
                 onSave={() => {
                     form.transform((data) => ({
@@ -133,12 +117,12 @@ function VerseMetaEditor({ surface }: AdminModuleComponentProps) {
                                 : Number(data.primary_listener_character_id),
                         difficulty_level: data.difficulty_level,
                         summary_short: data.summary_short,
-                        is_featured: metadata.verseMeta?.is_featured ?? false,
+                        is_featured: metadata.value?.is_featured ?? false,
                     }));
 
                     form.patch(metadata.updateHref, {
                         preserveScroll: true,
-                        onSuccess: () => setIsOpen(false),
+                        onSuccess: () => activation.deactivate(),
                     });
                 }}
                 isDirty={form.isDirty}
@@ -253,7 +237,27 @@ export const verseMetaEditorModule = defineAdminModule({
     entityScope: 'verse',
     surfaceSlots: 'inline_editor',
     requiredCapabilities: ['edit'],
-    qualifies: (surface) => getVerseMetaMetadata(surface) !== null,
+    actions: [
+        {
+            actionKey: 'edit_meta',
+            defaultLabel: 'Edit Meta',
+            dynamicLabel: (surface) =>
+                getStructuredMetaContractMetadata<
+                    ScriptureVerseMeta,
+                    { characters: ScriptureVerseCharacterAssignment[] }
+                >(surface)?.value
+                    ? 'Edit Meta'
+                    : 'Add Meta',
+            placement: 'inline',
+            openMode: 'inline',
+            priority: 20,
+        },
+    ],
+    qualifies: (surface) =>
+        getStructuredMetaContractMetadata<
+            ScriptureVerseMeta,
+            { characters: ScriptureVerseCharacterAssignment[] }
+        >(surface) !== null,
     EditorComponent: VerseMetaEditor,
     order: 20,
     description:

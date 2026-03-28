@@ -1,5 +1,5 @@
 import { Link, useForm } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -22,7 +22,7 @@ import type {
     ScriptureAdminMediaAssignment,
     ScriptureAdminMediaSummary,
 } from '@/types';
-import { getBookMediaSlotsMetadata } from '@/admin/surfaces/scripture/books/surface-types';
+import { getMediaSlotsContractMetadata } from '@/admin/surfaces/core/contract-readers';
 
 type MediaAssignmentFormData = {
     media_id: string;
@@ -465,9 +465,11 @@ function MediaAssignmentEditorCard({
     );
 }
 
-function MediaSlotsEditor({ surface }: AdminModuleComponentProps) {
-    const metadata = getBookMediaSlotsMetadata(surface);
-    const [isOpen, setIsOpen] = useState(false);
+function MediaSlotsEditor({
+    surface,
+    activation,
+}: AdminModuleComponentProps) {
+    const metadata = getMediaSlotsContractMetadata(surface);
     const summary = useMemo(() => {
         const publishedCount = metadata?.assignments.filter(
             (assignment) => assignment.status === 'published',
@@ -488,27 +490,8 @@ function MediaSlotsEditor({ surface }: AdminModuleComponentProps) {
         'media_slots',
     );
 
-    if (!isOpen) {
-        return (
-            <>
-                <Button
-                    type="button"
-                    size="sm"
-                    className="h-8 rounded-full px-3"
-                    onClick={() => setIsOpen(true)}
-                >
-                    Edit
-                </Button>
-                <Button
-                    asChild
-                    size="sm"
-                    variant="outline"
-                    className="h-8 rounded-full px-3"
-                >
-                    <Link href={fullEditHref}>Full Edit</Link>
-                </Button>
-            </>
-        );
+    if (!activation.isActive) {
+        return null;
     }
 
     return (
@@ -529,7 +512,7 @@ function MediaSlotsEditor({ surface }: AdminModuleComponentProps) {
                             Book media slots
                         </h3>
                         <p className="text-sm leading-6 text-muted-foreground">
-                            Manage media assignments for {metadata.bookTitle}{' '}
+                            Manage media assignments for {metadata.entityLabel}{' '}
                             without re-entering the book context.
                         </p>
                     </div>
@@ -539,7 +522,7 @@ function MediaSlotsEditor({ surface }: AdminModuleComponentProps) {
                     <Button
                         type="button"
                         variant="outline"
-                        onClick={() => setIsOpen(false)}
+                        onClick={activation.deactivate}
                     >
                         Close
                     </Button>
@@ -572,7 +555,16 @@ export const mediaSlotsEditorModule = defineAdminModule({
     entityScope: 'book',
     surfaceSlots: 'inline_editor',
     requiredCapabilities: ['edit'],
-    qualifies: (surface) => getBookMediaSlotsMetadata(surface) !== null,
+    actions: [
+        {
+            actionKey: 'edit_media',
+            defaultLabel: 'Edit Media',
+            placement: 'inline',
+            openMode: 'inline',
+            priority: 40,
+        },
+    ],
+    qualifies: (surface) => getMediaSlotsContractMetadata(surface) !== null,
     EditorComponent: MediaSlotsEditor,
     order: 40,
     description:

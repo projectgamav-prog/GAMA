@@ -1,8 +1,7 @@
 import { useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect } from 'react';
 import InputError from '@/components/input-error';
 import { ScriptureInlineRegionEditor } from '@/components/scripture/scripture-inline-region-editor';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { defineAdminModule } from '@/admin/core/module-registry';
@@ -14,38 +13,39 @@ type SectionRowDetailFormData = {
     title: string;
 };
 
-function SectionRowDetailEditor({ surface }: AdminModuleComponentProps) {
+function SectionRowDetailEditor({
+    surface,
+    activation,
+}: AdminModuleComponentProps) {
     const metadata = getSectionGroupMetadata(surface);
-    const [isOpen, setIsOpen] = useState(false);
     const form = useForm<SectionRowDetailFormData>({
-        number: metadata?.rowNumber ?? '',
-        title: metadata?.rowTitle ?? '',
+        number: '',
+        title: '',
     });
 
     if (metadata === null || metadata.updateHref === null) {
         return null;
     }
 
+    useEffect(() => {
+        if (!activation.isActive) {
+            form.clearErrors();
+            form.reset();
+
+            return;
+        }
+
+        form.setData({
+            number: metadata.rowNumber ?? '',
+            title: metadata.rowTitle ?? '',
+        });
+        form.clearErrors();
+    }, [activation.isActive, form, metadata.rowNumber, metadata.rowTitle]);
+
     const editorTitle = `${metadata.groupLabel} details`;
 
-    if (!isOpen) {
-        return (
-            <Button
-                type="button"
-                size="sm"
-                className="h-8 rounded-full px-3"
-                onClick={() => {
-                    form.setData({
-                        number: metadata.rowNumber ?? '',
-                        title: metadata.rowTitle ?? '',
-                    });
-                    form.clearErrors();
-                    setIsOpen(true);
-                }}
-            >
-                Edit
-            </Button>
-        );
+    if (!activation.isActive) {
+        return null;
     }
 
     return (
@@ -56,12 +56,12 @@ function SectionRowDetailEditor({ surface }: AdminModuleComponentProps) {
                 onCancel={() => {
                     form.reset();
                     form.clearErrors();
-                    setIsOpen(false);
+                    activation.deactivate();
                 }}
                 onSave={() => {
                     form.patch(metadata.updateHref!, {
                         preserveScroll: true,
-                        onSuccess: () => setIsOpen(false),
+                        onSuccess: () => activation.deactivate(),
                     });
                 }}
                 isDirty={form.isDirty}
@@ -110,6 +110,20 @@ export const sectionRowDetailEditorModule = defineAdminModule({
     surfaceSlots: 'inline_editor',
     presentationVariants: 'compact',
     requiredCapabilities: ['edit'],
+    actions: [
+        {
+            actionKey: 'edit_details',
+            defaultLabel: 'Edit Details',
+            dynamicLabel: (surface) => {
+                const metadata = getSectionGroupMetadata(surface);
+
+                return metadata ? `Edit ${metadata.groupLabel}` : 'Edit Details';
+            },
+            placement: 'inline',
+            openMode: 'inline',
+            priority: 20,
+        },
+    ],
     qualifies: (surface) => getSectionGroupMetadata(surface)?.updateHref !== null,
     EditorComponent: SectionRowDetailEditor,
     order: 20,

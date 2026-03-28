@@ -1,16 +1,16 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { ScriptureTextContentBlockInlineEditor } from '@/components/scripture/scripture-text-content-block-inline-editor';
 import { defineAdminModule } from '@/admin/core/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/core/module-types';
 import { buildScriptureAdminBlockHref } from '@/lib/scripture-admin-navigation';
 import { getRegisteredBlockEditorMetadata } from '@/admin/surfaces/blocks/surface-types';
 
-function TextualBlockEditor({ surface }: AdminModuleComponentProps) {
+function TextualBlockEditor({
+    surface,
+    activation,
+}: AdminModuleComponentProps) {
     const metadata = getRegisteredBlockEditorMetadata(surface);
-    const [isOpen, setIsOpen] = useState(false);
 
-    if (metadata === null) {
+    if (metadata === null || !activation.isActive) {
         return null;
     }
 
@@ -18,19 +18,6 @@ function TextualBlockEditor({ surface }: AdminModuleComponentProps) {
         metadata.fullEditHref,
         metadata.block.id,
     );
-
-    if (!isOpen) {
-        return (
-            <Button
-                type="button"
-                size="sm"
-                className="h-8 rounded-full px-3"
-                onClick={() => setIsOpen(true)}
-            >
-                Edit
-            </Button>
-        );
-    }
 
     return (
         <div className="basis-full pt-2">
@@ -49,7 +36,8 @@ function TextualBlockEditor({ surface }: AdminModuleComponentProps) {
                     },
                 }}
                 entityLabel={metadata.entityLabel}
-                onCancel={() => setIsOpen(false)}
+                onCancel={activation.deactivate}
+                onSaveSuccess={activation.deactivate}
             />
         </div>
     );
@@ -63,6 +51,15 @@ export const textualBlockEditorModule = defineAdminModule({
     regionScope: 'content_blocks',
     blockTypes: ['text', 'quote'],
     requiredCapabilities: ['edit'],
+    actions: [
+        {
+            actionKey: 'edit_block',
+            defaultLabel: 'Edit',
+            placement: 'inline',
+            openMode: 'inline',
+            priority: 30,
+        },
+    ],
     EditorComponent: TextualBlockEditor,
     order: 30,
     description:

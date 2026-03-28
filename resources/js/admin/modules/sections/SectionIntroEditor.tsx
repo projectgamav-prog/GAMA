@@ -3,11 +3,15 @@ import type { AdminModuleComponentProps } from '@/admin/core/module-types';
 import { RegisteredIntroBlockEditor } from '@/admin/modules/blocks/RegisteredIntroBlockEditor';
 import { getSectionGroupMetadata } from '@/admin/surfaces/sections/surface-types';
 
-function SectionIntroEditor({ surface }: AdminModuleComponentProps) {
+function SectionIntroEditor({
+    surface,
+    activation,
+}: AdminModuleComponentProps) {
     const metadata = getSectionGroupMetadata(surface);
 
     if (
         metadata === null ||
+        !activation.isActive ||
         (metadata.introStoreHref === null &&
             metadata.introUpdateHref === null &&
             metadata.introBlock === null)
@@ -24,6 +28,8 @@ function SectionIntroEditor({ surface }: AdminModuleComponentProps) {
             updateHref={metadata.introUpdateHref}
             storeHref={metadata.introStoreHref}
             defaultRegion={metadata.introDefaultRegion}
+            onCancel={activation.deactivate}
+            onSaveSuccess={activation.deactivate}
         />
     );
 }
@@ -34,6 +40,20 @@ export const sectionIntroEditorModule = defineAdminModule({
     entityScope: ['book_section', 'chapter_section'],
     surfaceSlots: 'inline_editor',
     presentationVariants: 'compact',
+    actions: [
+        {
+            actionKey: 'edit_intro',
+            defaultLabel: 'Edit Intro',
+            dynamicLabel: (surface) => {
+                const metadata = getSectionGroupMetadata(surface);
+
+                return metadata?.introBlock ? 'Edit Intro' : 'Add Intro';
+            },
+            placement: 'inline',
+            openMode: 'inline',
+            priority: 25,
+        },
+    ],
     qualifies: (surface) => {
         const metadata = getSectionGroupMetadata(surface);
 

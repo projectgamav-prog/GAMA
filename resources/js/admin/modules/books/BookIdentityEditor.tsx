@@ -1,14 +1,14 @@
-import { Link, useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import { useForm } from '@inertiajs/react';
+import { useEffect } from 'react';
 import InputError from '@/components/input-error';
 import { ScriptureInlineRegionEditor } from '@/components/scripture/scripture-inline-region-editor';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { defineAdminModule } from '@/admin/core/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/core/module-types';
+import { getIdentityContractMetadata } from '@/admin/surfaces/core/contract-readers';
 import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
-import { getBookIdentityMetadata } from '@/admin/surfaces/scripture/books/surface-types';
+import type { ScriptureBook } from '@/types';
 
 type BookIdentityFormData = {
     slug: string;
@@ -16,53 +16,50 @@ type BookIdentityFormData = {
     title: string;
 };
 
-function BookIdentityEditor({ surface }: AdminModuleComponentProps) {
-    const metadata = getBookIdentityMetadata(surface);
-    const [isOpen, setIsOpen] = useState(false);
+function BookIdentityEditor({
+    surface,
+    activation,
+}: AdminModuleComponentProps) {
+    const metadata = getIdentityContractMetadata<ScriptureBook>(surface);
     const form = useForm<BookIdentityFormData>({
-        slug: metadata?.book.slug ?? '',
-        number: metadata?.book.number ?? '',
-        title: metadata?.book.title ?? '',
+        slug: '',
+        number: '',
+        title: '',
     });
 
     if (metadata === null) {
         return null;
     }
 
+    useEffect(() => {
+        if (!activation.isActive) {
+            form.clearErrors();
+            form.reset();
+
+            return;
+        }
+
+        form.setData({
+            slug: metadata.entityRecord.slug,
+            number: metadata.entityRecord.number ?? '',
+            title: metadata.entityRecord.title,
+        });
+        form.clearErrors();
+    }, [
+        activation.isActive,
+        form,
+        metadata.entityRecord.number,
+        metadata.entityRecord.slug,
+        metadata.entityRecord.title,
+    ]);
+
     const fullEditHref = buildScriptureAdminSectionHref(
         metadata.fullEditHref,
         'identity',
     );
 
-    if (!isOpen) {
-        return (
-            <>
-                <Button
-                    type="button"
-                    size="sm"
-                    className="h-8 rounded-full px-3"
-                    onClick={() => {
-                        form.setData({
-                            slug: metadata.book.slug,
-                            number: metadata.book.number ?? '',
-                            title: metadata.book.title,
-                        });
-                        form.clearErrors();
-                        setIsOpen(true);
-                    }}
-                >
-                    Edit
-                </Button>
-                <Button
-                    asChild
-                    size="sm"
-                    variant="outline"
-                    className="h-8 rounded-full px-3"
-                >
-                    <Link href={fullEditHref}>Full Edit</Link>
-                </Button>
-            </>
-        );
+    if (!activation.isActive) {
+        return null;
     }
 
     return (
@@ -74,12 +71,12 @@ function BookIdentityEditor({ surface }: AdminModuleComponentProps) {
                 onCancel={() => {
                     form.reset();
                     form.clearErrors();
-                    setIsOpen(false);
+                    activation.deactivate();
                 }}
                 onSave={() => {
                     form.patch(metadata.updateHref, {
                         preserveScroll: true,
-                        onSuccess: () => setIsOpen(false),
+                        onSuccess: () => activation.deactivate(),
                     });
                 }}
                 isDirty={form.isDirty}
@@ -135,7 +132,17 @@ export const bookIdentityEditorModule = defineAdminModule({
     entityScope: 'book',
     surfaceSlots: 'inline_editor',
     requiredCapabilities: ['edit'],
-    qualifies: (surface) => getBookIdentityMetadata(surface) !== null,
+    actions: [
+        {
+            actionKey: 'edit_identity',
+            defaultLabel: 'Edit Details',
+            placement: 'inline',
+            openMode: 'inline',
+            priority: 10,
+        },
+    ],
+    qualifies: (surface) =>
+        getIdentityContractMetadata<ScriptureBook>(surface) !== null,
     EditorComponent: BookIdentityEditor,
     order: 10,
     description:

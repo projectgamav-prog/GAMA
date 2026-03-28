@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react';
 import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import {
-    createBookBlockRegionSurface,
-    createBookContentBlockActionsSurface,
-    createBookContentBlockSurface,
-} from '@/admin/surfaces/scripture/books/surface-builders';
+    createRegisteredBlockActionsSurface,
+    createRegisteredBlockEditorSurface,
+    createRegisteredBlockRegionSurface,
+} from '@/admin/surfaces/blocks/surface-builders';
+import { BOOK_CONTENT_BLOCKS_SURFACE_KEY } from '@/admin/surfaces/core/surface-keys';
 import { scriptureInlineRegionLabel } from '@/lib/scripture-inline-admin';
 import type {
     ScriptureBook,
@@ -51,8 +52,10 @@ export function ScriptureBookContentBlockRegion({
     const seenBlocksByRegion = new Map<string, number>();
     const regionSurface =
         isAdmin && admin
-            ? createBookBlockRegionSurface({
-                  book,
+            ? createRegisteredBlockRegionSurface({
+                  surfaceKey: BOOK_CONTENT_BLOCKS_SURFACE_KEY,
+                  ownerEntity: 'book',
+                  ownerEntityId: book.id,
                   entityLabel: book.title,
                   blocks,
                   storeHref: admin.content_block_store_href,
@@ -105,8 +108,11 @@ export function ScriptureBookContentBlockRegion({
                             null;
                         const editorSurface =
                             isAdmin && admin && updateHref
-                                ? createBookContentBlockSurface({
-                                      book,
+                                ? createRegisteredBlockEditorSurface({
+                                      surfaceKey:
+                                          BOOK_CONTENT_BLOCKS_SURFACE_KEY,
+                                      ownerEntity: 'book',
+                                      ownerEntityId: book.id,
                                       entityLabel: book.title,
                                       block,
                                       updateHref,
@@ -115,8 +121,11 @@ export function ScriptureBookContentBlockRegion({
                                 : null;
                         const actionsSurface =
                             isAdmin && admin && updateHref
-                                ? createBookContentBlockActionsSurface({
-                                      book,
+                                ? createRegisteredBlockActionsSurface({
+                                      surfaceKey:
+                                          BOOK_CONTENT_BLOCKS_SURFACE_KEY,
+                                      ownerEntity: 'book',
+                                      ownerEntityId: book.id,
                                       block,
                                       fullEditHref: admin.full_edit_href,
                                       moveUpHref:

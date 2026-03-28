@@ -1,15 +1,15 @@
-import { Link, useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import { useForm } from '@inertiajs/react';
+import { useEffect } from 'react';
 import InputError from '@/components/input-error';
 import { ScriptureInlineRegionEditor } from '@/components/scripture/scripture-inline-region-editor';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { defineAdminModule } from '@/admin/core/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/core/module-types';
+import { getIdentityContractMetadata } from '@/admin/surfaces/core/contract-readers';
 import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
-import { getVerseIdentityMetadata } from '@/admin/surfaces/scripture/verses/surface-types';
+import type { ScriptureVerse } from '@/types';
 
 type VerseIdentityFormData = {
     slug: string;
@@ -17,53 +17,50 @@ type VerseIdentityFormData = {
     text: string;
 };
 
-function VerseIdentityEditor({ surface }: AdminModuleComponentProps) {
-    const metadata = getVerseIdentityMetadata(surface);
-    const [isOpen, setIsOpen] = useState(false);
+function VerseIdentityEditor({
+    surface,
+    activation,
+}: AdminModuleComponentProps) {
+    const metadata = getIdentityContractMetadata<ScriptureVerse>(surface);
     const form = useForm<VerseIdentityFormData>({
-        slug: metadata?.verse.slug ?? '',
-        number: metadata?.verse.number ?? '',
-        text: metadata?.verse.text ?? '',
+        slug: '',
+        number: '',
+        text: '',
     });
 
     if (metadata === null) {
         return null;
     }
 
+    useEffect(() => {
+        if (!activation.isActive) {
+            form.clearErrors();
+            form.reset();
+
+            return;
+        }
+
+        form.setData({
+            slug: metadata.entityRecord.slug,
+            number: metadata.entityRecord.number ?? '',
+            text: metadata.entityRecord.text,
+        });
+        form.clearErrors();
+    }, [
+        activation.isActive,
+        form,
+        metadata.entityRecord.number,
+        metadata.entityRecord.slug,
+        metadata.entityRecord.text,
+    ]);
+
     const fullEditHref = buildScriptureAdminSectionHref(
         metadata.fullEditHref,
         'identity',
     );
 
-    if (!isOpen) {
-        return (
-            <>
-                <Button
-                    type="button"
-                    size="sm"
-                    className="h-8 rounded-full px-3"
-                    onClick={() => {
-                        form.setData({
-                            slug: metadata.verse.slug,
-                            number: metadata.verse.number ?? '',
-                            text: metadata.verse.text,
-                        });
-                        form.clearErrors();
-                        setIsOpen(true);
-                    }}
-                >
-                    Edit Intro
-                </Button>
-                <Button
-                    asChild
-                    size="sm"
-                    variant="outline"
-                    className="h-8 rounded-full px-3"
-                >
-                    <Link href={fullEditHref}>Full Edit</Link>
-                </Button>
-            </>
-        );
+    if (!activation.isActive) {
+        return null;
     }
 
     return (
@@ -75,12 +72,12 @@ function VerseIdentityEditor({ surface }: AdminModuleComponentProps) {
                 onCancel={() => {
                     form.reset();
                     form.clearErrors();
-                    setIsOpen(false);
+                    activation.deactivate();
                 }}
                 onSave={() => {
                     form.patch(metadata.updateHref, {
                         preserveScroll: true,
-                        onSuccess: () => setIsOpen(false),
+                        onSuccess: () => activation.deactivate(),
                     });
                 }}
                 isDirty={form.isDirty}
@@ -137,7 +134,17 @@ export const verseIdentityEditorModule = defineAdminModule({
     entityScope: 'verse',
     surfaceSlots: 'inline_editor',
     requiredCapabilities: ['edit'],
-    qualifies: (surface) => getVerseIdentityMetadata(surface) !== null,
+    actions: [
+        {
+            actionKey: 'edit_intro',
+            defaultLabel: 'Edit Intro',
+            placement: 'inline',
+            openMode: 'inline',
+            priority: 10,
+        },
+    ],
+    qualifies: (surface) =>
+        getIdentityContractMetadata<ScriptureVerse>(surface) !== null,
     EditorComponent: VerseIdentityEditor,
     order: 10,
     description:

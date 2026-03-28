@@ -1,30 +1,30 @@
 import { router } from '@inertiajs/react';
 import { LoaderCircle, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { Button } from '@/components/ui/button';
 import { defineAdminModule } from '@/admin/core/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/core/module-types';
+import { Button } from '@/components/ui/button';
 import { getBlockActionMetadata } from '@/admin/surfaces/blocks/surface-types';
 
-function BlockDelete({ surface }: AdminModuleComponentProps) {
+function BlockDelete({
+    surface,
+    activation,
+}: AdminModuleComponentProps) {
     const metadata = getBlockActionMetadata(surface);
     const management = metadata?.management;
-    const [confirmDelete, setConfirmDelete] = useState(false);
     const [processing, setProcessing] = useState(false);
 
-    if (metadata === null || !management?.deleteHref) {
+    if (
+        metadata === null ||
+        !activation.isActive ||
+        !management?.deleteHref
+    ) {
         return null;
     }
 
-    if (confirmDelete) {
-        return (
-            <div className="flex items-center gap-1 rounded-full border border-destructive/20 bg-destructive/5 p-1">
+    return (
+        <div className="basis-full pt-2">
+            <div className="flex flex-wrap items-center gap-1 rounded-full border border-destructive/20 bg-destructive/5 p-1">
                 <span className="px-2 text-[10px] font-semibold tracking-[0.18em] text-destructive uppercase">
                     Delete block?
                 </span>
@@ -33,7 +33,7 @@ function BlockDelete({ surface }: AdminModuleComponentProps) {
                     size="sm"
                     variant="ghost"
                     className="h-8 rounded-full px-3"
-                    onClick={() => setConfirmDelete(false)}
+                    onClick={activation.deactivate}
                     disabled={processing}
                 >
                     <X className="size-3.5" />
@@ -50,8 +50,8 @@ function BlockDelete({ surface }: AdminModuleComponentProps) {
                         router.delete(management.deleteHref!, {
                             preserveScroll: true,
                             onSuccess: () => {
-                                setConfirmDelete(false);
                                 management.onDeleteSuccess?.();
+                                activation.deactivate();
                             },
                             onFinish: () => setProcessing(false),
                         });
@@ -66,28 +66,7 @@ function BlockDelete({ surface }: AdminModuleComponentProps) {
                     Delete
                 </Button>
             </div>
-        );
-    }
-
-    return (
-        <TooltipProvider delayDuration={150}>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <Button
-                        type="button"
-                        size="icon"
-                        variant="ghost"
-                        className="size-8 rounded-full text-destructive hover:text-destructive"
-                        onClick={() => setConfirmDelete(true)}
-                        disabled={management.disabled || processing}
-                    >
-                        <Trash2 className="size-3.5" />
-                        <span className="sr-only">Delete block</span>
-                    </Button>
-                </TooltipTrigger>
-                <TooltipContent>Delete block</TooltipContent>
-            </Tooltip>
-        </TooltipProvider>
+        </div>
     );
 }
 
@@ -98,10 +77,20 @@ export const blockDeleteModule = defineAdminModule({
     surfaceSlots: 'block_actions',
     regionScope: '*',
     requiredCapabilities: ['delete'],
+    actions: [
+        {
+            actionKey: 'delete_block',
+            defaultLabel: 'Delete',
+            placement: 'dropdown',
+            openMode: 'inline',
+            priority: 50,
+            variant: 'destructive',
+        },
+    ],
+    qualifies: (surface) =>
+        Boolean(getBlockActionMetadata(surface)?.management?.deleteHref),
     EditorComponent: BlockDelete,
-    order: 40,
+    order: 50,
     description:
-        'Renders the current safe delete control with local confirmation for eligible blocks.',
+        'Provides the shared delete confirmation flow as a module-owned action on semantic block-action surfaces.',
 });
-
-

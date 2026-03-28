@@ -39,9 +39,7 @@ export type BlockCreateSurfaceMetadata = {
     insertionPoint?: ScriptureContentBlockInsertionPoint;
     blockTypes: string[];
     disabled?: boolean;
-    label?: string;
     placementLabel?: string;
-    onSelectType?: (blockType: string) => void;
 };
 
 export type BlockRegionSurfaceMetadata = {

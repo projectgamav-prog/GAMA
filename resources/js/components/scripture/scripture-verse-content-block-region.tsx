@@ -1,9 +1,10 @@
 import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import {
-    createVerseBlockRegionSurface,
-    createVerseNoteBlockActionsSurface,
-    createVerseNoteBlockSurface,
-} from '@/admin/surfaces/scripture/verses/surface-builders';
+    createRegisteredBlockActionsSurface,
+    createRegisteredBlockEditorSurface,
+    createRegisteredBlockRegionSurface,
+} from '@/admin/surfaces/blocks/surface-builders';
+import { VERSE_NOTES_SURFACE_KEY } from '@/admin/surfaces/core/surface-keys';
 import { scriptureInlineRegionLabel } from '@/lib/scripture-inline-admin';
 import type {
     ScriptureContentBlock,
@@ -46,8 +47,10 @@ export function ScriptureVerseContentBlockRegion({
     const seenBlocksByRegion = new Map<string, number>();
     const regionSurface =
         showAdminControls && admin
-            ? createVerseBlockRegionSurface({
-                  verse,
+            ? createRegisteredBlockRegionSurface({
+                  surfaceKey: VERSE_NOTES_SURFACE_KEY,
+                  ownerEntity: 'verse',
+                  ownerEntityId: verse.id,
                   entityLabel: verseTitle,
                   blocks,
                   storeHref: admin.content_block_store_href,
@@ -99,8 +102,10 @@ export function ScriptureVerseContentBlockRegion({
 
                         const editorSurface =
                             showAdminControls && admin && updateHref
-                                ? createVerseNoteBlockSurface({
-                                      verse,
+                                ? createRegisteredBlockEditorSurface({
+                                      surfaceKey: VERSE_NOTES_SURFACE_KEY,
+                                      ownerEntity: 'verse',
+                                      ownerEntityId: verse.id,
                                       entityLabel: verseTitle,
                                       block,
                                       updateHref,
@@ -109,8 +114,10 @@ export function ScriptureVerseContentBlockRegion({
                                 : null;
                         const actionsSurface =
                             showAdminControls && admin && updateHref
-                                ? createVerseNoteBlockActionsSurface({
-                                      verse,
+                                ? createRegisteredBlockActionsSurface({
+                                      surfaceKey: VERSE_NOTES_SURFACE_KEY,
+                                      ownerEntity: 'verse',
+                                      ownerEntityId: verse.id,
                                       block,
                                       fullEditHref: admin.full_edit_href,
                                       moveUpHref:

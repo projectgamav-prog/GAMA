@@ -4,13 +4,17 @@ import {
     buildScriptureAdminBlockHref,
     buildScriptureAdminSectionHref,
 } from '@/lib/scripture-admin-navigation';
-import { getChapterIntroMetadata } from '@/admin/surfaces/scripture/chapters/surface-types';
+import { getIntroContractMetadata } from '@/admin/surfaces/core/contract-readers';
 import { RegisteredIntroBlockEditor } from '@/admin/modules/blocks/RegisteredIntroBlockEditor';
+import type { ScriptureChapter } from '@/types';
 
-function ChapterIntroEditor({ surface }: AdminModuleComponentProps) {
-    const metadata = getChapterIntroMetadata(surface);
+function ChapterIntroEditor({
+    surface,
+    activation,
+}: AdminModuleComponentProps) {
+    const metadata = getIntroContractMetadata<ScriptureChapter>(surface);
 
-    if (metadata === null) {
+    if (metadata === null || !activation.isActive) {
         return null;
     }
 
@@ -28,13 +32,15 @@ function ChapterIntroEditor({ surface }: AdminModuleComponentProps) {
     return (
         <RegisteredIntroBlockEditor
             title="Chapter intro"
-            entityLabel={metadata.chapterTitle}
+            entityLabel={metadata.entityLabel}
             block={metadata.block}
             blockTypes={metadata.blockTypes}
             updateHref={metadata.updateHref}
             storeHref={metadata.storeHref}
             fullEditHref={fullEditHref}
             defaultRegion="overview"
+            onCancel={activation.deactivate}
+            onSaveSuccess={activation.deactivate}
         />
     );
 }
@@ -45,7 +51,22 @@ export const chapterIntroEditorModule = defineAdminModule({
     entityScope: 'chapter',
     surfaceSlots: 'inline_editor',
     requiredCapabilities: ['full_edit'],
-    qualifies: (surface) => getChapterIntroMetadata(surface) !== null,
+    actions: [
+        {
+            actionKey: 'edit_intro',
+            defaultLabel: 'Edit Intro',
+            dynamicLabel: (surface) =>
+                getIntroContractMetadata<ScriptureChapter>(surface)?.block
+                    ? 'Edit Intro'
+                    : 'Add Intro',
+            placement: 'inline',
+            openMode: 'inline',
+            priority: 20,
+        },
+    ],
+    qualifies: (surface) =>
+        getIntroContractMetadata<ScriptureChapter>(surface)?.introKind ===
+        'registered_block',
     EditorComponent: ChapterIntroEditor,
     order: 20,
     description:
