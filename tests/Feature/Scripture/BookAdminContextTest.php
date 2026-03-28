@@ -21,10 +21,35 @@ beforeEach(function () {
     $this->book = Book::query()
         ->where('slug', 'bhagavad-gita')
         ->firstOrFail();
+    $this->bookSection = $this->book->bookSections()
+        ->where('slug', 'main')
+        ->firstOrFail();
 
     $this->booksIndexRoute = route('scripture.books.index');
     $this->showRoute = route('scripture.books.show', $this->book);
     $this->overviewRoute = route('scripture.books.overview', $this->book);
+    $this->bookStoreRoute = route('scripture.books.admin.store');
+    $this->bookSectionStoreRoute = route('scripture.book-sections.admin.store', [
+        'book' => $this->book,
+    ]);
+    $this->chapterStoreRoute = route('scripture.chapters.admin.store', [
+        'book' => $this->book,
+        'bookSection' => $this->bookSection,
+    ]);
+    $this->bookSectionDetailsUpdateRoute = route(
+        'scripture.book-sections.admin.details.update',
+        [
+            'book' => $this->book,
+            'bookSection' => $this->bookSection,
+        ],
+    );
+    $this->bookSectionIntroStoreRoute = route(
+        'scripture.book-sections.admin.content-blocks.store',
+        [
+            'book' => $this->book,
+            'bookSection' => $this->bookSection,
+        ],
+    );
     $this->detailsUpdateRoute = route('scripture.books.admin.details.update', $this->book);
     $this->identityUpdateRoute = route('scripture.books.admin.identity.update', $this->book);
     $this->fullEditRoute = route('scripture.books.admin.full-edit', $this->book);
@@ -67,6 +92,24 @@ test('guests and non editors cannot access protected book admin context', functi
     $this->get($this->fullEditRoute)
         ->assertRedirect(route('login'));
 
+    $this->post($this->bookStoreRoute, [
+        'slug' => 'blocked-book',
+        'title' => 'Blocked Book',
+    ])->assertRedirect(route('login'));
+
+    $this->post($this->bookSectionStoreRoute, [
+        'slug' => 'blocked-section',
+    ])->assertRedirect(route('login'));
+
+    $this->post($this->chapterStoreRoute, [
+        'slug' => 'blocked-chapter',
+    ])->assertRedirect(route('login'));
+
+    $this->patch($this->bookSectionDetailsUpdateRoute, [
+        'number' => 'II',
+        'title' => 'Blocked section title',
+    ])->assertRedirect(route('login'));
+
     $nonEditor = User::factory()->create([
         'can_access_admin_context' => false,
     ]);
@@ -103,7 +146,33 @@ test('guests and non editors cannot access protected book admin context', functi
         ->assertForbidden();
 
     $this->actingAs($nonEditor)
+        ->post($this->bookStoreRoute, [
+            'slug' => 'blocked-book',
+            'title' => 'Blocked Book',
+        ])
+        ->assertForbidden();
+
+    $this->actingAs($nonEditor)
+        ->post($this->bookSectionStoreRoute, [
+            'slug' => 'blocked-section',
+        ])
+        ->assertForbidden();
+
+    $this->actingAs($nonEditor)
+        ->post($this->chapterStoreRoute, [
+            'slug' => 'blocked-chapter',
+        ])
+        ->assertForbidden();
+
+    $this->actingAs($nonEditor)
         ->get($this->canonicalEditRoute)
+        ->assertForbidden();
+
+    $this->actingAs($nonEditor)
+        ->patch($this->bookSectionDetailsUpdateRoute, [
+            'number' => 'II',
+            'title' => 'Blocked section title',
+        ])
         ->assertForbidden();
 
     $this->actingAs($nonEditor)
@@ -158,6 +227,15 @@ test('authorized editors receive registered book admin props on book detail, ove
     $videoBlock = $this->book->contentBlocks()
         ->where('block_type', 'video')
         ->firstOrFail();
+    $sectionIntroBlock = $this->bookSection->contentBlocks()->create([
+        'region' => 'overview',
+        'block_type' => 'text',
+        'title' => 'Section intro note',
+        'body' => 'Editable intro note for the grouped book section surface.',
+        'data_json' => null,
+        'sort_order' => 1,
+        'status' => 'published',
+    ]);
 
     $this->actingAs($editor)
         ->get($this->showRoute)
@@ -166,10 +244,45 @@ test('authorized editors receive registered book admin props on book detail, ove
             ->where('adminContext.canAccess', true)
             ->where('adminContext.isVisible', false)
             ->where('isAdmin', true)
+            ->where('admin.book_section_store_href', $this->bookSectionStoreRoute)
             ->where('admin.identity_update_href', $this->identityUpdateRoute)
             ->where('admin.details_update_href', $this->detailsUpdateRoute)
             ->where('admin.full_edit_href', $this->fullEditRoute)
             ->where('admin.canonical_edit_href', $this->canonicalEditRoute),
+        )
+        ->assertInertia(fn (Assert $page) => $page
+            ->where(
+                'book_sections.0.admin.details_update_href',
+                $this->bookSectionDetailsUpdateRoute,
+            ),
+        )
+        ->assertInertia(fn (Assert $page) => $page
+            ->where(
+                'book_sections.0.admin.child_store_href',
+                $this->chapterStoreRoute,
+            )
+            ->where(
+                'book_sections.0.admin.intro_store_href',
+                $this->bookSectionIntroStoreRoute,
+            )
+            ->where(
+                'book_sections.0.admin.primary_intro_block.id',
+                $sectionIntroBlock->id,
+            )
+            ->where(
+                'book_sections.0.admin.primary_intro_block.block_type',
+                'text',
+            )
+            ->where(
+                'book_sections.0.admin.primary_intro_update_href',
+                route('scripture.book-sections.admin.content-blocks.update', [
+                    'book' => $this->book,
+                    'bookSection' => $this->bookSection,
+                    'contentBlock' => $sectionIntroBlock,
+                ]),
+            )
+            ->where('book_sections.0.admin.intro_block_types', ['text', 'quote', 'image'])
+            ->where('book_sections.0.admin.intro_default_region', 'overview'),
         );
 
     $this->actingAs($editor)
@@ -192,6 +305,7 @@ test('authorized editors receive registered book admin props on book detail, ove
         ->assertInertia(fn (Assert $page) => $page
             ->where('adminContext.canAccess', true)
             ->where('isAdmin', true)
+            ->where('admin.store_href', $this->bookStoreRoute)
             ->where(
                 'books.0.admin.details_update_href',
                 route('scripture.books.admin.details.update', $this->book),
@@ -272,6 +386,60 @@ test('authorized editors receive registered book admin props on book detail, ove
         );
 });
 
+test('authorized editors can create canonical book, book section, and chapter rows from hierarchy admin routes', function () {
+    $editor = User::query()->where('email', 'admin@example.com')->firstOrFail();
+
+    $this->actingAs($editor)
+        ->from($this->booksIndexRoute)
+        ->post($this->bookStoreRoute, [
+            'slug' => 'book-created-from-library',
+            'number' => '201',
+            'title' => 'Book Created From Library',
+        ])
+        ->assertRedirect($this->booksIndexRoute);
+
+    $createdBook = Book::query()
+        ->where('slug', 'book-created-from-library')
+        ->firstOrFail();
+
+    expect($createdBook->number)->toBe('201');
+    expect($createdBook->title)->toBe('Book Created From Library');
+
+    $this->actingAs($editor)
+        ->from($this->showRoute)
+        ->post($this->bookSectionStoreRoute, [
+            'slug' => 'created-book-section',
+            'number' => 'I',
+            'title' => 'Created Book Section',
+        ])
+        ->assertRedirect($this->showRoute);
+
+    $createdBookSection = $this->book->fresh()
+        ->bookSections()
+        ->where('slug', 'created-book-section')
+        ->firstOrFail();
+
+    expect($createdBookSection->number)->toBe('I');
+    expect($createdBookSection->title)->toBe('Created Book Section');
+
+    $this->actingAs($editor)
+        ->from($this->showRoute)
+        ->post($this->chapterStoreRoute, [
+            'slug' => 'created-chapter-row',
+            'number' => '20',
+            'title' => 'Created Chapter Row',
+        ])
+        ->assertRedirect($this->showRoute);
+
+    $createdChapter = $this->bookSection->fresh()
+        ->chapters()
+        ->where('slug', 'created-chapter-row')
+        ->firstOrFail();
+
+    expect($createdChapter->number)->toBe('20');
+    expect($createdChapter->title)->toBe('Created Chapter Row');
+});
+
 test('authorized editors can update book description across book surfaces', function () {
     $editor = User::query()->where('email', 'editor2@example.com')->firstOrFail();
 
@@ -302,6 +470,101 @@ test('authorized editors can update book description across book surfaces', func
             ->where(
                 'book.description',
                 'Updated editorial book description from admin context.',
+            ),
+        );
+});
+
+test('authorized editors can update basic book section row details from grouped book surfaces', function () {
+    $editor = User::query()->where('email', 'editor2@example.com')->firstOrFail();
+
+    $this->actingAs($editor)
+        ->from($this->showRoute)
+        ->patch($this->bookSectionDetailsUpdateRoute, [
+            'number' => 'I',
+            'title' => 'Main Movement',
+        ])
+        ->assertRedirect($this->showRoute);
+
+    expect($this->bookSection->fresh()->number)->toBe('I');
+    expect($this->bookSection->fresh()->title)->toBe('Main Movement');
+
+    $this->actingAs($editor)
+        ->get($this->showRoute)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('book_sections.0.number', 'I')
+            ->where('book_sections.0.title', 'Main Movement')
+            ->where(
+                'book_sections.0.admin.details_update_href',
+                $this->bookSectionDetailsUpdateRoute,
+            ),
+        );
+});
+
+test('authorized editors can manage book section intro blocks from grouped book surfaces', function () {
+    $editor = User::query()->where('email', 'editor3@example.com')->firstOrFail();
+
+    $this->actingAs($editor)
+        ->from($this->showRoute)
+        ->post($this->bookSectionIntroStoreRoute, [
+            'block_type' => 'image',
+            'title' => 'Book section intro image',
+            'body' => 'Intro caption for the grouped book section.',
+            'media_url' => 'https://example.test/book-section-intro.jpg',
+            'alt_text' => 'Book section intro illustration',
+            'region' => 'overview',
+            'status' => 'published',
+            'insertion_mode' => 'start',
+        ])
+        ->assertRedirect($this->showRoute);
+
+    $createdIntroBlock = $this->bookSection->fresh()
+        ->contentBlocks()
+        ->where('title', 'Book section intro image')
+        ->firstOrFail();
+
+    $this->actingAs($editor)
+        ->from($this->showRoute)
+        ->patch(route('scripture.book-sections.admin.content-blocks.update', [
+            'book' => $this->book,
+            'bookSection' => $this->bookSection,
+            'contentBlock' => $createdIntroBlock,
+        ]), [
+            'block_type' => 'image',
+            'title' => 'Updated book section intro image',
+            'body' => 'Updated intro caption for the grouped book section.',
+            'media_url' => 'https://example.test/book-section-intro-updated.jpg',
+            'alt_text' => 'Updated book section intro illustration',
+            'region' => 'overview',
+            'sort_order' => 1,
+            'status' => 'published',
+        ])
+        ->assertRedirect($this->showRoute);
+
+    expect($createdIntroBlock->fresh()->data_json)->toBe([
+        'url' => 'https://example.test/book-section-intro-updated.jpg',
+        'alt' => 'Updated book section intro illustration',
+    ]);
+
+    $this->actingAs($editor)
+        ->get($this->showRoute)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where(
+                'book_sections.0.admin.primary_intro_block.title',
+                'Updated book section intro image',
+            )
+            ->where(
+                'book_sections.0.admin.primary_intro_block.block_type',
+                'image',
+            )
+            ->where(
+                'book_sections.0.admin.primary_intro_block.data_json.url',
+                'https://example.test/book-section-intro-updated.jpg',
+            )
+            ->where(
+                'book_sections.0.admin.primary_intro_block.data_json.alt',
+                'Updated book section intro illustration',
             ),
         );
 });

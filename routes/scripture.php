@@ -2,13 +2,22 @@
 
 use App\Http\Controllers\Scripture\AdminContextVisibilityController;
 use App\Http\Controllers\Scripture\BookAdminContentBlockController;
+use App\Http\Controllers\Scripture\BookAdminCreateController;
 use App\Http\Controllers\Scripture\BookAdminDetailsController;
 use App\Http\Controllers\Scripture\BookAdminIdentityController;
 use App\Http\Controllers\Scripture\BookAdminMediaAssignmentController;
 use App\Http\Controllers\Scripture\BookCanonicalEditController;
 use App\Http\Controllers\Scripture\BookController;
 use App\Http\Controllers\Scripture\BookFullEditController;
+use App\Http\Controllers\Scripture\BookSectionAdminCreateController;
+use App\Http\Controllers\Scripture\BookSectionAdminContentBlockController;
+use App\Http\Controllers\Scripture\BookSectionAdminDetailsController;
 use App\Http\Controllers\Scripture\ChapterAdminContentBlockController;
+use App\Http\Controllers\Scripture\ChapterAdminCreateController;
+use App\Http\Controllers\Scripture\ChapterAdminIdentityController;
+use App\Http\Controllers\Scripture\ChapterSectionAdminCreateController;
+use App\Http\Controllers\Scripture\ChapterSectionAdminContentBlockController;
+use App\Http\Controllers\Scripture\ChapterSectionAdminDetailsController;
 use App\Http\Controllers\Scripture\ChapterController;
 use App\Http\Controllers\Scripture\ChapterFullEditController;
 use App\Http\Controllers\Scripture\ChapterVerseController;
@@ -17,6 +26,7 @@ use App\Http\Controllers\Scripture\DictionaryEntryController;
 use App\Http\Controllers\Scripture\PostponedAdminSurfaceController;
 use App\Http\Controllers\Scripture\TopicController;
 use App\Http\Controllers\Scripture\VerseAdminContentBlockController;
+use App\Http\Controllers\Scripture\VerseAdminCreateController;
 use App\Http\Controllers\Scripture\VerseAdminIdentityController;
 use App\Http\Controllers\Scripture\VerseAdminMetaController;
 use App\Http\Controllers\Scripture\VerseController;
@@ -106,6 +116,14 @@ Route::prefix('books')
             ->name('books.show');
 
         Route::middleware(['auth', EnsureCanAccessAdminContext::class])
+            ->prefix('admin')
+            ->name('books.admin.')
+            ->group(function () {
+                Route::post('/', [BookAdminCreateController::class, 'store'])
+                    ->name('store');
+            });
+
+        Route::middleware(['auth', EnsureCanAccessAdminContext::class])
             ->prefix('{book:slug}/admin')
             ->name('books.admin.')
             ->group(function () {
@@ -165,10 +183,44 @@ Route::prefix('books')
                 )->name('media-assignments.update');
             });
 
+        Route::middleware(['auth', EnsureCanAccessAdminContext::class])
+            ->prefix('{book:slug}/sections/admin')
+            ->name('book-sections.admin.')
+            ->group(function () {
+                Route::post('/', [BookSectionAdminCreateController::class, 'store'])
+                    ->name('store');
+            });
+
         Route::get(
             '{book:slug}/sections/{bookSection:slug}/chapters/{chapter:slug}',
             [ChapterController::class, 'show'],
         )->name('chapters.show');
+
+        Route::middleware(['auth', EnsureCanAccessAdminContext::class])
+            ->prefix('{book:slug}/sections/{bookSection:slug}/admin')
+            ->name('book-sections.admin.')
+            ->group(function () {
+                Route::patch('details', [BookSectionAdminDetailsController::class, 'update'])
+                    ->name('details.update');
+
+                Route::post(
+                    'content-blocks',
+                    [BookSectionAdminContentBlockController::class, 'store'],
+                )->name('content-blocks.store');
+
+                Route::patch(
+                    'content-blocks/{contentBlock}',
+                    [BookSectionAdminContentBlockController::class, 'update'],
+                )->name('content-blocks.update');
+            });
+
+        Route::middleware(['auth', EnsureCanAccessAdminContext::class])
+            ->prefix('{book:slug}/sections/{bookSection:slug}/chapters/admin')
+            ->name('chapters.admin.')
+            ->group(function () {
+                Route::post('/', [ChapterAdminCreateController::class, 'store'])
+                    ->name('store');
+            });
 
         Route::middleware(['auth', EnsureCanAccessAdminContext::class])
             ->prefix('{book:slug}/sections/{bookSection:slug}/chapters/{chapter:slug}/admin')
@@ -176,6 +228,9 @@ Route::prefix('books')
             ->group(function () {
                 Route::get('full-edit', [ChapterFullEditController::class, 'show'])
                     ->name('full-edit');
+
+                Route::patch('identity', [ChapterAdminIdentityController::class, 'update'])
+                    ->name('identity.update');
 
                 Route::post('content-blocks', [ChapterAdminContentBlockController::class, 'store'])
                     ->name('content-blocks.store');
@@ -211,6 +266,36 @@ Route::prefix('books')
                 )->name('content-blocks.destroy');
             });
 
+        Route::middleware(['auth', EnsureCanAccessAdminContext::class])
+            ->prefix(
+                '{book:slug}/sections/{bookSection:slug}/chapters/{chapter:slug}/sections/admin',
+            )
+            ->name('chapter-sections.admin.')
+            ->group(function () {
+                Route::post('/', [ChapterSectionAdminCreateController::class, 'store'])
+                    ->name('store');
+            });
+
+        Route::middleware(['auth', EnsureCanAccessAdminContext::class])
+            ->prefix(
+                '{book:slug}/sections/{bookSection:slug}/chapters/{chapter:slug}/sections/{chapterSection:slug}/admin',
+            )
+            ->name('chapter-sections.admin.')
+            ->group(function () {
+                Route::patch('details', [ChapterSectionAdminDetailsController::class, 'update'])
+                    ->name('details.update');
+
+                Route::post(
+                    'content-blocks',
+                    [ChapterSectionAdminContentBlockController::class, 'store'],
+                )->name('content-blocks.store');
+
+                Route::patch(
+                    'content-blocks/{contentBlock}',
+                    [ChapterSectionAdminContentBlockController::class, 'update'],
+                )->name('content-blocks.update');
+            });
+
         Route::get(
             '{book:slug}/sections/{bookSection:slug}/chapters/{chapter:slug}/verses',
             [ChapterVerseController::class, 'index'],
@@ -220,6 +305,16 @@ Route::prefix('books')
             '{book:slug}/sections/{bookSection:slug}/chapters/{chapter:slug}/sections/{chapterSection:slug}/verses/{verse:slug}',
             [VerseController::class, 'show'],
         )->name('chapters.verses.show');
+
+        Route::middleware(['auth', EnsureCanAccessAdminContext::class])
+            ->prefix(
+                '{book:slug}/sections/{bookSection:slug}/chapters/{chapter:slug}/sections/{chapterSection:slug}/verses/admin',
+            )
+            ->name('chapters.verses.admin.')
+            ->group(function () {
+                Route::post('/', [VerseAdminCreateController::class, 'store'])
+                    ->name('store');
+            });
 
         Route::middleware(['auth', EnsureCanAccessAdminContext::class])
             ->prefix(

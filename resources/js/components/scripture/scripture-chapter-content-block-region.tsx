@@ -1,9 +1,9 @@
-import { AdminModuleHost } from '@/admin/modules/shared/AdminModuleHost';
+import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import {
     createChapterBlockRegionSurface,
     createChapterContentBlockActionsSurface,
     createChapterContentBlockSurface,
-} from '@/admin/modules/chapters/surface-builders';
+} from '@/admin/surfaces/scripture/chapters/surface-builders';
 import { scriptureInlineRegionLabel } from '@/lib/scripture-inline-admin';
 import type {
     ScriptureChapter,
@@ -169,3 +169,4 @@ export function ScriptureChapterContentBlockRegion({
         </ScriptureSection>
     );
 }
+

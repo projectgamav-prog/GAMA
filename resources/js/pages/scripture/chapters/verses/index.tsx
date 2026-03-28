@@ -7,7 +7,13 @@ import {
     PlayCircle,
 } from 'lucide-react';
 import { useState } from 'react';
+import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
+import {
+    createChapterSectionVerseGroupSurface,
+    createChapterVerseGroupsSurface,
+} from '@/admin/surfaces/sections/surface-builders';
 import { ScriptureActionRow } from '@/components/scripture/scripture-action-row';
+import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
@@ -15,6 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { useVisibleAdminControls } from '@/hooks/use-admin-context';
 import ScriptureLayout from '@/layouts/scripture-layout';
 import {
     chapterLabel,
@@ -32,16 +39,26 @@ export default function ChapterVersesIndex({
     chapter,
     reader_languages,
     default_language,
+    admin,
     chapter_sections,
 }: ChapterVersesIndexProps) {
+    const adminPanelClassName =
+        'flex flex-wrap items-center gap-2 rounded-2xl border border-border/70 bg-muted/20 p-3';
     const [language, setLanguage] = useState<'en' | 'hi'>(
         default_language ?? reader_languages[0] ?? 'en',
     );
+    const showAdminControls = useVisibleAdminControls();
     const hasReaderLanguages = reader_languages.length > 0;
     const showsLanguageToggle = reader_languages.length > 1;
 
     const totalCards = chapter_sections.reduce(
         (sum, section) => sum + section.cards.length,
+        0,
+    );
+    const totalVerses = chapter_sections.reduce(
+        (sum, section) =>
+            sum +
+            section.cards.reduce((cardSum, card) => cardSum + card.verses.length, 0),
         0,
     );
     const hidesGenericBookSection = isGenericSectionLabel(
@@ -62,6 +79,15 @@ export default function ChapterVersesIndex({
         parentEntityType: 'book_section' as const,
         parentEntityId: book_section.id,
     };
+    const verseGroupsSurface = showAdminControls && admin
+        ? createChapterVerseGroupsSurface({
+              chapter,
+              groupCount: chapter_sections.length,
+              verseCount: totalVerses,
+              readerHref: chapter.verses_href ?? chapter.href,
+              chapterSectionStoreHref: admin.chapter_section_store_href,
+          })
+        : null;
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -87,6 +113,8 @@ export default function ChapterVersesIndex({
             title={`${chapterTitle} Reader`}
             breadcrumbs={breadcrumbs}
         >
+            <ScriptureAdminModeBar />
+
             <ScripturePageIntroCard
                 entityMeta={{
                     ...chapterEntity,
@@ -112,6 +140,12 @@ export default function ChapterVersesIndex({
                 contentClassName="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"
             >
                 <div className="space-y-2">
+                    {verseGroupsSurface && (
+                        <AdminModuleHost
+                            surface={verseGroupsSurface}
+                            className={adminPanelClassName}
+                        />
+                    )}
                     <p className="text-sm font-medium">Reader Controls</p>
                     <div className="flex flex-wrap items-center gap-3">
                         {hasReaderLanguages ? (
@@ -187,6 +221,18 @@ export default function ChapterVersesIndex({
                     const sectionTitle = hidesGenericChapterSection
                         ? 'All Verses'
                         : sectionLabel(section.number, section.title);
+                    const sectionGroupSurface = showAdminControls
+                        ? createChapterSectionVerseGroupSurface({
+                              chapterSection: section,
+                              title: sectionTitle,
+                              primaryCount: section.cards.length,
+                              primaryLabel: 'cards',
+                              secondaryCount: verseCount,
+                              secondaryLabel: 'verses',
+                              openHref: section.href ?? null,
+                              openLabel: 'Jump to Group',
+                          })
+                        : null;
 
                     return (
                         <ScriptureSection
@@ -203,7 +249,7 @@ export default function ChapterVersesIndex({
                             }}
                             title={sectionTitle}
                             description={
-                                <span className="flex flex-wrap items-center gap-2">
+                                <div className="flex flex-wrap items-center gap-2">
                                     <Badge variant="outline">
                                         {section.cards.length} card
                                         {section.cards.length === 1 ? '' : 's'}
@@ -212,10 +258,16 @@ export default function ChapterVersesIndex({
                                         {verseCount} verse
                                         {verseCount === 1 ? '' : 's'}
                                     </Badge>
-                                </span>
+                                </div>
                             }
                         >
                             <div className="space-y-4">
+                                {sectionGroupSurface && (
+                                    <AdminModuleHost
+                                        surface={sectionGroupSurface}
+                                        className={adminPanelClassName}
+                                    />
+                                )}
                                 {section.cards.map((card) => (
                                     <Card key={card.id}>
                                         <CardHeader className="gap-3">
@@ -383,3 +435,4 @@ export default function ChapterVersesIndex({
         </ScriptureLayout>
     );
 }
+

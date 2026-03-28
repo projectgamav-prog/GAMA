@@ -1,8 +1,9 @@
 import { Link } from '@inertiajs/react';
 import { ArrowRight, BookOpenText } from 'lucide-react';
-import { AdminModuleHost } from '@/admin/modules/shared/AdminModuleHost';
-import type { AdminSurfaceContract } from '@/admin/modules/shared/surface-contracts';
-import { createBookIntroSurface } from '@/admin/modules/books/surface-builders';
+import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
+import type { AdminSurfaceContract } from '@/admin/surfaces/core/surface-contracts';
+import { createBookIntroSurface } from '@/admin/surfaces/scripture/books/surface-builders';
+import { createBooksCollectionSurface } from '@/admin/surfaces/sections/surface-builders';
 import { BookOverviewVideoDisclosure } from '@/components/scripture/book-overview-video-disclosure';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
@@ -88,13 +89,20 @@ function BookCard({
     );
 }
 
-export default function BooksIndex({ books, isAdmin }: BooksIndexProps) {
+export default function BooksIndex({ books, isAdmin, admin }: BooksIndexProps) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Books',
             href: '/books',
         },
     ];
+    const libraryCollectionSurface =
+        isAdmin && admin
+            ? createBooksCollectionSurface({
+                  bookCount: books.length,
+                  storeHref: admin.store_href,
+              })
+            : null;
 
     return (
         <ScriptureLayout title="Books" breadcrumbs={breadcrumbs}>
@@ -109,7 +117,14 @@ export default function BooksIndex({ books, isAdmin }: BooksIndexProps) {
                 }
                 title="Scripture Library"
                 description="Browse the available books and enter each reading journey from its canonical book page."
-            />
+            >
+                {libraryCollectionSurface && (
+                    <AdminModuleHost
+                        surface={libraryCollectionSurface}
+                        className={CARD_PANEL_CLASS_NAME}
+                    />
+                )}
+            </ScripturePageIntroCard>
 
             <ScriptureSection
                 title="Available Books"
@@ -142,3 +157,4 @@ export default function BooksIndex({ books, isAdmin }: BooksIndexProps) {
         </ScriptureLayout>
     );
 }
+

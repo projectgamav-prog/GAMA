@@ -13,6 +13,8 @@ type SharedProps = {
     blockTypeField: ScriptureRegisteredAdminField;
     titleField: ScriptureRegisteredAdminField;
     bodyField: ScriptureRegisteredAdminField;
+    mediaUrlField?: ScriptureRegisteredAdminField;
+    altTextField?: ScriptureRegisteredAdminField;
     regionField: ScriptureRegisteredAdminField;
     sortOrderField: ScriptureRegisteredAdminField;
     statusField: ScriptureRegisteredAdminField;
@@ -24,6 +26,8 @@ export function CreateVerseContentBlockCard({
     blockTypeField,
     titleField,
     bodyField,
+    mediaUrlField,
+    altTextField,
     regionField,
     sortOrderField,
     statusField,
@@ -39,12 +43,14 @@ export function CreateVerseContentBlockCard({
             defaultRegion="study"
             titleField={titleField}
             bodyField={bodyField}
+            mediaUrlField={mediaUrlField}
+            altTextField={altTextField}
             regionField={regionField}
             sortOrderField={sortOrderField}
             statusField={statusField}
             createBadgeLabel="Add note block"
-            scopeBadgeLabel="Text + Quote"
-            createTitle="Create Verse Note"
+            scopeBadgeLabel="Text + Quote + Image"
+            createTitle="Create Verse Block"
             createActionLabel="Add note block"
         />
     );
@@ -55,6 +61,8 @@ export function VerseContentBlockEditorCard({
     blockTypeField,
     titleField,
     bodyField,
+    mediaUrlField,
+    altTextField,
     regionField,
     sortOrderField,
     statusField,
@@ -67,6 +75,8 @@ export function VerseContentBlockEditorCard({
             blockTypeField={blockTypeField}
             titleField={titleField}
             bodyField={bodyField}
+            mediaUrlField={mediaUrlField}
+            altTextField={altTextField}
             regionField={regionField}
             sortOrderField={sortOrderField}
             statusField={statusField}

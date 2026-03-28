@@ -148,6 +148,7 @@ export type ScriptureBookAdmin = {
     details_update_href: string;
     full_edit_href: string;
     canonical_edit_href: string;
+    book_section_store_href: string;
     content_block_store_href: string;
     content_block_types: string[];
     content_block_default_region: string;
@@ -166,6 +167,8 @@ export type ScriptureBookAdmin = {
 
 export type ScriptureChapterAdmin = {
     full_edit_href: string;
+    identity_update_href: string;
+    chapter_section_store_href: string;
     content_block_store_href: string;
     content_block_types: string[];
     content_block_default_region: string;
@@ -183,6 +186,10 @@ export type ScriptureBookCardAdmin = Pick<
     ScriptureBookAdmin,
     'details_update_href' | 'full_edit_href' | 'canonical_edit_href'
 >;
+
+export type ScriptureBooksIndexAdmin = {
+    store_href: string;
+};
 
 export type ScriptureAdminContentBlock = ScriptureContentBlock & {
     status: 'draft' | 'published';
@@ -214,6 +221,16 @@ export type ScriptureAdminMediaAssignment = {
     status: 'draft' | 'published';
     update_href: string;
     media: ScriptureAdminMediaSummary | null;
+};
+
+export type ScriptureSectionRowAdmin = {
+    details_update_href: string;
+    child_store_href?: string | null;
+    intro_store_href?: string | null;
+    primary_intro_block?: ScriptureContentBlock | null;
+    primary_intro_update_href?: string | null;
+    intro_block_types?: string[] | null;
+    intro_default_region?: string | null;
 };
 
 export type ScriptureEntityType =
@@ -295,6 +312,7 @@ export type ScriptureBookSection = {
     number: string | null;
     title: string | null;
     href: string;
+    admin?: ScriptureSectionRowAdmin | null;
 };
 
 export type ScriptureChapter = {
@@ -313,6 +331,7 @@ export type ScriptureChapterSection = {
     title: string | null;
     verses_count?: number;
     href?: string;
+    admin?: ScriptureSectionRowAdmin | null;
 };
 
 export type ScriptureVerse = {
@@ -531,6 +550,7 @@ export type BookOverviewProps = {
 export type BooksIndexProps = {
     books: ScriptureBook[];
     isAdmin: boolean;
+    admin?: ScriptureBooksIndexAdmin | null;
 };
 
 export type DictionaryIndexProps = {
@@ -578,6 +598,7 @@ export type ChapterVersesIndexProps = {
     chapter: ScriptureChapter;
     reader_languages: ScriptureReaderLanguage[];
     default_language: ScriptureReaderLanguage | null;
+    admin?: Pick<ScriptureChapterAdmin, 'chapter_section_store_href'> | null;
     chapter_sections: Array<
         ScriptureChapterSection & {
             cards: ScriptureReaderCard[];
@@ -635,6 +656,7 @@ export type ChapterFullEditProps = {
         admin_full_edit_href: string;
     };
     admin_entity: ScriptureRegisteredAdminEntity;
+    admin_identity_update_href: string;
     admin_content_block_store_href: string;
     next_content_block_sort_order: number;
     admin_content_blocks: ScriptureAdminContentBlock[];

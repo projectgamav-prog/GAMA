@@ -26,6 +26,7 @@ import { useScriptureAdminTargetNavigation } from '@/hooks/use-scripture-admin-t
 import ScriptureLayout from '@/layouts/scripture-layout';
 import { chapterLabel, sectionLabel, verseLabel } from '@/lib/scripture';
 import { formatAdminList, parseAdminList } from '@/lib/scripture-admin';
+import { getUniqueVerseCharacterOptions } from '@/lib/scripture-character-options';
 import type { BreadcrumbItem, VerseFullEditProps } from '@/types';
 
 type VerseMetaEditorFormData = {
@@ -167,16 +168,7 @@ function VerseMetaEditorCard({
         study_flags_text: formatAdminList(verseMeta?.study_flags_json ?? null),
     });
     const errors = form.errors as Record<string, string>;
-    const characterOptions = characters
-        .map((assignment) => assignment.character)
-        .filter((character): character is NonNullable<typeof character> =>
-            character !== null,
-        )
-        .filter(
-            (character, index, list) =>
-                list.findIndex((candidate) => candidate.id === character.id) ===
-                index,
-        );
+    const characterOptions = getUniqueVerseCharacterOptions(characters);
 
     const submit = () => {
         form.transform((data) => ({
@@ -584,7 +576,7 @@ export default function VerseFullEdit({
             <ScriptureSection
                 adminTargetSection="content_blocks"
                 title="Note Blocks"
-                description="Manage verse-owned text and quote note blocks, including drafts that stay hidden from the public page."
+                description="Manage verse-owned text, quote, and image note blocks, including drafts that stay hidden from the public page."
                 action={
                     <div className="flex flex-wrap gap-2">
                         <Badge variant="outline">
@@ -603,6 +595,8 @@ export default function VerseFullEdit({
                         blockTypeField={fields.content_block_type}
                         titleField={fields.content_block_title}
                         bodyField={fields.content_block_body}
+                        mediaUrlField={fields.content_block_media_url}
+                        altTextField={fields.content_block_alt_text}
                         regionField={fields.content_block_region}
                         sortOrderField={fields.content_block_sort_order}
                         statusField={fields.content_block_status}
@@ -615,6 +609,8 @@ export default function VerseFullEdit({
                             blockTypeField={fields.content_block_type}
                             titleField={fields.content_block_title}
                             bodyField={fields.content_block_body}
+                            mediaUrlField={fields.content_block_media_url}
+                            altTextField={fields.content_block_alt_text}
                             regionField={fields.content_block_region}
                             sortOrderField={fields.content_block_sort_order}
                             statusField={fields.content_block_status}

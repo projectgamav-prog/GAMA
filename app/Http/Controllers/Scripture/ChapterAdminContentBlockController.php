@@ -56,7 +56,7 @@ class ChapterAdminContentBlockController extends Controller
     }
 
     /**
-     * Update a chapter-owned registered textual note block.
+     * Update a chapter-owned registered note block.
      */
     public function update(
         ChapterContentBlockUpdateRequest $request,
@@ -70,7 +70,10 @@ class ChapterAdminContentBlockController extends Controller
         $adminRouteContext->abortUnlessEditableNoteBlock($contentBlock);
 
         $contentBlock->update(
-            RegisteredContentBlock::updateAttributes($request->validated()),
+            RegisteredContentBlock::updateAttributes(
+                $request->validated(),
+                includeDataJson: true,
+            ),
         );
 
         return redirect()->back(status: 303);

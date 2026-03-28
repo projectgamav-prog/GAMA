@@ -44,6 +44,7 @@ class ChapterFullEditController extends Controller
                 'admin_full_edit_href' => $adminRouteContext->fullEditHref(),
             ],
             'admin_entity' => $adminEntityRegistry->definition('chapter')->toArray(),
+            'admin_identity_update_href' => $adminRouteContext->identityUpdateHref(),
             'admin_content_block_store_href' => $adminRouteContext->contentBlockStoreHref(),
             'next_content_block_sort_order' => RegisteredContentBlockData::nextSortOrder(
                 $contentBlocks,

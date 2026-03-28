@@ -41,10 +41,42 @@ beforeEach(function () {
     $this->chapter = $this->bookSection->chapters()
         ->where('slug', 'chapter-1')
         ->firstOrFail();
+    $this->chapterSection = $this->chapter->chapterSections()
+        ->inCanonicalOrder()
+        ->firstOrFail();
 
     $this->chapterShowRoute = route(
         'scripture.chapters.show',
         chapterRouteParameters($this->book, $this->bookSection, $this->chapter),
+    );
+    $this->readerRoute = route(
+        'scripture.chapters.verses.index',
+        chapterRouteParameters($this->book, $this->bookSection, $this->chapter),
+    );
+    $this->chapterSectionDetailsUpdateRoute = route(
+        'scripture.chapter-sections.admin.details.update',
+        [
+            ...chapterRouteParameters($this->book, $this->bookSection, $this->chapter),
+            'chapterSection' => $this->chapterSection,
+        ],
+    );
+    $this->chapterSectionIntroStoreRoute = route(
+        'scripture.chapter-sections.admin.content-blocks.store',
+        [
+            ...chapterRouteParameters($this->book, $this->bookSection, $this->chapter),
+            'chapterSection' => $this->chapterSection,
+        ],
+    );
+    $this->chapterSectionStoreRoute = route(
+        'scripture.chapter-sections.admin.store',
+        chapterRouteParameters($this->book, $this->bookSection, $this->chapter),
+    );
+    $this->verseStoreRoute = route(
+        'scripture.chapters.verses.admin.store',
+        [
+            ...chapterRouteParameters($this->book, $this->bookSection, $this->chapter),
+            'chapterSection' => $this->chapterSection,
+        ],
     );
     $this->fullEditRoute = route(
         'scripture.chapters.admin.full-edit',
@@ -71,6 +103,15 @@ test('guests and non editors cannot access protected chapter admin context', fun
     $this->get($this->fullEditRoute)
         ->assertRedirect(route('login'));
 
+    $this->post($this->chapterSectionStoreRoute, [
+        'slug' => 'blocked-chapter-section',
+    ])->assertRedirect(route('login'));
+
+    $this->patch($this->chapterSectionDetailsUpdateRoute, [
+        'number' => 'A',
+        'title' => 'Blocked chapter section',
+    ])->assertRedirect(route('login'));
+
     $nonEditor = User::factory()->create([
         'can_access_admin_context' => false,
     ]);
@@ -91,6 +132,12 @@ test('guests and non editors cannot access protected chapter admin context', fun
         ->assertForbidden();
 
     $this->actingAs($nonEditor)
+        ->post($this->chapterSectionStoreRoute, [
+            'slug' => 'blocked-chapter-section',
+        ])
+        ->assertForbidden();
+
+    $this->actingAs($nonEditor)
         ->post($this->contentBlockStoreRoute, [
             'block_type' => 'text',
             'title' => 'Blocked chapter note',
@@ -98,6 +145,13 @@ test('guests and non editors cannot access protected chapter admin context', fun
             'region' => 'study',
             'sort_order' => 1,
             'status' => 'draft',
+        ])
+        ->assertForbidden();
+
+    $this->actingAs($nonEditor)
+        ->patch($this->chapterSectionDetailsUpdateRoute, [
+            'number' => 'A',
+            'title' => 'Blocked chapter section',
         ])
         ->assertForbidden();
 
@@ -120,6 +174,15 @@ test('authorized editors receive chapter admin props without requiring visibilit
         'sort_order' => 10,
         'status' => 'published',
     ]);
+    $chapterSectionIntroBlock = $this->chapterSection->contentBlocks()->create([
+        'region' => 'overview',
+        'block_type' => 'text',
+        'title' => 'Section intro note',
+        'body' => 'Editable intro note shown on grouped chapter section surfaces.',
+        'data_json' => null,
+        'sort_order' => 1,
+        'status' => 'published',
+    ]);
 
     $this->actingAs($editor)
         ->get($this->chapterShowRoute)
@@ -129,9 +192,10 @@ test('authorized editors receive chapter admin props without requiring visibilit
             ->where('adminContext.canAccess', true)
             ->where('adminContext.isVisible', false)
             ->where('adminContext.visibilityUrl', $this->visibilityRoute)
+            ->where('admin.chapter_section_store_href', $this->chapterSectionStoreRoute)
             ->where('admin.full_edit_href', $this->fullEditRoute)
             ->where('admin.content_block_store_href', $this->contentBlockStoreRoute)
-            ->where('admin.content_block_types', ['text', 'quote'])
+            ->where('admin.content_block_types', ['text', 'quote', 'image'])
             ->where('admin.content_block_default_region', 'study')
             ->where('admin.primary_content_block_id', $primaryBlock->id)
             ->where(
@@ -148,6 +212,75 @@ test('authorized editors receive chapter admin props without requiring visibilit
                     'contentBlock' => $primaryBlock,
                 ]),
             ),
+        )
+        ->assertInertia(fn (Assert $page) => $page
+            ->where(
+                'chapter_sections.0.admin.details_update_href',
+                $this->chapterSectionDetailsUpdateRoute,
+            ),
+        )
+        ->assertInertia(fn (Assert $page) => $page
+            ->where(
+                'chapter_sections.0.admin.child_store_href',
+                $this->verseStoreRoute,
+            )
+            ->where(
+                'chapter_sections.0.admin.intro_store_href',
+                $this->chapterSectionIntroStoreRoute,
+            )
+            ->where(
+                'chapter_sections.0.admin.primary_intro_block.id',
+                $chapterSectionIntroBlock->id,
+            )
+            ->where(
+                'chapter_sections.0.admin.primary_intro_block.block_type',
+                'text',
+            )
+            ->where(
+                'chapter_sections.0.admin.primary_intro_update_href',
+                route('scripture.chapter-sections.admin.content-blocks.update', [
+                    ...chapterRouteParameters($this->book, $this->bookSection, $this->chapter),
+                    'chapterSection' => $this->chapterSection,
+                    'contentBlock' => $chapterSectionIntroBlock,
+                ]),
+            )
+            ->where('chapter_sections.0.admin.intro_block_types', ['text', 'quote', 'image'])
+            ->where('chapter_sections.0.admin.intro_default_region', 'overview'),
+        );
+
+    $this->actingAs($editor)
+        ->get($this->readerRoute)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('admin.chapter_section_store_href', $this->chapterSectionStoreRoute)
+            ->where(
+                'chapter_sections.0.admin.details_update_href',
+                $this->chapterSectionDetailsUpdateRoute,
+            ),
+        )
+        ->assertInertia(fn (Assert $page) => $page
+            ->where(
+                'chapter_sections.0.admin.child_store_href',
+                $this->verseStoreRoute,
+            )
+            ->where(
+                'chapter_sections.0.admin.intro_store_href',
+                $this->chapterSectionIntroStoreRoute,
+            )
+            ->where(
+                'chapter_sections.0.admin.primary_intro_block.id',
+                $chapterSectionIntroBlock->id,
+            )
+            ->where(
+                'chapter_sections.0.admin.primary_intro_update_href',
+                route('scripture.chapter-sections.admin.content-blocks.update', [
+                    ...chapterRouteParameters($this->book, $this->bookSection, $this->chapter),
+                    'chapterSection' => $this->chapterSection,
+                    'contentBlock' => $chapterSectionIntroBlock,
+                ]),
+            )
+            ->where('chapter_sections.0.admin.intro_block_types', ['text', 'quote', 'image'])
+            ->where('chapter_sections.0.admin.intro_default_region', 'overview'),
         );
 
     $response = $this->actingAs($editor)
@@ -181,6 +314,146 @@ test('authorized editors receive chapter admin props without requiring visibilit
     $hideResponse
         ->assertRedirect($this->chapterShowRoute)
         ->assertCookieExpired(AdminContext::VISIBILITY_COOKIE);
+});
+
+test('authorized editors can create canonical chapter section rows from grouped chapter surfaces', function () {
+    $editor = User::query()->where('email', 'admin@example.com')->firstOrFail();
+
+    $this->actingAs($editor)
+        ->from($this->chapterShowRoute)
+        ->post($this->chapterSectionStoreRoute, [
+            'slug' => 'created-chapter-section',
+            'number' => 'I',
+            'title' => 'Created Chapter Section',
+        ])
+        ->assertRedirect($this->chapterShowRoute);
+
+    $createdChapterSection = $this->chapter->fresh()
+        ->chapterSections()
+        ->where('slug', 'created-chapter-section')
+        ->firstOrFail();
+
+    expect($createdChapterSection->number)->toBe('I');
+    expect($createdChapterSection->title)->toBe('Created Chapter Section');
+});
+
+test('authorized editors can update basic chapter section row details across grouped chapter surfaces', function () {
+    $editor = User::query()->where('email', 'editor2@example.com')->firstOrFail();
+
+    $this->actingAs($editor)
+        ->from($this->chapterShowRoute)
+        ->patch($this->chapterSectionDetailsUpdateRoute, [
+            'number' => '0',
+            'title' => 'Opening Dialogue',
+        ])
+        ->assertRedirect($this->chapterShowRoute);
+
+    expect($this->chapterSection->fresh()->number)->toBe('0');
+    expect($this->chapterSection->fresh()->title)->toBe('Opening Dialogue');
+
+    $this->actingAs($editor)
+        ->get($this->chapterShowRoute)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('chapter_sections.0.number', '0')
+            ->where('chapter_sections.0.title', 'Opening Dialogue')
+            ->where(
+                'chapter_sections.0.admin.details_update_href',
+                $this->chapterSectionDetailsUpdateRoute,
+            ),
+        );
+
+    $this->actingAs($editor)
+        ->get($this->readerRoute)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('chapter_sections.0.number', '0')
+            ->where('chapter_sections.0.title', 'Opening Dialogue')
+            ->where(
+                'chapter_sections.0.admin.details_update_href',
+                $this->chapterSectionDetailsUpdateRoute,
+            ),
+        );
+});
+
+test('authorized editors can manage chapter section intro blocks across grouped chapter surfaces', function () {
+    $editor = User::query()->where('email', 'editor3@example.com')->firstOrFail();
+
+    $this->actingAs($editor)
+        ->from($this->chapterShowRoute)
+        ->post($this->chapterSectionIntroStoreRoute, [
+            'block_type' => 'quote',
+            'title' => 'Chapter section intro quote',
+            'body' => 'Grouped intro quote for the chapter section.',
+            'region' => 'overview',
+            'status' => 'published',
+            'insertion_mode' => 'start',
+        ])
+        ->assertRedirect($this->chapterShowRoute);
+
+    $createdIntroBlock = $this->chapterSection->fresh()
+        ->contentBlocks()
+        ->where('title', 'Chapter section intro quote')
+        ->firstOrFail();
+
+    $this->actingAs($editor)
+        ->from($this->readerRoute)
+        ->patch(route('scripture.chapter-sections.admin.content-blocks.update', [
+            ...chapterRouteParameters($this->book, $this->bookSection, $this->chapter),
+            'chapterSection' => $this->chapterSection,
+            'contentBlock' => $createdIntroBlock,
+        ]), [
+            'block_type' => 'image',
+            'title' => 'Updated chapter section intro image',
+            'body' => 'Updated grouped intro caption for the chapter section.',
+            'media_url' => 'https://example.test/chapter-section-intro.jpg',
+            'alt_text' => 'Chapter section intro illustration',
+            'region' => 'overview',
+            'sort_order' => 1,
+            'status' => 'published',
+        ])
+        ->assertRedirect($this->readerRoute);
+
+    expect($createdIntroBlock->fresh()->data_json)->toBe([
+        'url' => 'https://example.test/chapter-section-intro.jpg',
+        'alt' => 'Chapter section intro illustration',
+    ]);
+
+    $this->actingAs($editor)
+        ->get($this->chapterShowRoute)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where(
+                'chapter_sections.0.admin.primary_intro_block.title',
+                'Updated chapter section intro image',
+            )
+            ->where(
+                'chapter_sections.0.admin.primary_intro_block.block_type',
+                'image',
+            )
+            ->where(
+                'chapter_sections.0.admin.primary_intro_block.data_json.url',
+                'https://example.test/chapter-section-intro.jpg',
+            )
+            ->where(
+                'chapter_sections.0.admin.primary_intro_block.data_json.alt',
+                'Chapter section intro illustration',
+            ),
+        );
+
+    $this->actingAs($editor)
+        ->get($this->readerRoute)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where(
+                'chapter_sections.0.admin.primary_intro_block.block_type',
+                'image',
+            )
+            ->where(
+                'chapter_sections.0.admin.primary_intro_block.data_json.url',
+                'https://example.test/chapter-section-intro.jpg',
+            ),
+        );
 });
 
 test('page intro edit is hidden when no clear primary published chapter note exists', function () {
@@ -360,7 +633,7 @@ test('content block update hard fails when the block is not owned by the current
         ->toBe('Other chapter block');
 });
 
-test('chapter block editing is limited to chapter owned registered textual notes', function () {
+test('chapter block editing is limited to chapter owned registered note blocks', function () {
     $editor = User::query()->where('email', 'admin@example.com')->firstOrFail();
 
     $chapter = Chapter::query()->create([
@@ -394,13 +667,26 @@ test('chapter block editing is limited to chapter owned registered textual notes
         'status' => 'published',
     ]);
 
+    $imageBlock = $chapter->contentBlocks()->create([
+        'region' => 'study',
+        'block_type' => 'image',
+        'title' => 'Editable image note',
+        'body' => 'Image caption that should stay editable.',
+        'data_json' => [
+            'url' => 'https://example.test/chapter-image.jpg',
+            'alt' => 'Editable chapter image alt',
+        ],
+        'sort_order' => 3,
+        'status' => 'published',
+    ]);
+
     $videoBlock = $chapter->contentBlocks()->create([
         'region' => 'study',
         'block_type' => 'video',
         'title' => 'Protected video block',
         'body' => null,
         'data_json' => ['url' => 'https://example.test/chapter-video.mp4'],
-        'sort_order' => 3,
+        'sort_order' => 4,
         'status' => 'published',
     ]);
 
@@ -425,25 +711,54 @@ test('chapter block editing is limited to chapter owned registered textual notes
                     'contentBlock' => $quoteBlock,
                 ]),
             )
+            ->where(
+                "admin.content_block_update_hrefs.{$imageBlock->id}",
+                route('scripture.chapters.admin.content-blocks.update', [
+                    ...$routeParameters,
+                    'contentBlock' => $imageBlock,
+                ]),
+            )
+            ->missing("admin.content_block_duplicate_hrefs.{$imageBlock->id}")
             ->missing("admin.content_block_update_hrefs.{$videoBlock->id}"),
         );
+
+    $this->actingAs($editor)
+        ->from($fullEditRoute)
+        ->patch(route('scripture.chapters.admin.content-blocks.update', [
+            ...$routeParameters,
+            'contentBlock' => $imageBlock,
+        ]), [
+            'block_type' => 'image',
+            'title' => 'Updated image note',
+            'body' => 'Updated chapter image caption.',
+            'media_url' => 'https://example.test/chapter-image-updated.jpg',
+            'alt_text' => 'Updated chapter image alt',
+            'region' => 'study',
+            'sort_order' => 3,
+            'status' => 'published',
+        ])
+        ->assertRedirect($fullEditRoute);
 
     $this->actingAs($editor)
         ->get($fullEditRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->has('admin_content_blocks', 2)
+            ->has('admin_content_blocks', 3)
             ->where('admin_content_blocks.0.title', 'Editable text note')
             ->where('admin_content_blocks.0.block_type', 'text')
             ->where('admin_content_blocks.1.title', 'Editable quote note')
             ->where('admin_content_blocks.1.block_type', 'quote')
+            ->where('admin_content_blocks.2.title', 'Updated image note')
+            ->where('admin_content_blocks.2.block_type', 'image')
+            ->where('admin_content_blocks.2.data_json.url', 'https://example.test/chapter-image-updated.jpg')
+            ->where('admin_content_blocks.2.data_json.alt', 'Updated chapter image alt')
             ->has('protected_content_blocks', 1)
             ->where('protected_content_blocks.0.title', 'Protected video block')
             ->where(
                 'protected_content_blocks.0.protection_reason',
-                'Only chapter-owned text and quote note blocks are editable in this phase.',
+                'Only chapter-owned registered note blocks (text, quote, and image) are editable in this phase.',
             )
-            ->where('next_content_block_sort_order', 4),
+            ->where('next_content_block_sort_order', 5),
         );
 
     $this->actingAs($editor)
@@ -462,6 +777,11 @@ test('chapter block editing is limited to chapter owned registered textual notes
 
     expect(ContentBlock::query()->findOrFail($videoBlock->id)->title)
         ->toBe('Protected video block');
+    expect(ContentBlock::query()->findOrFail($imageBlock->id)->data_json)
+        ->toBe([
+            'url' => 'https://example.test/chapter-image-updated.jpg',
+            'alt' => 'Updated chapter image alt',
+        ]);
 });
 
 test('chapter note creation accepts contextual insertion points and preserves ordering', function () {
@@ -525,6 +845,50 @@ test('chapter note creation accepts contextual insertion points and preserves or
             ->where('title', 'Inserted quote')
             ->value('block_type'),
     )->toBe('quote');
+});
+
+test('authorized editors can create chapter image note blocks from the public page', function () {
+    $editor = User::query()->where('email', 'editor3@example.com')->firstOrFail();
+
+    $this->actingAs($editor)
+        ->from($this->chapterShowRoute)
+        ->post($this->contentBlockStoreRoute, [
+            'block_type' => 'image',
+            'title' => 'Chapter overview image',
+            'body' => 'Public caption for the chapter image.',
+            'media_url' => 'https://example.test/chapter-overview-image.jpg',
+            'alt_text' => 'Bhagavad Gita Chapter 6 overview illustration',
+            'region' => 'overview',
+            'status' => 'published',
+            'insertion_mode' => 'start',
+        ])
+        ->assertRedirect($this->chapterShowRoute);
+
+    $createdBlock = $this->chapter->fresh()
+        ->contentBlocks()
+        ->where('title', 'Chapter overview image')
+        ->firstOrFail();
+
+    expect($createdBlock->block_type)->toBe('image');
+    expect($createdBlock->data_json)->toBe([
+        'url' => 'https://example.test/chapter-overview-image.jpg',
+        'alt' => 'Bhagavad Gita Chapter 6 overview illustration',
+    ]);
+
+    $this->get($this->chapterShowRoute)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('content_blocks.0.block_type', 'image')
+            ->where('content_blocks.0.title', 'Chapter overview image')
+            ->where(
+                'content_blocks.0.data_json.url',
+                'https://example.test/chapter-overview-image.jpg',
+            )
+            ->where(
+                'content_blocks.0.data_json.alt',
+                'Bhagavad Gita Chapter 6 overview illustration',
+            ),
+        );
 });
 
 test('authorized editors can manage chapter note blocks from the public page', function () {

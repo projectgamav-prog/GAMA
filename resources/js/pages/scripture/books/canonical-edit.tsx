@@ -215,6 +215,7 @@ export default function BookCanonicalEdit({
 
             {canonicalBrowseRegion && (
                 <ScriptureSection
+                    adminTargetSection="canonical_browse"
                     title="Canonical Browse Structure"
                     description="Browse hierarchy behavior remains documented here and stays outside editorial workflows."
                 >

@@ -1,10 +1,10 @@
 import { Link } from '@inertiajs/react';
 import { SquareArrowOutUpRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { defineAdminModule } from '@/admin/modules/shared/module-registry';
-import type { AdminModuleComponentProps } from '@/admin/modules/shared/module-types';
+import { defineAdminModule } from '@/admin/core/module-registry';
+import type { AdminModuleComponentProps } from '@/admin/core/module-types';
 import { buildScriptureAdminBlockHref } from '@/lib/scripture-admin-navigation';
-import { getBlockActionMetadata } from './surface-types';
+import { getBlockActionMetadata } from '@/admin/surfaces/blocks/surface-types';
 
 function BlockFullEditLauncher({ surface }: AdminModuleComponentProps) {
     const metadata = getBlockActionMetadata(surface);
@@ -44,3 +44,5 @@ export const blockFullEditLauncherModule = defineAdminModule({
     description:
         'Renders the shared full-edit fallback entry in the block action cluster.',
 });
+
+

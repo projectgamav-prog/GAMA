@@ -1,0 +1,63 @@
+import { Link } from '@inertiajs/react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { defineAdminModule } from '@/admin/core/module-registry';
+import type { AdminModuleComponentProps } from '@/admin/core/module-types';
+import {
+    BOOK_SECTION_CHAPTER_GROUP_SURFACE_KEY,
+    CHAPTER_SECTION_VERSE_GROUP_SURFACE_KEY,
+} from '@/admin/surfaces/core/surface-keys';
+import { getSectionGroupMetadata } from '@/admin/surfaces/sections/surface-types';
+
+function formatCountLabel(count: number, label: string): string {
+    const singularLabel = label.endsWith('s') ? label.slice(0, -1) : label;
+
+    return `${count} ${count === 1 ? singularLabel : label}`;
+}
+
+function SectionGroupPanel({ surface }: AdminModuleComponentProps) {
+    const metadata = getSectionGroupMetadata(surface);
+
+    if (metadata === null) {
+        return null;
+    }
+
+    return (
+        <>
+            <Badge variant="outline">{metadata.groupLabel}</Badge>
+            <Badge variant="secondary">
+                {formatCountLabel(metadata.primaryCount, metadata.primaryLabel)}
+            </Badge>
+            {metadata.secondaryCount !== null && metadata.secondaryLabel && (
+                <Badge variant="secondary">
+                    {formatCountLabel(
+                        metadata.secondaryCount,
+                        metadata.secondaryLabel,
+                    )}
+                </Badge>
+            )}
+            {metadata.openHref && metadata.openLabel && (
+                <Button asChild size="sm" variant="outline" className="h-8 rounded-full px-3">
+                    <Link href={metadata.openHref}>{metadata.openLabel}</Link>
+                </Button>
+            )}
+        </>
+    );
+}
+
+export const sectionGroupPanelModule = defineAdminModule({
+    key: 'section-group-panel',
+    surfaceKeys: [
+        BOOK_SECTION_CHAPTER_GROUP_SURFACE_KEY,
+        CHAPTER_SECTION_VERSE_GROUP_SURFACE_KEY,
+    ],
+    entityScope: ['book_section', 'chapter_section'],
+    surfaceSlots: 'inline_editor',
+    presentationVariants: 'compact',
+    EditorComponent: SectionGroupPanel,
+    order: 10,
+    description:
+        'Shows semantic group badges for section-level chapter and verse group surfaces.',
+});
+
+

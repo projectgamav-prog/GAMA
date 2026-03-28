@@ -1,9 +1,9 @@
-import { AdminModuleHost } from '@/admin/modules/shared/AdminModuleHost';
+import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import {
     createVerseBlockRegionSurface,
     createVerseNoteBlockActionsSurface,
     createVerseNoteBlockSurface,
-} from '@/admin/modules/verses/surface-builders';
+} from '@/admin/surfaces/scripture/verses/surface-builders';
 import { scriptureInlineRegionLabel } from '@/lib/scripture-inline-admin';
 import type {
     ScriptureContentBlock,
@@ -170,3 +170,4 @@ export function ScriptureVerseContentBlockRegion({
         </ScriptureSection>
     );
 }
+

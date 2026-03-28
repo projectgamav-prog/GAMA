@@ -6,11 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { VERSE_INTRO_SURFACE_KEY } from '@/admin/modules/shared/surface-keys';
-import { defineAdminModule } from '@/admin/modules/shared/module-registry';
-import type { AdminModuleComponentProps } from '@/admin/modules/shared/module-types';
+import { VERSE_INTRO_SURFACE_KEY } from '@/admin/surfaces/core/surface-keys';
+import { defineAdminModule } from '@/admin/core/module-registry';
+import type { AdminModuleComponentProps } from '@/admin/core/module-types';
 import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
-import { getVerseIdentityMetadata } from './surface-types';
+import { getVerseIdentityMetadata } from '@/admin/surfaces/scripture/verses/surface-types';
 
 type VerseIdentityFormData = {
     slug: string;
@@ -53,7 +53,7 @@ function VerseIdentityEditor({ surface }: AdminModuleComponentProps) {
                         setIsOpen(true);
                     }}
                 >
-                    Edit
+                    Edit Intro
                 </Button>
                 <Button
                     asChild
@@ -70,8 +70,8 @@ function VerseIdentityEditor({ surface }: AdminModuleComponentProps) {
     return (
         <div className="basis-full pt-2">
             <ScriptureInlineRegionEditor
-                title="Verse identity"
-                description="Update the canonical verse text, number, and slug for this verse."
+                title="Verse intro"
+                description="Update the canonical verse text, number, and slug for the verse intro context shown on the public verse page."
                 fullEditHref={fullEditHref}
                 onCancel={() => {
                     form.reset();
@@ -143,3 +143,5 @@ export const verseIdentityEditorModule = defineAdminModule({
     description:
         'Renders the canonical verse identity editor for the verse intro surface.',
 });
+
+

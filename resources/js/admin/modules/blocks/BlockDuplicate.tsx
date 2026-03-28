@@ -8,10 +8,10 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
-import { defineAdminModule } from '@/admin/modules/shared/module-registry';
-import type { AdminModuleComponentProps } from '@/admin/modules/shared/module-types';
+import { defineAdminModule } from '@/admin/core/module-registry';
+import type { AdminModuleComponentProps } from '@/admin/core/module-types';
 import { scriptureAdminStartCase } from '@/lib/scripture-admin-field-display';
-import { getBlockActionMetadata } from './surface-types';
+import { getBlockActionMetadata } from '@/admin/surfaces/blocks/surface-types';
 
 function BlockDuplicate({ surface }: AdminModuleComponentProps) {
     const metadata = getBlockActionMetadata(surface);
@@ -78,3 +78,5 @@ export const blockDuplicateModule = defineAdminModule({
     description:
         'Renders the shared duplicate action for eligible registered textual blocks.',
 });
+
+

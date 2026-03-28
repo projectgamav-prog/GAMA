@@ -8,6 +8,7 @@ use App\Models\Character;
 use App\Models\Topic;
 use App\Models\Verse;
 use App\Support\Scripture\Admin\BookContentBlockSchema;
+use App\Support\Scripture\Admin\RegisteredNoteContentBlockSchema;
 use App\Support\Scripture\Admin\TextualContentBlockSchema;
 
 class AdminEntityRegistry
@@ -454,7 +455,7 @@ class AdminEntityRegistry
                     label: 'Chapter title',
                     source: 'chapters.title',
                 ),
-                ...$this->sharedTextualNoteBlockFields(),
+                ...$this->sharedRegisteredNoteBlockFields(),
             ],
             regions: [
                 new AdminRegionDefinition(
@@ -473,11 +474,11 @@ class AdminEntityRegistry
                     label: 'Published notes',
                     surface: 'chapters.show',
                     description: 'Chapter-owned editorial note blocks.',
-                    fieldKeys: array_keys($this->sharedTextualNoteBlockFields()),
+                    fieldKeys: array_keys($this->sharedRegisteredNoteBlockFields()),
                     contextualFieldKeys: ['content_block_title', 'content_block_body'],
-                    fullFieldKeys: array_keys($this->sharedTextualNoteBlockFields()),
+                    fullFieldKeys: array_keys($this->sharedRegisteredNoteBlockFields()),
                     capabilityHint: 'content_blocks',
-                    helpText: 'Chapter uses the shared registered text and quote note workflow while keeping ownership scoped to the current chapter.',
+                    helpText: 'Chapter uses the shared registered note workflow while keeping ownership scoped to the current chapter. Text, quote, and image blocks stay inside this surface; video remains protected.',
                     methods: [
                         new AdminRegionMethodDefinition(
                             family: AdminMethodFamily::CONTENT_BLOCK_CREATE,
@@ -498,12 +499,12 @@ class AdminEntityRegistry
                             family: AdminMethodFamily::REORDER,
                             editModes: [AdminEditMode::FULL],
                             label: 'Chapter content-block reorder',
-                            description: 'Uses the shared ordering resolver while Chapter stays scoped to registered text and quote note blocks.',
+                            description: 'Uses the shared ordering resolver while Chapter stays scoped to registered text, quote, and image note blocks.',
                         ),
                     ],
                 ),
             ],
-            notes: 'Chapter now uses the shared registered textual note-block workflow while keeping canonical chapter identity outside the current edit surface.',
+            notes: 'Chapter now uses the shared registered note-block workflow while keeping canonical chapter identity outside the current edit surface.',
         );
     }
 
@@ -601,7 +602,7 @@ class AdminEntityRegistry
                     classification: AdminFieldClassification::EDITORIAL,
                     group: AdminFieldGroup::EDITORIAL,
                 ),
-                ...$this->sharedTextualNoteBlockFields(),
+                ...$this->sharedRegisteredNoteBlockFields(),
             ],
             regions: [
                 new AdminRegionDefinition(
@@ -648,11 +649,11 @@ class AdminEntityRegistry
                     label: 'Published notes',
                     surface: 'chapters.verses.show',
                     description: 'Verse-owned editorial note blocks.',
-                    fieldKeys: array_keys($this->sharedTextualNoteBlockFields()),
+                    fieldKeys: array_keys($this->sharedRegisteredNoteBlockFields()),
                     contextualFieldKeys: ['content_block_title', 'content_block_body'],
-                    fullFieldKeys: array_keys($this->sharedTextualNoteBlockFields()),
+                    fullFieldKeys: array_keys($this->sharedRegisteredNoteBlockFields()),
                     capabilityHint: 'content_blocks',
-                    helpText: 'Verse uses the shared registered text and quote note workflow while keeping ownership scoped to the current verse.',
+                    helpText: 'Verse uses the shared registered note workflow while keeping ownership scoped to the current verse. Text, quote, and image blocks stay inside this surface; video remains protected.',
                     methods: [
                         new AdminRegionMethodDefinition(
                             family: AdminMethodFamily::CONTENT_BLOCK_CREATE,
@@ -673,7 +674,7 @@ class AdminEntityRegistry
                             family: AdminMethodFamily::REORDER,
                             editModes: [AdminEditMode::FULL],
                             label: 'Verse content-block reorder',
-                            description: 'Uses the shared ordering resolver while Verse stays scoped to registered text and quote note blocks.',
+                            description: 'Uses the shared ordering resolver while Verse stays scoped to registered text, quote, and image note blocks.',
                         ),
                     ],
                 ),
@@ -901,7 +902,7 @@ class AdminEntityRegistry
     /**
      * @return array<string, AdminFieldDefinition>
      */
-    private function sharedTextualNoteBlockFields(): array
+    private function sharedRegisteredNoteBlockFields(): array
     {
         return [
             'content_block_type' => new AdminFieldDefinition(
@@ -909,12 +910,34 @@ class AdminEntityRegistry
                 label: 'Registered block type',
                 source: 'content_blocks.block_type',
                 type: 'select',
-                validationRules: ['required', TextualContentBlockSchema::typeValidationRule()],
+                validationRules: ['required', RegisteredNoteContentBlockSchema::typeValidationRule()],
                 editModes: [AdminEditMode::FULL],
                 classification: AdminFieldClassification::EDITORIAL,
                 group: AdminFieldGroup::SUPPORTING,
-                options: TextualContentBlockSchema::editableTypes(),
-                helpText: 'Only registered textual note blocks belong here. Richer media stays on dedicated media surfaces instead of raw block JSON.',
+                options: RegisteredNoteContentBlockSchema::editableTypes(),
+                helpText: 'Only registered note blocks belong here. Text, quote, and image remain in this shared block workflow, while video stays on protected media flows.',
+            ),
+            'content_block_media_url' => new AdminFieldDefinition(
+                key: 'content_block_media_url',
+                label: 'Image source URL',
+                source: 'content_blocks.data_json->url',
+                type: 'text',
+                validationRules: ['required_if:block_type,image', 'nullable', 'string', 'max:2048'],
+                editModes: [AdminEditMode::CONTEXTUAL, AdminEditMode::FULL],
+                classification: AdminFieldClassification::EDITORIAL,
+                group: AdminFieldGroup::SUPPORTING,
+                helpText: 'Required when the registered note block type is image.',
+            ),
+            'content_block_alt_text' => new AdminFieldDefinition(
+                key: 'content_block_alt_text',
+                label: 'Image alt text',
+                source: 'content_blocks.data_json->alt',
+                type: 'text',
+                validationRules: ['nullable', 'string', 'max:255'],
+                editModes: [AdminEditMode::CONTEXTUAL, AdminEditMode::FULL],
+                classification: AdminFieldClassification::EDITORIAL,
+                group: AdminFieldGroup::SUPPORTING,
+                helpText: 'Optional accessibility text for registered image note blocks.',
             ),
             ...$this->sharedTextBlockFields(),
         ];

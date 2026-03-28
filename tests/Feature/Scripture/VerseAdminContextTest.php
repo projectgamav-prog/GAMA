@@ -68,6 +68,15 @@ beforeEach(function () {
         'scripture.chapters.verses.admin.content-blocks.store',
         $this->verseRouteParameters,
     );
+    $this->verseStoreRoute = route(
+        'scripture.chapters.verses.admin.store',
+        [
+            'book' => $this->book,
+            'bookSection' => $this->bookSection,
+            'chapter' => $this->chapter,
+            'chapterSection' => $this->chapterSection,
+        ],
+    );
     $this->visibilityRoute = route('scripture.admin-context.visibility.update');
 });
 
@@ -83,6 +92,11 @@ test('guests and non editors cannot access protected verse admin context', funct
 
     $this->get($this->fullEditRoute)
         ->assertRedirect(route('login'));
+
+    $this->post($this->verseStoreRoute, [
+        'slug' => 'blocked-verse',
+        'text' => 'Blocked verse text.',
+    ])->assertRedirect(route('login'));
 
     $nonEditor = User::factory()->create([
         'can_access_admin_context' => false,
@@ -100,6 +114,13 @@ test('guests and non editors cannot access protected verse admin context', funct
 
     $this->actingAs($nonEditor)
         ->get($this->fullEditRoute)
+        ->assertForbidden();
+
+    $this->actingAs($nonEditor)
+        ->post($this->verseStoreRoute, [
+            'slug' => 'blocked-verse',
+            'text' => 'Blocked verse text.',
+        ])
         ->assertForbidden();
 
     $this->actingAs($nonEditor)
@@ -174,7 +195,7 @@ test('authorized editors can toggle protected admin visibility and receive verse
             ->where('admin.meta_update_href', $this->metaUpdateRoute)
             ->where('admin.full_edit_href', $this->fullEditRoute)
             ->where('admin.content_block_store_href', $this->contentBlockStoreRoute)
-            ->where('admin.content_block_types', ['text', 'quote'])
+            ->where('admin.content_block_types', ['text', 'quote', 'image'])
             ->where('admin.content_block_default_region', 'study')
             ->where(
                 "admin.content_block_update_hrefs.{$publishedBlock->id}",
@@ -194,6 +215,33 @@ test('authorized editors can toggle protected admin visibility and receive verse
     $hideResponse
         ->assertRedirect($this->verseShowRoute)
         ->assertCookieExpired(AdminContext::VISIBILITY_COOKIE);
+});
+
+test('authorized editors can create canonical verse rows from chapter section group surfaces', function () {
+    $editor = User::query()->where('email', 'admin@example.com')->firstOrFail();
+    $readerRoute = route('scripture.chapters.verses.index', [
+        'book' => $this->book,
+        'bookSection' => $this->bookSection,
+        'chapter' => $this->chapter,
+    ]);
+
+    $this->actingAs($editor)
+        ->from($readerRoute)
+        ->post($this->verseStoreRoute, [
+            'slug' => 'created-verse-row',
+            'number' => '99',
+            'text' => 'Created verse text from the chapter section group surface.',
+        ])
+        ->assertRedirect($readerRoute);
+
+    $createdVerse = $this->chapterSection->fresh()
+        ->verses()
+        ->where('slug', 'created-verse-row')
+        ->firstOrFail();
+
+    expect($createdVerse->number)->toBe('99');
+    expect($createdVerse->text)
+        ->toBe('Created verse text from the chapter section group surface.');
 });
 
 test('authorized editors can update verse meta without wiping untouched full-edit fields', function () {
@@ -358,7 +406,7 @@ test('content block update hard fails when the block is not owned by the current
         ->toBe('Other verse block');
 });
 
-test('content block editing is limited to verse owned registered textual notes', function () {
+test('content block editing is limited to verse owned registered note blocks', function () {
     $editor = User::query()->where('email', 'admin@example.com')->firstOrFail();
 
     $textBlock = $this->firstVerse->contentBlocks()->create([
@@ -381,13 +429,26 @@ test('content block editing is limited to verse owned registered textual notes',
         'status' => 'published',
     ]);
 
+    $imageBlock = $this->firstVerse->contentBlocks()->create([
+        'region' => 'study',
+        'block_type' => 'image',
+        'title' => 'Editable image note',
+        'body' => 'Image caption that should stay editable.',
+        'data_json' => [
+            'url' => 'https://example.test/verse-image.jpg',
+            'alt' => 'Editable verse image alt',
+        ],
+        'sort_order' => 3,
+        'status' => 'published',
+    ]);
+
     $videoBlock = $this->firstVerse->contentBlocks()->create([
         'region' => 'study',
         'block_type' => 'video',
         'title' => 'Protected video block',
         'body' => null,
         'data_json' => ['url' => 'https://example.test/video.mp4'],
-        'sort_order' => 3,
+        'sort_order' => 4,
         'status' => 'published',
     ]);
 
@@ -410,23 +471,52 @@ test('content block editing is limited to verse owned registered textual notes',
                     'contentBlock' => $quoteBlock,
                 ]),
             )
+            ->where(
+                "admin.content_block_update_hrefs.{$imageBlock->id}",
+                route('scripture.chapters.verses.admin.content-blocks.update', [
+                    ...$this->verseRouteParameters,
+                    'contentBlock' => $imageBlock,
+                ]),
+            )
+            ->missing("admin.content_block_duplicate_hrefs.{$imageBlock->id}")
             ->missing("admin.content_block_update_hrefs.{$videoBlock->id}"),
         );
+
+    $this->actingAs($editor)
+        ->from($this->fullEditRoute)
+        ->patch(route('scripture.chapters.verses.admin.content-blocks.update', [
+            ...$this->verseRouteParameters,
+            'contentBlock' => $imageBlock,
+        ]), [
+            'block_type' => 'image',
+            'title' => 'Updated image note',
+            'body' => 'Updated verse image caption.',
+            'media_url' => 'https://example.test/verse-image-updated.jpg',
+            'alt_text' => 'Updated verse image alt',
+            'region' => 'study',
+            'sort_order' => 3,
+            'status' => 'published',
+        ])
+        ->assertRedirect($this->fullEditRoute);
 
     $this->actingAs($editor)
         ->get($this->fullEditRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->has('admin_content_blocks', 2)
+            ->has('admin_content_blocks', 3)
             ->where('admin_content_blocks.0.title', 'Editable text note')
             ->where('admin_content_blocks.0.block_type', 'text')
             ->where('admin_content_blocks.1.title', 'Editable quote note')
             ->where('admin_content_blocks.1.block_type', 'quote')
+            ->where('admin_content_blocks.2.title', 'Updated image note')
+            ->where('admin_content_blocks.2.block_type', 'image')
+            ->where('admin_content_blocks.2.data_json.url', 'https://example.test/verse-image-updated.jpg')
+            ->where('admin_content_blocks.2.data_json.alt', 'Updated verse image alt')
             ->has('protected_content_blocks', 1)
             ->where('protected_content_blocks.0.title', 'Protected video block')
             ->where(
                 'protected_content_blocks.0.protection_reason',
-                'Only verse-owned text and quote note blocks are editable in this phase.',
+                'Only verse-owned registered note blocks (text, quote, and image) are editable in this phase.',
             ),
         );
 
@@ -446,6 +536,11 @@ test('content block editing is limited to verse owned registered textual notes',
 
     expect(ContentBlock::query()->findOrFail($videoBlock->id)->title)
         ->toBe('Protected video block');
+    expect(ContentBlock::query()->findOrFail($imageBlock->id)->data_json)
+        ->toBe([
+            'url' => 'https://example.test/verse-image-updated.jpg',
+            'alt' => 'Updated verse image alt',
+        ]);
 });
 
 test('verse note creation uses shared ordering when sort order inserts before existing notes', function () {

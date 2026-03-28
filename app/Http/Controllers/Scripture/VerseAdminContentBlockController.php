@@ -66,7 +66,7 @@ class VerseAdminContentBlockController extends Controller
     }
 
     /**
-     * Update a verse-owned registered textual note block.
+     * Update a verse-owned registered note block.
      */
     public function update(
         VerseContentBlockUpdateRequest $request,
@@ -88,7 +88,10 @@ class VerseAdminContentBlockController extends Controller
         $adminRouteContext->abortUnlessEditableNoteBlock($contentBlock);
 
         $contentBlock->update(
-            RegisteredContentBlock::updateAttributes($request->validated()),
+            RegisteredContentBlock::updateAttributes(
+                $request->validated(),
+                includeDataJson: true,
+            ),
         );
 
         return redirect()->back(status: 303);

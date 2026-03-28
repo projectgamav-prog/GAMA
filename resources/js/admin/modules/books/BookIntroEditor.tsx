@@ -5,16 +5,17 @@ import { ScriptureInlineRegionEditor } from '@/components/scripture/scripture-in
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { BOOK_INTRO_SURFACE_KEY } from '@/admin/modules/shared/surface-keys';
-import { defineAdminModule } from '@/admin/modules/shared/module-registry';
-import type { AdminModuleComponentProps } from '@/admin/modules/shared/module-types';
+import { BOOK_INTRO_SURFACE_KEY } from '@/admin/surfaces/core/surface-keys';
+import { defineAdminModule } from '@/admin/core/module-registry';
+import type { AdminModuleComponentProps } from '@/admin/core/module-types';
 import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
-import { getBookIntroMetadata } from './surface-types';
+import { getBookIntroMetadata } from '@/admin/surfaces/scripture/books/surface-types';
 
 function BookIntroEditor({ surface }: AdminModuleComponentProps) {
     const metadata = getBookIntroMetadata(surface);
     const [isOpen, setIsOpen] = useState(false);
     const isCompact = surface.presentation?.variant === 'compact';
+    const hasIntro = Boolean(metadata?.book.description?.trim());
     const form = useForm<{ description: string }>({
         description: metadata?.book.description ?? '',
     });
@@ -43,7 +44,7 @@ function BookIntroEditor({ surface }: AdminModuleComponentProps) {
                         setIsOpen(true);
                     }}
                 >
-                    Edit
+                    {hasIntro ? 'Edit Intro' : 'Add Intro'}
                 </Button>
                 <Button
                     asChild
@@ -60,13 +61,14 @@ function BookIntroEditor({ surface }: AdminModuleComponentProps) {
     return (
         <div className="basis-full pt-2">
             <ScriptureInlineRegionEditor
-                title="Book intro"
+                title={hasIntro ? 'Book intro' : 'Add book intro'}
                 description={
                     isCompact
                         ? 'Update the public summary shown for this book on the library page.'
                         : 'Update the public introductory copy shown on the book detail or overview page.'
                 }
                 fullEditHref={fullEditHref}
+                mode={hasIntro ? 'edit' : 'create'}
                 onCancel={() => {
                     form.reset();
                     form.clearErrors();
@@ -81,6 +83,7 @@ function BookIntroEditor({ surface }: AdminModuleComponentProps) {
                 isDirty={form.isDirty}
                 hasErrors={Object.keys(form.errors).length > 0}
                 processing={form.processing}
+                saveLabel={hasIntro ? 'Save' : 'Add Intro'}
             >
                 <div className="grid gap-2">
                     <Label htmlFor="book_intro_description">Description</Label>
@@ -112,3 +115,5 @@ export const bookIntroEditorModule = defineAdminModule({
     description:
         'Renders the inline book intro editor for the semantic book intro surface.',
 });
+
+

@@ -7,6 +7,7 @@ const SCRIPTURE_ADMIN_SECTION_IDS = {
     meta: 'meta-editor',
     content_blocks: 'content-blocks',
     media_slots: 'media-slots',
+    canonical_browse: 'canonical-browse',
 } as const;
 
 type ScriptureAdminSectionIds = typeof SCRIPTURE_ADMIN_SECTION_IDS;

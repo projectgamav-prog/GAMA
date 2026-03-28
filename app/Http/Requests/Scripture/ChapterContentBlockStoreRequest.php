@@ -8,13 +8,8 @@ use App\Models\Chapter;
 use App\Models\ContentBlock;
 use App\Support\Scripture\Admin\ChapterAdminRouteContext;
 
-class ChapterContentBlockStoreRequest extends OrderedRegistryContentBlockStoreRequest
+class ChapterContentBlockStoreRequest extends RegisteredNoteContentBlockStoreRequest
 {
-    protected function adminEntityKey(): string
-    {
-        return 'chapter';
-    }
-
     protected function isContextualInsertionAnchor(ContentBlock $contentBlock): bool
     {
         return $this->chapterAdminRouteContext()

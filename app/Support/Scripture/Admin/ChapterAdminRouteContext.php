@@ -40,6 +40,11 @@ class ChapterAdminRouteContext
         return route('scripture.chapters.admin.full-edit', $this->routeParameters());
     }
 
+    public function identityUpdateHref(): string
+    {
+        return route('scripture.chapters.admin.identity.update', $this->routeParameters());
+    }
+
     public function contentBlockStoreHref(): string
     {
         return route('scripture.chapters.admin.content-blocks.store', $this->routeParameters());
@@ -92,6 +97,14 @@ class ChapterAdminRouteContext
      */
     public function contentBlockTypes(): array
     {
+        return RegisteredNoteContentBlockSchema::editableTypes();
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function duplicableContentBlockTypes(): array
+    {
         return TextualContentBlockSchema::editableTypes();
     }
 
@@ -116,7 +129,11 @@ class ChapterAdminRouteContext
 
     public function isDuplicableNoteBlock(ContentBlock $contentBlock): bool
     {
-        return $this->isEditableNoteBlock($contentBlock);
+        return RegisteredContentBlock::isEditableFor(
+            $this->chapter,
+            $contentBlock,
+            $this->duplicableContentBlockTypes(),
+        );
     }
 
     public function abortUnlessEditableNoteBlock(ContentBlock $contentBlock): void
@@ -153,6 +170,6 @@ class ChapterAdminRouteContext
 
     public function contentBlockProtectionReason(): string
     {
-        return 'Only chapter-owned text and quote note blocks are editable in this phase.';
+        return 'Only chapter-owned registered note blocks (text, quote, and image) are editable in this phase.';
     }
 }

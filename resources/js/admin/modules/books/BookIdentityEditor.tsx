@@ -5,11 +5,11 @@ import { ScriptureInlineRegionEditor } from '@/components/scripture/scripture-in
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { BOOK_INTRO_SURFACE_KEY } from '@/admin/modules/shared/surface-keys';
-import { defineAdminModule } from '@/admin/modules/shared/module-registry';
-import type { AdminModuleComponentProps } from '@/admin/modules/shared/module-types';
+import { BOOK_INTRO_SURFACE_KEY } from '@/admin/surfaces/core/surface-keys';
+import { defineAdminModule } from '@/admin/core/module-registry';
+import type { AdminModuleComponentProps } from '@/admin/core/module-types';
 import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
-import { getBookIdentityMetadata } from './surface-types';
+import { getBookIdentityMetadata } from '@/admin/surfaces/scripture/books/surface-types';
 
 type BookIdentityFormData = {
     slug: string;
@@ -141,3 +141,5 @@ export const bookIdentityEditorModule = defineAdminModule({
     description:
         'Renders the canonical book identity editor for the public book intro surface.',
 });
+
+

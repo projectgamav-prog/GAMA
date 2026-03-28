@@ -10,11 +10,11 @@ import {
     Tag,
     Users,
 } from 'lucide-react';
-import { AdminModuleHost } from '@/admin/modules/shared/AdminModuleHost';
+import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import {
     createVerseIdentitySurface,
     createVerseMetaSurface,
-} from '@/admin/modules/verses/surface-builders';
+} from '@/admin/surfaces/scripture/verses/surface-builders';
 import { ScriptureActionRow } from '@/components/scripture/scripture-action-row';
 import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
@@ -939,3 +939,4 @@ export default function VerseShow({
         </ScriptureLayout>
     );
 }
+

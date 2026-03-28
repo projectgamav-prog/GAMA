@@ -8,9 +8,9 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
-import { defineAdminModule } from '@/admin/modules/shared/module-registry';
-import type { AdminModuleComponentProps } from '@/admin/modules/shared/module-types';
-import { getBlockActionMetadata } from './surface-types';
+import { defineAdminModule } from '@/admin/core/module-registry';
+import type { AdminModuleComponentProps } from '@/admin/core/module-types';
+import { getBlockActionMetadata } from '@/admin/surfaces/blocks/surface-types';
 
 type PendingAction = 'move-up' | 'move-down' | null;
 
@@ -156,3 +156,5 @@ export const blockReorderModule = defineAdminModule({
     description:
         'Renders the existing move-earlier/move-later controls and position badge for eligible blocks.',
 });
+
+

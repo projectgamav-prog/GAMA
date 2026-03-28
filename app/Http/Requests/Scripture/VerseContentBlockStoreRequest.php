@@ -10,13 +10,8 @@ use App\Models\ContentBlock;
 use App\Models\Verse;
 use App\Support\Scripture\Admin\VerseAdminRouteContext;
 
-class VerseContentBlockStoreRequest extends OrderedRegistryContentBlockStoreRequest
+class VerseContentBlockStoreRequest extends RegisteredNoteContentBlockStoreRequest
 {
-    protected function adminEntityKey(): string
-    {
-        return 'verse';
-    }
-
     protected function isContextualInsertionAnchor(ContentBlock $contentBlock): bool
     {
         return $this->verseAdminRouteContext()

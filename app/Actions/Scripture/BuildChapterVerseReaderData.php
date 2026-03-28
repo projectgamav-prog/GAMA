@@ -59,6 +59,10 @@ class BuildChapterVerseReaderData
             'chapterSections' => fn ($query) => $query
                 ->inCanonicalOrder()
                 ->with([
+                    'contentBlocks' => fn ($contentBlockQuery) => $contentBlockQuery
+                        ->published()
+                        ->orderBy('sort_order')
+                        ->orderBy('id'),
                     'verses' => fn ($verseQuery) => $verseQuery
                         ->inCanonicalOrder()
                         ->with([

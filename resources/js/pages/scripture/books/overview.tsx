@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { ArrowRight } from 'lucide-react';
-import { AdminModuleHost } from '@/admin/modules/shared/AdminModuleHost';
-import { createBookIntroSurface } from '@/admin/modules/books/surface-builders';
+import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
+import { createBookIntroSurface } from '@/admin/surfaces/scripture/books/surface-builders';
 import { ScriptureActionRow } from '@/components/scripture/scripture-action-row';
 import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
 import { BookPublicMediaSection } from '@/components/scripture/book-public-media-section';
@@ -127,3 +127,4 @@ export default function BookOverview({
         </ScriptureLayout>
     );
 }
+

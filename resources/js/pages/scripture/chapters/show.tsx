@@ -7,11 +7,19 @@ import {
     Rows3,
 } from 'lucide-react';
 import { useState } from 'react';
-import { AdminModuleHost } from '@/admin/modules/shared/AdminModuleHost';
-import { createChapterIntroSurface } from '@/admin/modules/chapters/surface-builders';
+import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
+import {
+    createChapterIdentitySurface,
+    createChapterIntroSurface,
+} from '@/admin/surfaces/scripture/chapters/surface-builders';
+import {
+    createChapterSectionVerseGroupSurface,
+    createChapterVerseGroupsSurface,
+} from '@/admin/surfaces/sections/surface-builders';
 import { ScriptureActionRow } from '@/components/scripture/scripture-action-row';
 import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
 import { ScriptureChapterContentBlockRegion } from '@/components/scripture/scripture-chapter-content-block-region';
+import { ContentBlockRenderer } from '@/components/scripture/content-block-renderer';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
@@ -67,13 +75,23 @@ export default function ChapterShow({
                   (block) => block.id === admin.primary_content_block_id,
               ) ?? null)
             : null;
+    const chapterIdentitySurface =
+        showAdminControls && admin
+            ? createChapterIdentitySurface({
+                  chapter,
+                  updateHref: admin.identity_update_href,
+                  fullEditHref: admin.full_edit_href,
+              })
+            : null;
     const chapterIntroSurface =
         showAdminControls && admin
             ? createChapterIntroSurface({
                   chapter,
                   chapterTitle,
                   block: pageIntroBlock,
+                  blockTypes: admin.content_block_types,
                   updateHref: admin.primary_content_block_update_href,
+                  storeHref: admin.content_block_store_href,
                   fullEditHref: admin.full_edit_href,
               })
             : null;
@@ -81,6 +99,34 @@ export default function ChapterShow({
         pageIntroBlock === null
             ? content_blocks
             : content_blocks.filter((block) => block.id !== pageIntroBlock.id);
+    const totalSectionVerses = chapter_sections.reduce(
+        (sum, section) => sum + (section.verses_count ?? 0),
+        0,
+    );
+    const chapterVerseGroupsSurface =
+        showAdminControls && admin
+            ? createChapterVerseGroupsSurface({
+                  chapter,
+                  groupCount: chapter_sections.length,
+                  verseCount: totalSectionVerses,
+                  readerHref: chapter.verses_href ?? chapter.href,
+                  chapterSectionStoreHref: admin.chapter_section_store_href,
+              })
+            : null;
+    const buildChapterSectionGroupSurface = (
+        section: ChapterShowProps['chapter_sections'][number],
+        sectionTitle: string,
+    ) =>
+        showAdminControls
+            ? createChapterSectionVerseGroupSurface({
+                  chapterSection: section,
+                  title: sectionTitle,
+                  primaryCount: section.verses_count ?? 0,
+                  primaryLabel: 'verses',
+                  openHref: section.href ?? chapter.verses_href ?? chapter.href,
+                  openLabel: 'Open Reader',
+              })
+            : null;
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -122,29 +168,50 @@ export default function ChapterShow({
                 description="Read the chapter overview first, then open the reader and continue in canonical order."
                 contentClassName="space-y-6"
             >
-                {chapterIntroSurface && (
-                    <AdminModuleHost
-                        surface={chapterIntroSurface}
-                        className={PANEL_CLASS_NAME}
-                    />
+                {(chapterIdentitySurface || chapterIntroSurface) && (
+                    <div className="space-y-3">
+                        {chapterIdentitySurface && (
+                            <AdminModuleHost
+                                surface={chapterIdentitySurface}
+                                className={PANEL_CLASS_NAME}
+                            />
+                        )}
+                        {chapterIntroSurface && (
+                            <AdminModuleHost
+                                surface={chapterIntroSurface}
+                                className={PANEL_CLASS_NAME}
+                            />
+                        )}
+                    </div>
                 )}
 
                 {pageIntroBlock ? (
-                    <div className="rounded-2xl border border-border/70 bg-muted/20 px-5 py-5 sm:px-6 sm:py-6">
-                        <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-                            Chapter Introduction
-                        </p>
-                        {pageIntroBlock.title && (
-                            <p className="mt-4 text-lg font-semibold">
-                                {pageIntroBlock.title}
+                    pageIntroBlock.block_type === 'text' ? (
+                        <div className="rounded-2xl border border-border/70 bg-muted/20 px-5 py-5 sm:px-6 sm:py-6">
+                            <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+                                Chapter Introduction
                             </p>
-                        )}
-                        {pageIntroBlock.body && (
-                            <p className="mt-3 leading-7 text-muted-foreground">
-                                {pageIntroBlock.body}
+                            {pageIntroBlock.title && (
+                                <p className="mt-4 text-lg font-semibold">
+                                    {pageIntroBlock.title}
+                                </p>
+                            )}
+                            {pageIntroBlock.body && (
+                                <p className="mt-3 leading-7 text-muted-foreground">
+                                    {pageIntroBlock.body}
+                                </p>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="rounded-2xl border border-border/70 bg-muted/20 p-2 sm:p-3">
+                            <p className="px-3 pt-3 text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase sm:px-4">
+                                Chapter Introduction
                             </p>
-                        )}
-                    </div>
+                            <div className="mt-3">
+                                <ContentBlockRenderer block={pageIntroBlock} />
+                            </div>
+                        </div>
+                    )
                 ) : null}
 
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -209,12 +276,25 @@ export default function ChapterShow({
                         : 'Canonical sections inside this chapter, with verse counts for quick entry into the reader.'
                 }
             >
+                {chapterVerseGroupsSurface && (
+                    <div className="mb-4">
+                        <AdminModuleHost
+                            surface={chapterVerseGroupsSurface}
+                            className={PANEL_CLASS_NAME}
+                        />
+                    </div>
+                )}
                 {viewMode === 'cards' ? (
                     <div className="grid gap-4 md:grid-cols-2">
                         {chapter_sections.map((section) => {
                             const sectionTitle = hidesGenericChapterSection
                                 ? 'All Verses'
                                 : sectionLabel(section.number, section.title);
+                            const sectionGroupSurface =
+                                buildChapterSectionGroupSurface(
+                                    section,
+                                    sectionTitle,
+                                );
 
                             return (
                                 <ScriptureEntityRegion
@@ -230,6 +310,14 @@ export default function ChapterShow({
                                 >
                                     <Card>
                                         <CardHeader className="gap-3">
+                                            {sectionGroupSurface && (
+                                                <AdminModuleHost
+                                                    surface={sectionGroupSurface}
+                                                    className={
+                                                        PANEL_CLASS_NAME
+                                                    }
+                                                />
+                                            )}
                                             <div className="flex items-center gap-2">
                                                 <Badge variant="outline">
                                                     {section.verses_count ?? 0}{' '}
@@ -274,6 +362,11 @@ export default function ChapterShow({
                             const sectionTitle = hidesGenericChapterSection
                                 ? 'All Verses'
                                 : sectionLabel(section.number, section.title);
+                            const sectionGroupSurface =
+                                buildChapterSectionGroupSurface(
+                                    section,
+                                    sectionTitle,
+                                );
 
                             return (
                                 <ScriptureEntityRegion
@@ -295,6 +388,14 @@ export default function ChapterShow({
                                         }
                                     >
                                         <div className="min-w-0 space-y-2">
+                                            {sectionGroupSurface && (
+                                                <AdminModuleHost
+                                                    surface={sectionGroupSurface}
+                                                    className={
+                                                        PANEL_CLASS_NAME
+                                                    }
+                                                />
+                                            )}
                                             <div className="flex flex-wrap items-center gap-2">
                                                 <Badge variant="outline">
                                                     {section.verses_count ?? 0}{' '}
@@ -340,3 +441,4 @@ export default function ChapterShow({
         </ScriptureLayout>
     );
 }
+

@@ -1,11 +1,11 @@
 import type { ReactNode } from 'react';
 import { router } from '@inertiajs/react';
-import { AdminModuleHost } from '@/admin/modules/shared/AdminModuleHost';
+import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import {
     createBookBlockRegionSurface,
     createBookContentBlockActionsSurface,
     createBookContentBlockSurface,
-} from '@/admin/modules/books/surface-builders';
+} from '@/admin/surfaces/scripture/books/surface-builders';
 import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
 import { scriptureInlineRegionLabel } from '@/lib/scripture-inline-admin';
 import type {
@@ -188,3 +188,4 @@ export function ScriptureBookContentBlockRegion({
         </ScriptureSection>
     );
 }
+

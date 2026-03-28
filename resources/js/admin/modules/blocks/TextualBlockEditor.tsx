@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScriptureTextContentBlockInlineEditor } from '@/components/scripture/scripture-text-content-block-inline-editor';
-import { defineAdminModule } from '@/admin/modules/shared/module-registry';
-import type { AdminModuleComponentProps } from '@/admin/modules/shared/module-types';
+import { defineAdminModule } from '@/admin/core/module-registry';
+import type { AdminModuleComponentProps } from '@/admin/core/module-types';
 import { buildScriptureAdminBlockHref } from '@/lib/scripture-admin-navigation';
-import { getRegisteredBlockEditorMetadata } from './surface-types';
+import { getRegisteredBlockEditorMetadata } from '@/admin/surfaces/blocks/surface-types';
 
 function TextualBlockEditor({ surface }: AdminModuleComponentProps) {
     const metadata = getRegisteredBlockEditorMetadata(surface);
@@ -67,3 +67,5 @@ export const textualBlockEditorModule = defineAdminModule({
     description:
         'Renders the shared inline editor for registered text and quote blocks on active scripture surfaces.',
 });
+
+

@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScriptureImageContentBlockInlineEditor } from '@/components/scripture/scripture-image-content-block-inline-editor';
-import { defineAdminModule } from '@/admin/modules/shared/module-registry';
-import type { AdminModuleComponentProps } from '@/admin/modules/shared/module-types';
-import { BOOK_CONTENT_BLOCKS_SURFACE_KEY } from '@/admin/modules/shared/surface-keys';
+import { defineAdminModule } from '@/admin/core/module-registry';
+import type { AdminModuleComponentProps } from '@/admin/core/module-types';
 import { buildScriptureAdminBlockHref } from '@/lib/scripture-admin-navigation';
-import { getRegisteredBlockEditorMetadata } from './surface-types';
+import { getRegisteredBlockEditorMetadata } from '@/admin/surfaces/blocks/surface-types';
 
 function ImageBlockEditor({ surface }: AdminModuleComponentProps) {
     const metadata = getRegisteredBlockEditorMetadata(surface);
@@ -63,7 +62,6 @@ function ImageBlockEditor({ surface }: AdminModuleComponentProps) {
 
 export const imageBlockEditorModule = defineAdminModule({
     key: 'image-block-editor',
-    surfaceKeys: BOOK_CONTENT_BLOCKS_SURFACE_KEY,
     entityScope: 'content_block',
     surfaceSlots: 'inline_editor',
     regionScope: 'content_blocks',
@@ -72,5 +70,7 @@ export const imageBlockEditorModule = defineAdminModule({
     EditorComponent: ImageBlockEditor,
     order: 22,
     description:
-        'Renders the shared inline editor for registered Book image blocks on active scripture surfaces.',
+        'Renders the shared inline editor for registered image blocks on active scripture surfaces.',
 });
+
+

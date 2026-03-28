@@ -6,9 +6,9 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
-import { defineAdminModule } from '@/admin/modules/shared/module-registry';
-import type { AdminModuleComponentProps } from '@/admin/modules/shared/module-types';
-import { getBlockActionMetadata } from './surface-types';
+import { defineAdminModule } from '@/admin/core/module-registry';
+import type { AdminModuleComponentProps } from '@/admin/core/module-types';
+import { getBlockActionMetadata } from '@/admin/surfaces/blocks/surface-types';
 
 function BlockDragReorder({ surface }: AdminModuleComponentProps) {
     const metadata = getBlockActionMetadata(surface);
@@ -58,3 +58,5 @@ export const blockDragReorderModule = defineAdminModule({
     description:
         'Renders the drag handle for same-region block reordering when the surface qualifies.',
 });
+
+

@@ -13,11 +13,12 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { VERSE_META_SURFACE_KEY } from '@/admin/modules/shared/surface-keys';
-import { defineAdminModule } from '@/admin/modules/shared/module-registry';
-import type { AdminModuleComponentProps } from '@/admin/modules/shared/module-types';
+import { VERSE_META_SURFACE_KEY } from '@/admin/surfaces/core/surface-keys';
+import { defineAdminModule } from '@/admin/core/module-registry';
+import type { AdminModuleComponentProps } from '@/admin/core/module-types';
 import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
-import { getVerseMetaMetadata } from './surface-types';
+import { getUniqueVerseCharacterOptions } from '@/lib/scripture-character-options';
+import { getVerseMetaMetadata } from '@/admin/surfaces/scripture/verses/surface-types';
 
 type VerseMetaFormData = {
     primary_speaker_character_id: string;
@@ -50,17 +51,7 @@ function VerseMetaEditor({ surface }: AdminModuleComponentProps) {
         return null;
     }
 
-    const characterOptions = metadata.characters
-        .map((assignment) => assignment.character)
-        .filter((character): character is NonNullable<typeof character> =>
-            character !== null,
-        )
-        .filter(
-            (character, index, characters) =>
-                characters.findIndex(
-                    (candidate) => candidate.id === character.id,
-                ) === index,
-        );
+    const characterOptions = getUniqueVerseCharacterOptions(metadata.characters);
     const fullEditHref = buildScriptureAdminSectionHref(
         metadata.fullEditHref,
         'meta',
@@ -268,3 +259,5 @@ export const verseMetaEditorModule = defineAdminModule({
     description:
         'Renders the verse-meta editor for the structured verse notes surface.',
 });
+
+

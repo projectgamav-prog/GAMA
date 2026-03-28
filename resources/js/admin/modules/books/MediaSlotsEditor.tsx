@@ -14,16 +14,16 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { BOOK_MEDIA_SLOTS_SURFACE_KEY } from '@/admin/modules/shared/surface-keys';
-import { defineAdminModule } from '@/admin/modules/shared/module-registry';
-import type { AdminModuleComponentProps } from '@/admin/modules/shared/module-types';
+import { BOOK_MEDIA_SLOTS_SURFACE_KEY } from '@/admin/surfaces/core/surface-keys';
+import { defineAdminModule } from '@/admin/core/module-registry';
+import type { AdminModuleComponentProps } from '@/admin/core/module-types';
 import { getBookMediaSlotMeta } from '@/lib/book-media-slot-meta';
 import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
 import type {
     ScriptureAdminMediaAssignment,
     ScriptureAdminMediaSummary,
 } from '@/types';
-import { getBookMediaSlotsMetadata } from './surface-types';
+import { getBookMediaSlotsMetadata } from '@/admin/surfaces/scripture/books/surface-types';
 
 type MediaAssignmentFormData = {
     media_id: string;
@@ -578,3 +578,5 @@ export const mediaSlotsEditorModule = defineAdminModule({
     description:
         'Renders the book media-slot assignment editor on the public book detail page.',
 });
+
+

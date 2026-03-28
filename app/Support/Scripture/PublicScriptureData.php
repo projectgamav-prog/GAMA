@@ -59,29 +59,6 @@ class PublicScriptureData
     }
 
     /**
-     * @param  iterable<int, BookSection>  $sections
-     * @return list<array<string, mixed>>
-     */
-    public function bookSectionsWithChapters(Book $book, iterable $sections): array
-    {
-        return collect($sections)
-            ->map(fn (BookSection $section) => [
-                ...$this->bookSection($book, $section),
-                'chapters' => collect($section->chapters)
-                    ->map(fn (Chapter $chapter) => $this->chapter(
-                        $book,
-                        $section,
-                        $chapter,
-                        includeReaderLink: false,
-                    ))
-                    ->values()
-                    ->all(),
-            ])
-            ->values()
-            ->all();
-    }
-
-    /**
      * @return array<string, mixed>
      */
     public function bookSection(Book $book, BookSection $section): array
@@ -120,28 +97,6 @@ class PublicScriptureData
             ...$data,
             'verses_href' => $this->chapterReaderHref($book, $bookSection, $chapter),
         ];
-    }
-
-    /**
-     * @param  iterable<int, ChapterSection>  $sections
-     * @return list<array<string, mixed>>
-     */
-    public function chapterSections(
-        Book $book,
-        BookSection $bookSection,
-        Chapter $chapter,
-        iterable $sections,
-    ): array {
-        return collect($sections)
-            ->map(fn (ChapterSection $section) => $this->chapterSection(
-                $book,
-                $bookSection,
-                $chapter,
-                $section,
-                $section->verses_count ?? null,
-            ))
-            ->values()
-            ->all();
     }
 
     /**

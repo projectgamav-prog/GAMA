@@ -6,10 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\Book;
 use App\Models\BookSection;
 use App\Models\Chapter;
+use App\Models\ChapterSection;
 use App\Models\ContentBlock;
 use App\Support\AdminContext\AdminContext;
 use App\Support\Scripture\Admin\ChapterAdminRouteContext;
+use App\Support\Scripture\Admin\ChapterSectionAdminRouteContext;
 use App\Support\Scripture\Admin\ContentBlockCapabilityPayload;
+use App\Support\Scripture\Admin\PrimaryPublishedEditableContentBlock;
 use App\Support\Scripture\Admin\VisibleContentBlockSequence;
 use App\Support\Scripture\PublicScriptureData;
 use Illuminate\Http\Request;
@@ -44,6 +47,12 @@ class ChapterController extends Controller
 
         $chapterSections = $chapter->chapterSections()
             ->withCount('verses')
+            ->with([
+                'contentBlocks' => fn ($contentBlockQuery) => $contentBlockQuery
+                    ->published()
+                    ->orderBy('sort_order')
+                    ->orderBy('id'),
+            ])
             ->inCanonicalOrder()
             ->get();
 
@@ -60,11 +69,13 @@ class ChapterController extends Controller
                     $primaryEditableBlock,
                 )
                 : null,
-            'chapter_sections' => $publicScriptureData->chapterSections(
+            'chapter_sections' => $this->chapterSectionsPayload(
                 $book,
                 $bookSection,
                 $chapter,
                 $chapterSections,
+                $publicScriptureData,
+                $isAdmin,
             ),
         ]);
     }
@@ -78,25 +89,10 @@ class ChapterController extends Controller
         Collection $contentBlocks,
         ChapterAdminRouteContext $adminRouteContext,
     ): ?ContentBlock {
-        $editableBlocks = $contentBlocks
-            ->filter(fn (ContentBlock $block) => $adminRouteContext->isEditableNoteBlock($block))
-            ->values();
-
-        if ($editableBlocks->isEmpty()) {
-            return null;
-        }
-
-        $overviewBlocks = $editableBlocks
-            ->filter(fn (ContentBlock $block) => $block->region === 'overview')
-            ->values();
-
-        if ($overviewBlocks->count() === 1) {
-            return $overviewBlocks->first();
-        }
-
-        return $editableBlocks->count() === 1
-            ? $editableBlocks->first()
-            : null;
+        return PrimaryPublishedEditableContentBlock::resolve(
+            $contentBlocks,
+            fn (ContentBlock $block): bool => $adminRouteContext->isEditableNoteBlock($block),
+        );
     }
 
     /**
@@ -112,6 +108,11 @@ class ChapterController extends Controller
 
         return [
             'full_edit_href' => $adminRouteContext->fullEditHref(),
+            'identity_update_href' => $adminRouteContext->identityUpdateHref(),
+            'chapter_section_store_href' => route(
+                'scripture.chapter-sections.admin.store',
+                $adminRouteContext->routeParameters(),
+            ),
             'content_block_store_href' => $adminRouteContext->contentBlockStoreHref(),
             'content_block_types' => $adminRouteContext->contentBlockTypes(),
             'content_block_default_region' => $adminRouteContext->defaultContentBlockRegion(),
@@ -130,6 +131,100 @@ class ChapterController extends Controller
                 fn (ContentBlock $block): string => $adminRouteContext->contentBlockReorderHref($block),
                 fn (ContentBlock $block): string => $adminRouteContext->contentBlockDuplicateHref($block),
                 fn (ContentBlock $block): string => $adminRouteContext->contentBlockDestroyHref($block),
+            ),
+        ];
+    }
+
+    /**
+     * @param  Collection<int, ChapterSection>  $chapterSections
+     * @return list<array<string, mixed>>
+     */
+    private function chapterSectionsPayload(
+        Book $book,
+        BookSection $bookSection,
+        Chapter $chapter,
+        Collection $chapterSections,
+        PublicScriptureData $publicScriptureData,
+        bool $isAdmin,
+    ): array {
+        return $chapterSections
+            ->map(fn (ChapterSection $chapterSection) => [
+                ...$publicScriptureData->chapterSection(
+                    $book,
+                    $bookSection,
+                    $chapter,
+                    $chapterSection,
+                    $chapterSection->verses_count ?? null,
+                ),
+                'admin' => $isAdmin
+                    ? $this->chapterSectionAdminPayload(
+                        $book,
+                        $bookSection,
+                        $chapter,
+                        $chapterSection,
+                        $publicScriptureData,
+                    )
+                    : null,
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function chapterSectionAdminPayload(
+        Book $book,
+        BookSection $bookSection,
+        Chapter $chapter,
+        ChapterSection $chapterSection,
+        PublicScriptureData $publicScriptureData,
+    ): array {
+        $adminRouteContext = new ChapterSectionAdminRouteContext(
+            $book,
+            $bookSection,
+            $chapter,
+            $chapterSection,
+        );
+        $contentBlocks = $chapterSection->relationLoaded('contentBlocks')
+            ? collect($chapterSection->contentBlocks)
+            : $chapterSection->contentBlocks()
+                ->published()
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get();
+        $primaryIntroBlock = PrimaryPublishedEditableContentBlock::resolve(
+            $contentBlocks,
+            fn (ContentBlock $block): bool => $adminRouteContext->isEditableIntroBlock($block),
+        );
+
+        return [
+            'details_update_href' => route(
+                'scripture.chapter-sections.admin.details.update',
+                [
+                    'book' => $book,
+                    'bookSection' => $bookSection,
+                    'chapter' => $chapter,
+                    'chapterSection' => $chapterSection,
+                ],
+            ),
+            'intro_store_href' => $adminRouteContext->contentBlockStoreHref(),
+            'primary_intro_block' => $primaryIntroBlock
+                ? ($publicScriptureData->contentBlocks([$primaryIntroBlock])[0] ?? null)
+                : null,
+            'primary_intro_update_href' => $primaryIntroBlock
+                ? $adminRouteContext->contentBlockUpdateHref($primaryIntroBlock)
+                : null,
+            'intro_block_types' => $adminRouteContext->contentBlockTypes(),
+            'intro_default_region' => $adminRouteContext->defaultContentBlockRegion(),
+            'child_store_href' => route(
+                'scripture.chapters.verses.admin.store',
+                [
+                    'book' => $book,
+                    'bookSection' => $bookSection,
+                    'chapter' => $chapter,
+                    'chapterSection' => $chapterSection,
+                ],
             ),
         ];
     }

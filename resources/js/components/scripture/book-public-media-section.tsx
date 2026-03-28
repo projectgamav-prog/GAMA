@@ -1,5 +1,5 @@
-import { AdminModuleHost } from '@/admin/modules/shared/AdminModuleHost';
-import { createBookMediaSlotsSurface } from '@/admin/modules/books/surface-builders';
+import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
+import { createBookMediaSlotsSurface } from '@/admin/surfaces/scripture/books/surface-builders';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -146,3 +146,4 @@ export function BookPublicMediaSection({ book, admin, isAdmin }: Props) {
         </ScriptureSection>
     );
 }
+

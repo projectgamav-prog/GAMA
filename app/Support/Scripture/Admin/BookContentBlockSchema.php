@@ -9,10 +9,7 @@ class BookContentBlockSchema
      */
     public static function editableTypes(): array
     {
-        return [
-            ...TextualContentBlockSchema::editableTypes(),
-            'image',
-        ];
+        return RegisteredNoteContentBlockSchema::editableTypes();
     }
 
     /**

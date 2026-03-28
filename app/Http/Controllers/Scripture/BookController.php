@@ -4,12 +4,16 @@ namespace App\Http\Controllers\Scripture;
 
 use App\Http\Controllers\Controller;
 use App\Models\Book;
+use App\Models\BookSection;
+use App\Models\Chapter;
 use App\Models\ContentBlock;
 use App\Models\Media;
 use App\Models\MediaAssignment;
 use App\Support\AdminContext\AdminContext;
 use App\Support\Scripture\Admin\BookAdminRouteContext;
+use App\Support\Scripture\Admin\BookSectionAdminRouteContext;
 use App\Support\Scripture\Admin\ContentBlockCapabilityPayload;
+use App\Support\Scripture\Admin\PrimaryPublishedEditableContentBlock;
 use App\Support\Scripture\Admin\VisibleContentBlockSequence;
 use App\Support\Scripture\PublicScriptureData;
 use Illuminate\Database\Eloquent\Collection;
@@ -35,6 +39,7 @@ class BookController extends Controller
 
         return Inertia::render('scripture/books/index', [
             'isAdmin' => $isAdmin,
+            'admin' => $isAdmin ? $this->booksIndexAdminPayload() : null,
             'books' => $books
                 ->map(fn (Book $book) => [
                     ...$publicScriptureData->book($book),
@@ -84,6 +89,10 @@ class BookController extends Controller
                 ->inCanonicalOrder()
                 ->with([
                     'chapters' => fn ($chapterQuery) => $chapterQuery->inCanonicalOrder(),
+                    'contentBlocks' => fn ($contentBlockQuery) => $contentBlockQuery
+                        ->published()
+                        ->orderBy('sort_order')
+                        ->orderBy('id'),
                 ]),
         ]);
         $this->loadPublicBookMediaRelations($book);
@@ -102,9 +111,11 @@ class BookController extends Controller
                     includeMediaManagement: true,
                 )
                 : null,
-            'book_sections' => $publicScriptureData->bookSectionsWithChapters(
+            'book_sections' => $this->bookSectionsPayload(
                 $book,
                 $book->bookSections,
+                $publicScriptureData,
+                $isAdmin,
             ),
         ]);
     }
@@ -160,6 +171,10 @@ class BookController extends Controller
             'details_update_href' => $adminRouteContext->detailsUpdateHref(),
             'full_edit_href' => $adminRouteContext->fullEditHref(),
             'canonical_edit_href' => $adminRouteContext->canonicalEditHref(),
+            'book_section_store_href' => route(
+                'scripture.book-sections.admin.store',
+                ['book' => $book],
+            ),
             'content_block_store_href' => $adminRouteContext->contentBlockStoreHref(),
             'content_block_types' => $adminRouteContext->editableContentBlockTypes(),
             'content_block_default_region' => $adminRouteContext->creatableContentBlockRegions()[0],
@@ -255,6 +270,98 @@ class BookController extends Controller
             'details_update_href' => $adminRouteContext->detailsUpdateHref(),
             'full_edit_href' => $adminRouteContext->fullEditHref(),
             'canonical_edit_href' => $adminRouteContext->canonicalEditHref(),
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function booksIndexAdminPayload(): array
+    {
+        return [
+            'store_href' => route('scripture.books.admin.store'),
+        ];
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<int, BookSection>  $sections
+     * @return list<array<string, mixed>>
+     */
+    private function bookSectionsPayload(
+        Book $book,
+        \Illuminate\Support\Collection $sections,
+        PublicScriptureData $publicScriptureData,
+        bool $isAdmin,
+    ): array {
+        return $sections
+            ->map(fn (BookSection $section) => [
+                ...$publicScriptureData->bookSection($book, $section),
+                'admin' => $isAdmin
+                    ? $this->bookSectionAdminPayload(
+                        $book,
+                        $section,
+                        $publicScriptureData,
+                    )
+                    : null,
+                'chapters' => collect($section->chapters)
+                    ->map(fn (Chapter $chapter) => $publicScriptureData->chapter(
+                        $book,
+                        $section,
+                        $chapter,
+                        includeReaderLink: false,
+                    ))
+                    ->values()
+                    ->all(),
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function bookSectionAdminPayload(
+        Book $book,
+        BookSection $bookSection,
+        PublicScriptureData $publicScriptureData,
+    ): array {
+        $adminRouteContext = new BookSectionAdminRouteContext($book, $bookSection);
+        $contentBlocks = $bookSection->relationLoaded('contentBlocks')
+            ? collect($bookSection->contentBlocks)
+            : $bookSection->contentBlocks()
+                ->published()
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get();
+        $primaryIntroBlock = PrimaryPublishedEditableContentBlock::resolve(
+            $contentBlocks,
+            fn (ContentBlock $block): bool => $adminRouteContext->isEditableIntroBlock($block),
+        );
+
+        return [
+            'details_update_href' => route(
+                'scripture.book-sections.admin.details.update',
+                [
+                    'book' => $book,
+                    'bookSection' => $bookSection,
+                ],
+            ),
+            'intro_store_href' => $adminRouteContext->contentBlockStoreHref(),
+            'primary_intro_block' => $primaryIntroBlock
+                ? ($publicScriptureData->contentBlocks([$primaryIntroBlock])[0] ?? null)
+                : null,
+            'primary_intro_update_href' => $primaryIntroBlock
+                ? $adminRouteContext->contentBlockUpdateHref($primaryIntroBlock)
+                : null,
+            'intro_block_types' => $adminRouteContext->contentBlockTypes(),
+            'intro_default_region' => $adminRouteContext->defaultContentBlockRegion(),
+            'child_store_href' => route(
+                'scripture.chapters.admin.store',
+                [
+                    'book' => $book,
+                    'bookSection' => $bookSection,
+                ],
+            ),
         ];
     }
 }

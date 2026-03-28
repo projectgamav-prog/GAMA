@@ -1,9 +1,9 @@
 import { Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
-import { defineAdminModule } from '@/admin/modules/shared/module-registry';
-import type { AdminModuleComponentProps } from '@/admin/modules/shared/module-types';
+import { defineAdminModule } from '@/admin/core/module-registry';
+import type { AdminModuleComponentProps } from '@/admin/core/module-types';
 import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
-import { getBlockRegionMetadata } from './surface-types';
+import { getBlockRegionMetadata } from '@/admin/surfaces/blocks/surface-types';
 
 function BlockRegionFullEdit({ surface }: AdminModuleComponentProps) {
     const metadata = getBlockRegionMetadata(surface);
@@ -40,3 +40,5 @@ export const blockRegionFullEditModule = defineAdminModule({
     description:
         'Renders the shared region-level full-edit entry for block-backed scripture surfaces.',
 });
+
+

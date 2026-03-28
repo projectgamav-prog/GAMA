@@ -108,6 +108,14 @@ class VerseAdminRouteContext
      */
     public function contentBlockTypes(): array
     {
+        return RegisteredNoteContentBlockSchema::editableTypes();
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function duplicableContentBlockTypes(): array
+    {
         return TextualContentBlockSchema::editableTypes();
     }
 
@@ -132,7 +140,11 @@ class VerseAdminRouteContext
 
     public function isDuplicableNoteBlock(ContentBlock $contentBlock): bool
     {
-        return $this->isEditableNoteBlock($contentBlock);
+        return RegisteredContentBlock::isEditableFor(
+            $this->verse,
+            $contentBlock,
+            $this->duplicableContentBlockTypes(),
+        );
     }
 
     public function isContextualInsertionAnchor(ContentBlock $contentBlock): bool
@@ -174,6 +186,6 @@ class VerseAdminRouteContext
 
     public function contentBlockProtectionReason(): string
     {
-        return 'Only verse-owned text and quote note blocks are editable in this phase.';
+        return 'Only verse-owned registered note blocks (text, quote, and image) are editable in this phase.';
     }
 }
