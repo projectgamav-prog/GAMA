@@ -69,6 +69,7 @@ function BlockDuplicate({ surface }: AdminModuleComponentProps) {
 
 export const blockDuplicateModule = defineAdminModule({
     key: 'block-duplicate',
+    contractKeys: 'block_actions',
     entityScope: 'content_block',
     surfaceSlots: 'block_actions',
     regionScope: '*',

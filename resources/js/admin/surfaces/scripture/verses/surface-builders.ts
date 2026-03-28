@@ -83,6 +83,7 @@ export function createVerseIdentitySurface({
 }: VerseIdentitySurfaceArgs): AdminSurfaceContract<VerseIdentitySurfaceMetadata> {
     return createInlineEditorSurface({
         surfaceKey: VERSE_INTRO_SURFACE_KEY,
+        contractKey: 'identity',
         entity: 'verse',
         entityId: verse.id,
         regionKey: 'verse_intro',
@@ -104,6 +105,7 @@ export function createVerseMetaSurface({
 }: VerseMetaSurfaceArgs): AdminSurfaceContract<VerseMetaSurfaceMetadata> {
     return createInlineEditorSurface({
         surfaceKey: VERSE_META_SURFACE_KEY,
+        contractKey: 'structured_meta',
         entity: 'verse',
         entityId: verse.id,
         regionKey: 'verse_notes',
@@ -133,6 +135,7 @@ export function createVerseBlockRegionSurface({
 
     return createInsertControlSurface({
         surfaceKey: VERSE_NOTES_SURFACE_KEY,
+        contractKey: 'block_region',
         entity: 'verse',
         entityId: verse.id,
         regionKey: 'content_blocks',
@@ -148,7 +151,6 @@ export function createVerseBlockRegionSurface({
             insertionPoint,
             label: 'Add Block',
             placementLabel: insertionPoint.label,
-            onSelectType: () => undefined,
         },
     });
 }
@@ -162,6 +164,7 @@ export function createVerseNoteBlockSurface({
 }: VerseNoteBlockSurfaceArgs): AdminSurfaceContract<RegisteredBlockEditorSurfaceMetadata> {
     return createInlineEditorSurface({
         surfaceKey: VERSE_NOTES_SURFACE_KEY,
+        contractKey: 'registered_block',
         entity: 'content_block',
         entityId: block.id,
         regionKey: 'content_blocks',
@@ -221,6 +224,7 @@ export function createVerseNoteBlockActionsSurface({
 
     return createBlockActionsSurface({
         surfaceKey: VERSE_NOTES_SURFACE_KEY,
+        contractKey: 'block_actions',
         entity: 'content_block',
         entityId: block.id,
         regionKey: 'content_blocks',

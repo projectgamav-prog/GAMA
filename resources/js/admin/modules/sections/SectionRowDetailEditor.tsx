@@ -7,10 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { defineAdminModule } from '@/admin/core/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/core/module-types';
-import {
-    BOOK_SECTION_CHAPTER_GROUP_SURFACE_KEY,
-    CHAPTER_SECTION_VERSE_GROUP_SURFACE_KEY,
-} from '@/admin/surfaces/core/surface-keys';
 import { getSectionGroupMetadata } from '@/admin/surfaces/sections/surface-types';
 
 type SectionRowDetailFormData = {
@@ -109,14 +105,12 @@ function SectionRowDetailEditor({ surface }: AdminModuleComponentProps) {
 
 export const sectionRowDetailEditorModule = defineAdminModule({
     key: 'section-row-detail-editor',
-    surfaceKeys: [
-        BOOK_SECTION_CHAPTER_GROUP_SURFACE_KEY,
-        CHAPTER_SECTION_VERSE_GROUP_SURFACE_KEY,
-    ],
+    contractKeys: 'section_group',
     entityScope: ['book_section', 'chapter_section'],
     surfaceSlots: 'inline_editor',
     presentationVariants: 'compact',
     requiredCapabilities: ['edit'],
+    qualifies: (surface) => getSectionGroupMetadata(surface)?.updateHref !== null,
     EditorComponent: SectionRowDetailEditor,
     order: 20,
     description:

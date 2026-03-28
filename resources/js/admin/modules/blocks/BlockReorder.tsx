@@ -147,6 +147,7 @@ function BlockReorder({ surface }: AdminModuleComponentProps) {
 
 export const blockReorderModule = defineAdminModule({
     key: 'block-reorder',
+    contractKeys: 'block_actions',
     entityScope: 'content_block',
     surfaceSlots: 'block_actions',
     regionScope: '*',

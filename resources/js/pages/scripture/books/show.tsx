@@ -2,13 +2,12 @@ import { Link } from '@inertiajs/react';
 import { BookOpenText } from 'lucide-react';
 import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import {
-    createBookIdentitySurface,
-    createBookIntroSurface,
-} from '@/admin/surfaces/scripture/books/surface-builders';
+    resolveBookHeaderSurfaces,
+} from '@/admin/integrations/scripture/books';
 import {
-    createBookChapterGroupsSurface,
-    createBookSectionChapterGroupSurface,
-} from '@/admin/surfaces/sections/surface-builders';
+    resolveBookChapterGroupsSurface,
+    resolveBookSectionChapterGroupSurface,
+} from '@/admin/integrations/sections';
 import { BookPublicMediaSection } from '@/components/scripture/book-public-media-section';
 import { ScriptureBookContentBlockRegion } from '@/components/scripture/scripture-book-content-block-region';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
@@ -47,36 +46,17 @@ export default function BookShow({
         entityId: book.id,
         entityLabel: book.title,
     };
-    const totalChapterCount = book_sections.reduce(
-        (sum, section) => sum + section.chapters.length,
-        0,
-    );
-    const identitySurface =
-        isAdmin && admin
-            ? createBookIdentitySurface({
-                  book,
-                  updateHref: admin.identity_update_href,
-                  fullEditHref: admin.canonical_edit_href,
-              })
-            : null;
-    const introSurface =
-        isAdmin && admin
-            ? createBookIntroSurface({
-                  book,
-                  updateHref: admin.details_update_href,
-                  fullEditHref: admin.full_edit_href,
-              })
-            : null;
-    const chapterGroupsSurface =
-        isAdmin && admin
-            ? createBookChapterGroupsSurface({
-                  book,
-                  groupCount: book_sections.length,
-                  chapterCount: totalChapterCount,
-                  canonicalEditHref: admin.canonical_edit_href,
-                  bookSectionStoreHref: admin.book_section_store_href,
-              })
-            : null;
+    const { identitySurface, introSurface } = resolveBookHeaderSurfaces({
+        book,
+        admin,
+        enabled: isAdmin,
+    });
+    const chapterGroupsSurface = resolveBookChapterGroupsSurface({
+        book,
+        bookSections: book_sections,
+        admin,
+        enabled: isAdmin,
+    });
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: book.title,
@@ -165,13 +145,11 @@ export default function BookShow({
                             ? 'Chapters'
                             : sectionLabel(section.number, section.title);
                         const sectionGroupSurface =
-                            isAdmin && admin
-                                ? createBookSectionChapterGroupSurface({
-                                      bookSection: section,
-                                      title: sectionTitle,
-                                      chapterCount: section.chapters.length,
-                                  })
-                                : null;
+                            resolveBookSectionChapterGroupSurface({
+                                bookSection: section,
+                                title: sectionTitle,
+                                enabled: isAdmin && admin !== null && admin !== undefined,
+                            });
 
                         return (
                             <ScriptureEntityRegion

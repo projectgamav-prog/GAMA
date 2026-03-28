@@ -82,6 +82,7 @@ export function createChapterIdentitySurface({
 }: ChapterIdentitySurfaceArgs): AdminSurfaceContract<ChapterIdentitySurfaceMetadata> {
     return createInlineEditorSurface({
         surfaceKey: CHAPTER_INTRO_SURFACE_KEY,
+        contractKey: 'identity',
         entity: 'chapter',
         entityId: chapter.id,
         regionKey: 'page_intro',
@@ -106,6 +107,7 @@ export function createChapterIntroSurface({
 }: ChapterIntroSurfaceArgs): AdminSurfaceContract<ChapterIntroSurfaceMetadata> {
     return createInlineEditorSurface({
         surfaceKey: CHAPTER_INTRO_SURFACE_KEY,
+        contractKey: 'intro',
         entity: 'chapter',
         entityId: chapter.id,
         regionKey: 'page_intro',
@@ -142,6 +144,7 @@ export function createChapterBlockRegionSurface({
 
     return createInsertControlSurface({
         surfaceKey: CHAPTER_CONTENT_BLOCKS_SURFACE_KEY,
+        contractKey: 'block_region',
         entity: 'chapter',
         entityId: chapter.id,
         regionKey: 'content_blocks',
@@ -157,7 +160,6 @@ export function createChapterBlockRegionSurface({
             insertionPoint,
             label: 'Add Block',
             placementLabel: insertionPoint.label,
-            onSelectType: () => undefined,
         },
     });
 }
@@ -171,6 +173,7 @@ export function createChapterContentBlockSurface({
 }: ChapterContentBlockSurfaceArgs): AdminSurfaceContract<RegisteredBlockEditorSurfaceMetadata> {
     return createInlineEditorSurface({
         surfaceKey: CHAPTER_CONTENT_BLOCKS_SURFACE_KEY,
+        contractKey: 'registered_block',
         entity: 'content_block',
         entityId: block.id,
         regionKey: 'content_blocks',
@@ -230,6 +233,7 @@ export function createChapterContentBlockActionsSurface({
 
     return createBlockActionsSurface({
         surfaceKey: CHAPTER_CONTENT_BLOCKS_SURFACE_KEY,
+        contractKey: 'block_actions',
         entity: 'content_block',
         entityId: block.id,
         regionKey: 'content_blocks',

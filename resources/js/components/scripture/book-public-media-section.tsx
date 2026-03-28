@@ -1,5 +1,5 @@
 import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
-import { createBookMediaSlotsSurface } from '@/admin/surfaces/scripture/books/surface-builders';
+import { resolveBookMediaSurface } from '@/admin/integrations/scripture/books';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -84,21 +84,11 @@ export function BookPublicMediaSection({ book, admin, isAdmin }: Props) {
         overview_video !== null ||
         hero_media !== null ||
         supporting_media.length > 0;
-    const mediaSurface =
-        isAdmin &&
-        admin?.media_assignment_store_href &&
-        admin.media_assignments &&
-        admin.available_media &&
-        admin.next_media_assignment_sort_order !== undefined
-            ? createBookMediaSlotsSurface({
-                  book,
-                  storeHref: admin.media_assignment_store_href,
-                  fullEditHref: admin.full_edit_href,
-                  assignments: admin.media_assignments,
-                  availableMedia: admin.available_media,
-                  nextSortOrder: admin.next_media_assignment_sort_order,
-              })
-            : null;
+    const mediaSurface = resolveBookMediaSurface({
+        book,
+        admin,
+        enabled: isAdmin,
+    });
 
     if (!hasMedia && !mediaSurface) {
         return null;

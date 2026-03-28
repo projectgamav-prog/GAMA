@@ -2,8 +2,10 @@ import { Link } from '@inertiajs/react';
 import { ArrowRight, BookOpenText } from 'lucide-react';
 import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import type { AdminSurfaceContract } from '@/admin/surfaces/core/surface-contracts';
-import { createBookIntroSurface } from '@/admin/surfaces/scripture/books/surface-builders';
-import { createBooksCollectionSurface } from '@/admin/surfaces/sections/surface-builders';
+import {
+    resolveBookCardIntroSurface,
+} from '@/admin/integrations/scripture/books';
+import { resolveBooksCollectionSurface } from '@/admin/integrations/sections';
 import { BookOverviewVideoDisclosure } from '@/components/scripture/book-overview-video-disclosure';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
@@ -96,13 +98,11 @@ export default function BooksIndex({ books, isAdmin, admin }: BooksIndexProps) {
             href: '/books',
         },
     ];
-    const libraryCollectionSurface =
-        isAdmin && admin
-            ? createBooksCollectionSurface({
-                  bookCount: books.length,
-                  storeHref: admin.store_href,
-              })
-            : null;
+    const libraryCollectionSurface = resolveBooksCollectionSurface({
+        bookCount: books.length,
+        admin,
+        enabled: isAdmin,
+    });
 
     return (
         <ScriptureLayout title="Books" breadcrumbs={breadcrumbs}>
@@ -136,19 +136,10 @@ export default function BooksIndex({ books, isAdmin, admin }: BooksIndexProps) {
                             key={book.id}
                             book={book}
                             introSurface={
-                                isAdmin && book.admin
-                                    ? createBookIntroSurface({
-                                          book,
-                                          updateHref:
-                                              book.admin.details_update_href,
-                                          fullEditHref:
-                                              book.admin.full_edit_href,
-                                          presentation: {
-                                              placement: 'inline',
-                                              variant: 'compact',
-                                          },
-                                      })
-                                    : null
+                                resolveBookCardIntroSurface({
+                                    book,
+                                    enabled: isAdmin,
+                                })
                             }
                         />
                     ))}

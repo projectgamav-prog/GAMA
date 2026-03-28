@@ -22,6 +22,17 @@ export type AdminSurfaceCapability =
     | 'manage_media'
     | 'manage_relations';
 
+export type AdminSurfaceContractKey =
+    | 'identity'
+    | 'intro'
+    | 'structured_meta'
+    | 'block_region'
+    | 'registered_block'
+    | 'block_actions'
+    | 'media_slots'
+    | 'section_collection'
+    | 'section_group';
+
 export type AdminSurfaceIdentifier = string | number;
 
 export type AdminSurfaceSlot =
@@ -59,6 +70,7 @@ export type AdminSurfaceOwner = {
  */
 export type AdminSurfaceContract<TMetadata = unknown> = {
     surfaceKey?: AdminSurfaceKey | null;
+    contractKey?: AdminSurfaceContractKey | null;
     entity: ScriptureEntityType;
     entityId: AdminSurfaceIdentifier;
     slot: AdminSurfaceSlot;

@@ -41,7 +41,7 @@ export type BlockCreateSurfaceMetadata = {
     disabled?: boolean;
     label?: string;
     placementLabel?: string;
-    onSelectType: (blockType: string) => void;
+    onSelectType?: (blockType: string) => void;
 };
 
 export type BlockRegionSurfaceMetadata = {
@@ -85,8 +85,7 @@ export function getBlockCreateMetadata(
 
     const candidate = surface.metadata as Partial<BlockCreateSurfaceMetadata>;
 
-    return Array.isArray(candidate.blockTypes) &&
-        typeof candidate.onSelectType === 'function'
+    return Array.isArray(candidate.blockTypes)
         ? (candidate as BlockCreateSurfaceMetadata)
         : null;
 }

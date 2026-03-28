@@ -13,7 +13,6 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { VERSE_META_SURFACE_KEY } from '@/admin/surfaces/core/surface-keys';
 import { defineAdminModule } from '@/admin/core/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/core/module-types';
 import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
@@ -250,10 +249,11 @@ function VerseMetaEditor({ surface }: AdminModuleComponentProps) {
 
 export const verseMetaEditorModule = defineAdminModule({
     key: 'verse-meta-editor',
-    surfaceKeys: VERSE_META_SURFACE_KEY,
+    contractKeys: 'structured_meta',
     entityScope: 'verse',
     surfaceSlots: 'inline_editor',
     requiredCapabilities: ['edit'],
+    qualifies: (surface) => getVerseMetaMetadata(surface) !== null,
     EditorComponent: VerseMetaEditor,
     order: 20,
     description:

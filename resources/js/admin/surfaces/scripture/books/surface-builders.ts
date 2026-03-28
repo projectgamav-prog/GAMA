@@ -55,7 +55,6 @@ type BookBlockRegionSurfaceArgs = {
     fullEditHref: string;
     defaultRegion: string;
     blockTypes: string[];
-    onSelectType: (blockType: string) => void;
 };
 
 type BookContentBlockSurfaceArgs = {
@@ -96,6 +95,7 @@ export function createBookIdentitySurface({
 }: BookIdentitySurfaceArgs): AdminSurfaceContract<BookIdentitySurfaceMetadata> {
     return createInlineEditorSurface({
         surfaceKey: BOOK_INTRO_SURFACE_KEY,
+        contractKey: 'identity',
         entity: 'book',
         entityId: book.id,
         regionKey: 'book_intro',
@@ -117,6 +117,7 @@ export function createBookIntroSurface({
 }: BookIntroSurfaceArgs): AdminSurfaceContract<BookIntroSurfaceMetadata> {
     return createInlineEditorSurface({
         surfaceKey: BOOK_INTRO_SURFACE_KEY,
+        contractKey: 'intro',
         entity: 'book',
         entityId: book.id,
         regionKey: 'book_intro',
@@ -139,7 +140,6 @@ export function createBookBlockRegionSurface({
     fullEditHref,
     defaultRegion,
     blockTypes,
-    onSelectType,
 }: BookBlockRegionSurfaceArgs): AdminSurfaceContract<BlockRegionSurfaceMetadata> {
     const insertionPoint =
         blocks.length > 0
@@ -148,6 +148,7 @@ export function createBookBlockRegionSurface({
 
     return createInsertControlSurface({
         surfaceKey: BOOK_CONTENT_BLOCKS_SURFACE_KEY,
+        contractKey: 'block_region',
         entity: 'book',
         entityId: book.id,
         regionKey: 'content_blocks',
@@ -163,7 +164,6 @@ export function createBookBlockRegionSurface({
             insertionPoint,
             label: 'Add Block',
             placementLabel: insertionPoint.label,
-            onSelectType,
         },
     });
 }
@@ -177,6 +177,7 @@ export function createBookContentBlockSurface({
 }: BookContentBlockSurfaceArgs): AdminSurfaceContract<RegisteredBlockEditorSurfaceMetadata> {
     return createInlineEditorSurface({
         surfaceKey: BOOK_CONTENT_BLOCKS_SURFACE_KEY,
+        contractKey: 'registered_block',
         entity: 'content_block',
         entityId: block.id,
         regionKey: 'content_blocks',
@@ -236,6 +237,7 @@ export function createBookContentBlockActionsSurface({
 
     return createBlockActionsSurface({
         surfaceKey: BOOK_CONTENT_BLOCKS_SURFACE_KEY,
+        contractKey: 'block_actions',
         entity: 'content_block',
         entityId: block.id,
         regionKey: 'content_blocks',
@@ -259,6 +261,7 @@ export function createBookMediaSlotsSurface({
 }: BookMediaSlotsSurfaceArgs): AdminSurfaceContract<BookMediaSlotsSurfaceMetadata> {
     return createInlineEditorSurface({
         surfaceKey: BOOK_MEDIA_SLOTS_SURFACE_KEY,
+        contractKey: 'media_slots',
         entity: 'book',
         entityId: book.id,
         regionKey: 'book_media_slots',

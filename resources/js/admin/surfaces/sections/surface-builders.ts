@@ -147,6 +147,7 @@ export function createBooksCollectionSurface({
 }: BooksCollectionSurfaceArgs): AdminSurfaceContract<SectionCollectionSurfaceMetadata> {
     return createInlineEditorSurface({
         surfaceKey: BOOKS_COLLECTION_SURFACE_KEY,
+        contractKey: 'section_collection',
         entity: 'book',
         entityId: 'library',
         regionKey: 'books_collection',
@@ -184,6 +185,7 @@ export function createBookChapterGroupsSurface({
 }: BookChapterGroupsSurfaceArgs): AdminSurfaceContract<SectionCollectionSurfaceMetadata> {
     return createInlineEditorSurface({
         surfaceKey: BOOK_CHAPTER_GROUPS_SURFACE_KEY,
+        contractKey: 'section_collection',
         entity: 'book',
         entityId: book.id,
         regionKey: 'canonical_browse',
@@ -235,6 +237,7 @@ export function createBookSectionChapterGroupSurface({
 
     return createInlineEditorSurface({
         surfaceKey: BOOK_SECTION_CHAPTER_GROUP_SURFACE_KEY,
+        contractKey: 'section_group',
         entity: 'book_section',
         entityId: bookSection.id,
         regionKey: 'chapter_group',
@@ -284,6 +287,7 @@ export function createChapterVerseGroupsSurface({
 }: ChapterVerseGroupsSurfaceArgs): AdminSurfaceContract<SectionCollectionSurfaceMetadata> {
     return createInlineEditorSurface({
         surfaceKey: CHAPTER_VERSE_GROUPS_SURFACE_KEY,
+        contractKey: 'section_collection',
         entity: 'chapter',
         entityId: chapter.id,
         regionKey: 'chapter_sections',
@@ -332,6 +336,7 @@ export function createChapterSectionVerseGroupSurface({
 
     return createInlineEditorSurface({
         surfaceKey: CHAPTER_SECTION_VERSE_GROUP_SURFACE_KEY,
+        contractKey: 'section_group',
         entity: 'chapter_section',
         entityId: chapterSection.id,
         regionKey: 'verse_group',

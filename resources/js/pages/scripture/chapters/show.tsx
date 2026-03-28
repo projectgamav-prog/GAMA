@@ -9,13 +9,12 @@ import {
 import { useState } from 'react';
 import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import {
-    createChapterIdentitySurface,
-    createChapterIntroSurface,
-} from '@/admin/surfaces/scripture/chapters/surface-builders';
+    resolveChapterHeaderSurfaces,
+} from '@/admin/integrations/scripture/chapters';
 import {
-    createChapterSectionVerseGroupSurface,
-    createChapterVerseGroupsSurface,
-} from '@/admin/surfaces/sections/surface-builders';
+    resolveChapterSectionVerseGroupSurface,
+    resolveChapterVerseGroupsSurface,
+} from '@/admin/integrations/sections';
 import { ScriptureActionRow } from '@/components/scripture/scripture-action-row';
 import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
 import { ScriptureChapterContentBlockRegion } from '@/components/scripture/scripture-chapter-content-block-region';
@@ -69,64 +68,40 @@ export default function ChapterShow({
         parentEntityType: 'book_section' as const,
         parentEntityId: book_section.id,
     };
-    const pageIntroBlock =
-        isAdmin && admin && admin.primary_content_block_id !== null
-            ? (content_blocks.find(
-                  (block) => block.id === admin.primary_content_block_id,
-              ) ?? null)
-            : null;
-    const chapterIdentitySurface =
-        showAdminControls && admin
-            ? createChapterIdentitySurface({
-                  chapter,
-                  updateHref: admin.identity_update_href,
-                  fullEditHref: admin.full_edit_href,
-              })
-            : null;
-    const chapterIntroSurface =
-        showAdminControls && admin
-            ? createChapterIntroSurface({
-                  chapter,
-                  chapterTitle,
-                  block: pageIntroBlock,
-                  blockTypes: admin.content_block_types,
-                  updateHref: admin.primary_content_block_update_href,
-                  storeHref: admin.content_block_store_href,
-                  fullEditHref: admin.full_edit_href,
-              })
-            : null;
+    const {
+        identitySurface: chapterIdentitySurface,
+        introSurface: chapterIntroSurface,
+        introBlock: pageIntroBlock,
+    } = resolveChapterHeaderSurfaces({
+        chapter,
+        chapterTitle,
+        blocks: content_blocks,
+        admin,
+        enabled: showAdminControls,
+    });
     const chapterNoteBlocks =
         pageIntroBlock === null
             ? content_blocks
             : content_blocks.filter((block) => block.id !== pageIntroBlock.id);
-    const totalSectionVerses = chapter_sections.reduce(
-        (sum, section) => sum + (section.verses_count ?? 0),
-        0,
-    );
-    const chapterVerseGroupsSurface =
-        showAdminControls && admin
-            ? createChapterVerseGroupsSurface({
-                  chapter,
-                  groupCount: chapter_sections.length,
-                  verseCount: totalSectionVerses,
-                  readerHref: chapter.verses_href ?? chapter.href,
-                  chapterSectionStoreHref: admin.chapter_section_store_href,
-              })
-            : null;
+    const chapterVerseGroupsSurface = resolveChapterVerseGroupsSurface({
+        chapter,
+        chapterSections: chapter_sections,
+        admin,
+        enabled: showAdminControls,
+    });
     const buildChapterSectionGroupSurface = (
         section: ChapterShowProps['chapter_sections'][number],
         sectionTitle: string,
     ) =>
-        showAdminControls
-            ? createChapterSectionVerseGroupSurface({
-                  chapterSection: section,
-                  title: sectionTitle,
-                  primaryCount: section.verses_count ?? 0,
-                  primaryLabel: 'verses',
-                  openHref: section.href ?? chapter.verses_href ?? chapter.href,
-                  openLabel: 'Open Reader',
-              })
-            : null;
+        resolveChapterSectionVerseGroupSurface({
+            chapterSection: section,
+            title: sectionTitle,
+            primaryCount: section.verses_count ?? 0,
+            primaryLabel: 'verses',
+            openHref: section.href ?? chapter.verses_href ?? chapter.href,
+            openLabel: 'Open Reader',
+            enabled: showAdminControls,
+        });
 
     const breadcrumbs: BreadcrumbItem[] = [
         {

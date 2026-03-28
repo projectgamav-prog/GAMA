@@ -2,13 +2,6 @@ import { useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import { defineAdminModule } from '@/admin/core/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/core/module-types';
-import {
-    BOOK_CHAPTER_GROUPS_SURFACE_KEY,
-    BOOK_SECTION_CHAPTER_GROUP_SURFACE_KEY,
-    BOOKS_COLLECTION_SURFACE_KEY,
-    CHAPTER_SECTION_VERSE_GROUP_SURFACE_KEY,
-    CHAPTER_VERSE_GROUPS_SURFACE_KEY,
-} from '@/admin/surfaces/core/surface-keys';
 import InputError from '@/components/input-error';
 import { ScriptureInlineRegionEditor } from '@/components/scripture/scripture-inline-region-editor';
 import { Button } from '@/components/ui/button';
@@ -139,17 +132,12 @@ function HierarchyCreateEditor({ surface }: AdminModuleComponentProps) {
 
 export const hierarchyCreateEditorModule = defineAdminModule({
     key: 'hierarchy-create-editor',
-    surfaceKeys: [
-        BOOKS_COLLECTION_SURFACE_KEY,
-        BOOK_CHAPTER_GROUPS_SURFACE_KEY,
-        BOOK_SECTION_CHAPTER_GROUP_SURFACE_KEY,
-        CHAPTER_VERSE_GROUPS_SURFACE_KEY,
-        CHAPTER_SECTION_VERSE_GROUP_SURFACE_KEY,
-    ],
+    contractKeys: ['section_collection', 'section_group'],
     entityScope: ['book', 'book_section', 'chapter', 'chapter_section'],
     surfaceSlots: 'inline_editor',
     presentationVariants: 'compact',
     requiredCapabilities: ['create_row'],
+    qualifies: (surface) => getSectionCreateMetadata(surface) !== null,
     EditorComponent: HierarchyCreateEditor,
     order: 15,
     description:

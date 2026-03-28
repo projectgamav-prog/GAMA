@@ -3,10 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { defineAdminModule } from '@/admin/core/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/core/module-types';
-import {
-    BOOK_CHAPTER_GROUPS_SURFACE_KEY,
-    CHAPTER_VERSE_GROUPS_SURFACE_KEY,
-} from '@/admin/surfaces/core/surface-keys';
 import { getSectionCollectionMetadata } from '@/admin/surfaces/sections/surface-types';
 
 function formatCountLabel(count: number, label: string): string {
@@ -49,13 +45,11 @@ function SectionCollectionPanel({ surface }: AdminModuleComponentProps) {
 
 export const sectionCollectionPanelModule = defineAdminModule({
     key: 'section-collection-panel',
-    surfaceKeys: [
-        BOOK_CHAPTER_GROUPS_SURFACE_KEY,
-        CHAPTER_VERSE_GROUPS_SURFACE_KEY,
-    ],
+    contractKeys: 'section_collection',
     entityScope: ['book', 'chapter'],
     surfaceSlots: 'inline_editor',
     presentationVariants: 'compact',
+    qualifies: (surface) => getSectionCollectionMetadata(surface) !== null,
     EditorComponent: SectionCollectionPanel,
     order: 5,
     description:

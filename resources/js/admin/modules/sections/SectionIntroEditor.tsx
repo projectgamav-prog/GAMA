@@ -1,10 +1,6 @@
 import { defineAdminModule } from '@/admin/core/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/core/module-types';
 import { RegisteredIntroBlockEditor } from '@/admin/modules/blocks/RegisteredIntroBlockEditor';
-import {
-    BOOK_SECTION_CHAPTER_GROUP_SURFACE_KEY,
-    CHAPTER_SECTION_VERSE_GROUP_SURFACE_KEY,
-} from '@/admin/surfaces/core/surface-keys';
 import { getSectionGroupMetadata } from '@/admin/surfaces/sections/surface-types';
 
 function SectionIntroEditor({ surface }: AdminModuleComponentProps) {
@@ -34,13 +30,20 @@ function SectionIntroEditor({ surface }: AdminModuleComponentProps) {
 
 export const sectionIntroEditorModule = defineAdminModule({
     key: 'section-intro-editor',
-    surfaceKeys: [
-        BOOK_SECTION_CHAPTER_GROUP_SURFACE_KEY,
-        CHAPTER_SECTION_VERSE_GROUP_SURFACE_KEY,
-    ],
+    contractKeys: 'section_group',
     entityScope: ['book_section', 'chapter_section'],
     surfaceSlots: 'inline_editor',
     presentationVariants: 'compact',
+    qualifies: (surface) => {
+        const metadata = getSectionGroupMetadata(surface);
+
+        return Boolean(
+            metadata &&
+                (metadata.introStoreHref !== null ||
+                    metadata.introUpdateHref !== null ||
+                    metadata.introBlock !== null),
+        );
+    },
     EditorComponent: SectionIntroEditor,
     order: 25,
     description:

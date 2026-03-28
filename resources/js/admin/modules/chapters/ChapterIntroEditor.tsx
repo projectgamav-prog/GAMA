@@ -1,4 +1,3 @@
-import { CHAPTER_INTRO_SURFACE_KEY } from '@/admin/surfaces/core/surface-keys';
 import { defineAdminModule } from '@/admin/core/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/core/module-types';
 import {
@@ -42,10 +41,11 @@ function ChapterIntroEditor({ surface }: AdminModuleComponentProps) {
 
 export const chapterIntroEditorModule = defineAdminModule({
     key: 'chapter-intro-editor',
-    surfaceKeys: CHAPTER_INTRO_SURFACE_KEY,
+    contractKeys: 'intro',
     entityScope: 'chapter',
     surfaceSlots: 'inline_editor',
     requiredCapabilities: ['full_edit'],
+    qualifies: (surface) => getChapterIntroMetadata(surface) !== null,
     EditorComponent: ChapterIntroEditor,
     order: 20,
     description:

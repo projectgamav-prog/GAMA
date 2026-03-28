@@ -2,6 +2,7 @@ import type { ScriptureEntityType } from '@/types';
 import type {
     AdminSurfaceCapability,
     AdminSurfaceContract,
+    AdminSurfaceContractKey,
     AdminSurfaceIdentifier,
     AdminSurfaceOwner,
     AdminSurfacePresentation,
@@ -24,6 +25,7 @@ type AdminSurfaceCallback = (...args: any[]) => void;
 
 type BuildSurfaceArgs<TMetadata> = {
     surfaceKey?: AdminSurfaceKey | null;
+    contractKey?: AdminSurfaceContractKey | null;
     entity: ScriptureEntityType;
     entityId: AdminSurfaceIdentifier;
     slot: AdminSurfaceSlot;
@@ -76,6 +78,7 @@ export function createSurfaceOwner(
  */
 export function createAdminSurface<TMetadata>({
     surfaceKey = null,
+    contractKey = null,
     entity,
     entityId,
     slot,
@@ -89,6 +92,7 @@ export function createAdminSurface<TMetadata>({
 }: BuildSurfaceArgs<TMetadata>): AdminSurfaceContract<TMetadata> {
     return {
         surfaceKey: surfaceKey ?? resolveSemanticSurfaceKey(entity, regionKey),
+        contractKey,
         entity,
         entityId,
         slot,

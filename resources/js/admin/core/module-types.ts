@@ -3,6 +3,7 @@ import type { ScriptureEntityType } from '@/types';
 import type {
     AdminSurfaceCapability,
     AdminSurfaceContract,
+    AdminSurfaceContractKey,
     AdminSurfacePlacement,
     AdminSurfaceSlot,
     AdminSurfaceVariant,
@@ -37,6 +38,7 @@ export type AdminModuleComponent = ComponentType<AdminModuleComponentProps>;
 export type AdminModuleDefinition = {
     key: string;
     surfaceKeys?: AdminModuleScope<AdminSurfaceKey>;
+    contractKeys?: AdminModuleScope<AdminSurfaceContractKey>;
     entityScope: AdminModuleScope<ScriptureEntityType>;
     surfaceSlots?: AdminModuleScope<AdminSurfaceSlot>;
     regionScope?: AdminModuleScope<string>;
@@ -44,6 +46,7 @@ export type AdminModuleDefinition = {
     presentationPlacements?: AdminModuleScope<AdminSurfacePlacement>;
     presentationVariants?: AdminModuleScope<AdminSurfaceVariant>;
     requiredCapabilities?: readonly AdminSurfaceCapability[];
+    qualifies?: (surface: AdminSurfaceContract) => boolean;
     EditorComponent: AdminModuleComponent;
     order?: number;
     description?: string;

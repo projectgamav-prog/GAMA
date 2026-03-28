@@ -1,12 +1,10 @@
 import type { ReactNode } from 'react';
-import { router } from '@inertiajs/react';
 import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import {
     createBookBlockRegionSurface,
     createBookContentBlockActionsSurface,
     createBookContentBlockSurface,
 } from '@/admin/surfaces/scripture/books/surface-builders';
-import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
 import { scriptureInlineRegionLabel } from '@/lib/scripture-inline-admin';
 import type {
     ScriptureBook,
@@ -61,16 +59,6 @@ export function ScriptureBookContentBlockRegion({
                   fullEditHref: admin.full_edit_href,
                   defaultRegion: admin.content_block_default_region,
                   blockTypes: admin.content_block_types,
-                  onSelectType: (blockType) => {
-                      if (blockType !== 'text') {
-                          router.visit(
-                              buildScriptureAdminSectionHref(
-                                  admin.full_edit_href,
-                                  'content_blocks',
-                              ),
-                          );
-                      }
-                  },
               })
             : null;
 

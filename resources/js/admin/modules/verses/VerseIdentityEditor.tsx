@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { VERSE_INTRO_SURFACE_KEY } from '@/admin/surfaces/core/surface-keys';
 import { defineAdminModule } from '@/admin/core/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/core/module-types';
 import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
@@ -134,10 +133,11 @@ function VerseIdentityEditor({ surface }: AdminModuleComponentProps) {
 
 export const verseIdentityEditorModule = defineAdminModule({
     key: 'verse-identity-editor',
-    surfaceKeys: VERSE_INTRO_SURFACE_KEY,
+    contractKeys: 'identity',
     entityScope: 'verse',
     surfaceSlots: 'inline_editor',
     requiredCapabilities: ['edit'],
+    qualifies: (surface) => getVerseIdentityMetadata(surface) !== null,
     EditorComponent: VerseIdentityEditor,
     order: 10,
     description:

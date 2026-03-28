@@ -62,6 +62,7 @@ function ImageBlockEditor({ surface }: AdminModuleComponentProps) {
 
 export const imageBlockEditorModule = defineAdminModule({
     key: 'image-block-editor',
+    contractKeys: 'registered_block',
     entityScope: 'content_block',
     surfaceSlots: 'inline_editor',
     regionScope: 'content_blocks',

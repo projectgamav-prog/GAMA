@@ -3,10 +3,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { defineAdminModule } from '@/admin/core/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/core/module-types';
-import {
-    BOOK_SECTION_CHAPTER_GROUP_SURFACE_KEY,
-    CHAPTER_SECTION_VERSE_GROUP_SURFACE_KEY,
-} from '@/admin/surfaces/core/surface-keys';
 import { getSectionGroupMetadata } from '@/admin/surfaces/sections/surface-types';
 
 function formatCountLabel(count: number, label: string): string {
@@ -47,13 +43,11 @@ function SectionGroupPanel({ surface }: AdminModuleComponentProps) {
 
 export const sectionGroupPanelModule = defineAdminModule({
     key: 'section-group-panel',
-    surfaceKeys: [
-        BOOK_SECTION_CHAPTER_GROUP_SURFACE_KEY,
-        CHAPTER_SECTION_VERSE_GROUP_SURFACE_KEY,
-    ],
+    contractKeys: 'section_group',
     entityScope: ['book_section', 'chapter_section'],
     surfaceSlots: 'inline_editor',
     presentationVariants: 'compact',
+    qualifies: (surface) => getSectionGroupMetadata(surface) !== null,
     EditorComponent: SectionGroupPanel,
     order: 10,
     description:

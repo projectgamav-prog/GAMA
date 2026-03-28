@@ -35,6 +35,7 @@ function BlockFullEditLauncher({ surface }: AdminModuleComponentProps) {
 
 export const blockFullEditLauncherModule = defineAdminModule({
     key: 'block-full-edit-launcher',
+    contractKeys: 'block_actions',
     entityScope: 'content_block',
     surfaceSlots: 'block_actions',
     regionScope: '*',

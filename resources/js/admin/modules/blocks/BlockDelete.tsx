@@ -93,6 +93,7 @@ function BlockDelete({ surface }: AdminModuleComponentProps) {
 
 export const blockDeleteModule = defineAdminModule({
     key: 'block-delete',
+    contractKeys: 'block_actions',
     entityScope: 'content_block',
     surfaceSlots: 'block_actions',
     regionScope: '*',

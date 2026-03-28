@@ -12,9 +12,8 @@ import {
 } from 'lucide-react';
 import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import {
-    createVerseIdentitySurface,
-    createVerseMetaSurface,
-} from '@/admin/surfaces/scripture/verses/surface-builders';
+    resolveVerseHeaderSurfaces,
+} from '@/admin/integrations/scripture/verses';
 import { ScriptureActionRow } from '@/components/scripture/scripture-action-row';
 import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
@@ -130,24 +129,16 @@ export default function VerseShow({
             verse_meta.summary_short !== null ||
             keywords.length > 0 ||
             studyFlags.length > 0);
-    const verseIntroSurface =
-        showAdminControls && admin
-            ? createVerseIdentitySurface({
-                  verse,
-                  updateHref: admin.identity_update_href,
-                  fullEditHref: admin.full_edit_href,
-              })
-            : null;
-    const verseNotesSurface =
-        showAdminControls && admin
-            ? createVerseMetaSurface({
-                  verse,
-                  verseMeta: verse_meta,
-                  characters,
-                  updateHref: admin.meta_update_href,
-                  fullEditHref: admin.full_edit_href,
-              })
-            : null;
+    const {
+        introSurface: verseIntroSurface,
+        metaSurface: verseNotesSurface,
+    } = resolveVerseHeaderSurfaces({
+        verse,
+        verseMeta: verse_meta,
+        characters,
+        admin,
+        enabled: showAdminControls,
+    });
     const hasCompanionSections =
         hasVerseMeta ||
         dictionary_terms.length > 0 ||

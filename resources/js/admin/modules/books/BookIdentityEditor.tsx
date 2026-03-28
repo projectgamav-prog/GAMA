@@ -5,7 +5,6 @@ import { ScriptureInlineRegionEditor } from '@/components/scripture/scripture-in
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { BOOK_INTRO_SURFACE_KEY } from '@/admin/surfaces/core/surface-keys';
 import { defineAdminModule } from '@/admin/core/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/core/module-types';
 import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
@@ -132,10 +131,11 @@ function BookIdentityEditor({ surface }: AdminModuleComponentProps) {
 
 export const bookIdentityEditorModule = defineAdminModule({
     key: 'book-identity-editor',
-    surfaceKeys: BOOK_INTRO_SURFACE_KEY,
+    contractKeys: 'identity',
     entityScope: 'book',
     surfaceSlots: 'inline_editor',
     requiredCapabilities: ['edit'],
+    qualifies: (surface) => getBookIdentityMetadata(surface) !== null,
     EditorComponent: BookIdentityEditor,
     order: 10,
     description:

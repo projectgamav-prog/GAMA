@@ -5,7 +5,6 @@ import { ScriptureInlineRegionEditor } from '@/components/scripture/scripture-in
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CHAPTER_INTRO_SURFACE_KEY } from '@/admin/surfaces/core/surface-keys';
 import { defineAdminModule } from '@/admin/core/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/core/module-types';
 import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
@@ -132,10 +131,11 @@ function ChapterIdentityEditor({ surface }: AdminModuleComponentProps) {
 
 export const chapterIdentityEditorModule = defineAdminModule({
     key: 'chapter-identity-editor',
-    surfaceKeys: CHAPTER_INTRO_SURFACE_KEY,
+    contractKeys: 'identity',
     entityScope: 'chapter',
     surfaceSlots: 'inline_editor',
     requiredCapabilities: ['edit'],
+    qualifies: (surface) => getChapterIdentityMetadata(surface) !== null,
     EditorComponent: ChapterIdentityEditor,
     order: 10,
     description:

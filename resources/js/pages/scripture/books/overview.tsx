@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { ArrowRight } from 'lucide-react';
 import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
-import { createBookIntroSurface } from '@/admin/surfaces/scripture/books/surface-builders';
+import { resolveBookHeaderSurfaces } from '@/admin/integrations/scripture/books';
 import { ScriptureActionRow } from '@/components/scripture/scripture-action-row';
 import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
 import { BookPublicMediaSection } from '@/components/scripture/book-public-media-section';
@@ -26,14 +26,11 @@ export default function BookOverview({
         entityId: book.id,
         entityLabel: book.title,
     };
-    const introSurface =
-        isAdmin && admin
-            ? createBookIntroSurface({
-                  book,
-                  updateHref: admin.details_update_href,
-                  fullEditHref: admin.full_edit_href,
-              })
-            : null;
+    const { introSurface } = resolveBookHeaderSurfaces({
+        book,
+        admin,
+        enabled: isAdmin,
+    });
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Books',

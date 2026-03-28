@@ -31,6 +31,7 @@ function BlockRegionFullEdit({ surface }: AdminModuleComponentProps) {
 
 export const blockRegionFullEditModule = defineAdminModule({
     key: 'block-region-full-edit',
+    contractKeys: 'block_region',
     entityScope: ['book', 'chapter', 'verse'],
     surfaceSlots: 'insert_control',
     regionScope: 'content_blocks',

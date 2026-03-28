@@ -137,7 +137,7 @@ function BlockCreate({ surface }: AdminModuleComponentProps) {
                     return;
                 }
 
-                metadata.onSelectType(blockType);
+                metadata.onSelectType?.(blockType);
             }}
         />
     );
@@ -145,6 +145,7 @@ function BlockCreate({ surface }: AdminModuleComponentProps) {
 
 export const blockCreateModule = defineAdminModule({
     key: 'block-create',
+    contractKeys: 'block_region',
     entityScope: ['book', 'chapter', 'verse'],
     surfaceSlots: 'insert_control',
     regionScope: 'content_blocks',

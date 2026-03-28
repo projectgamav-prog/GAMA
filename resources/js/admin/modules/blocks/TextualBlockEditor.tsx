@@ -57,6 +57,7 @@ function TextualBlockEditor({ surface }: AdminModuleComponentProps) {
 
 export const textualBlockEditorModule = defineAdminModule({
     key: 'textual-block-editor',
+    contractKeys: 'registered_block',
     entityScope: 'content_block',
     surfaceSlots: 'inline_editor',
     regionScope: 'content_blocks',

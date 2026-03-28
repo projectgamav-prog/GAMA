@@ -9,9 +9,9 @@ import {
 import { useState } from 'react';
 import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import {
-    createChapterSectionVerseGroupSurface,
-    createChapterVerseGroupsSurface,
-} from '@/admin/surfaces/sections/surface-builders';
+    resolveChapterSectionVerseGroupSurface,
+    resolveChapterVerseGroupsSurface,
+} from '@/admin/integrations/sections';
 import { ScriptureActionRow } from '@/components/scripture/scripture-action-row';
 import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
@@ -55,12 +55,6 @@ export default function ChapterVersesIndex({
         (sum, section) => sum + section.cards.length,
         0,
     );
-    const totalVerses = chapter_sections.reduce(
-        (sum, section) =>
-            sum +
-            section.cards.reduce((cardSum, card) => cardSum + card.verses.length, 0),
-        0,
-    );
     const hidesGenericBookSection = isGenericSectionLabel(
         book_section.slug,
         book_section.title,
@@ -79,15 +73,18 @@ export default function ChapterVersesIndex({
         parentEntityType: 'book_section' as const,
         parentEntityId: book_section.id,
     };
-    const verseGroupsSurface = showAdminControls && admin
-        ? createChapterVerseGroupsSurface({
-              chapter,
-              groupCount: chapter_sections.length,
-              verseCount: totalVerses,
-              readerHref: chapter.verses_href ?? chapter.href,
-              chapterSectionStoreHref: admin.chapter_section_store_href,
-          })
-        : null;
+    const verseGroupsSurface = resolveChapterVerseGroupsSurface({
+        chapter,
+        chapterSections: chapter_sections.map((section) => ({
+            ...section,
+            verses_count: section.cards.reduce(
+                (sum, card) => sum + card.verses.length,
+                0,
+            ),
+        })),
+        admin,
+        enabled: showAdminControls,
+    });
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -221,18 +218,18 @@ export default function ChapterVersesIndex({
                     const sectionTitle = hidesGenericChapterSection
                         ? 'All Verses'
                         : sectionLabel(section.number, section.title);
-                    const sectionGroupSurface = showAdminControls
-                        ? createChapterSectionVerseGroupSurface({
-                              chapterSection: section,
-                              title: sectionTitle,
-                              primaryCount: section.cards.length,
-                              primaryLabel: 'cards',
-                              secondaryCount: verseCount,
-                              secondaryLabel: 'verses',
-                              openHref: section.href ?? null,
-                              openLabel: 'Jump to Group',
-                          })
-                        : null;
+                    const sectionGroupSurface =
+                        resolveChapterSectionVerseGroupSurface({
+                            chapterSection: section,
+                            title: sectionTitle,
+                            primaryCount: section.cards.length,
+                            primaryLabel: 'cards',
+                            secondaryCount: verseCount,
+                            secondaryLabel: 'verses',
+                            openHref: section.href ?? null,
+                            openLabel: 'Jump to Group',
+                            enabled: showAdminControls,
+                        });
 
                     return (
                         <ScriptureSection

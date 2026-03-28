@@ -49,6 +49,7 @@ function BlockDragReorder({ surface }: AdminModuleComponentProps) {
 
 export const blockDragReorderModule = defineAdminModule({
     key: 'block-drag-reorder',
+    contractKeys: 'block_actions',
     entityScope: 'content_block',
     surfaceSlots: 'block_actions',
     regionScope: '*',
