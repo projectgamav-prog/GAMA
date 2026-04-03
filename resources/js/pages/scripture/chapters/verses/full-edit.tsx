@@ -541,7 +541,7 @@ export default function VerseFullEdit({
                     </>
                 }
                 title={`Full edit: ${verseTitle}`}
-                description="Use this deeper workspace to manage canonical verse identity, verse meta, and attached intro or note blocks in one protected place."
+                description="Use this deeper workspace to manage verse identity, verse notes, translations, commentaries, and attached note blocks in one protected place."
                 headerAction={
                     <Button asChild variant="outline" size="sm">
                         <Link href={verse.href}>
@@ -588,10 +588,10 @@ export default function VerseFullEdit({
             <ScriptureSection
                 adminTargetSection="translations"
                 title="Verse Translations"
-                description="Manage verse-owned translation rows from the real `verse_translations` table."
+                description="Review and manage the translations shown with this verse."
                 action={
                     <Badge variant="outline">
-                        {admin_translations.rows.length} row
+                        {admin_translations.rows.length} translation
                         {admin_translations.rows.length === 1 ? '' : 's'}
                     </Badge>
                 }
@@ -607,11 +607,13 @@ export default function VerseFullEdit({
             <ScriptureSection
                 adminTargetSection="commentaries"
                 title="Verse Commentaries"
-                description="Manage verse-owned commentary rows from the real `verse_commentaries` table."
+                description="Review and manage the commentaries shown with this verse."
                 action={
                     <Badge variant="outline">
-                        {admin_commentaries.rows.length} row
-                        {admin_commentaries.rows.length === 1 ? '' : 's'}
+                        {admin_commentaries.rows.length}{' '}
+                        {admin_commentaries.rows.length === 1
+                            ? 'commentary'
+                            : 'commentaries'}
                     </Badge>
                 }
             >

@@ -20,6 +20,7 @@ import {
     type VerseTranslationsContractMetadata,
 } from '@/admin/surfaces/core/contract-readers';
 import { VERSE_TRANSLATIONS_SURFACE_KEY } from '@/admin/surfaces/core/surface-keys';
+import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
 import type {
     ScriptureAdminVerseTranslation,
     ScriptureTranslationSourceOption,
@@ -36,6 +37,34 @@ type TranslationFormData = {
 };
 
 const NONE_VALUE = '__none__';
+const TRANSLATION_FIELD_COPY = {
+    source_key: {
+        label: 'Source key',
+        helpText:
+            'Use the source key you want to keep with this translation.',
+    },
+    source_name: {
+        label: 'Source name',
+        helpText: 'The source name shown alongside this translation.',
+    },
+    translation_source_id: {
+        label: 'Source',
+        helpText:
+            'Choose a saved source to prefill the details below, or leave it blank and enter them manually.',
+    },
+    language_code: {
+        label: 'Language',
+        helpText: 'Use a short language code such as en, sa, or hi.',
+    },
+    text: {
+        label: 'Translation',
+        helpText: 'Enter the translation text shown for this verse.',
+    },
+    sort_order: {
+        label: 'Order',
+        helpText: 'Lower numbers appear first in the translation list.',
+    },
+} as const;
 
 function selectSourceOptionLabel(source: ScriptureTranslationSourceOption): string {
     return source.short_name
@@ -53,6 +82,12 @@ function resolveTranslationMetadata(
         >(props.surface);
 
     return metadata?.relationKey === 'translations' ? metadata : null;
+}
+
+function getFieldCopy<Key extends keyof typeof TRANSLATION_FIELD_COPY>(
+    fieldKey: Key,
+) {
+    return TRANSLATION_FIELD_COPY[fieldKey];
 }
 
 function applySourceToForm(
@@ -106,15 +141,21 @@ function CreateTranslationCard({
             <CardHeader className="gap-3">
                 <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="outline">Verse translations</Badge>
-                    <Badge variant="secondary">Create</Badge>
+                    <Badge variant="secondary">New</Badge>
                 </div>
-                <CardTitle>Add translation row</CardTitle>
+                <CardTitle>Add translation</CardTitle>
             </CardHeader>
             <CardContent className="space-y-5">
                 <div className="grid gap-2">
                     <ScriptureAdminSourceLabel
                         field={metadata.fields.translation_source_id}
                         htmlFor="new_translation_source_id"
+                        labelOverride={getFieldCopy('translation_source_id').label}
+                        helperTextOverride={
+                            getFieldCopy('translation_source_id').helpText
+                        }
+                        showSchemaMeta={false}
+                        showValidation={false}
                     />
                     <Select
                         value={form.data.translation_source_id}
@@ -123,11 +164,11 @@ function CreateTranslationCard({
                         }
                     >
                         <SelectTrigger id="new_translation_source_id">
-                            <SelectValue placeholder="Choose translation source" />
+                            <SelectValue placeholder="Choose a source" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value={NONE_VALUE}>
-                                Unlinked row
+                                Not linked to a saved source
                             </SelectItem>
                             {metadata.sourceOptions.map((source) => (
                                 <SelectItem
@@ -144,14 +185,25 @@ function CreateTranslationCard({
 
                 <VerseRelationSourceSummary
                     source={selectedSource}
-                    emptyMessage="Choose a registered translation source to prefill row metadata, or leave the row unlinked and enter values manually."
+                    emptyMessage="Choose a saved source to prefill the details below, or enter them manually."
                 />
+
+                <div className="space-y-1">
+                    <h4 className="text-sm font-semibold">Source details</h4>
+                    <p className="text-sm text-muted-foreground">
+                        These details stay with this translation entry.
+                    </p>
+                </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
                     <div className="grid gap-2">
                         <ScriptureAdminSourceLabel
                             field={metadata.fields.source_key}
                             htmlFor="new_translation_source_key"
+                            labelOverride={getFieldCopy('source_key').label}
+                            helperTextOverride={getFieldCopy('source_key').helpText}
+                            showSchemaMeta={false}
+                            showValidation={false}
                         />
                         <Input
                             id="new_translation_source_key"
@@ -167,6 +219,10 @@ function CreateTranslationCard({
                         <ScriptureAdminSourceLabel
                             field={metadata.fields.source_name}
                             htmlFor="new_translation_source_name"
+                            labelOverride={getFieldCopy('source_name').label}
+                            helperTextOverride={getFieldCopy('source_name').helpText}
+                            showSchemaMeta={false}
+                            showValidation={false}
                         />
                         <Input
                             id="new_translation_source_name"
@@ -182,6 +238,12 @@ function CreateTranslationCard({
                         <ScriptureAdminSourceLabel
                             field={metadata.fields.language_code}
                             htmlFor="new_translation_language_code"
+                            labelOverride={getFieldCopy('language_code').label}
+                            helperTextOverride={
+                                getFieldCopy('language_code').helpText
+                            }
+                            showSchemaMeta={false}
+                            showValidation={false}
                         />
                         <Input
                             id="new_translation_language_code"
@@ -201,6 +263,10 @@ function CreateTranslationCard({
                         <ScriptureAdminSourceLabel
                             field={metadata.fields.sort_order}
                             htmlFor="new_translation_sort_order"
+                            labelOverride={getFieldCopy('sort_order').label}
+                            helperTextOverride={getFieldCopy('sort_order').helpText}
+                            showSchemaMeta={false}
+                            showValidation={false}
                         />
                         <Input
                             id="new_translation_sort_order"
@@ -219,6 +285,10 @@ function CreateTranslationCard({
                     <ScriptureAdminSourceLabel
                         field={metadata.fields.text}
                         htmlFor="new_translation_text"
+                        labelOverride={getFieldCopy('text').label}
+                        helperTextOverride={getFieldCopy('text').helpText}
+                        showSchemaMeta={false}
+                        showValidation={false}
                     />
                     <Textarea
                         id="new_translation_text"
@@ -249,7 +319,7 @@ function CreateTranslationCard({
                     }}
                     disabled={form.processing}
                 >
-                    Add translation row
+                    Add translation
                 </Button>
             </CardContent>
         </Card>
@@ -285,15 +355,24 @@ function TranslationEditorCard({
                 <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="secondary">{row.source_name}</Badge>
                     <Badge variant="outline">{row.language_code}</Badge>
-                    <Badge variant="outline">Sort {row.sort_order}</Badge>
+                    <Badge variant="outline">Order {row.sort_order}</Badge>
                 </div>
-                <CardTitle>{row.source_name}</CardTitle>
+                <CardTitle>Edit translation</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                    {row.source_name}
+                </p>
             </CardHeader>
             <CardContent className="space-y-5">
                 <div className="grid gap-2">
                     <ScriptureAdminSourceLabel
                         field={metadata.fields.translation_source_id}
                         htmlFor={`translation_source_id_${row.id}`}
+                        labelOverride={getFieldCopy('translation_source_id').label}
+                        helperTextOverride={
+                            getFieldCopy('translation_source_id').helpText
+                        }
+                        showSchemaMeta={false}
+                        showValidation={false}
                     />
                     <Select
                         value={form.data.translation_source_id}
@@ -302,11 +381,11 @@ function TranslationEditorCard({
                         }
                     >
                         <SelectTrigger id={`translation_source_id_${row.id}`}>
-                            <SelectValue placeholder="Choose translation source" />
+                            <SelectValue placeholder="Choose a source" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value={NONE_VALUE}>
-                                Unlinked row
+                                Not linked to a saved source
                             </SelectItem>
                             {metadata.sourceOptions.map((source) => (
                                 <SelectItem
@@ -323,14 +402,26 @@ function TranslationEditorCard({
 
                 <VerseRelationSourceSummary
                     source={selectedSource}
-                    emptyMessage="This translation row is not linked to a translation_sources record right now."
+                    emptyMessage="This entry is not linked to a saved source yet."
                 />
+
+                <div className="space-y-1">
+                    <h4 className="text-sm font-semibold">Source details</h4>
+                    <p className="text-sm text-muted-foreground">
+                        Update the saved source link or edit the details kept
+                        with this translation.
+                    </p>
+                </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
                     <div className="grid gap-2">
                         <ScriptureAdminSourceLabel
                             field={metadata.fields.source_key}
                             htmlFor={`translation_source_key_${row.id}`}
+                            labelOverride={getFieldCopy('source_key').label}
+                            helperTextOverride={getFieldCopy('source_key').helpText}
+                            showSchemaMeta={false}
+                            showValidation={false}
                         />
                         <Input
                             id={`translation_source_key_${row.id}`}
@@ -346,6 +437,10 @@ function TranslationEditorCard({
                         <ScriptureAdminSourceLabel
                             field={metadata.fields.source_name}
                             htmlFor={`translation_source_name_${row.id}`}
+                            labelOverride={getFieldCopy('source_name').label}
+                            helperTextOverride={getFieldCopy('source_name').helpText}
+                            showSchemaMeta={false}
+                            showValidation={false}
                         />
                         <Input
                             id={`translation_source_name_${row.id}`}
@@ -361,6 +456,12 @@ function TranslationEditorCard({
                         <ScriptureAdminSourceLabel
                             field={metadata.fields.language_code}
                             htmlFor={`translation_language_code_${row.id}`}
+                            labelOverride={getFieldCopy('language_code').label}
+                            helperTextOverride={
+                                getFieldCopy('language_code').helpText
+                            }
+                            showSchemaMeta={false}
+                            showValidation={false}
                         />
                         <Input
                             id={`translation_language_code_${row.id}`}
@@ -379,6 +480,10 @@ function TranslationEditorCard({
                         <ScriptureAdminSourceLabel
                             field={metadata.fields.sort_order}
                             htmlFor={`translation_sort_order_${row.id}`}
+                            labelOverride={getFieldCopy('sort_order').label}
+                            helperTextOverride={getFieldCopy('sort_order').helpText}
+                            showSchemaMeta={false}
+                            showValidation={false}
                         />
                         <Input
                             id={`translation_sort_order_${row.id}`}
@@ -397,6 +502,10 @@ function TranslationEditorCard({
                     <ScriptureAdminSourceLabel
                         field={metadata.fields.text}
                         htmlFor={`translation_text_${row.id}`}
+                        labelOverride={getFieldCopy('text').label}
+                        helperTextOverride={getFieldCopy('text').helpText}
+                        showSchemaMeta={false}
+                        showValidation={false}
                     />
                     <Textarea
                         id={`translation_text_${row.id}`}
@@ -440,7 +549,7 @@ function TranslationEditorCard({
                         }
                         disabled={form.processing}
                     >
-                        Delete
+                        Delete translation
                     </Button>
                 </div>
             </CardContent>
@@ -450,6 +559,13 @@ function TranslationEditorCard({
 
 function VerseTranslationsEditor(props: AdminModuleComponentProps) {
     const metadata = resolveTranslationMetadata(props);
+    const fullEditHref =
+        metadata?.fullEditHref
+            ? buildScriptureAdminSectionHref(
+                  metadata.fullEditHref,
+                  'translations',
+              )
+            : null;
 
     if (metadata === null || !props.activation.isActive) {
         return null;
@@ -461,10 +577,12 @@ function VerseTranslationsEditor(props: AdminModuleComponentProps) {
                 <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
                         <Badge variant="outline">
-                            {metadata.rows.length} rows
+                            {metadata.rows.length} translation
+                            {metadata.rows.length === 1 ? '' : 's'}
                         </Badge>
                         <Badge variant="outline">
-                            {metadata.sourceOptions.length} sources
+                            {metadata.sourceOptions.length} saved source
+                            {metadata.sourceOptions.length === 1 ? '' : 's'}
                         </Badge>
                     </div>
                     <div className="space-y-1">
@@ -472,9 +590,9 @@ function VerseTranslationsEditor(props: AdminModuleComponentProps) {
                             Verse translations
                         </h3>
                         <p className="text-sm leading-6 text-muted-foreground">
-                            Manage verse-owned rows from `verse_translations`
-                            while keeping optional awareness of
-                            `translation_sources`.
+                            Add, update, and organize the translations shown
+                            with this verse. Choose a saved source to prefill
+                            details when it helps.
                         </p>
                     </div>
                 </div>
@@ -487,9 +605,9 @@ function VerseTranslationsEditor(props: AdminModuleComponentProps) {
                     >
                         Close
                     </Button>
-                    {metadata.fullEditHref && (
+                    {fullEditHref && (
                         <Button asChild variant="outline">
-                            <Link href={metadata.fullEditHref}>Full edit</Link>
+                            <Link href={fullEditHref}>Open full edit</Link>
                         </Button>
                     )}
                 </div>
@@ -529,5 +647,5 @@ export const verseTranslationsEditorModule = defineAdminModule({
     EditorComponent: VerseTranslationsEditor,
     order: 30,
     description:
-        'Manages verse-owned translation rows from verse_translations through the shared relation-row surface contract.',
+        'Manages verse translations through the shared verse relation surface.',
 });

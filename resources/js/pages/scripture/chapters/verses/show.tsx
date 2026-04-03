@@ -822,9 +822,7 @@ export default function VerseShow({
 
                         {translations.length === 0 && translationsSurface && (
                             <div className="rounded-2xl border border-dashed border-border/80 bg-muted/20 px-5 py-5 text-sm leading-6 text-muted-foreground sm:px-6 sm:py-6">
-                                No translation rows are attached to this verse
-                                yet. The semantic verse translation surface
-                                still stays available for admin modules.
+                                No translations have been added yet.
                             </div>
                         )}
 
@@ -896,9 +894,7 @@ export default function VerseShow({
 
                         {commentaries.length === 0 && commentariesSurface && (
                             <div className="rounded-2xl border border-dashed border-border/80 bg-muted/20 px-5 py-5 text-sm leading-6 text-muted-foreground sm:px-6 sm:py-6">
-                                No commentary rows are attached to this verse
-                                yet. The semantic verse commentary surface
-                                still stays available for admin modules.
+                                No commentaries have been added yet.
                             </div>
                         )}
 

@@ -20,6 +20,7 @@ import {
     type VerseCommentariesContractMetadata,
 } from '@/admin/surfaces/core/contract-readers';
 import { VERSE_COMMENTARIES_SURFACE_KEY } from '@/admin/surfaces/core/surface-keys';
+import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
 import type {
     ScriptureAdminVerseCommentary,
     ScriptureCommentarySourceOption,
@@ -38,6 +39,42 @@ type CommentaryFormData = {
 };
 
 const NONE_VALUE = '__none__';
+const COMMENTARY_FIELD_COPY = {
+    source_key: {
+        label: 'Source key',
+        helpText:
+            'Use the source key you want to keep with this commentary.',
+    },
+    source_name: {
+        label: 'Source name',
+        helpText: 'The source name shown alongside this commentary.',
+    },
+    commentary_source_id: {
+        label: 'Source',
+        helpText:
+            'Choose a saved source to prefill the details below, or leave it blank and enter them manually.',
+    },
+    author_name: {
+        label: 'Author',
+        helpText: 'Add the author name shown with this commentary.',
+    },
+    language_code: {
+        label: 'Language',
+        helpText: 'Use a short language code such as en, sa, or hi.',
+    },
+    title: {
+        label: 'Title',
+        helpText: 'Optional title shown above the commentary text.',
+    },
+    body: {
+        label: 'Commentary',
+        helpText: 'Enter the commentary text shown for this verse.',
+    },
+    sort_order: {
+        label: 'Order',
+        helpText: 'Lower numbers appear first in the commentary list.',
+    },
+} as const;
 
 function selectSourceOptionLabel(source: ScriptureCommentarySourceOption): string {
     return source.short_name
@@ -55,6 +92,12 @@ function resolveCommentaryMetadata(
         >(props.surface);
 
     return metadata?.relationKey === 'commentaries' ? metadata : null;
+}
+
+function getFieldCopy<Key extends keyof typeof COMMENTARY_FIELD_COPY>(
+    fieldKey: Key,
+) {
+    return COMMENTARY_FIELD_COPY[fieldKey];
 }
 
 function applySourceToForm(
@@ -111,15 +154,21 @@ function CreateCommentaryCard({
             <CardHeader className="gap-3">
                 <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="outline">Verse commentaries</Badge>
-                    <Badge variant="secondary">Create</Badge>
+                    <Badge variant="secondary">New</Badge>
                 </div>
-                <CardTitle>Add commentary row</CardTitle>
+                <CardTitle>Add commentary</CardTitle>
             </CardHeader>
             <CardContent className="space-y-5">
                 <div className="grid gap-2">
                     <ScriptureAdminSourceLabel
                         field={metadata.fields.commentary_source_id}
                         htmlFor="new_commentary_source_id"
+                        labelOverride={getFieldCopy('commentary_source_id').label}
+                        helperTextOverride={
+                            getFieldCopy('commentary_source_id').helpText
+                        }
+                        showSchemaMeta={false}
+                        showValidation={false}
                     />
                     <Select
                         value={form.data.commentary_source_id}
@@ -128,11 +177,11 @@ function CreateCommentaryCard({
                         }
                     >
                         <SelectTrigger id="new_commentary_source_id">
-                            <SelectValue placeholder="Choose commentary source" />
+                            <SelectValue placeholder="Choose a source" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value={NONE_VALUE}>
-                                Unlinked row
+                                Not linked to a saved source
                             </SelectItem>
                             {metadata.sourceOptions.map((source) => (
                                 <SelectItem
@@ -149,14 +198,25 @@ function CreateCommentaryCard({
 
                 <VerseRelationSourceSummary
                     source={selectedSource}
-                    emptyMessage="Choose a registered commentary source to prefill row metadata, or leave the row unlinked and enter values manually."
+                    emptyMessage="Choose a saved source to prefill the details below, or enter them manually."
                 />
+
+                <div className="space-y-1">
+                    <h4 className="text-sm font-semibold">Source details</h4>
+                    <p className="text-sm text-muted-foreground">
+                        These details stay with this commentary entry.
+                    </p>
+                </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
                     <div className="grid gap-2">
                         <ScriptureAdminSourceLabel
                             field={metadata.fields.source_key}
                             htmlFor="new_commentary_source_key"
+                            labelOverride={getFieldCopy('source_key').label}
+                            helperTextOverride={getFieldCopy('source_key').helpText}
+                            showSchemaMeta={false}
+                            showValidation={false}
                         />
                         <Input
                             id="new_commentary_source_key"
@@ -172,6 +232,10 @@ function CreateCommentaryCard({
                         <ScriptureAdminSourceLabel
                             field={metadata.fields.source_name}
                             htmlFor="new_commentary_source_name"
+                            labelOverride={getFieldCopy('source_name').label}
+                            helperTextOverride={getFieldCopy('source_name').helpText}
+                            showSchemaMeta={false}
+                            showValidation={false}
                         />
                         <Input
                             id="new_commentary_source_name"
@@ -187,6 +251,10 @@ function CreateCommentaryCard({
                         <ScriptureAdminSourceLabel
                             field={metadata.fields.author_name}
                             htmlFor="new_commentary_author_name"
+                            labelOverride={getFieldCopy('author_name').label}
+                            helperTextOverride={getFieldCopy('author_name').helpText}
+                            showSchemaMeta={false}
+                            showValidation={false}
                         />
                         <Input
                             id="new_commentary_author_name"
@@ -202,6 +270,12 @@ function CreateCommentaryCard({
                         <ScriptureAdminSourceLabel
                             field={metadata.fields.language_code}
                             htmlFor="new_commentary_language_code"
+                            labelOverride={getFieldCopy('language_code').label}
+                            helperTextOverride={
+                                getFieldCopy('language_code').helpText
+                            }
+                            showSchemaMeta={false}
+                            showValidation={false}
                         />
                         <Input
                             id="new_commentary_language_code"
@@ -221,6 +295,10 @@ function CreateCommentaryCard({
                         <ScriptureAdminSourceLabel
                             field={metadata.fields.title}
                             htmlFor="new_commentary_title"
+                            labelOverride={getFieldCopy('title').label}
+                            helperTextOverride={getFieldCopy('title').helpText}
+                            showSchemaMeta={false}
+                            showValidation={false}
                         />
                         <Input
                             id="new_commentary_title"
@@ -236,6 +314,10 @@ function CreateCommentaryCard({
                         <ScriptureAdminSourceLabel
                             field={metadata.fields.sort_order}
                             htmlFor="new_commentary_sort_order"
+                            labelOverride={getFieldCopy('sort_order').label}
+                            helperTextOverride={getFieldCopy('sort_order').helpText}
+                            showSchemaMeta={false}
+                            showValidation={false}
                         />
                         <Input
                             id="new_commentary_sort_order"
@@ -254,6 +336,10 @@ function CreateCommentaryCard({
                     <ScriptureAdminSourceLabel
                         field={metadata.fields.body}
                         htmlFor="new_commentary_body"
+                        labelOverride={getFieldCopy('body').label}
+                        helperTextOverride={getFieldCopy('body').helpText}
+                        showSchemaMeta={false}
+                        showValidation={false}
                     />
                     <Textarea
                         id="new_commentary_body"
@@ -290,7 +376,7 @@ function CreateCommentaryCard({
                     }}
                     disabled={form.processing}
                 >
-                    Add commentary row
+                    Add commentary
                 </Button>
             </CardContent>
         </Card>
@@ -330,15 +416,24 @@ function CommentaryEditorCard({
                         {row.title ?? row.source_name}
                     </Badge>
                     <Badge variant="outline">{row.language_code}</Badge>
-                    <Badge variant="outline">Sort {row.sort_order}</Badge>
+                    <Badge variant="outline">Order {row.sort_order}</Badge>
                 </div>
-                <CardTitle>{row.title ?? row.source_name}</CardTitle>
+                <CardTitle>Edit commentary</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                    {row.title ?? row.source_name}
+                </p>
             </CardHeader>
             <CardContent className="space-y-5">
                 <div className="grid gap-2">
                     <ScriptureAdminSourceLabel
                         field={metadata.fields.commentary_source_id}
                         htmlFor={`commentary_source_id_${row.id}`}
+                        labelOverride={getFieldCopy('commentary_source_id').label}
+                        helperTextOverride={
+                            getFieldCopy('commentary_source_id').helpText
+                        }
+                        showSchemaMeta={false}
+                        showValidation={false}
                     />
                     <Select
                         value={form.data.commentary_source_id}
@@ -347,11 +442,11 @@ function CommentaryEditorCard({
                         }
                     >
                         <SelectTrigger id={`commentary_source_id_${row.id}`}>
-                            <SelectValue placeholder="Choose commentary source" />
+                            <SelectValue placeholder="Choose a source" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value={NONE_VALUE}>
-                                Unlinked row
+                                Not linked to a saved source
                             </SelectItem>
                             {metadata.sourceOptions.map((source) => (
                                 <SelectItem
@@ -368,14 +463,26 @@ function CommentaryEditorCard({
 
                 <VerseRelationSourceSummary
                     source={selectedSource}
-                    emptyMessage="This commentary row is not linked to a commentary_sources record right now."
+                    emptyMessage="This entry is not linked to a saved source yet."
                 />
+
+                <div className="space-y-1">
+                    <h4 className="text-sm font-semibold">Source details</h4>
+                    <p className="text-sm text-muted-foreground">
+                        Update the saved source link or edit the details kept
+                        with this commentary.
+                    </p>
+                </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
                     <div className="grid gap-2">
                         <ScriptureAdminSourceLabel
                             field={metadata.fields.source_key}
                             htmlFor={`commentary_source_key_${row.id}`}
+                            labelOverride={getFieldCopy('source_key').label}
+                            helperTextOverride={getFieldCopy('source_key').helpText}
+                            showSchemaMeta={false}
+                            showValidation={false}
                         />
                         <Input
                             id={`commentary_source_key_${row.id}`}
@@ -391,6 +498,10 @@ function CommentaryEditorCard({
                         <ScriptureAdminSourceLabel
                             field={metadata.fields.source_name}
                             htmlFor={`commentary_source_name_${row.id}`}
+                            labelOverride={getFieldCopy('source_name').label}
+                            helperTextOverride={getFieldCopy('source_name').helpText}
+                            showSchemaMeta={false}
+                            showValidation={false}
                         />
                         <Input
                             id={`commentary_source_name_${row.id}`}
@@ -406,6 +517,10 @@ function CommentaryEditorCard({
                         <ScriptureAdminSourceLabel
                             field={metadata.fields.author_name}
                             htmlFor={`commentary_author_name_${row.id}`}
+                            labelOverride={getFieldCopy('author_name').label}
+                            helperTextOverride={getFieldCopy('author_name').helpText}
+                            showSchemaMeta={false}
+                            showValidation={false}
                         />
                         <Input
                             id={`commentary_author_name_${row.id}`}
@@ -421,6 +536,12 @@ function CommentaryEditorCard({
                         <ScriptureAdminSourceLabel
                             field={metadata.fields.language_code}
                             htmlFor={`commentary_language_code_${row.id}`}
+                            labelOverride={getFieldCopy('language_code').label}
+                            helperTextOverride={
+                                getFieldCopy('language_code').helpText
+                            }
+                            showSchemaMeta={false}
+                            showValidation={false}
                         />
                         <Input
                             id={`commentary_language_code_${row.id}`}
@@ -439,6 +560,10 @@ function CommentaryEditorCard({
                         <ScriptureAdminSourceLabel
                             field={metadata.fields.title}
                             htmlFor={`commentary_title_${row.id}`}
+                            labelOverride={getFieldCopy('title').label}
+                            helperTextOverride={getFieldCopy('title').helpText}
+                            showSchemaMeta={false}
+                            showValidation={false}
                         />
                         <Input
                             id={`commentary_title_${row.id}`}
@@ -454,6 +579,10 @@ function CommentaryEditorCard({
                         <ScriptureAdminSourceLabel
                             field={metadata.fields.sort_order}
                             htmlFor={`commentary_sort_order_${row.id}`}
+                            labelOverride={getFieldCopy('sort_order').label}
+                            helperTextOverride={getFieldCopy('sort_order').helpText}
+                            showSchemaMeta={false}
+                            showValidation={false}
                         />
                         <Input
                             id={`commentary_sort_order_${row.id}`}
@@ -472,6 +601,10 @@ function CommentaryEditorCard({
                     <ScriptureAdminSourceLabel
                         field={metadata.fields.body}
                         htmlFor={`commentary_body_${row.id}`}
+                        labelOverride={getFieldCopy('body').label}
+                        helperTextOverride={getFieldCopy('body').helpText}
+                        showSchemaMeta={false}
+                        showValidation={false}
                     />
                     <Textarea
                         id={`commentary_body_${row.id}`}
@@ -521,7 +654,7 @@ function CommentaryEditorCard({
                         }
                         disabled={form.processing}
                     >
-                        Delete
+                        Delete commentary
                     </Button>
                 </div>
             </CardContent>
@@ -531,6 +664,13 @@ function CommentaryEditorCard({
 
 function VerseCommentariesEditor(props: AdminModuleComponentProps) {
     const metadata = resolveCommentaryMetadata(props);
+    const fullEditHref =
+        metadata?.fullEditHref
+            ? buildScriptureAdminSectionHref(
+                  metadata.fullEditHref,
+                  'commentaries',
+              )
+            : null;
 
     if (metadata === null || !props.activation.isActive) {
         return null;
@@ -542,10 +682,14 @@ function VerseCommentariesEditor(props: AdminModuleComponentProps) {
                 <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
                         <Badge variant="outline">
-                            {metadata.rows.length} rows
+                            {metadata.rows.length}{' '}
+                            {metadata.rows.length === 1
+                                ? 'commentary'
+                                : 'commentaries'}
                         </Badge>
                         <Badge variant="outline">
-                            {metadata.sourceOptions.length} sources
+                            {metadata.sourceOptions.length} saved source
+                            {metadata.sourceOptions.length === 1 ? '' : 's'}
                         </Badge>
                     </div>
                     <div className="space-y-1">
@@ -553,9 +697,9 @@ function VerseCommentariesEditor(props: AdminModuleComponentProps) {
                             Verse commentaries
                         </h3>
                         <p className="text-sm leading-6 text-muted-foreground">
-                            Manage verse-owned rows from `verse_commentaries`
-                            while keeping optional awareness of
-                            `commentary_sources`.
+                            Add, update, and organize the commentary shown
+                            with this verse. Choose a saved source to prefill
+                            details when it helps.
                         </p>
                     </div>
                 </div>
@@ -568,9 +712,9 @@ function VerseCommentariesEditor(props: AdminModuleComponentProps) {
                     >
                         Close
                     </Button>
-                    {metadata.fullEditHref && (
+                    {fullEditHref && (
                         <Button asChild variant="outline">
-                            <Link href={metadata.fullEditHref}>Full edit</Link>
+                            <Link href={fullEditHref}>Open full edit</Link>
                         </Button>
                     )}
                 </div>
@@ -610,5 +754,5 @@ export const verseCommentariesEditorModule = defineAdminModule({
     EditorComponent: VerseCommentariesEditor,
     order: 35,
     description:
-        'Manages verse-owned commentary rows from verse_commentaries through the shared relation-row surface contract.',
+        'Manages verse commentaries through the shared verse relation surface.',
 });

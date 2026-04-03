@@ -24,6 +24,7 @@ export function VerseRelationSourceSummary({ source, emptyMessage }: Props) {
 
     return (
         <div className="rounded-xl border border-border/70 bg-muted/20 px-4 py-4">
+            <p className="text-sm font-semibold">Saved source</p>
             <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="secondary">{source.name}</Badge>
                 <Badge variant="outline" className="font-mono text-[11px]">
@@ -38,6 +39,10 @@ export function VerseRelationSourceSummary({ source, emptyMessage }: Props) {
             </div>
 
             <div className="mt-3 space-y-1 text-sm leading-6 text-muted-foreground">
+                <p>
+                    The fields below can be prefilled from this saved source,
+                    and you can still adjust the entry details if needed.
+                </p>
                 {source.short_name && <p>Short name: {source.short_name}</p>}
                 {source.author_name && <p>Author: {source.author_name}</p>}
                 {source.tradition && <p>Tradition: {source.tradition}</p>}

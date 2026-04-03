@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { usePage } from '@inertiajs/react';
 import { adminModuleRegistry } from './module-registry';
 import type { AdminModuleDefinition } from './module-types';
 import type { AdminSurfaceContract } from '../surfaces/core/surface-contracts';
@@ -9,6 +10,7 @@ import {
     resolveAdminModuleActions,
 } from './module-actions';
 import { AdminModuleActionRenderer } from './AdminModuleActionRenderer';
+import { parseScriptureAdminNavigationTarget } from '@/lib/scripture-admin-navigation';
 import { cn } from '@/lib/utils';
 
 type Props = {
@@ -29,6 +31,7 @@ export function AdminModuleHost({
     modules = adminModuleRegistry,
     className,
 }: Props) {
+    const page = usePage();
     const qualifyingModules = useMemo(
         () => getQualifyingAdminModules(surface, modules),
         [surface, modules],
@@ -47,6 +50,20 @@ export function AdminModuleHost({
             setActiveActionKey(null);
         }
     }, [activeActionKey, resolvedActions]);
+
+    useEffect(() => {
+        const target = parseScriptureAdminNavigationTarget(page.url);
+
+        if (
+            target === null ||
+            target.section !== surface.regionKey ||
+            resolvedActions.length === 0
+        ) {
+            return;
+        }
+
+        setActiveActionKey((current) => current ?? resolvedActions[0].key);
+    }, [page.url, resolvedActions, surface.regionKey]);
 
     if (qualifyingModules.length === 0) {
         return null;
