@@ -27,6 +27,11 @@ class BookSectionAdminRouteContext
         ], $extra);
     }
 
+    public function destroyHref(): string
+    {
+        return route('scripture.book-sections.admin.destroy', $this->routeParameters());
+    }
+
     public function contentBlockStoreHref(): string
     {
         return route(
@@ -39,6 +44,16 @@ class BookSectionAdminRouteContext
     {
         return route(
             'scripture.book-sections.admin.content-blocks.update',
+            $this->routeParameters([
+                'contentBlock' => $contentBlock,
+            ]),
+        );
+    }
+
+    public function contentBlockDestroyHref(ContentBlock $contentBlock): string
+    {
+        return route(
+            'scripture.book-sections.admin.content-blocks.destroy',
             $this->routeParameters([
                 'contentBlock' => $contentBlock,
             ]),
@@ -75,11 +90,7 @@ class BookSectionAdminRouteContext
 
     public function abortUnlessEditableIntroBlock(ContentBlock $contentBlock): void
     {
-        RegisteredContentBlock::abortUnlessEditableFor(
-            $this->bookSection,
-            $contentBlock,
-            $this->contentBlockTypes(),
-        );
+        abort_unless($this->isEditableIntroBlock($contentBlock), 404);
     }
 
     public function isContextualInsertionAnchor(ContentBlock $contentBlock): bool

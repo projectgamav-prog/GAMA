@@ -120,8 +120,10 @@ function applySourceToForm(
 
 function CreateTranslationCard({
     metadata,
+    onSuccess,
 }: {
     metadata: VerseTranslationsContractMetadata;
+    onSuccess: () => void;
 }) {
     const form = useForm<TranslationFormData>({
         source_key: '',
@@ -315,6 +317,7 @@ function CreateTranslationCard({
                         form.post(metadata.storeHref, {
                             preserveScroll: true,
                             preserveState: false,
+                            onSuccess,
                         });
                     }}
                     disabled={form.processing}
@@ -329,9 +332,11 @@ function CreateTranslationCard({
 function TranslationEditorCard({
     metadata,
     row,
+    onSuccess,
 }: {
     metadata: VerseTranslationsContractMetadata;
     row: ScriptureAdminVerseTranslation;
+    onSuccess: () => void;
 }) {
     const form = useForm<TranslationFormData>({
         source_key: row.source_key,
@@ -532,6 +537,7 @@ function TranslationEditorCard({
                             }));
                             form.patch(row.update_href, {
                                 preserveScroll: true,
+                                onSuccess,
                             });
                         }}
                         disabled={form.processing}
@@ -559,6 +565,7 @@ function TranslationEditorCard({
 
 function VerseTranslationsEditor(props: AdminModuleComponentProps) {
     const metadata = resolveTranslationMetadata(props);
+    const handleMutationSuccess = () => props.activation.deactivate();
     const fullEditHref =
         metadata?.fullEditHref
             ? buildScriptureAdminSectionHref(
@@ -612,13 +619,17 @@ function VerseTranslationsEditor(props: AdminModuleComponentProps) {
                     )}
                 </div>
 
-                <CreateTranslationCard metadata={metadata} />
+                <CreateTranslationCard
+                    metadata={metadata}
+                    onSuccess={handleMutationSuccess}
+                />
 
                 {metadata.rows.map((row) => (
                     <TranslationEditorCard
                         key={row.id}
                         metadata={metadata}
                         row={row}
+                        onSuccess={handleMutationSuccess}
                     />
                 ))}
             </div>

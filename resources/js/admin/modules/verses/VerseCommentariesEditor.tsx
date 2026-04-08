@@ -131,8 +131,10 @@ function applySourceToForm(
 
 function CreateCommentaryCard({
     metadata,
+    onSuccess,
 }: {
     metadata: VerseCommentariesContractMetadata;
+    onSuccess: () => void;
 }) {
     const form = useForm<CommentaryFormData>({
         source_key: '',
@@ -372,6 +374,7 @@ function CreateCommentaryCard({
                         form.post(metadata.storeHref, {
                             preserveScroll: true,
                             preserveState: false,
+                            onSuccess,
                         });
                     }}
                     disabled={form.processing}
@@ -386,9 +389,11 @@ function CreateCommentaryCard({
 function CommentaryEditorCard({
     metadata,
     row,
+    onSuccess,
 }: {
     metadata: VerseCommentariesContractMetadata;
     row: ScriptureAdminVerseCommentary;
+    onSuccess: () => void;
 }) {
     const form = useForm<CommentaryFormData>({
         source_key: row.source_key,
@@ -637,6 +642,7 @@ function CommentaryEditorCard({
                             }));
                             form.patch(row.update_href, {
                                 preserveScroll: true,
+                                onSuccess,
                             });
                         }}
                         disabled={form.processing}
@@ -664,6 +670,7 @@ function CommentaryEditorCard({
 
 function VerseCommentariesEditor(props: AdminModuleComponentProps) {
     const metadata = resolveCommentaryMetadata(props);
+    const handleMutationSuccess = () => props.activation.deactivate();
     const fullEditHref =
         metadata?.fullEditHref
             ? buildScriptureAdminSectionHref(
@@ -719,13 +726,17 @@ function VerseCommentariesEditor(props: AdminModuleComponentProps) {
                     )}
                 </div>
 
-                <CreateCommentaryCard metadata={metadata} />
+                <CreateCommentaryCard
+                    metadata={metadata}
+                    onSuccess={handleMutationSuccess}
+                />
 
                 {metadata.rows.map((row) => (
                     <CommentaryEditorCard
                         key={row.id}
                         metadata={metadata}
                         row={row}
+                        onSuccess={handleMutationSuccess}
                     />
                 ))}
             </div>

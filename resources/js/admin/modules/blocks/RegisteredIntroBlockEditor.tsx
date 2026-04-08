@@ -32,11 +32,13 @@ type Props = {
     block: ScriptureContentBlock | null;
     blockTypes: string[];
     updateHref: string | null;
+    destroyHref?: string | null;
     storeHref: string | null;
     fullEditHref?: string | null;
     defaultRegion?: string | null;
     onCancel?: () => void;
     onSaveSuccess?: () => void;
+    onDeleteSuccess?: () => void;
 };
 
 export function RegisteredIntroBlockEditor({
@@ -45,11 +47,13 @@ export function RegisteredIntroBlockEditor({
     block,
     blockTypes,
     updateHref,
+    destroyHref = null,
     storeHref,
     fullEditHref = null,
     defaultRegion = 'overview',
     onCancel,
     onSaveSuccess,
+    onDeleteSuccess,
 }: Props) {
     const isCreateMode = block === null && storeHref !== null;
     const resolvedDefaultRegion = defaultRegion ?? 'overview';
@@ -276,6 +280,25 @@ export function RegisteredIntroBlockEditor({
                     </div>
                 )}
             </ScriptureInlineRegionEditor>
+
+            {!isCreateMode && destroyHref && (
+                <div className="mt-3 flex justify-end">
+                    <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() =>
+                            form.delete(destroyHref, {
+                                preserveScroll: true,
+                                onSuccess: () => onDeleteSuccess?.(),
+                            })
+                        }
+                        disabled={form.processing}
+                    >
+                        Delete Intro
+                    </Button>
+                </div>
+            )}
         </div>
     );
 }

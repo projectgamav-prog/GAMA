@@ -132,11 +132,13 @@ export type ScriptureVerseAdmin = {
     identity_update_href: string;
     meta_update_href: string;
     full_edit_href: string;
+    destroy_href: string;
     translations: ScriptureVerseTranslationsAdmin;
     commentaries: ScriptureVerseCommentariesAdmin;
     intro_store_href: string;
     primary_intro_block: ScriptureContentBlock | null;
     primary_intro_update_href: string | null;
+    primary_intro_destroy_href: string | null;
     intro_block_types: string[];
     intro_default_region: string;
     content_block_store_href: string;
@@ -155,6 +157,7 @@ export type ScriptureBookAdmin = {
     details_update_href: string;
     full_edit_href: string;
     canonical_edit_href: string;
+    destroy_href: string;
     book_section_store_href: string;
     content_block_store_href: string;
     content_block_types: string[];
@@ -175,10 +178,12 @@ export type ScriptureBookAdmin = {
 export type ScriptureChapterAdmin = {
     full_edit_href: string;
     identity_update_href: string;
+    destroy_href: string;
     chapter_section_store_href: string;
     intro_store_href: string;
     primary_intro_block: ScriptureContentBlock | null;
     primary_intro_update_href: string | null;
+    primary_intro_destroy_href: string | null;
     intro_block_types: string[];
     intro_default_region: string;
     content_block_store_href: string;
@@ -230,15 +235,18 @@ export type ScriptureAdminMediaAssignment = {
     sort_order: number;
     status: 'draft' | 'published';
     update_href: string;
+    destroy_href?: string | null;
     media: ScriptureAdminMediaSummary | null;
 };
 
 export type ScriptureSectionRowAdmin = {
     details_update_href: string;
+    destroy_href?: string | null;
     child_store_href?: string | null;
     intro_store_href?: string | null;
     primary_intro_block?: ScriptureContentBlock | null;
     primary_intro_update_href?: string | null;
+    primary_intro_destroy_href?: string | null;
     intro_block_types?: string[] | null;
     intro_default_region?: string | null;
 };
@@ -357,6 +365,47 @@ export type ScriptureVerse = {
 
 export type ScriptureReaderLanguage = 'en' | 'hi';
 
+export type ScriptureVerseRelationRowsAdmin<TRow> = {
+    store_href: string;
+    next_sort_order: number;
+    rows: TRow[];
+};
+
+export type ScriptureVerseRelationSharedAdmin<
+    TSource,
+    TFields = Record<string, ScriptureRegisteredAdminField>,
+> = {
+    sources: TSource[];
+    fields: TFields;
+};
+
+export type ScriptureChapterVerseSharedAdmin = {
+    translations: ScriptureVerseRelationSharedAdmin<
+        ScriptureTranslationSourceOption,
+        ScriptureVerseTranslationsAdminFields
+    >;
+    commentaries: ScriptureVerseRelationSharedAdmin<
+        ScriptureCommentarySourceOption,
+        ScriptureVerseCommentariesAdminFields
+    >;
+};
+
+export type ScriptureReaderVerseAdmin = {
+    identity_update_href: string;
+    meta_update_href: string;
+    full_edit_href: string;
+    destroy_href: string;
+    nearby_create_href: string;
+    intro_store_href: string;
+    primary_intro_block: ScriptureContentBlock | null;
+    primary_intro_update_href: string | null;
+    primary_intro_destroy_href: string | null;
+    intro_block_types: string[];
+    intro_default_region: string;
+    translations: ScriptureVerseRelationRowsAdmin<ScriptureAdminVerseTranslation>;
+    commentaries: ScriptureVerseRelationRowsAdmin<ScriptureAdminVerseCommentary>;
+};
+
 export type ScriptureReaderVerse = {
     id: number;
     slug: string;
@@ -365,6 +414,9 @@ export type ScriptureReaderVerse = {
     explanation_href: string;
     video_href: string | null;
     translations: Record<ScriptureReaderLanguage, string | null>;
+    verse_meta?: ScriptureVerseMeta | null;
+    characters?: ScriptureVerseCharacterAssignment[];
+    admin?: ScriptureReaderVerseAdmin | null;
 };
 
 export type ScriptureReaderCard = {
@@ -699,6 +751,7 @@ export type ChapterShowProps = {
     >;
     isAdmin: boolean;
     admin?: ScriptureChapterAdmin | null;
+    verse_admin_shared?: ScriptureChapterVerseSharedAdmin | null;
 };
 
 export type VerseShowProps = {

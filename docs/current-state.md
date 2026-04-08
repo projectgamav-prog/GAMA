@@ -49,14 +49,46 @@ After completing a task:
 ### Verse translation support
 - Schema-driven from `verse_translations`
 - Source-aware from `translation_sources`
-- Inline quick edit works through the Verse surface/module/action system
+- Inline quick edit works through the Verse surface/module/action system on verse detail and chapter verse-list rows
+- Successful inline create/save now closes back to the normal display state
 - User-facing copy was cleaned up from schema-heavy wording
 
 ### Verse commentary support
 - Schema-driven from `verse_commentaries`
 - Source-aware from `commentary_sources`
-- Inline quick edit works through the Verse surface/module/action system
+- Inline quick edit works through the Verse surface/module/action system on verse detail and chapter verse-list rows
+- Successful inline create/save now closes back to the normal display state
 - User-facing copy was cleaned up from schema-heavy wording
+
+### Book media slot support
+- Schema-driven from the existing media-slot contract and module wiring
+- Inline create/save/delete now closes back to the normal display state
+- Page shells remain thin while the module owns the editing lifecycle
+
+### Chapter-page verse row admin
+- Each visible verse row on `scripture.chapters.show` now exposes its own verse admin controls through verse surfaces
+- Verse identity, intro, structured notes/meta, translations, commentaries, nearby verse create, delete, and full edit launcher now attach directly to the rendered verse rows/cards
+- Verse-row controls stay attached to the corresponding verse instead of drifting back to chapter-section-only controls or page-local action hacks
+
+### Intro surface CRUD
+- Verse intro, chapter intro, book-section intro, and chapter-section intro now support create/update/delete through the shared registered intro editor where the backend route exists
+- Intro delete remains module-driven and surface-driven rather than being hardcoded into page shells
+
+### Current book-schema CRUD coverage
+- `books`: create, identity/details update, editorial content-block CRUD, media-slot CRUD, and delete are active
+- `book_sections`: create, detail update, intro CRUD, and delete are active
+- `chapters`: create, identity update, intro CRUD, chapter note-block CRUD, and delete are active
+- `chapter_sections`: create, detail update, intro CRUD, and delete are active
+- `verses`: create, identity update, delete, intro CRUD, structured notes/meta edit, translation CRUD, commentary CRUD, and verse note-block CRUD are active
+- `verse intro/notes`: intro and structured notes/meta now edit inline from the chapter verse list as well as verse detail; published note blocks still stay on verse detail/full edit
+- `relevant media slot surfaces`: book media slots now support create/update/delete in the active module path
+
+### Structural delete coverage
+- Shared `entity_actions` delete controls now attach to the current structural admin surfaces instead of page-local buttons
+- Book delete is available from the book shell
+- Chapter delete is available from the chapter shell
+- Book-section and chapter-section delete are available from their existing section-group wrappers
+- Destructive cleanup now removes entity-owned editorial data before deleting structural rows so morph-owned content does not orphan silently
 
 ### Module/action UI
 - Compact grouped launcher layout works
@@ -82,6 +114,14 @@ But this still needs real product-level validation:
 - Must feel meaningfully deeper than inline quick edit
 - Must not regress into a decorative jump or weak duplicate shell
 - Needs future review to confirm that it is genuinely useful
+
+### Inline editor lifecycle validation
+- Close-on-success behavior is now wired for the active module-based create/save editors audited in this pass
+- Browser validation is still needed to confirm there are no remaining lifecycle regressions on the touched surfaces, especially the new chapter-page verse-row controls and the new intro/media delete actions
+
+### Remaining scope watchpoints
+- No open CRUD gap remains in the current active book-schema entity list after this pass
+- Verse published note-block CRUD still lives on verse detail/full edit rather than as compact row-local controls on the chapter page; that is now a UX/scope choice, not a missing schema CRUD path
 
 ### User-friendly editing UX
 - Translation/commentary wording improved, but all new edit flows should keep being checked for schema-heavy language leaks
@@ -111,10 +151,10 @@ Current feature work must remain grounded in real tables and relations, especial
 Do not drift into fake generic abstractions detached from the schema.
 
 ## Immediate next priority when resuming
-1. Re-check Full Edit experience for translations/commentaries and strengthen it if still weak
-2. Continue polishing translation/commentary UX for editor-friendliness
-3. Keep reducing page burden and hidden hardcoding
-4. Continue long-term movement toward schema-derived modules and later CMS-integratable module families
+1. Validate the chapter-page verse-row controls in browser: identity, intro, notes/meta, nearby create, delete, translations, commentaries, and full edit
+2. Validate delete flows on the active surfaces: book, book section, chapter, chapter section, verse, intro, and media slot
+3. Re-check Full Edit experience for translations/commentaries and verse note depth from the chapter page
+4. Continue UX cleanup without reintroducing page-local admin behavior
 
 ## Do not forget
 - `admin-architecture.md` is now the authoritative architecture document

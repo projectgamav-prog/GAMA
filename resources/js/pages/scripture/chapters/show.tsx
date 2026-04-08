@@ -25,6 +25,7 @@ export default function ChapterShow({
     default_language,
     chapter_sections,
     admin,
+    verse_admin_shared,
 }: ChapterShowProps) {
     const showAdminControls = useVisibleAdminControls();
     const hidesGenericBookSection = isGenericSectionLabel(
@@ -46,6 +47,7 @@ export default function ChapterShow({
     const {
         identitySurface: chapterIdentitySurface,
         introSurface: chapterIntroSurface,
+        actionsSurface: chapterActionsSurface,
     } = resolveChapterHeaderSurfaces({
         chapter,
         chapterTitle,
@@ -107,7 +109,11 @@ export default function ChapterShow({
                 contentClassName="space-y-6"
             >
                 <AdminModuleHostGroup
-                    surfaces={[chapterIdentitySurface, chapterIntroSurface]}
+                    surfaces={[
+                        chapterIdentitySurface,
+                        chapterIntroSurface,
+                        chapterActionsSurface,
+                    ]}
                 />
 
                 <ScriptureIntroBlock
@@ -140,6 +146,7 @@ export default function ChapterShow({
                 defaultLanguage={default_language}
                 showAdminControls={showAdminControls}
                 admin={admin}
+                verseAdminShared={verse_admin_shared}
             />
         </ScriptureLayout>
     );

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
+import { AdminModuleHostGroup } from '@/admin/core/AdminModuleHostGroup';
 import type { AdminSurfaceContract } from '@/admin/surfaces/core/surface-contracts';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScriptureIntroBlock } from '@/components/scripture/scripture-intro-block';
@@ -21,6 +22,7 @@ type Props = {
     introBlock?: ScriptureContentBlock | null;
     introLabel?: string;
     adminSurface?: AdminSurfaceContract | null;
+    adminSurfaces?: Array<AdminSurfaceContract | null | undefined>;
     panelClassName?: string;
     children: ReactNode;
     className?: string;
@@ -34,10 +36,13 @@ export function ScriptureSectionGroupWrapper({
     introBlock = null,
     introLabel = 'Section Introduction',
     adminSurface = null,
+    adminSurfaces = [],
     panelClassName = SCRIPTURE_INLINE_ADMIN_PANEL_CLASS_NAME,
     children,
     className,
 }: Props) {
+    const headerSurfaces = adminSurfaces.length > 0 ? adminSurfaces : [adminSurface];
+
     return (
         <ScriptureEntityRegion meta={entityMeta} asChild>
             <Card id={id} className={cn('overflow-hidden', className)}>
@@ -51,11 +56,18 @@ export function ScriptureSectionGroupWrapper({
                                 </div>
                             )}
                         </div>
-                        {adminSurface && (
-                            <AdminModuleHost
-                                surface={adminSurface}
+                        {adminSurfaces.length > 0 ? (
+                            <AdminModuleHostGroup
+                                surfaces={headerSurfaces}
                                 className={panelClassName}
                             />
+                        ) : (
+                            adminSurface && (
+                                <AdminModuleHost
+                                    surface={adminSurface}
+                                    className={panelClassName}
+                                />
+                            )
                         )}
                     </div>
 

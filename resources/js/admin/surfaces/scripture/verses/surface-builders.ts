@@ -3,6 +3,7 @@ import {
     VERSE_IDENTITY_SURFACE_KEY,
     VERSE_INTRO_SURFACE_KEY,
     VERSE_META_SURFACE_KEY,
+    VERSE_ROW_ACTIONS_SURFACE_KEY,
     VERSE_TRANSLATIONS_SURFACE_KEY,
 } from '@/admin/surfaces/core/surface-keys';
 import {
@@ -21,6 +22,7 @@ import type {
     IdentityContractMetadata,
     IntroContractMetadata,
     VerseCommentariesContractMetadata,
+    EntityActionsContractMetadata,
     StructuredMetaContractMetadata,
     VerseTranslationsContractMetadata,
 } from '@/admin/surfaces/core/contract-readers';
@@ -37,8 +39,18 @@ type VerseIntroSurfaceArgs = {
     block: ScriptureContentBlock | null;
     blockTypes: string[];
     updateHref: string | null;
+    destroyHref?: string | null;
     storeHref: string | null;
     fullEditHref: string;
+};
+
+type VerseRowActionsSurfaceArgs = {
+    verse: ScriptureVerse;
+    verseTitle: string;
+    parentLabel: string | null;
+    createHref?: string | null;
+    destroyHref?: string | null;
+    fullEditHref?: string | null;
 };
 
 type VerseMetaSurfaceArgs = {
@@ -89,6 +101,7 @@ export function createVerseIntroSurface({
     block,
     blockTypes,
     updateHref,
+    destroyHref = null,
     storeHref,
     fullEditHref,
 }: VerseIntroSurfaceArgs): AdminSurfaceContract<IntroContractMetadata<ScriptureVerse>> {
@@ -110,7 +123,41 @@ export function createVerseIntroSurface({
             block,
             blockTypes,
             updateHref,
+            destroyHref,
             storeHref,
+            fullEditHref,
+        },
+    });
+}
+
+export function createVerseRowActionsSurface({
+    verse,
+    verseTitle,
+    parentLabel,
+    createHref = null,
+    destroyHref = null,
+    fullEditHref = null,
+}: VerseRowActionsSurfaceArgs): AdminSurfaceContract<EntityActionsContractMetadata> {
+    return createInlineEditorSurface({
+        surfaceKey: VERSE_ROW_ACTIONS_SURFACE_KEY,
+        contractKey: 'entity_actions',
+        entity: 'verse',
+        entityId: verse.id,
+        regionKey: 'verse_row_actions',
+        capabilities: [
+            ...(createHref ? (['create_row'] as const) : []),
+            ...(destroyHref ? (['delete'] as const) : []),
+            ...(fullEditHref ? (['full_edit'] as const) : []),
+        ],
+        presentation: {
+            placement: 'inline',
+            variant: 'compact',
+        },
+        metadata: {
+            entityLabel: verseTitle,
+            parentLabel,
+            createHref,
+            destroyHref,
             fullEditHref,
         },
     });

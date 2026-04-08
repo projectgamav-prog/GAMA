@@ -48,8 +48,17 @@ export type IntroContractMetadata<TEntity> = {
     block: ScriptureContentBlock | null;
     blockTypes: string[];
     updateHref: string | null;
+    destroyHref?: string | null;
     storeHref: string | null;
     fullEditHref: string;
+};
+
+export type EntityActionsContractMetadata = {
+    entityLabel: string;
+    parentLabel: string | null;
+    createHref: string | null;
+    destroyHref: string | null;
+    fullEditHref: string | null;
 };
 
 export type StructuredMetaContractMetadata<TValue, TOptions = unknown> = {
@@ -125,6 +134,9 @@ export function getIntroContractMetadata<TEntity>(
                 metadata.textValue === undefined) &&
             (typeof metadata.updateHref === 'string' ||
                 metadata.updateHref === null) &&
+            (typeof metadata.destroyHref === 'string' ||
+                metadata.destroyHref === null ||
+                metadata.destroyHref === undefined) &&
             (typeof metadata.storeHref === 'string' ||
                 metadata.storeHref === null ||
                 metadata.storeHref === undefined) &&
@@ -133,6 +145,29 @@ export function getIntroContractMetadata<TEntity>(
                 metadata.block === undefined) &&
             typeof metadata.entityRecord === 'object' &&
             metadata.entityRecord !== null,
+    );
+}
+
+export function getEntityActionsContractMetadata(
+    surface: AdminSurfaceContract,
+): EntityActionsContractMetadata | null {
+    return getContractMetadata<EntityActionsContractMetadata>(
+        surface,
+        'entity_actions',
+        (metadata) =>
+            typeof metadata.entityLabel === 'string' &&
+            (typeof metadata.parentLabel === 'string' ||
+                metadata.parentLabel === null ||
+                metadata.parentLabel === undefined) &&
+            (typeof metadata.createHref === 'string' ||
+                metadata.createHref === null ||
+                metadata.createHref === undefined) &&
+            (typeof metadata.destroyHref === 'string' ||
+                metadata.destroyHref === null ||
+                metadata.destroyHref === undefined) &&
+            (typeof metadata.fullEditHref === 'string' ||
+                metadata.fullEditHref === null ||
+                metadata.fullEditHref === undefined),
     );
 }
 

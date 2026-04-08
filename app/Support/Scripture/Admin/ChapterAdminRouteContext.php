@@ -46,6 +46,11 @@ class ChapterAdminRouteContext
         return route('scripture.chapters.admin.identity.update', $this->routeParameters());
     }
 
+    public function destroyHref(): string
+    {
+        return route('scripture.chapters.admin.destroy', $this->routeParameters());
+    }
+
     public function contentBlockStoreHref(): string
     {
         return route('scripture.chapters.admin.content-blocks.store', $this->routeParameters());

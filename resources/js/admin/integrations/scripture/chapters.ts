@@ -1,6 +1,7 @@
 import { chapterIdentityEditorModule } from '@/admin/modules/chapters/ChapterIdentityEditor';
 import { chapterIntroEditorModule } from '@/admin/modules/chapters/ChapterIntroEditor';
 import {
+    createChapterActionsSurface,
     createChapterIdentitySurface,
     createChapterIntroSurface,
 } from '@/admin/surfaces/scripture/chapters/surface-builders';
@@ -31,6 +32,7 @@ export function resolveChapterHeaderSurfaces({
         return {
             identitySurface: null,
             introSurface: null,
+            actionsSurface: null,
         };
     }
 
@@ -46,8 +48,14 @@ export function resolveChapterHeaderSurfaces({
             block: admin.primary_intro_block,
             blockTypes: admin.intro_block_types,
             updateHref: admin.primary_intro_update_href,
+            destroyHref: admin.primary_intro_destroy_href,
             storeHref: admin.intro_store_href,
             fullEditHref: admin.full_edit_href,
+        }),
+        actionsSurface: createChapterActionsSurface({
+            chapter,
+            chapterTitle,
+            destroyHref: admin.destroy_href ?? null,
         }),
     };
 }

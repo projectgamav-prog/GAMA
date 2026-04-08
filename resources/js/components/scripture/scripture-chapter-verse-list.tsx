@@ -3,9 +3,11 @@ import { Languages } from 'lucide-react';
 import { useState } from 'react';
 import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import {
+    resolveChapterSectionActionsSurface,
     resolveChapterSectionVerseGroupSurface,
     resolveChapterVerseGroupsSurface,
 } from '@/admin/integrations/sections';
+import { ScriptureChapterVerseRowAdmin } from '@/components/scripture/scripture-chapter-verse-row-admin';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import {
     SCRIPTURE_INLINE_ADMIN_PANEL_CLASS_NAME,
@@ -27,6 +29,7 @@ import { cn } from '@/lib/utils';
 import type {
     ScriptureChapter,
     ScriptureChapterAdmin,
+    ScriptureChapterVerseSharedAdmin,
     ScriptureChapterSection,
     ScriptureReaderCard,
     ScriptureReaderLanguage,
@@ -48,6 +51,7 @@ type Props = {
     defaultLanguage: ScriptureReaderLanguage | null;
     showAdminControls: boolean;
     admin?: Pick<ScriptureChapterAdmin, 'chapter_section_store_href'> | null;
+    verseAdminShared?: ScriptureChapterVerseSharedAdmin | null;
     panelClassName?: string;
 };
 
@@ -56,12 +60,18 @@ type VerseReaderRowProps = {
     index: number;
     language: ScriptureReaderLanguage;
     hasReaderLanguages: boolean;
+    sectionTitle: string;
+    showAdminControls: boolean;
+    verseAdminShared?: ScriptureChapterVerseSharedAdmin | null;
 };
 
 type VerseReaderCardPanelProps = {
     card: ScriptureReaderCard;
     language: ScriptureReaderLanguage;
     hasReaderLanguages: boolean;
+    sectionTitle: string;
+    showAdminControls: boolean;
+    verseAdminShared?: ScriptureChapterVerseSharedAdmin | null;
 };
 
 function ScriptureVerseReaderRow({
@@ -69,6 +79,9 @@ function ScriptureVerseReaderRow({
     index,
     language,
     hasReaderLanguages,
+    sectionTitle,
+    showAdminControls,
+    verseAdminShared = null,
 }: VerseReaderRowProps) {
     const verseDetailAction = resolveScriptureNavigationAction({
         actionKey: 'open_verse_detail',
@@ -152,6 +165,13 @@ function ScriptureVerseReaderRow({
                     </div>
                 </div>
 
+                <ScriptureChapterVerseRowAdmin
+                    verse={verse}
+                    sectionTitle={sectionTitle}
+                    showAdminControls={showAdminControls}
+                    sharedAdmin={verseAdminShared}
+                />
+
                 <p className="text-[1.02rem] leading-8">{verse.text}</p>
 
                 <div className="rounded-lg bg-muted/35 px-3.5 py-3">
@@ -185,6 +205,9 @@ function ScriptureVerseReaderCardPanel({
     card,
     language,
     hasReaderLanguages,
+    sectionTitle,
+    showAdminControls,
+    verseAdminShared = null,
 }: VerseReaderCardPanelProps) {
     const showsHeader = card.type === 'group' || card.verses.length > 1;
 
@@ -217,6 +240,9 @@ function ScriptureVerseReaderCardPanel({
                         index={index}
                         language={language}
                         hasReaderLanguages={hasReaderLanguages}
+                        sectionTitle={sectionTitle}
+                        showAdminControls={showAdminControls}
+                        verseAdminShared={verseAdminShared}
                     />
                 ))}
             </CardContent>
@@ -231,6 +257,7 @@ export function ScriptureChapterVerseList({
     defaultLanguage,
     showAdminControls,
     admin,
+    verseAdminShared = null,
     panelClassName = DEFAULT_PANEL_CLASS_NAME,
 }: Props) {
     const [language, setLanguage] = useState<ScriptureReaderLanguage>(
@@ -371,6 +398,12 @@ export function ScriptureChapterVerseList({
                             openHref: null,
                             enabled: showAdminControls,
                         });
+                    const sectionActionsSurface =
+                        resolveChapterSectionActionsSurface({
+                            chapterSection: section,
+                            title: sectionTitle,
+                            enabled: showAdminControls,
+                        });
 
                     return (
                         <ScriptureSectionGroupWrapper
@@ -396,7 +429,10 @@ export function ScriptureChapterVerseList({
                                 </span>
                             }
                             introBlock={section.intro_block}
-                            adminSurface={sectionGroupSurface}
+                            adminSurfaces={[
+                                sectionGroupSurface,
+                                sectionActionsSurface,
+                            ]}
                             panelClassName={panelClassName}
                         >
                             <div className="space-y-3">
@@ -406,6 +442,9 @@ export function ScriptureChapterVerseList({
                                         card={card}
                                         language={language}
                                         hasReaderLanguages={hasReaderLanguages}
+                                        sectionTitle={sectionTitle}
+                                        showAdminControls={showAdminControls}
+                                        verseAdminShared={verseAdminShared}
                                     />
                                 ))}
                             </div>

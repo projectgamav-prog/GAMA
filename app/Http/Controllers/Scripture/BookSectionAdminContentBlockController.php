@@ -73,6 +73,23 @@ class BookSectionAdminContentBlockController extends Controller
         return redirect()->back(status: 303);
     }
 
+    /**
+     * Delete a book-section-owned intro block.
+     */
+    public function destroy(
+        Book $book,
+        BookSection $bookSection,
+        ContentBlock $contentBlock,
+    ): RedirectResponse {
+        $adminRouteContext = new BookSectionAdminRouteContext($book, $bookSection);
+
+        $adminRouteContext->abortUnlessEditableIntroBlock($contentBlock);
+
+        $contentBlock->delete();
+
+        return redirect()->back(status: 303);
+    }
+
     private function nullableString(mixed $value): ?string
     {
         if (! is_string($value)) {

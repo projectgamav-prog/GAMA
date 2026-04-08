@@ -171,6 +171,7 @@ class BookController extends Controller
             'details_update_href' => $adminRouteContext->detailsUpdateHref(),
             'full_edit_href' => $adminRouteContext->fullEditHref(),
             'canonical_edit_href' => $adminRouteContext->canonicalEditHref(),
+            'destroy_href' => $adminRouteContext->destroyHref(),
             'book_section_store_href' => route(
                 'scripture.book-sections.admin.store',
                 ['book' => $book],
@@ -221,6 +222,7 @@ class BookController extends Controller
                     'sort_order' => $mediaAssignment->sort_order,
                     'status' => $mediaAssignment->status,
                     'update_href' => $adminRouteContext->mediaAssignmentUpdateHref($mediaAssignment),
+                    'destroy_href' => $adminRouteContext->mediaAssignmentDestroyHref($mediaAssignment),
                     'media' => $mediaAssignment->media
                         ? [
                             'id' => $mediaAssignment->media->id,
@@ -364,12 +366,16 @@ class BookController extends Controller
                     'bookSection' => $bookSection,
                 ],
             ),
+            'destroy_href' => $adminRouteContext->destroyHref(),
             'intro_store_href' => $adminRouteContext->contentBlockStoreHref(),
             'primary_intro_block' => $primaryIntroBlock
                 ? ($publicScriptureData->contentBlocks([$primaryIntroBlock])[0] ?? null)
                 : null,
             'primary_intro_update_href' => $primaryIntroBlock
                 ? $adminRouteContext->contentBlockUpdateHref($primaryIntroBlock)
+                : null,
+            'primary_intro_destroy_href' => $primaryIntroBlock
+                ? $adminRouteContext->contentBlockDestroyHref($primaryIntroBlock)
                 : null,
             'intro_block_types' => $adminRouteContext->contentBlockTypes(),
             'intro_default_region' => $adminRouteContext->defaultContentBlockRegion(),

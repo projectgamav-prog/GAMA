@@ -39,7 +39,32 @@ Before any implementation prompt, tell Codex:
 
 ## Immediate focus
 
-### 1. Validate and strengthen Full Edit
+### 1. Validate the new verse-row admin flow in browser
+Check the chapter page verse rows for:
+- edit verse identity/text
+- edit verse intro
+- edit verse notes/meta
+- add nearby verse
+- delete verse
+- quick translation add/edit
+- quick commentary add/edit
+- full edit launcher
+
+Confirm that the controls stay attached to the correct verse row, stay compact, and return to normal display state after successful inline mutations.
+
+### 2. Validate the new delete coverage on active surfaces
+Check:
+- book delete from the book shell
+- book-section delete from the chapter-list section wrapper
+- chapter delete from the chapter shell
+- chapter-section delete from the verse-list section wrapper
+- verse delete from the chapter page
+- intro delete on chapter / verse / book-section / chapter-section intro surfaces
+- book media-slot delete
+
+If any delete flow lands on the wrong page or leaves stale UI state, fix it in the module/surface/controller path rather than in page shells.
+
+### 3. Validate and strengthen Full Edit
 Check whether Full Edit for:
 - translations
 - commentaries
@@ -48,7 +73,7 @@ is truly functioning as a meaningful deeper editing path.
 
 If it still feels weak, improve it so that it becomes a real deeper workspace rather than a routed duplicate of inline quick edit.
 
-### 2. Continue UX cleanup
+### 4. Continue UX cleanup
 Keep translation/commentary editing:
 - user-friendly
 - editor-facing
@@ -56,7 +81,7 @@ Keep translation/commentary editing:
 
 Audit labels, helper text, empty states, and action wording again when needed.
 
-### 3. Keep architecture discipline
+### 5. Keep architecture discipline
 As new work continues:
 - pages should expose surfaces only
 - modules should define actions
@@ -84,10 +109,10 @@ Safe direction:
 - route abstraction later
 
 ## Practical restart order
-1. Review current translation/commentary Full Edit behavior in browser
-2. Confirm whether it is genuinely good enough
-3. Fix only what is still weak
-4. Then resume larger module-direction work
+1. Review the chapter-page verse-row controls in browser and confirm the right verse row owns the opened editor
+2. Review the new delete flows on structural, intro, media, and verse surfaces
+3. Review current translation/commentary Full Edit behavior in browser
+4. Fix only what is still weak before moving on to deeper UX refinement
 
 ## Success condition for the next phase
 When resuming, the goal is not “add more things quickly.”

@@ -7,6 +7,7 @@ import {
 } from '@/admin/surfaces/core/surface-keys';
 import { createInlineEditorSurface } from '@/admin/surfaces/core/surface-builders';
 import type { AdminSurfaceContract } from '@/admin/surfaces/core/surface-contracts';
+import type { EntityActionsContractMetadata } from '@/admin/surfaces/core/contract-readers';
 import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
 import type {
     ScriptureBook,
@@ -265,6 +266,8 @@ export function createBookSectionChapterGroupSurface({
             introStoreHref: bookSection.admin?.intro_store_href ?? null,
             introUpdateHref:
                 bookSection.admin?.primary_intro_update_href ?? null,
+            introDestroyHref:
+                bookSection.admin?.primary_intro_destroy_href ?? null,
             introDefaultRegion:
                 bookSection.admin?.intro_default_region ?? null,
             create: createSectionCreateMetadata(
@@ -273,6 +276,33 @@ export function createBookSectionChapterGroupSurface({
                 title,
                 SECTION_ROW_FIELDS,
             ),
+        },
+    });
+}
+
+export function createBookSectionActionsSurface({
+    bookSection,
+    title,
+}: {
+    bookSection: ScriptureBookSection;
+    title: string;
+}): AdminSurfaceContract<EntityActionsContractMetadata> {
+    return createInlineEditorSurface({
+        contractKey: 'entity_actions',
+        entity: 'book_section',
+        entityId: bookSection.id,
+        regionKey: 'chapter_list_section_actions',
+        capabilities: bookSection.admin?.destroy_href ? ['delete'] : [],
+        presentation: {
+            placement: 'inline',
+            variant: 'compact',
+        },
+        metadata: {
+            entityLabel: title,
+            parentLabel: null,
+            createHref: null,
+            destroyHref: bookSection.admin?.destroy_href ?? null,
+            fullEditHref: null,
         },
     });
 }
@@ -311,6 +341,33 @@ export function createChapterVerseGroupsSurface({
                 chapter.title ?? chapter.number ?? 'Chapter',
                 SECTION_ROW_FIELDS,
             ),
+        },
+    });
+}
+
+export function createChapterSectionActionsSurface({
+    chapterSection,
+    title,
+}: {
+    chapterSection: ScriptureChapterSection;
+    title: string;
+}): AdminSurfaceContract<EntityActionsContractMetadata> {
+    return createInlineEditorSurface({
+        contractKey: 'entity_actions',
+        entity: 'chapter_section',
+        entityId: chapterSection.id,
+        regionKey: 'verse_list_section_actions',
+        capabilities: chapterSection.admin?.destroy_href ? ['delete'] : [],
+        presentation: {
+            placement: 'inline',
+            variant: 'compact',
+        },
+        metadata: {
+            entityLabel: title,
+            parentLabel: null,
+            createHref: null,
+            destroyHref: chapterSection.admin?.destroy_href ?? null,
+            fullEditHref: null,
         },
     });
 }
@@ -363,6 +420,8 @@ export function createChapterSectionVerseGroupSurface({
             introStoreHref: chapterSection.admin?.intro_store_href ?? null,
             introUpdateHref:
                 chapterSection.admin?.primary_intro_update_href ?? null,
+            introDestroyHref:
+                chapterSection.admin?.primary_intro_destroy_href ?? null,
             introDefaultRegion:
                 chapterSection.admin?.intro_default_region ?? null,
             create: createSectionCreateMetadata(

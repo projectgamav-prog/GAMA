@@ -3,6 +3,7 @@ import { bookIntroEditorModule } from '@/admin/modules/books/BookIntroEditor';
 import { mediaSlotsEditorModule } from '@/admin/modules/books/MediaSlotsEditor';
 import type { AdminSurfacePresentation } from '@/admin/surfaces/core/surface-contracts';
 import {
+    createBookActionsSurface,
     createBookIdentitySurface,
     createBookIntroSurface,
     createBookMediaSlotsSurface,
@@ -51,6 +52,7 @@ export function resolveBookHeaderSurfaces({
         return {
             identitySurface: null,
             introSurface: null,
+            actionsSurface: null,
         };
     }
 
@@ -67,6 +69,10 @@ export function resolveBookHeaderSurfaces({
             updateHref: admin.details_update_href,
             fullEditHref: admin.full_edit_href,
             presentation,
+        }),
+        actionsSurface: createBookActionsSurface({
+            book,
+            destroyHref: admin.destroy_href ?? null,
         }),
     };
 }

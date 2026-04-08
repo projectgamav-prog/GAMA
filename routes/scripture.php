@@ -3,6 +3,7 @@
 use App\Http\Controllers\Scripture\AdminContextVisibilityController;
 use App\Http\Controllers\Scripture\BookAdminContentBlockController;
 use App\Http\Controllers\Scripture\BookAdminCreateController;
+use App\Http\Controllers\Scripture\BookAdminDeleteController;
 use App\Http\Controllers\Scripture\BookAdminDetailsController;
 use App\Http\Controllers\Scripture\BookAdminIdentityController;
 use App\Http\Controllers\Scripture\BookAdminMediaAssignmentController;
@@ -11,12 +12,15 @@ use App\Http\Controllers\Scripture\BookController;
 use App\Http\Controllers\Scripture\BookFullEditController;
 use App\Http\Controllers\Scripture\BookSectionAdminCreateController;
 use App\Http\Controllers\Scripture\BookSectionAdminContentBlockController;
+use App\Http\Controllers\Scripture\BookSectionAdminDeleteController;
 use App\Http\Controllers\Scripture\BookSectionAdminDetailsController;
 use App\Http\Controllers\Scripture\ChapterAdminContentBlockController;
 use App\Http\Controllers\Scripture\ChapterAdminCreateController;
+use App\Http\Controllers\Scripture\ChapterAdminDeleteController;
 use App\Http\Controllers\Scripture\ChapterAdminIdentityController;
 use App\Http\Controllers\Scripture\ChapterSectionAdminCreateController;
 use App\Http\Controllers\Scripture\ChapterSectionAdminContentBlockController;
+use App\Http\Controllers\Scripture\ChapterSectionAdminDeleteController;
 use App\Http\Controllers\Scripture\ChapterSectionAdminDetailsController;
 use App\Http\Controllers\Scripture\ChapterController;
 use App\Http\Controllers\Scripture\ChapterFullEditController;
@@ -27,6 +31,7 @@ use App\Http\Controllers\Scripture\TopicController;
 use App\Http\Controllers\Scripture\VerseAdminContentBlockController;
 use App\Http\Controllers\Scripture\VerseAdminCommentaryController;
 use App\Http\Controllers\Scripture\VerseAdminCreateController;
+use App\Http\Controllers\Scripture\VerseAdminDeleteController;
 use App\Http\Controllers\Scripture\VerseAdminIdentityController;
 use App\Http\Controllers\Scripture\VerseAdminMetaController;
 use App\Http\Controllers\Scripture\VerseAdminTranslationController;
@@ -140,6 +145,9 @@ Route::prefix('books')
                 Route::patch('details', [BookAdminDetailsController::class, 'update'])
                     ->name('details.update');
 
+                Route::delete('', [BookAdminDeleteController::class, 'destroy'])
+                    ->name('destroy');
+
                 Route::post('content-blocks', [BookAdminContentBlockController::class, 'store'])
                     ->name('content-blocks.store');
 
@@ -182,6 +190,11 @@ Route::prefix('books')
                     'media-assignments/{mediaAssignment}',
                     [BookAdminMediaAssignmentController::class, 'update'],
                 )->name('media-assignments.update');
+
+                Route::delete(
+                    'media-assignments/{mediaAssignment}',
+                    [BookAdminMediaAssignmentController::class, 'destroy'],
+                )->name('media-assignments.destroy');
             });
 
         Route::middleware(['auth', EnsureCanAccessAdminContext::class])
@@ -204,6 +217,9 @@ Route::prefix('books')
                 Route::patch('details', [BookSectionAdminDetailsController::class, 'update'])
                     ->name('details.update');
 
+                Route::delete('', [BookSectionAdminDeleteController::class, 'destroy'])
+                    ->name('destroy');
+
                 Route::post(
                     'content-blocks',
                     [BookSectionAdminContentBlockController::class, 'store'],
@@ -213,6 +229,11 @@ Route::prefix('books')
                     'content-blocks/{contentBlock}',
                     [BookSectionAdminContentBlockController::class, 'update'],
                 )->name('content-blocks.update');
+
+                Route::delete(
+                    'content-blocks/{contentBlock}',
+                    [BookSectionAdminContentBlockController::class, 'destroy'],
+                )->name('content-blocks.destroy');
             });
 
         Route::middleware(['auth', EnsureCanAccessAdminContext::class])
@@ -232,6 +253,9 @@ Route::prefix('books')
 
                 Route::patch('identity', [ChapterAdminIdentityController::class, 'update'])
                     ->name('identity.update');
+
+                Route::delete('', [ChapterAdminDeleteController::class, 'destroy'])
+                    ->name('destroy');
 
                 Route::post('content-blocks', [ChapterAdminContentBlockController::class, 'store'])
                     ->name('content-blocks.store');
@@ -286,6 +310,9 @@ Route::prefix('books')
                 Route::patch('details', [ChapterSectionAdminDetailsController::class, 'update'])
                     ->name('details.update');
 
+                Route::delete('', [ChapterSectionAdminDeleteController::class, 'destroy'])
+                    ->name('destroy');
+
                 Route::post(
                     'content-blocks',
                     [ChapterSectionAdminContentBlockController::class, 'store'],
@@ -295,6 +322,11 @@ Route::prefix('books')
                     'content-blocks/{contentBlock}',
                     [ChapterSectionAdminContentBlockController::class, 'update'],
                 )->name('content-blocks.update');
+
+                Route::delete(
+                    'content-blocks/{contentBlock}',
+                    [ChapterSectionAdminContentBlockController::class, 'destroy'],
+                )->name('content-blocks.destroy');
             });
 
         Route::get(
@@ -323,6 +355,9 @@ Route::prefix('books')
 
                 Route::patch('identity', [VerseAdminIdentityController::class, 'update'])
                     ->name('identity.update');
+
+                Route::delete('', [VerseAdminDeleteController::class, 'destroy'])
+                    ->name('destroy');
 
                 Route::patch('meta', [VerseAdminMetaController::class, 'update'])
                     ->name('meta.update');

@@ -3,6 +3,7 @@ import { BookOpenText } from 'lucide-react';
 import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import {
     resolveBookChapterGroupsSurface,
+    resolveBookSectionActionsSurface,
     resolveBookSectionChapterGroupSurface,
 } from '@/admin/integrations/sections';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
@@ -89,6 +90,12 @@ export function ScriptureBookChapterList({
                             title: sectionTitle,
                             enabled: showAdminControls,
                         });
+                    const sectionActionsSurface =
+                        resolveBookSectionActionsSurface({
+                            bookSection: section,
+                            title: sectionTitle,
+                            enabled: showAdminControls,
+                        });
 
                     return (
                         <ScriptureSectionGroupWrapper
@@ -109,7 +116,10 @@ export function ScriptureBookChapterList({
                                 </span>
                             }
                             introBlock={section.intro_block}
-                            adminSurface={sectionGroupSurface}
+                            adminSurfaces={[
+                                sectionGroupSurface,
+                                sectionActionsSurface,
+                            ]}
                             panelClassName={panelClassName}
                         >
                             <div className="grid gap-3 md:grid-cols-2">

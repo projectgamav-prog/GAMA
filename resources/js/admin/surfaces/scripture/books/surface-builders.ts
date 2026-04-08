@@ -17,6 +17,7 @@ import type {
     ScriptureBook,
 } from '@/types';
 import type {
+    EntityActionsContractMetadata,
     IdentityContractMetadata,
     IntroContractMetadata,
     MediaSlotsContractMetadata,
@@ -33,6 +34,11 @@ type BookIntroSurfaceArgs = {
     updateHref: string;
     fullEditHref: string;
     presentation?: AdminSurfacePresentation | null;
+};
+
+type BookActionsSurfaceArgs = {
+    book: ScriptureBook;
+    destroyHref: string | null;
 };
 
 type BookMediaSlotsSurfaceArgs = {
@@ -88,6 +94,30 @@ export function createBookIntroSurface({
             updateHref,
             storeHref: null,
             fullEditHref,
+        },
+    });
+}
+
+export function createBookActionsSurface({
+    book,
+    destroyHref,
+}: BookActionsSurfaceArgs): AdminSurfaceContract<EntityActionsContractMetadata> {
+    return createInlineEditorSurface({
+        contractKey: 'entity_actions',
+        entity: 'book',
+        entityId: book.id,
+        regionKey: 'book_actions',
+        capabilities: destroyHref ? ['delete'] : [],
+        presentation: {
+            placement: 'inline',
+            variant: 'compact',
+        },
+        metadata: {
+            entityLabel: book.title,
+            parentLabel: null,
+            createHref: null,
+            destroyHref,
+            fullEditHref: null,
         },
     });
 }

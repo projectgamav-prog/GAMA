@@ -46,6 +46,22 @@ class BookAdminMediaAssignmentController extends Controller
     }
 
     /**
+     * Delete a book-owned media assignment.
+     */
+    public function destroy(
+        Book $book,
+        MediaAssignment $mediaAssignment,
+    ): RedirectResponse {
+        $adminRouteContext = new BookAdminRouteContext($book);
+
+        $adminRouteContext->abortUnlessOwnsMediaAssignment($mediaAssignment);
+
+        $mediaAssignment->delete();
+
+        return redirect()->back(status: 303);
+    }
+
+    /**
      * @param  array<string, mixed>  $validated
      * @return array<string, mixed>
      */

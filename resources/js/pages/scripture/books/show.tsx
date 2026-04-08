@@ -22,7 +22,7 @@ export default function BookShow({
         entityId: book.id,
         entityLabel: book.title,
     };
-    const { identitySurface, introSurface } = resolveBookHeaderSurfaces({
+    const { identitySurface, introSurface, actionsSurface } = resolveBookHeaderSurfaces({
         book,
         admin,
         enabled: isAdmin,
@@ -56,7 +56,7 @@ export default function BookShow({
                 contentClassName="space-y-4"
             >
                 <AdminModuleHostGroup
-                    surfaces={[identitySurface, introSurface]}
+                    surfaces={[identitySurface, introSurface, actionsSurface]}
                 />
             </ScripturePageIntroCard>
 

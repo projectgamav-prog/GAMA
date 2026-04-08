@@ -26,10 +26,12 @@ function SectionIntroEditor({
             block={metadata.introBlock}
             blockTypes={metadata.introBlockTypes}
             updateHref={metadata.introUpdateHref}
+            destroyHref={metadata.introDestroyHref}
             storeHref={metadata.introStoreHref}
             defaultRegion={metadata.introDefaultRegion}
             onCancel={activation.deactivate}
             onSaveSuccess={activation.deactivate}
+            onDeleteSuccess={activation.deactivate}
         />
     );
 }

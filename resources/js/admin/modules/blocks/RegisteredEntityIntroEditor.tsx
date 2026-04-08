@@ -44,11 +44,13 @@ export function RegisteredEntityIntroEditor({
             block={metadata.block}
             blockTypes={metadata.blockTypes}
             updateHref={metadata.updateHref}
+            destroyHref={metadata.destroyHref ?? null}
             storeHref={metadata.storeHref}
             fullEditHref={fullEditHref}
             defaultRegion="overview"
             onCancel={activation.deactivate}
             onSaveSuccess={activation.deactivate}
+            onDeleteSuccess={activation.deactivate}
         />
     );
 }

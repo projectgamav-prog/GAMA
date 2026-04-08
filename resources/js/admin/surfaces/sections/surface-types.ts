@@ -48,6 +48,7 @@ export type SectionGroupSurfaceMetadata = {
     introBlockTypes: string[];
     introStoreHref: string | null;
     introUpdateHref: string | null;
+    introDestroyHref: string | null;
     introDefaultRegion: string | null;
     create?: SectionCreateMetadata | null;
 };
@@ -146,6 +147,9 @@ export function getSectionGroupMetadata(
             (typeof metadata.introUpdateHref === 'string' ||
                 metadata.introUpdateHref === null ||
                 metadata.introUpdateHref === undefined) &&
+            (typeof metadata.introDestroyHref === 'string' ||
+                metadata.introDestroyHref === null ||
+                metadata.introDestroyHref === undefined) &&
             (typeof metadata.introDefaultRegion === 'string' ||
                 metadata.introDefaultRegion === null ||
                 metadata.introDefaultRegion === undefined) &&

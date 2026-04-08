@@ -12,6 +12,7 @@ import type {
     ScriptureContentBlock,
 } from '@/types';
 import type {
+    EntityActionsContractMetadata,
     IdentityContractMetadata,
     IntroContractMetadata,
 } from '@/admin/surfaces/core/contract-readers';
@@ -28,8 +29,15 @@ type ChapterIntroSurfaceArgs = {
     block: ScriptureContentBlock | null;
     blockTypes: string[];
     updateHref: string | null;
+    destroyHref?: string | null;
     storeHref: string | null;
     fullEditHref: string;
+};
+
+type ChapterActionsSurfaceArgs = {
+    chapter: ScriptureChapter;
+    chapterTitle: string;
+    destroyHref: string | null;
 };
 
 export function createChapterIdentitySurface({
@@ -58,6 +66,7 @@ export function createChapterIntroSurface({
     block,
     blockTypes,
     updateHref,
+    destroyHref = null,
     storeHref,
     fullEditHref,
 }: ChapterIntroSurfaceArgs): AdminSurfaceContract<IntroContractMetadata<ScriptureChapter>> {
@@ -79,9 +88,34 @@ export function createChapterIntroSurface({
             block,
             blockTypes,
             updateHref,
+            destroyHref,
             storeHref,
             fullEditHref,
         },
     });
 }
 
+export function createChapterActionsSurface({
+    chapter,
+    chapterTitle,
+    destroyHref,
+}: ChapterActionsSurfaceArgs): AdminSurfaceContract<EntityActionsContractMetadata> {
+    return createInlineEditorSurface({
+        contractKey: 'entity_actions',
+        entity: 'chapter',
+        entityId: chapter.id,
+        regionKey: 'chapter_actions',
+        capabilities: destroyHref ? ['delete'] : [],
+        presentation: {
+            placement: 'inline',
+            variant: 'compact',
+        },
+        metadata: {
+            entityLabel: chapterTitle,
+            parentLabel: null,
+            createHref: null,
+            destroyHref,
+            fullEditHref: null,
+        },
+    });
+}

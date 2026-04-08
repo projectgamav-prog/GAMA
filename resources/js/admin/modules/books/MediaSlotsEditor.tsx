@@ -61,10 +61,12 @@ function CreateMediaAssignmentCard({
     storeHref,
     nextSortOrder,
     availableMedia,
+    onSuccess,
 }: {
     storeHref: string;
     nextSortOrder: number;
     availableMedia: ScriptureAdminMediaSummary[];
+    onSuccess: () => void;
 }) {
     const form = useForm<MediaAssignmentFormData>({
         media_id: availableMedia[0] ? String(availableMedia[0].id) : '',
@@ -247,6 +249,7 @@ function CreateMediaAssignmentCard({
                                 form.post(storeHref, {
                                     preserveScroll: true,
                                     preserveState: false,
+                                    onSuccess,
                                 });
                             }}
                             disabled={form.processing}
@@ -263,9 +266,11 @@ function CreateMediaAssignmentCard({
 function MediaAssignmentEditorCard({
     assignment,
     availableMedia,
+    onSuccess,
 }: {
     assignment: ScriptureAdminMediaAssignment;
     availableMedia: ScriptureAdminMediaSummary[];
+    onSuccess: () => void;
 }) {
     const form = useForm<MediaAssignmentFormData>({
         media_id: String(assignment.media_id),
@@ -454,12 +459,29 @@ function MediaAssignmentEditorCard({
                         }));
                         form.patch(assignment.update_href, {
                             preserveScroll: true,
+                            onSuccess,
                         });
                     }}
                     disabled={form.processing}
                 >
                     Save media slot
                 </Button>
+
+                {assignment.destroy_href && (
+                    <Button
+                        type="button"
+                        variant="destructive"
+                        onClick={() =>
+                            form.delete(assignment.destroy_href!, {
+                                preserveScroll: true,
+                                onSuccess,
+                            })
+                        }
+                        disabled={form.processing}
+                    >
+                        Delete media slot
+                    </Button>
+                )}
             </CardContent>
         </Card>
     );
@@ -470,6 +492,7 @@ function MediaSlotsEditor({
     activation,
 }: AdminModuleComponentProps) {
     const metadata = getMediaSlotsContractMetadata(surface);
+    const handleMutationSuccess = () => activation.deactivate();
     const summary = useMemo(() => {
         const publishedCount = metadata?.assignments.filter(
             (assignment) => assignment.status === 'published',
@@ -535,6 +558,7 @@ function MediaSlotsEditor({
                     storeHref={metadata.storeHref}
                     nextSortOrder={metadata.nextSortOrder}
                     availableMedia={metadata.availableMedia}
+                    onSuccess={handleMutationSuccess}
                 />
 
                 {metadata.assignments.map((assignment) => (
@@ -542,6 +566,7 @@ function MediaSlotsEditor({
                         key={assignment.id}
                         assignment={assignment}
                         availableMedia={metadata.availableMedia}
+                        onSuccess={handleMutationSuccess}
                     />
                 ))}
             </div>

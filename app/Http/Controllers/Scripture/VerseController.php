@@ -166,6 +166,7 @@ class VerseController extends Controller
             'identity_update_href' => $adminRouteContext->identityUpdateHref(),
             'meta_update_href' => $adminRouteContext->metaUpdateHref(),
             'full_edit_href' => $adminRouteContext->fullEditHref(),
+            'destroy_href' => $adminRouteContext->destroyHref(),
             'translations' => [
                 'store_href' => $adminRouteContext->translationStoreHref(),
                 'next_sort_order' => VerseRelationAdminData::nextTranslationSortOrder(
@@ -208,6 +209,9 @@ class VerseController extends Controller
                 : null,
             'primary_intro_update_href' => $primaryIntroBlock
                 ? $adminRouteContext->contentBlockUpdateHref($primaryIntroBlock)
+                : null,
+            'primary_intro_destroy_href' => $primaryIntroBlock
+                ? $adminRouteContext->contentBlockDestroyHref($primaryIntroBlock)
                 : null,
             'intro_block_types' => $adminRouteContext->contentBlockTypes(),
             'intro_default_region' => $adminRouteContext->defaultIntroBlockRegion(),

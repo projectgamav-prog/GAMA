@@ -43,6 +43,11 @@ class BookAdminRouteContext
         return route('scripture.books.admin.identity.update', $this->routeParameters());
     }
 
+    public function destroyHref(): string
+    {
+        return route('scripture.books.admin.destroy', $this->routeParameters());
+    }
+
     public function fullEditHref(): string
     {
         return route('scripture.books.admin.full-edit', $this->routeParameters());
@@ -132,6 +137,13 @@ class BookAdminRouteContext
     public function mediaAssignmentUpdateHref(MediaAssignment $mediaAssignment): string
     {
         return route('scripture.books.admin.media-assignments.update', $this->routeParameters([
+            'mediaAssignment' => $mediaAssignment,
+        ]));
+    }
+
+    public function mediaAssignmentDestroyHref(MediaAssignment $mediaAssignment): string
+    {
+        return route('scripture.books.admin.media-assignments.destroy', $this->routeParameters([
             'mediaAssignment' => $mediaAssignment,
         ]));
     }

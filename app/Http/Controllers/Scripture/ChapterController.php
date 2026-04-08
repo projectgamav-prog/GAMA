@@ -8,12 +8,18 @@ use App\Models\Book;
 use App\Models\BookSection;
 use App\Models\Chapter;
 use App\Models\ChapterSection;
+use App\Models\CommentarySource;
 use App\Models\ContentBlock;
+use App\Models\TranslationSource;
+use App\Models\Verse;
 use App\Support\AdminContext\AdminContext;
 use App\Support\Scripture\Admin\ChapterAdminRouteContext;
 use App\Support\Scripture\Admin\ChapterSectionAdminRouteContext;
 use App\Support\Scripture\Admin\ContentBlockCapabilityPayload;
 use App\Support\Scripture\Admin\PrimaryPublishedEditableContentBlock;
+use App\Support\Scripture\Admin\Registry\AdminEntityRegistry;
+use App\Support\Scripture\Admin\VerseAdminRouteContext;
+use App\Support\Scripture\Admin\VerseRelationAdminData;
 use App\Support\Scripture\Admin\VisibleContentBlockSequence;
 use App\Support\Scripture\PublicScriptureData;
 use Illuminate\Http\Request;
@@ -33,6 +39,7 @@ class ChapterController extends Controller
         Chapter $chapter,
         BuildChapterVerseReaderData $buildChapterVerseReaderData,
         PublicScriptureData $publicScriptureData,
+        AdminEntityRegistry $adminEntityRegistry,
     ): Response
     {
         $contentBlocks = $chapter->contentBlocks()
@@ -58,6 +65,20 @@ class ChapterController extends Controller
             $bookSection,
             $chapter,
         );
+        $verseAdminDefinition = $adminEntityRegistry->definition('verse');
+
+        if ($isAdmin) {
+            $chapter->loadMissing([
+                'chapterSections.verses.commentaries',
+                'chapterSections.verses.verseMeta',
+                'chapterSections.verses.characterAssignments.character',
+                'chapterSections.verses.contentBlocks' => fn ($query) => $query
+                    ->published()
+                    ->orderBy('sort_order')
+                    ->orderBy('id'),
+            ]);
+        }
+
         $readerSectionsBySlug = collect($readerData['chapter_sections'])
             ->keyBy('slug');
 
@@ -81,6 +102,9 @@ class ChapterController extends Controller
                     $primaryIntroBlock,
                     $publicScriptureData,
                 )
+                : null,
+            'verse_admin_shared' => $isAdmin
+                ? $this->verseAdminSharedPayload($verseAdminDefinition)
                 : null,
             'chapter_sections' => $this->chapterSectionsPayload(
                 $book,
@@ -124,6 +148,7 @@ class ChapterController extends Controller
         return [
             'full_edit_href' => $adminRouteContext->fullEditHref(),
             'identity_update_href' => $adminRouteContext->identityUpdateHref(),
+            'destroy_href' => $adminRouteContext->destroyHref(),
             'chapter_section_store_href' => route(
                 'scripture.chapter-sections.admin.store',
                 $adminRouteContext->routeParameters(),
@@ -134,6 +159,9 @@ class ChapterController extends Controller
                 : null,
             'primary_intro_update_href' => $primaryIntroBlock
                 ? $adminRouteContext->contentBlockUpdateHref($primaryIntroBlock)
+                : null,
+            'primary_intro_destroy_href' => $primaryIntroBlock
+                ? $adminRouteContext->contentBlockDestroyHref($primaryIntroBlock)
                 : null,
             'intro_block_types' => $adminRouteContext->contentBlockTypes(),
             'intro_default_region' => $adminRouteContext->defaultIntroBlockRegion(),
@@ -228,11 +256,225 @@ class ChapterController extends Controller
                             $primaryIntroBlock,
                         )
                         : null,
-                    'cards' => $cards,
+                    'cards' => $this->chapterSectionCardsPayload(
+                        $book,
+                        $bookSection,
+                        $chapter,
+                        $chapterSection,
+                        $cards,
+                        $publicScriptureData,
+                        $isAdmin,
+                    ),
                 ];
             })
             ->values()
             ->all();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function verseAdminSharedPayload(
+        \App\Support\Scripture\Admin\Registry\AdminEntityDefinition $verseAdminDefinition,
+    ): array {
+        $translationSources = TranslationSource::query()
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+        $commentarySources = CommentarySource::query()
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+
+        return [
+            'translations' => [
+                'sources' => VerseRelationAdminData::translationSources($translationSources),
+                'fields' => VerseRelationAdminData::translationFields($verseAdminDefinition),
+            ],
+            'commentaries' => [
+                'sources' => VerseRelationAdminData::commentarySources($commentarySources),
+                'fields' => VerseRelationAdminData::commentaryFields($verseAdminDefinition),
+            ],
+        ];
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $cards
+     * @return list<array<string, mixed>>
+     */
+    private function chapterSectionCardsPayload(
+        Book $book,
+        BookSection $bookSection,
+        Chapter $chapter,
+        ChapterSection $chapterSection,
+        array $cards,
+        PublicScriptureData $publicScriptureData,
+        bool $isAdmin,
+    ): array {
+        if (! $isAdmin) {
+            return $cards;
+        }
+
+        $sectionVerses = $chapterSection->relationLoaded('verses')
+            ? collect($chapterSection->verses)
+            : $chapterSection->verses()
+                ->inCanonicalOrder()
+                ->with([
+                    'translations',
+                    'commentaries',
+                    'verseMeta',
+                    'characterAssignments.character',
+                    'contentBlocks' => fn ($query) => $query
+                        ->published()
+                        ->orderBy('sort_order')
+                        ->orderBy('id'),
+                ])
+                ->get();
+        $versesById = $sectionVerses->keyBy('id');
+
+        return collect($cards)
+            ->map(function (array $card) use (
+                $book,
+                $bookSection,
+                $chapter,
+                $chapterSection,
+                $publicScriptureData,
+                $versesById,
+            ): array {
+                $readerVerses = is_array($card['verses'] ?? null)
+                    ? $card['verses']
+                    : [];
+
+                return [
+                    ...$card,
+                    'verses' => collect($readerVerses)
+                        ->map(function (array $readerVerse) use (
+                            $book,
+                            $bookSection,
+                            $chapter,
+                            $chapterSection,
+                            $publicScriptureData,
+                            $versesById,
+                        ): array {
+                            $verse = $versesById->get($readerVerse['id'] ?? null);
+
+                            if (! $verse instanceof Verse) {
+                                return $readerVerse;
+                            }
+
+                            return [
+                                ...$readerVerse,
+                                'verse_meta' => $publicScriptureData->verseMeta($verse->verseMeta),
+                                'characters' => $publicScriptureData->characters(
+                                    $verse->characterAssignments,
+                                ),
+                                'admin' => $this->chapterReaderVerseAdminPayload(
+                                    $book,
+                                    $bookSection,
+                                    $chapter,
+                                    $chapterSection,
+                                    $verse,
+                                    $publicScriptureData,
+                                ),
+                            ];
+                        })
+                        ->values()
+                        ->all(),
+                ];
+            })
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function chapterReaderVerseAdminPayload(
+        Book $book,
+        BookSection $bookSection,
+        Chapter $chapter,
+        ChapterSection $chapterSection,
+        Verse $verse,
+        PublicScriptureData $publicScriptureData,
+    ): array {
+        $adminRouteContext = new VerseAdminRouteContext(
+            $book,
+            $bookSection,
+            $chapter,
+            $chapterSection,
+            $verse,
+        );
+        $contentBlocks = $verse->relationLoaded('contentBlocks')
+            ? collect($verse->contentBlocks)
+            : $verse->contentBlocks()
+                ->published()
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get();
+        $primaryIntroBlock = PrimaryPublishedEditableContentBlock::resolve(
+            $contentBlocks,
+            fn (ContentBlock $block): bool => $adminRouteContext->isEditableIntroBlock($block),
+        );
+
+        return [
+            'identity_update_href' => $adminRouteContext->identityUpdateHref(),
+            'meta_update_href' => $adminRouteContext->metaUpdateHref(),
+            'full_edit_href' => $adminRouteContext->fullEditHref(),
+            'destroy_href' => $adminRouteContext->destroyHref(),
+            'nearby_create_href' => route(
+                'scripture.chapters.verses.admin.store',
+                [
+                    'book' => $book,
+                    'bookSection' => $bookSection,
+                    'chapter' => $chapter,
+                    'chapterSection' => $chapterSection,
+                ],
+            ),
+            'intro_store_href' => $adminRouteContext->contentBlockStoreHref(),
+            'primary_intro_block' => $primaryIntroBlock
+                ? $publicScriptureData->contentBlock($primaryIntroBlock)
+                : null,
+            'primary_intro_update_href' => $primaryIntroBlock
+                ? $adminRouteContext->contentBlockUpdateHref($primaryIntroBlock)
+                : null,
+            'primary_intro_destroy_href' => $primaryIntroBlock
+                ? $adminRouteContext->contentBlockDestroyHref($primaryIntroBlock)
+                : null,
+            'intro_block_types' => $adminRouteContext->contentBlockTypes(),
+            'intro_default_region' => $adminRouteContext->defaultIntroBlockRegion(),
+            'translations' => [
+                'store_href' => $adminRouteContext->translationStoreHref(),
+                'next_sort_order' => VerseRelationAdminData::nextTranslationSortOrder(
+                    $verse->translations,
+                ),
+                'rows' => collect($verse->translations)
+                    ->map(
+                        fn (\App\Models\VerseTranslation $translation) => VerseRelationAdminData::translation(
+                            $translation,
+                            $adminRouteContext->translationUpdateHref($translation),
+                            $adminRouteContext->translationDestroyHref($translation),
+                        ),
+                    )
+                    ->values()
+                    ->all(),
+            ],
+            'commentaries' => [
+                'store_href' => $adminRouteContext->commentaryStoreHref(),
+                'next_sort_order' => VerseRelationAdminData::nextCommentarySortOrder(
+                    $verse->commentaries,
+                ),
+                'rows' => collect($verse->commentaries)
+                    ->map(
+                        fn (\App\Models\VerseCommentary $commentary) => VerseRelationAdminData::commentary(
+                            $commentary,
+                            $adminRouteContext->commentaryUpdateHref($commentary),
+                            $adminRouteContext->commentaryDestroyHref($commentary),
+                        ),
+                    )
+                    ->values()
+                    ->all(),
+            ],
+        ];
     }
 
     /**
@@ -264,12 +506,16 @@ class ChapterController extends Controller
                     'chapterSection' => $chapterSection,
                 ],
             ),
+            'destroy_href' => $adminRouteContext->destroyHref(),
             'intro_store_href' => $adminRouteContext->contentBlockStoreHref(),
             'primary_intro_block' => $primaryIntroBlock
                 ? ($publicScriptureData->contentBlocks([$primaryIntroBlock])[0] ?? null)
                 : null,
             'primary_intro_update_href' => $primaryIntroBlock
                 ? $adminRouteContext->contentBlockUpdateHref($primaryIntroBlock)
+                : null,
+            'primary_intro_destroy_href' => $primaryIntroBlock
+                ? $adminRouteContext->contentBlockDestroyHref($primaryIntroBlock)
                 : null,
             'intro_block_types' => $adminRouteContext->contentBlockTypes(),
             'intro_default_region' => $adminRouteContext->defaultContentBlockRegion(),

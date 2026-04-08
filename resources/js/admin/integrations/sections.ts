@@ -5,8 +5,10 @@ import { sectionIntroEditorModule } from '@/admin/modules/sections/SectionIntroE
 import { sectionRowDetailEditorModule } from '@/admin/modules/sections/SectionRowDetailEditor';
 import {
     createBookChapterGroupsSurface,
+    createBookSectionActionsSurface,
     createBookSectionChapterGroupSurface,
     createBooksCollectionSurface,
+    createChapterSectionActionsSurface,
     createChapterSectionVerseGroupSurface,
     createChapterVerseGroupsSurface,
 } from '@/admin/surfaces/sections/surface-builders';
@@ -104,6 +106,25 @@ export function resolveBookSectionChapterGroupSurface({
     });
 }
 
+export function resolveBookSectionActionsSurface({
+    bookSection,
+    title,
+    enabled = true,
+}: {
+    bookSection: ScriptureBookSection & { chapters: ScriptureChapter[] };
+    title: string;
+    enabled?: boolean;
+}) {
+    if (!enabled || !bookSection.admin?.destroy_href) {
+        return null;
+    }
+
+    return createBookSectionActionsSurface({
+        bookSection,
+        title,
+    });
+}
+
 export function resolveChapterVerseGroupsSurface({
     chapter,
     chapterSections,
@@ -170,5 +191,24 @@ export function resolveChapterSectionVerseGroupSurface({
         secondaryLabel,
         openHref,
         openLabel,
+    });
+}
+
+export function resolveChapterSectionActionsSurface({
+    chapterSection,
+    title,
+    enabled = true,
+}: {
+    chapterSection: ScriptureChapterSection;
+    title: string;
+    enabled?: boolean;
+}) {
+    if (!enabled || !chapterSection.admin?.destroy_href) {
+        return null;
+    }
+
+    return createChapterSectionActionsSurface({
+        chapterSection,
+        title,
     });
 }
