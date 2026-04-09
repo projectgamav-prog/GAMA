@@ -85,7 +85,7 @@ export default function CmsPagesIndex({
 
                     <Heading
                         title="CMS Pages"
-                        description="Create universal non-canonical pages here. Each page becomes a reusable content owner, and its content will be composed through content blocks rather than one-off page types."
+                        description="Create universal non-canonical pages here. Each CMS page becomes its own composition root, then grows through ordered containers and CMS blocks instead of scripture-shaped assumptions."
                     />
                 </div>
 
@@ -97,9 +97,9 @@ export default function CmsPagesIndex({
                                 Add Page
                             </CardTitle>
                             <CardDescription>
-                                This creates a CMS page record first. Content
-                                blocks attach to the page afterward through the
-                                shared owner pattern.
+                                This creates the CMS page record first. The
+                                next workspace step is composition through page
+                                containers and their ordered CMS blocks.
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -223,8 +223,8 @@ export default function CmsPagesIndex({
                                             : 'Add Page'}
                                     </Button>
                                     <p className="text-sm text-muted-foreground">
-                                        The new page opens in its CMS workspace
-                                        after creation.
+                                        The new page opens in its CMS
+                                        composition workspace after creation.
                                     </p>
                                 </div>
                             </form>
@@ -244,8 +244,9 @@ export default function CmsPagesIndex({
                         <CardContent className="space-y-4 text-sm leading-6 text-muted-foreground">
                             <p>
                                 Pages are now first-class CMS records with
-                                identity, slug routing, publish state, and a
-                                polymorphic content-block owner relationship.
+                                identity, slug routing, publish state, and an
+                                independent page-container-block composition
+                                model.
                             </p>
                             <p>
                                 Canonical scripture pages stay separate and
@@ -253,9 +254,10 @@ export default function CmsPagesIndex({
                                 inside their hierarchy.
                             </p>
                             <p>
-                                Full page-builder tooling is still postponed.
-                                This workspace creates the page record and gives
-                                it a stable shell for later block composition.
+                                The builder stays intentionally narrow here:
+                                create the page record first, then choose
+                                whether new content becomes a new container/card
+                                or a block inside an existing one.
                             </p>
                         </CardContent>
                     </Card>
@@ -269,7 +271,7 @@ export default function CmsPagesIndex({
                         </CardTitle>
                         <CardDescription>
                             Open a page workspace to edit core identity fields
-                            and review its current content-block ownership.
+                            and compose its current containers and blocks.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -311,14 +313,11 @@ export default function CmsPagesIndex({
 
                                             <div className="text-right text-sm text-muted-foreground">
                                                 <p>
-                                                    {page.content_block_count}{' '}
-                                                    owned blocks
+                                                    {page.container_count}{' '}
+                                                    containers
                                                 </p>
                                                 <p>
-                                                    {
-                                                        page.published_content_block_count
-                                                    }{' '}
-                                                    published
+                                                    {page.block_count} blocks
                                                 </p>
                                             </div>
                                         </div>
@@ -350,8 +349,8 @@ export default function CmsPagesIndex({
                         ) : (
                             <div className="rounded-2xl border border-dashed border-border/70 p-8 text-sm leading-6 text-muted-foreground">
                                 No CMS pages exist yet. Create the first page
-                                above, then use it as the future owner for
-                                universal content blocks.
+                                above, then compose it through containers and
+                                CMS blocks.
                             </div>
                         )}
                     </CardContent>

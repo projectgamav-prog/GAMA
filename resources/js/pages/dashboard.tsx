@@ -111,7 +111,8 @@ export default function Dashboard({
                                 </CardTitle>
                                 <CardDescription>
                                     Create universal pages as CMS records, then
-                                    grow them with content blocks.
+                                    compose them with containers and CMS
+                                    blocks.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Cms;
 use App\Http\Controllers\Controller;
 use App\Models\Page;
 use App\Support\Cms\PublicPageData;
-use App\Support\ContentBlocks\PublicContentBlockData;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -18,8 +17,8 @@ class PageWorkspaceController extends Controller
     {
         $pages = Page::query()
             ->withCount([
-                'contentBlocks',
-                'contentBlocks as published_content_blocks_count' => fn ($query) => $query->published(),
+                'pageContainers',
+                'pageBlocks',
             ])
             ->orderByDesc('updated_at')
             ->orderByDesc('id')
@@ -40,19 +39,20 @@ class PageWorkspaceController extends Controller
     public function show(
         Page $page,
         PublicPageData $publicPageData,
-        PublicContentBlockData $publicContentBlockData,
     ): Response {
         $page->load([
-            'contentBlocks' => fn ($query) => $query->orderBy('sort_order'),
+            'pageContainers' => fn ($query) => $query
+                ->orderBy('sort_order')
+                ->with([
+                    'pageBlocks' => fn ($blockQuery) => $blockQuery
+                        ->orderBy('sort_order')
+                        ->orderBy('id'),
+                ]),
         ]);
 
         return Inertia::render('cms/pages/show', [
             'page' => $publicPageData->adminPage($page),
-            'content_blocks' => $publicContentBlockData->contentBlocks(
-                $page->contentBlocks
-                    ->where('status', 'published')
-                    ->values(),
-            ),
+            'containers' => $publicPageData->adminContainers($page),
         ]);
     }
 }

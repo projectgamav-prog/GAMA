@@ -1,4 +1,4 @@
-# ⚠️ SYSTEM PROTOCOL — DO NOT MODIFY ABOVE THIS LINE
+# SYSTEM PROTOCOL - DO NOT MODIFY ABOVE THIS LINE
 # This section defines how this file must be used.
 # Codex must follow these rules strictly.
 
@@ -22,7 +22,7 @@ After completing a task:
 - Update this file if the next priorities have changed
 - Remove completed steps and add new ones
 
-# 🚫 DO NOT EDIT ABOVE THIS LINE
+# DO NOT EDIT ABOVE THIS LINE
 -----------------------
 
 
@@ -34,75 +34,96 @@ Before any implementation prompt, tell Codex:
 - read `admin-architecture.md` first
 - treat it as the authoritative architecture instruction
 - keep canonical scripture pages thin and surface-driven
-- treat manual page creation as CMS, not as a one-off feature path
+- treat manual pages as CMS
+- keep CMS composition independent from canonical scripture assumptions
 
 ## Immediate focus
 
-### 1. Browser-validate the first CMS page foundation
-Check the new CMS flow in browser:
+### 1. Browser-validate the new CMS composition foundation
+Check the CMS flow in browser:
 - dashboard CMS pages entry point
 - Add Page create flow
 - page list visibility after create
 - page identity update flow
+- create the first container
+- create a container below another container
+- add a block to the top of a container
+- add a block below an existing block
+- edit container fields
+- edit each current module type
+- delete a block
+- delete a container
 - draft page should not open publicly
 - published page should open publicly at `/pages/{slug}`
 
-If something breaks, fix it in the page model/controller/workspace path rather than papering over it with page-local hacks.
+If something breaks, fix it in the CMS page/container/block path rather than papering over it with page-local hacks.
 
-### 2. Add the first universal page-owned block workflow
-The next CMS capability gap is page composition.
+### 2. Add the next operational CMS controls
+After browser validation, close the biggest workflow gaps:
+- move/reorder containers
+- move/reorder blocks
+- add page delete
 
-Use the existing content-block owner pattern and extend it to pages so that CMS pages can start managing their own blocks.
+Keep this inside the CMS workspace/model system.
+Do not flatten the structure to make movement easier.
 
-Direction:
-- do not invent a second content system
-- do not create page-specific CMS block systems
-- keep the workflow universal for pages
+### 3. Improve the first CMS module family carefully
+After the composition flow is stable, improve the first registry modules where it materially helps authoring:
+- richer text editing than raw HTML
+- media selection/upload workflow
+- stronger button group authoring polish and validation feedback
 
-### 3. Decide the next minimal CMS page shell polish
-After the first block workflow exists, reassess:
+Do not overbuild category-management UI yet.
+Do not move CMS modules into scripture module folders.
+
+### 4. Reassess the next public CMS shell step
+Once composition and editing are stable, reassess:
 - whether CMS pages need a light public index/discovery path
-- whether layout/template hints need stricter semantics
-- whether the public page shell needs stronger empty-state or presentation polish
+- whether layout keys need stricter semantics
+- whether public page presentation needs stronger empty-state or layout polish
 
-Do not overbuild a full page builder in one jump.
+Do not overbuild a full CMS site-builder in one jump.
 
-### 4. Return to the remaining canonical polish items
+### 5. Return to the remaining canonical polish items
 Once the CMS foundation is stable, resume the still-open canonical cleanup:
 - remaining delete-heavy browser validation
 - re-check Full Edit usefulness for translations/commentaries
 - later move the shared Intro dropdown concept to canonical detail-page tops
 
-### 5. Keep architecture discipline
+### 6. Keep architecture discipline
 As new work continues:
 - canonical scripture remains schema-driven
-- CMS pages remain universal and page-record-driven
+- CMS composition remains page -> container -> block
+- CMS modules remain registry-based under `resources/js/admin/cms/`
 - pages stay thin
 - admin logic stays out of page-local hacks
-- shared content-block ownership stays shared
 
 ## Reminder of boundary
 - Do not let CMS pages become the source of truth for canonical scripture structure.
 - Do not redesign canonical routing into CMS routing.
-- Do not bypass the universal page system with special standalone page features.
+- Do not entangle CMS modules with scripture module folders.
+- Do not flatten CMS pages back into a single block list.
 
 Safe direction:
 - page record first
-- block ownership second
-- richer builder UX later
+- container structure second
+- block composition third
+- richer authoring UX later
 
 ## Practical restart order
-1. Browser-test create/update/public-route behavior for CMS pages
-2. Add page-owned content-block management
-3. Reassess minimal CMS page-shell polish
-4. Resume outstanding canonical polish work
+1. Browser-test page/container/block create/edit/delete behavior
+2. Add movement/reorder plus page delete
+3. Improve module authoring where it helps
+4. Reassess public CMS shell polish
+5. Resume outstanding canonical polish work
 
 ## Success condition for the next phase
-When resuming, the goal is not “add lots of CMS quickly.”
+When resuming, the goal is not "add lots of CMS quickly."
 
 The goal is:
 - one real universal page model
-- one shared content system
+- one clear container layer
+- one extensible CMS module registry
 - clear separation from canonical scripture
 - thin pages
 - truthful UX

@@ -1,4 +1,4 @@
-# ⚠️ SYSTEM PROTOCOL — DO NOT MODIFY ABOVE THIS LINE
+# SYSTEM PROTOCOL - DO NOT MODIFY ABOVE THIS LINE
 # This section defines how this file must be used.
 # Codex must follow these rules strictly.
 
@@ -22,7 +22,7 @@ After completing a task:
 - Update this file to reflect the new current state
 - Do not leave outdated or misleading information here
 
-# 🚫 DO NOT EDIT ABOVE THIS LINE
+# DO NOT EDIT ABOVE THIS LINE
 -----------------------
 
 
@@ -34,9 +34,13 @@ After completing a task:
 - Pages are thin render shells.
 - Canonical scripture admin still attaches through semantic surfaces and module qualification.
 - Canonical scripture pages remain schema-driven exceptions.
-- Manual page creation is now formally treated as CMS, not as a one-off feature direction.
-- A dedicated `pages` table now exists as the foundation for universal CMS pages.
-- Page-owned content uses the same polymorphic `content_blocks.parent_*` ownership pattern already used by canonical entities.
+- Manual pages are now formally treated as CMS, not as a one-off feature direction.
+- CMS composition is now formally independent from the canonical scripture schema.
+- The locked CMS composition model is now:
+  - `pages`
+  - `page_containers`
+  - `page_blocks`
+- Dedicated CMS frontend registry/core/editor/renderer code now lives under `resources/js/admin/cms/`.
 
 ### Canonical scripture public flow
 - Book list: `scripture.books.index`
@@ -51,58 +55,83 @@ After completing a task:
 - Intro dropdowns are active on book cards, book-section cards/groups, chapter cards, chapter-section cards/groups, and verse rows where intro content exists.
 - The current book-schema CRUD slice remains active for books, book sections, chapters, chapter sections, verses, verse intro/meta, verse translations/commentaries, relevant note-block surfaces, and book media slots.
 
-### CMS page foundation
-- Authenticated CMS workspace now exists at:
+### CMS page foundation and composition
+- Authenticated CMS workspace exists at:
   - `/cms/pages`
   - `/cms/pages/{page:slug}`
-- Public CMS page shell now exists at:
+- Public CMS page shell exists at:
   - `/pages/{page:slug}`
-- CMS page create works through the new Add Page flow in the CMS workspace.
-- Dashboard now exposes a CMS pages entry point and Add Page link for admin-context users.
-- CMS page records currently support:
+- CMS page create works through the Add Page flow in the CMS workspace.
+- Dashboard exposes a CMS pages entry point and Add Page link for admin-context users.
+- CMS page records support:
   - `title`
   - `slug`
   - `status`
   - optional `layout_key`
-- CMS page workspace currently supports:
+- CMS page workspace now supports:
   - create page
   - list pages
   - edit page identity/status/layout key
+  - create a new container with its first block
+  - add a block inside an existing container
+  - edit existing containers
+  - edit existing blocks
+  - delete containers
+  - delete blocks
   - open the public page when published
-  - review published block preview
-- Page-owned block ownership is established even though the universal page block editor is not built yet.
+- The current CMS module registry supports:
+  - `rich_text`
+  - `button_group`
+  - `media`
+- Public CMS pages now render ordered containers, and each container renders its ordered CMS blocks through the dedicated CMS renderer path.
 
 ## Partially working
 
-### CMS page composition
-- Pages already own content blocks through the shared owner model.
-- Public CMS pages already render published page-owned blocks if they exist.
+### CMS composition workflow depth
+- The core structure is real and active.
+- The workspace now makes the same-container vs new-container decision explicit.
+- Container placement is structurally supported for:
+  - above the current container list
+  - below an existing container
+- Block placement is structurally supported for:
+  - at the top of a container
+  - below an existing block inside the same container
 
-But the actual universal page block management workflow is still not built:
-- no CMS page block create/edit/delete UI yet
-- no dedicated CMS page block ordering workflow yet
-- no page-specific block regions or page-builder UX yet
+But the CMS workflow is still intentionally narrow:
+- no drag/drop or move/reorder UI yet
+- no page delete flow yet
+- no container move flow for already-created containers
+- no block publish state or scheduling yet
+- no richer page template system yet
 
-### Full Edit for canonical verse translations/commentaries
-- Deep-link targeting was added.
-- Full-edit page can open the intended translation/commentary editor automatically.
-- Routing is now more truthful in principle.
+### CMS module UX
+- Rich text works through a simple HTML-based editor.
+- Button group works with multi-button config, alignment, and layout options.
+- Media works with image/video URL fields plus width/aspect settings.
 
-But it still needs product-level validation to prove it is meaningfully deeper than inline quick edit.
+But richer authoring is still postponed:
+- no rich text WYSIWYG yet
+- no media picker/upload flow yet
+- no deeper module-specific validation UX beyond request errors
 
 ## Needs improvement / still watch closely
 
-### CMS page browser validation
-- The CMS page foundation needs a real browser pass for:
-  - dashboard entry point
+### CMS browser validation
+- The independent CMS composition flow still needs a real browser pass for:
   - Add Page create flow
   - page identity update flow
+  - create container
+  - add block inside container
+  - edit container
+  - edit block
+  - delete container
+  - delete block
   - draft-vs-published public route behavior
-  - empty-state page shell behavior
 
-### CMS page next capability gap
-- Universal page-owned block CRUD is the main remaining CMS gap after this foundation pass.
-- The current page workspace shows ownership and preview, but not composition tooling yet.
+### CMS next capability gaps
+- Reordering and movement are the next operational gap in the CMS builder.
+- Page delete is still missing.
+- The public CMS shell is real, but broader public discovery/navigation is still not built.
 
 ### Remaining canonical polish
 - The broader delete-heavy browser pass for some canonical structural/intro/media surfaces is still worth finishing.
@@ -116,36 +145,48 @@ But it still needs product-level validation to prove it is meaningfully deeper t
 - Intro presentation is more consistent across canonical cards.
 
 ### CMS page UX
-- The CMS page flow is intentionally minimal and foundation-first.
-- Editors can now create and identify universal pages, but they cannot yet compose them through an in-app block editor.
-- The public CMS shell is real, but still sparse by design in this phase.
+- The CMS page flow is no longer just a record shell. It is now a real composition workspace.
+- Editors can now decide locally whether content belongs in the same card/container or in a new one.
+- The CMS builder is still foundation-first rather than feature-complete.
 
 ## Important architecture reminders
 
 ### Locked rules
 - Pages remain thin.
 - Canonical pages expose surfaces, not feature logic.
-- Canonical module behavior stays in the admin module system.
+- Canonical module behavior stays in the canonical admin module system.
 - Canonical scripture pages remain schema-specific exceptions.
 - Manual pages use the universal CMS page system.
-- Content blocks remain reusable across owner types.
+- CMS composition uses its own page/container/block model.
+- CMS modules stay in the dedicated `resources/js/admin/cms/` area.
 
 ### Schema truth
 - Canonical scripture work must stay grounded in the real scripture tables and relations.
-- CMS page work must stay grounded in the dedicated `pages` table plus shared content-block ownership.
+- CMS page work must stay grounded in:
+  - `pages`
+  - `page_containers`
+  - `page_blocks`
 
-Do not drift into fake abstractions detached from either the canonical schema or the CMS page model.
+Do not drift into fake abstractions detached from either the canonical schema or the CMS data model.
 
 ## Immediate next priority when resuming
-1. Browser-validate the CMS page foundation end to end:
-   - dashboard entry point
+1. Browser-validate the CMS composition foundation end to end:
    - page create
    - page update
-   - published page open
-   - draft page gating
-2. Add the first universal CMS page-owned block management path without inventing a second content system.
-3. Decide the next minimal public-navigation/discovery step for CMS pages only after the block workflow is clearer.
-4. Return to the remaining canonical delete/full-edit/detail-top polish items without reintroducing page-local hacks.
+   - create container
+   - add block
+   - edit/delete container
+   - edit/delete block
+   - draft vs published public behavior
+2. Add the next operational CMS basics without overbuilding:
+   - container/block movement or reordering
+   - page delete
+3. Improve the first CMS module family only where it materially helps composition:
+   - richer text editing
+   - media selection/upload
+   - better module-level validation UX
+4. Reassess public CMS discovery/navigation only after the composition flow is stable.
+5. Return to the remaining canonical delete/full-edit/detail-top polish items without reintroducing page-local hacks.
 
 ## Do not forget
 - `admin-architecture.md` is the authoritative architecture document.

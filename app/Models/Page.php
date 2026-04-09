@@ -5,7 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Page extends Model
 {
@@ -24,12 +25,14 @@ class Page extends Model
         return 'slug';
     }
 
-    /**
-     * Get content blocks attached to the page.
-     */
-    public function contentBlocks(): MorphMany
+    public function pageContainers(): HasMany
     {
-        return $this->morphMany(ContentBlock::class, 'parent')->orderBy('sort_order');
+        return $this->hasMany(PageContainer::class)->orderBy('sort_order');
+    }
+
+    public function pageBlocks(): HasManyThrough
+    {
+        return $this->hasManyThrough(PageBlock::class, PageContainer::class);
     }
 
     /**

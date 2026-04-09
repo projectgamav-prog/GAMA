@@ -1,8 +1,8 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { Globe2, Layers3, Save } from 'lucide-react';
+import { Globe2, Save } from 'lucide-react';
+import { CmsCompositionEditor } from '@/admin/cms/workspace/CmsCompositionEditor';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
-import { ContentBlockRenderer } from '@/components/scripture/content-block-renderer';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -33,7 +33,7 @@ import type {
 
 export default function CmsPageShow({
     page,
-    content_blocks,
+    containers,
 }: CmsPageShowProps) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -56,14 +56,6 @@ export default function CmsPageShow({
         status: page.status,
         layout_key: page.layout_key ?? '',
     });
-
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-
-        form.patch(page.workspace_href, {
-            preserveScroll: true,
-        });
-    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -89,7 +81,7 @@ export default function CmsPageShow({
 
                     <Heading
                         title={page.title}
-                        description="This page is now a CMS content owner. Keep the identity fields here lightweight, and compose public content through page-owned blocks in later passes."
+                        description="CMS pages now compose through independent page containers and CMS blocks. Identity stays lightweight here, while composition stays in the dedicated CMS workspace below."
                     />
                 </div>
 
@@ -98,13 +90,19 @@ export default function CmsPageShow({
                         <CardHeader className="gap-3">
                             <CardTitle>Page Identity</CardTitle>
                             <CardDescription>
-                                Core page fields stay narrow here: title, slug,
+                                Keep the page record narrow here: title, slug,
                                 publish state, and optional layout key.
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
                             <form
-                                onSubmit={handleSubmit}
+                                onSubmit={(event) => {
+                                    event.preventDefault();
+
+                                    form.patch(page.workspace_href, {
+                                        preserveScroll: true,
+                                    });
+                                }}
                                 className="space-y-5"
                             >
                                 <div className="grid gap-2">
@@ -215,8 +213,8 @@ export default function CmsPageShow({
                                         )}
                                     >
                                         {form.recentlySuccessful
-                                            ? 'Saved'
-                                            : 'Identity updates stay separate from block composition.'}
+                                            ? 'Page identity saved.'
+                                            : 'Identity stays separate from composition decisions.'}
                                     </p>
                                 </div>
                             </form>
@@ -225,34 +223,25 @@ export default function CmsPageShow({
 
                     <Card>
                         <CardHeader className="gap-3">
-                            <CardTitle className="flex items-center gap-2">
-                                <Layers3 className="size-5" />
-                                Block Ownership
-                            </CardTitle>
+                            <CardTitle>Composition Direction</CardTitle>
                             <CardDescription>
-                                This page already owns content blocks through the
-                                shared polymorphic `content_blocks.parent_*`
-                                pattern.
+                                CMS composition is now independent from the
+                                canonical scripture schema.
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4 text-sm leading-6 text-muted-foreground">
-                            <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
-                                <p>
-                                    {page.content_block_count} total owned
-                                    block
-                                    {page.content_block_count === 1 ? '' : 's'}
-                                    , with{' '}
-                                    {page.published_content_block_count}{' '}
-                                    published for the public page shell.
-                                </p>
-                                <p className="mt-2">
-                                    The block composer/editor UI is
-                                    intentionally postponed in this first CMS
-                                    pass. The ownership foundation is in place
-                                    first so later block tooling can stay
-                                    universal.
-                                </p>
-                            </div>
+                            <p>
+                                A page owns ordered containers. Each container
+                                owns ordered CMS blocks. That is the structural
+                                seam that lets the workspace decide whether
+                                something stays inside the same card or becomes
+                                a new card.
+                            </p>
+                            <p>
+                                The module registry for those blocks now lives
+                                under `resources/js/admin/cms/`, separate from
+                                scripture admin modules.
+                            </p>
 
                             <div className="flex flex-wrap gap-2">
                                 <Button asChild variant="outline">
@@ -273,34 +262,10 @@ export default function CmsPageShow({
                     </Card>
                 </div>
 
-                <Card>
-                    <CardHeader className="gap-3">
-                        <CardTitle>Published Block Preview</CardTitle>
-                        <CardDescription>
-                            This is the current public shell view of published
-                            blocks attached to the page.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        {content_blocks.length > 0 ? (
-                            <div className="space-y-4">
-                                {content_blocks.map((block) => (
-                                    <ContentBlockRenderer
-                                        key={block.id}
-                                        block={block}
-                                    />
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="rounded-2xl border border-dashed border-border/70 p-8 text-sm leading-6 text-muted-foreground">
-                                No published blocks are attached yet. That is
-                                expected in this first foundation pass while the
-                                universal page record and public shell settle
-                                first.
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
+                <CmsCompositionEditor
+                    page={page}
+                    containers={containers}
+                />
             </div>
         </AppLayout>
     );
