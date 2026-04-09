@@ -10,7 +10,6 @@ import {
 export type ScriptureNavigationActionKey =
     | 'go_to_structure_overview'
     | 'open_book'
-    | 'open_book_overview'
     | 'open_chapter'
     | 'open_verse_detail'
     | 'open_verse_notes_video'
@@ -59,13 +58,6 @@ const NAVIGATION_PRESENTATIONS: Record<
         actionKey: 'open_book',
         label: 'Open Book',
         variant: 'link',
-        icon: ArrowRight,
-        iconPosition: 'end',
-    },
-    open_book_overview: {
-        actionKey: 'open_book_overview',
-        label: 'Read Overview',
-        variant: 'outline',
         icon: ArrowRight,
         iconPosition: 'end',
     },

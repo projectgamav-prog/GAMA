@@ -26,136 +26,127 @@ After completing a task:
 -----------------------
 
 
-
-
-
-# Current State Snapshot (Before Pause)
+# Current State Snapshot
 
 ## Working
 
 ### Architecture
 - Pages are thin render shells.
-- Admin attaches through semantic surfaces.
-- Modules qualify by semantic identity + capabilities.
-- Runtime host resolves and renders module actions.
-- Buttons/actions are module-driven instead of page-hardcoded in the main active flows.
+- Canonical scripture admin still attaches through semantic surfaces and module qualification.
+- Canonical scripture pages remain schema-driven exceptions.
+- Manual page creation is now formally treated as CMS, not as a one-off feature direction.
+- A dedicated `pages` table now exists as the foundation for universal CMS pages.
+- Page-owned content uses the same polymorphic `content_blocks.parent_*` ownership pattern already used by canonical entities.
 
-### Public reading flow
+### Canonical scripture public flow
 - Book list: `scripture.books.index`
 - Chapter list: `scripture.books.show`
 - Verse list: `scripture.chapters.show`
 - Verse detail: `scripture.chapters.verses.show`
 
-### Verse translation support
-- Schema-driven from `verse_translations`
-- Source-aware from `translation_sources`
-- Inline quick edit works through the Verse surface/module/action system on verse detail and chapter verse-list rows
-- Successful inline create/save now closes back to the normal display state
-- User-facing copy was cleaned up from schema-heavy wording
+### Canonical scripture admin state
+- Verse translations/commentaries stay schema-driven from the real verse tables and relations.
+- Verse-row admin controls on the chapter page are active and browser-validated for identity, intro, meta, translations, commentaries, nearby create, delete, and full edit launch.
+- Chapter-row controls on the book page are active and browser-validated for identity, intro, delete confirmation, and editor-mode visibility.
+- Intro dropdowns are active on book cards, book-section cards/groups, chapter cards, chapter-section cards/groups, and verse rows where intro content exists.
+- The current book-schema CRUD slice remains active for books, book sections, chapters, chapter sections, verses, verse intro/meta, verse translations/commentaries, relevant note-block surfaces, and book media slots.
 
-### Verse commentary support
-- Schema-driven from `verse_commentaries`
-- Source-aware from `commentary_sources`
-- Inline quick edit works through the Verse surface/module/action system on verse detail and chapter verse-list rows
-- Successful inline create/save now closes back to the normal display state
-- User-facing copy was cleaned up from schema-heavy wording
-
-### Book media slot support
-- Schema-driven from the existing media-slot contract and module wiring
-- Inline create/save/delete now closes back to the normal display state
-- Page shells remain thin while the module owns the editing lifecycle
-
-### Chapter-page verse row admin
-- Each visible verse row on `scripture.chapters.show` now exposes its own verse admin controls through verse surfaces
-- Verse identity, intro, structured notes/meta, translations, commentaries, nearby verse create, delete, and full edit launcher now attach directly to the rendered verse rows/cards
-- Verse-row controls stay attached to the corresponding verse instead of drifting back to chapter-section-only controls or page-local action hacks
-
-### Intro surface CRUD
-- Verse intro, chapter intro, book-section intro, and chapter-section intro now support create/update/delete through the shared registered intro editor where the backend route exists
-- Intro delete remains module-driven and surface-driven rather than being hardcoded into page shells
-
-### Current book-schema CRUD coverage
-- `books`: create, identity/details update, editorial content-block CRUD, media-slot CRUD, and delete are active
-- `book_sections`: create, detail update, intro CRUD, and delete are active
-- `chapters`: create, identity update, intro CRUD, chapter note-block CRUD, and delete are active
-- `chapter_sections`: create, detail update, intro CRUD, and delete are active
-- `verses`: create, identity update, delete, intro CRUD, structured notes/meta edit, translation CRUD, commentary CRUD, and verse note-block CRUD are active
-- `verse intro/notes`: intro and structured notes/meta now edit inline from the chapter verse list as well as verse detail; published note blocks still stay on verse detail/full edit
-- `relevant media slot surfaces`: book media slots now support create/update/delete in the active module path
-
-### Structural delete coverage
-- Shared `entity_actions` delete controls now attach to the current structural admin surfaces instead of page-local buttons
-- Book delete is available from the book shell
-- Chapter delete is available from the chapter shell
-- Book-section and chapter-section delete are available from their existing section-group wrappers
-- Destructive cleanup now removes entity-owned editorial data before deleting structural rows so morph-owned content does not orphan silently
-
-### Module/action UI
-- Compact grouped launcher layout works
-- Full-width stacked launcher bug was fixed
-- Buttons no longer occupy separate full-width rows in the touched intro/header areas
-- Verse list density improved
-- Duplicate verse-number display was removed
+### CMS page foundation
+- Authenticated CMS workspace now exists at:
+  - `/cms/pages`
+  - `/cms/pages/{page:slug}`
+- Public CMS page shell now exists at:
+  - `/pages/{page:slug}`
+- CMS page create works through the new Add Page flow in the CMS workspace.
+- Dashboard now exposes a CMS pages entry point and Add Page link for admin-context users.
+- CMS page records currently support:
+  - `title`
+  - `slug`
+  - `status`
+  - optional `layout_key`
+- CMS page workspace currently supports:
+  - create page
+  - list pages
+  - edit page identity/status/layout key
+  - open the public page when published
+  - review published block preview
+- Page-owned block ownership is established even though the universal page block editor is not built yet.
 
 ## Partially working
 
-### Full Edit for translations/commentaries
-- Deep-link targeting was added
-- Full-edit page can open the intended translation/commentary editor automatically
-- Routing is now truthful in principle
+### CMS page composition
+- Pages already own content blocks through the shared owner model.
+- Public CMS pages already render published page-owned blocks if they exist.
 
-But this still needs real product-level validation:
-- it may still feel weaker than a true deeper editing workspace
-- the UX needs to be checked again before trusting it as fully solved
+But the actual universal page block management workflow is still not built:
+- no CMS page block create/edit/delete UI yet
+- no dedicated CMS page block ordering workflow yet
+- no page-specific block regions or page-builder UX yet
+
+### Full Edit for canonical verse translations/commentaries
+- Deep-link targeting was added.
+- Full-edit page can open the intended translation/commentary editor automatically.
+- Routing is now more truthful in principle.
+
+But it still needs product-level validation to prove it is meaningfully deeper than inline quick edit.
 
 ## Needs improvement / still watch closely
 
-### Full Edit experience
-- Must feel meaningfully deeper than inline quick edit
-- Must not regress into a decorative jump or weak duplicate shell
-- Needs future review to confirm that it is genuinely useful
+### CMS page browser validation
+- The CMS page foundation needs a real browser pass for:
+  - dashboard entry point
+  - Add Page create flow
+  - page identity update flow
+  - draft-vs-published public route behavior
+  - empty-state page shell behavior
 
-### Inline editor lifecycle validation
-- Close-on-success behavior is now wired for the active module-based create/save editors audited in this pass
-- Browser validation is still needed to confirm there are no remaining lifecycle regressions on the touched surfaces, especially the new chapter-page verse-row controls and the new intro/media delete actions
+### CMS page next capability gap
+- Universal page-owned block CRUD is the main remaining CMS gap after this foundation pass.
+- The current page workspace shows ownership and preview, but not composition tooling yet.
 
-### Remaining scope watchpoints
-- No open CRUD gap remains in the current active book-schema entity list after this pass
-- Verse published note-block CRUD still lives on verse detail/full edit rather than as compact row-local controls on the chapter page; that is now a UX/scope choice, not a missing schema CRUD path
+### Remaining canonical polish
+- The broader delete-heavy browser pass for some canonical structural/intro/media surfaces is still worth finishing.
+- Translation/commentary Full Edit still needs another usefulness review.
+- The later detail-page intro-dropdown phase for canonical detail tops is still not built.
 
-### User-friendly editing UX
-- Translation/commentary wording improved, but all new edit flows should keep being checked for schema-heavy language leaks
-- Editors should feel content-oriented, not table-oriented
+## Current UX condition
 
-### Button presentation
-- Current compact launcher layout is correct
-- Possible future polish: slightly stronger white/high-contrast visual treatment without reintroducing heavy full-row behavior
+### Canonical scripture UX
+- The active canonical admin UX is more local, more truthful, and less dependent on detouring into deeper pages for common edits.
+- Intro presentation is more consistent across canonical cards.
+
+### CMS page UX
+- The CMS page flow is intentionally minimal and foundation-first.
+- Editors can now create and identify universal pages, but they cannot yet compose them through an in-app block editor.
+- The public CMS shell is real, but still sparse by design in this phase.
 
 ## Important architecture reminders
 
 ### Locked rules
-- Pages remain thin
-- Pages expose surfaces, not feature logic
-- Modules own editing behavior
-- Module actions should stay module-driven
-- Canonical scripture/book pages remain schema-specific exceptions
-- Future non-canonical work should move toward one universal CMS-driven page system
+- Pages remain thin.
+- Canonical pages expose surfaces, not feature logic.
+- Canonical module behavior stays in the admin module system.
+- Canonical scripture pages remain schema-specific exceptions.
+- Manual pages use the universal CMS page system.
+- Content blocks remain reusable across owner types.
 
 ### Schema truth
-Current feature work must remain grounded in real tables and relations, especially for verse support:
-- `verse_translations`
-- `translation_sources`
-- `verse_commentaries`
-- `commentary_sources`
+- Canonical scripture work must stay grounded in the real scripture tables and relations.
+- CMS page work must stay grounded in the dedicated `pages` table plus shared content-block ownership.
 
-Do not drift into fake generic abstractions detached from the schema.
+Do not drift into fake abstractions detached from either the canonical schema or the CMS page model.
 
 ## Immediate next priority when resuming
-1. Validate the chapter-page verse-row controls in browser: identity, intro, notes/meta, nearby create, delete, translations, commentaries, and full edit
-2. Validate delete flows on the active surfaces: book, book section, chapter, chapter section, verse, intro, and media slot
-3. Re-check Full Edit experience for translations/commentaries and verse note depth from the chapter page
-4. Continue UX cleanup without reintroducing page-local admin behavior
+1. Browser-validate the CMS page foundation end to end:
+   - dashboard entry point
+   - page create
+   - page update
+   - published page open
+   - draft page gating
+2. Add the first universal CMS page-owned block management path without inventing a second content system.
+3. Decide the next minimal public-navigation/discovery step for CMS pages only after the block workflow is clearer.
+4. Return to the remaining canonical delete/full-edit/detail-top polish items without reintroducing page-local hacks.
 
 ## Do not forget
-- `admin-architecture.md` is now the authoritative architecture document
-- Future Codex prompts should explicitly tell Codex to read `admin-architecture.md` first
+- `admin-architecture.md` is the authoritative architecture document.
+- Future Codex prompts should explicitly tell Codex to read `admin-architecture.md` first.

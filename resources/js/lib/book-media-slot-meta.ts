@@ -9,7 +9,7 @@ export const BOOK_MEDIA_SLOT_META: Record<string, BookMediaSlotMeta> = {
     overview_video: {
         label: 'Overview Video',
         description:
-            'Drives the Watch Overview control on the library card and in the shared public Book media section.',
+            'Registered video slot used in the shared public Book media section and related book-level media presentations.',
     },
     hero_media: {
         label: 'Hero Media',

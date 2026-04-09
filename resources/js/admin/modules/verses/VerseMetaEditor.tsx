@@ -31,6 +31,25 @@ type VerseMetaFormData = {
 
 const NONE_VALUE = '__none__';
 
+function buildVerseMetaFormData(
+    value: ScriptureVerseMeta | null,
+): VerseMetaFormData {
+    return {
+        primary_speaker_character_id:
+            value?.primary_speaker_character_id !== null &&
+            value?.primary_speaker_character_id !== undefined
+                ? String(value.primary_speaker_character_id)
+                : NONE_VALUE,
+        primary_listener_character_id:
+            value?.primary_listener_character_id !== null &&
+            value?.primary_listener_character_id !== undefined
+                ? String(value.primary_listener_character_id)
+                : NONE_VALUE,
+        difficulty_level: value?.difficulty_level ?? '',
+        summary_short: value?.summary_short ?? '',
+    };
+}
+
 function VerseMetaEditor({
     surface,
     activation,
@@ -39,16 +58,13 @@ function VerseMetaEditor({
         ScriptureVerseMeta,
         { characters: ScriptureVerseCharacterAssignment[] }
     >(surface);
-    const form = useForm<VerseMetaFormData>({
-        primary_speaker_character_id: NONE_VALUE,
-        primary_listener_character_id: NONE_VALUE,
-        difficulty_level: '',
-        summary_short: '',
-    });
 
     if (metadata === null) {
         return null;
     }
+
+    const initialData = buildVerseMetaFormData(metadata.value);
+    const form = useForm<VerseMetaFormData>(initialData);
 
     useEffect(() => {
         if (!activation.isActive) {
@@ -58,28 +74,14 @@ function VerseMetaEditor({
             return;
         }
 
-        form.setData({
-            primary_speaker_character_id:
-                metadata.value?.primary_speaker_character_id !== null &&
-                metadata.value?.primary_speaker_character_id !== undefined
-                    ? String(metadata.value.primary_speaker_character_id)
-                    : NONE_VALUE,
-            primary_listener_character_id:
-                metadata.value?.primary_listener_character_id !== null &&
-                metadata.value?.primary_listener_character_id !== undefined
-                    ? String(metadata.value.primary_listener_character_id)
-                    : NONE_VALUE,
-            difficulty_level: metadata.value?.difficulty_level ?? '',
-            summary_short: metadata.value?.summary_short ?? '',
-        });
+        form.setData(initialData);
         form.clearErrors();
     }, [
         activation.isActive,
-        form,
-        metadata.value?.difficulty_level,
-        metadata.value?.primary_listener_character_id,
-        metadata.value?.primary_speaker_character_id,
-        metadata.value?.summary_short,
+        initialData.difficulty_level,
+        initialData.primary_listener_character_id,
+        initialData.primary_speaker_character_id,
+        initialData.summary_short,
     ]);
 
     const characterOptions = getUniqueVerseCharacterOptions(
@@ -130,9 +132,11 @@ function VerseMetaEditor({
                 processing={form.processing}
             >
                 <div className="grid gap-2">
-                    <Label htmlFor="verse_meta_summary">Summary</Label>
+                    <Label htmlFor={`verse_meta_summary_${surface.entityId}`}>
+                        Summary
+                    </Label>
                     <Textarea
-                        id="verse_meta_summary"
+                        id={`verse_meta_summary_${surface.entityId}`}
                         value={form.data.summary_short}
                         onChange={(event) =>
                             form.setData('summary_short', event.target.value)
@@ -144,9 +148,13 @@ function VerseMetaEditor({
                 </div>
 
                 <div className="grid gap-2">
-                    <Label htmlFor="verse_meta_difficulty">Difficulty</Label>
+                    <Label
+                        htmlFor={`verse_meta_difficulty_${surface.entityId}`}
+                    >
+                        Difficulty
+                    </Label>
                     <Input
-                        id="verse_meta_difficulty"
+                        id={`verse_meta_difficulty_${surface.entityId}`}
                         value={form.data.difficulty_level}
                         onChange={(event) =>
                             form.setData(

@@ -1,5 +1,12 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { BookOpenText, Home, Settings, ShieldCheck, Sparkles } from 'lucide-react';
+import {
+    BookOpenText,
+    FileText,
+    Home,
+    Settings,
+    ShieldCheck,
+    Sparkles,
+} from 'lucide-react';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,6 +19,7 @@ import {
 } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { home } from '@/routes';
+import { index as cmsPagesIndex } from '@/routes/cms/pages';
 import { edit as appearanceEdit } from '@/routes/appearance';
 import { edit as profileEdit } from '@/routes/profile';
 import { index as scriptureBooksIndex } from '@/routes/scripture/books';
@@ -20,6 +28,8 @@ import type { BreadcrumbItem } from '@/types';
 
 type Props = {
     bookCount: number;
+    pageCount: number;
+    publishedPageCount: number;
 };
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -29,7 +39,11 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Dashboard({ bookCount }: Props) {
+export default function Dashboard({
+    bookCount,
+    pageCount,
+    publishedPageCount,
+}: Props) {
     const { auth } = usePage().props;
     const canAccessAdminContext = Boolean(auth.user?.can_access_admin_context);
 
@@ -54,7 +68,7 @@ export default function Dashboard({ bookCount }: Props) {
                     />
                 </div>
 
-                <div className="grid gap-4 xl:grid-cols-3">
+                <div className="grid gap-4 xl:grid-cols-4">
                     <Card>
                         <CardHeader className="gap-3">
                             <CardTitle className="flex items-center gap-2">
@@ -87,6 +101,44 @@ export default function Dashboard({ bookCount }: Props) {
                             </div>
                         </CardContent>
                     </Card>
+
+                    {canAccessAdminContext && (
+                        <Card>
+                            <CardHeader className="gap-3">
+                                <CardTitle className="flex items-center gap-2">
+                                    <FileText className="size-5" />
+                                    CMS pages
+                                </CardTitle>
+                                <CardDescription>
+                                    Create universal pages as CMS records, then
+                                    grow them with content blocks.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <p className="text-sm leading-6 text-muted-foreground">
+                                    {pageCount} CMS{' '}
+                                    {pageCount === 1 ? 'page is' : 'pages are'}{' '}
+                                    in the workspace, with{' '}
+                                    {publishedPageCount} published for the
+                                    public `/pages/{'{slug}'}` path.
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                    <Button asChild>
+                                        <Link href={cmsPagesIndex()}>
+                                            Open page workspace
+                                        </Link>
+                                    </Button>
+                                    <Button asChild variant="outline">
+                                        <Link
+                                            href={`${cmsPagesIndex().url}#create-page`}
+                                        >
+                                            Add page
+                                        </Link>
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
 
                     <Card>
                         <CardHeader className="gap-3">

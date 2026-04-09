@@ -6,7 +6,9 @@ import {
     resolveBookSectionActionsSurface,
     resolveBookSectionChapterGroupSurface,
 } from '@/admin/integrations/sections';
+import { ScriptureBookChapterRowAdmin } from '@/components/scripture/scripture-book-chapter-row-admin';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
+import { ScriptureIntroDropdown } from '@/components/scripture/scripture-intro-dropdown';
 import {
     SCRIPTURE_INLINE_ADMIN_PANEL_CLASS_NAME,
     ScriptureSectionGroupWrapper,
@@ -147,31 +149,49 @@ export function ScriptureBookChapterList({
                                                 region: 'chapter_list_row',
                                                 capabilityHint: 'navigation',
                                             }}
-                                            asChild
                                         >
-                                            <Link
-                                                href={chapterAction.href}
-                                                className="group rounded-lg border p-4 transition-colors hover:border-primary"
-                                            >
-                                                <div className="flex items-start gap-3">
-                                                    <div className="rounded-md bg-primary/10 p-2 text-primary">
-                                                        <BookOpenText className="size-4" />
+                                            <div className="space-y-3 rounded-lg border p-4 transition-colors hover:border-primary">
+                                                <Link
+                                                    href={chapterAction.href}
+                                                    className="group block"
+                                                >
+                                                    <div className="flex items-start gap-3">
+                                                        <div className="rounded-md bg-primary/10 p-2 text-primary">
+                                                            <BookOpenText className="size-4" />
+                                                        </div>
+                                                        <div className="space-y-1">
+                                                            <p className="font-medium group-hover:text-primary">
+                                                                {chapterLabel(
+                                                                    chapter.number,
+                                                                    chapter.title,
+                                                                )}
+                                                            </p>
+                                                            <p className="text-sm text-muted-foreground">
+                                                                {
+                                                                    chapterAction.label
+                                                                }
+                                                            </p>
+                                                        </div>
                                                     </div>
-                                                    <div className="space-y-1">
-                                                        <p className="font-medium group-hover:text-primary">
-                                                            {chapterLabel(
-                                                                chapter.number,
-                                                                chapter.title,
-                                                            )}
-                                                        </p>
-                                                        <p className="text-sm text-muted-foreground">
-                                                            {
-                                                                chapterAction.label
-                                                            }
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </Link>
+                                                </Link>
+
+                                                <ScriptureBookChapterRowAdmin
+                                                    chapter={chapter}
+                                                    showAdminControls={
+                                                        showAdminControls
+                                                    }
+                                                    panelClassName={
+                                                        panelClassName
+                                                    }
+                                                />
+
+                                                <ScriptureIntroDropdown
+                                                    block={
+                                                        chapter.intro_block ??
+                                                        null
+                                                    }
+                                                />
+                                            </div>
                                         </ScriptureEntityRegion>
                                     );
                                 })}

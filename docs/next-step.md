@@ -26,8 +26,6 @@ After completing a task:
 -----------------------
 
 
-
-
 # Next Step (When Resuming Work)
 
 ## First thing to do
@@ -35,90 +33,76 @@ Before any implementation prompt, tell Codex:
 
 - read `admin-architecture.md` first
 - treat it as the authoritative architecture instruction
-- do not reintroduce page-local admin logic or page-hardcoded actions
+- keep canonical scripture pages thin and surface-driven
+- treat manual page creation as CMS, not as a one-off feature path
 
 ## Immediate focus
 
-### 1. Validate the new verse-row admin flow in browser
-Check the chapter page verse rows for:
-- edit verse identity/text
-- edit verse intro
-- edit verse notes/meta
-- add nearby verse
-- delete verse
-- quick translation add/edit
-- quick commentary add/edit
-- full edit launcher
+### 1. Browser-validate the first CMS page foundation
+Check the new CMS flow in browser:
+- dashboard CMS pages entry point
+- Add Page create flow
+- page list visibility after create
+- page identity update flow
+- draft page should not open publicly
+- published page should open publicly at `/pages/{slug}`
 
-Confirm that the controls stay attached to the correct verse row, stay compact, and return to normal display state after successful inline mutations.
+If something breaks, fix it in the page model/controller/workspace path rather than papering over it with page-local hacks.
 
-### 2. Validate the new delete coverage on active surfaces
-Check:
-- book delete from the book shell
-- book-section delete from the chapter-list section wrapper
-- chapter delete from the chapter shell
-- chapter-section delete from the verse-list section wrapper
-- verse delete from the chapter page
-- intro delete on chapter / verse / book-section / chapter-section intro surfaces
-- book media-slot delete
+### 2. Add the first universal page-owned block workflow
+The next CMS capability gap is page composition.
 
-If any delete flow lands on the wrong page or leaves stale UI state, fix it in the module/surface/controller path rather than in page shells.
+Use the existing content-block owner pattern and extend it to pages so that CMS pages can start managing their own blocks.
 
-### 3. Validate and strengthen Full Edit
-Check whether Full Edit for:
-- translations
-- commentaries
+Direction:
+- do not invent a second content system
+- do not create page-specific CMS block systems
+- keep the workflow universal for pages
 
-is truly functioning as a meaningful deeper editing path.
+### 3. Decide the next minimal CMS page shell polish
+After the first block workflow exists, reassess:
+- whether CMS pages need a light public index/discovery path
+- whether layout/template hints need stricter semantics
+- whether the public page shell needs stronger empty-state or presentation polish
 
-If it still feels weak, improve it so that it becomes a real deeper workspace rather than a routed duplicate of inline quick edit.
+Do not overbuild a full page builder in one jump.
 
-### 4. Continue UX cleanup
-Keep translation/commentary editing:
-- user-friendly
-- editor-facing
-- free from schema/debug language leaks
-
-Audit labels, helper text, empty states, and action wording again when needed.
+### 4. Return to the remaining canonical polish items
+Once the CMS foundation is stable, resume the still-open canonical cleanup:
+- remaining delete-heavy browser validation
+- re-check Full Edit usefulness for translations/commentaries
+- later move the shared Intro dropdown concept to canonical detail-page tops
 
 ### 5. Keep architecture discipline
 As new work continues:
-- pages should expose surfaces only
-- modules should define actions
-- host should render actions
-- schema truth should remain in the real tables/relations
-- page-specific hardcoding should keep shrinking
-
-## Next likely implementation direction after that
-Move further toward schema-derived module families such as:
-- book module
-- book-section module
-- chapter module
-- chapter-section module
-- verse module
-- verse detail support modules
-
-Long-term aim:
-these schema-driven render/edit units should become increasingly reusable and later more naturally integratable into a broader CMS-driven page system.
+- canonical scripture remains schema-driven
+- CMS pages remain universal and page-record-driven
+- pages stay thin
+- admin logic stays out of page-local hacks
+- shared content-block ownership stays shared
 
 ## Reminder of boundary
-Do not try to fully redesign canonical routing into CMS routing yet.
+- Do not let CMS pages become the source of truth for canonical scripture structure.
+- Do not redesign canonical routing into CMS routing.
+- Do not bypass the universal page system with special standalone page features.
 
 Safe direction:
-- modular rendering first
-- route abstraction later
+- page record first
+- block ownership second
+- richer builder UX later
 
 ## Practical restart order
-1. Review the chapter-page verse-row controls in browser and confirm the right verse row owns the opened editor
-2. Review the new delete flows on structural, intro, media, and verse surfaces
-3. Review current translation/commentary Full Edit behavior in browser
-4. Fix only what is still weak before moving on to deeper UX refinement
+1. Browser-test create/update/public-route behavior for CMS pages
+2. Add page-owned content-block management
+3. Reassess minimal CMS page-shell polish
+4. Resume outstanding canonical polish work
 
 ## Success condition for the next phase
-When resuming, the goal is not “add more things quickly.”
+When resuming, the goal is not “add lots of CMS quickly.”
 
 The goal is:
+- one real universal page model
+- one shared content system
+- clear separation from canonical scripture
+- thin pages
 - truthful UX
-- architecture consistency
-- less page burden
-- stronger schema-driven module behavior

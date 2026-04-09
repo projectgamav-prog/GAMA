@@ -12,6 +12,7 @@ use App\Models\MediaAssignment;
 use App\Support\AdminContext\AdminContext;
 use App\Support\Scripture\Admin\BookAdminRouteContext;
 use App\Support\Scripture\Admin\BookSectionAdminRouteContext;
+use App\Support\Scripture\Admin\ChapterAdminRouteContext;
 use App\Support\Scripture\Admin\ContentBlockCapabilityPayload;
 use App\Support\Scripture\Admin\PrimaryPublishedEditableContentBlock;
 use App\Support\Scripture\Admin\VisibleContentBlockSequence;
@@ -84,11 +85,20 @@ class BookController extends Controller
         Book $book,
         PublicScriptureData $publicScriptureData,
     ): Response {
+        $isAdmin = AdminContext::canAccess($request->user());
+
         $book->load([
             'bookSections' => fn ($query) => $query
                 ->inCanonicalOrder()
                 ->with([
-                    'chapters' => fn ($chapterQuery) => $chapterQuery->inCanonicalOrder(),
+                    'chapters' => fn ($chapterQuery) => $chapterQuery
+                        ->inCanonicalOrder()
+                        ->with([
+                            'contentBlocks' => fn ($contentBlockQuery) => $contentBlockQuery
+                                ->published()
+                                ->orderBy('sort_order')
+                                ->orderBy('id'),
+                        ]),
                     'contentBlocks' => fn ($contentBlockQuery) => $contentBlockQuery
                         ->published()
                         ->orderBy('sort_order')
@@ -98,7 +108,6 @@ class BookController extends Controller
         $this->loadPublicBookMediaRelations($book);
 
         $contentBlocks = $this->publicBookContentBlocks($book);
-        $isAdmin = AdminContext::canAccess($request->user());
 
         return Inertia::render('scripture/books/show', [
             'book' => $publicScriptureData->book($book),
@@ -332,11 +341,65 @@ class BookController extends Controller
                         )
                         : null,
                     'chapters' => collect($section->chapters)
-                        ->map(fn (Chapter $chapter) => $publicScriptureData->chapter(
+                        ->map(function (Chapter $chapter) use (
                             $book,
                             $section,
-                            $chapter,
-                        ))
+                            $publicScriptureData,
+                            $isAdmin,
+                        ): array {
+                            $chapterContentBlocks = $chapter->relationLoaded('contentBlocks')
+                                ? collect($chapter->contentBlocks)
+                                : $chapter->contentBlocks()
+                                    ->published()
+                                    ->orderBy('sort_order')
+                                    ->orderBy('id')
+                                    ->get();
+                            $chapterAdminRouteContext = new ChapterAdminRouteContext(
+                                $book,
+                                $section,
+                                $chapter,
+                            );
+                            $primaryIntroBlock = PrimaryPublishedEditableContentBlock::resolve(
+                                $chapterContentBlocks,
+                                fn (ContentBlock $block): bool => $chapterAdminRouteContext->isEditableIntroBlock($block),
+                            );
+                            $chapterPayload = $publicScriptureData->chapter(
+                                $book,
+                                $section,
+                                $chapter,
+                            );
+                            $chapterPayload = [
+                                ...$chapterPayload,
+                                'intro_block' => $primaryIntroBlock
+                                    ? $publicScriptureData->contentBlock($primaryIntroBlock)
+                                    : null,
+                            ];
+
+                            if (! $isAdmin) {
+                                return $chapterPayload;
+                            }
+
+                            return [
+                                ...$chapterPayload,
+                                'admin' => [
+                                    'full_edit_href' => $chapterAdminRouteContext->fullEditHref(),
+                                    'identity_update_href' => $chapterAdminRouteContext->identityUpdateHref(),
+                                    'destroy_href' => $chapterAdminRouteContext->destroyHref(),
+                                    'intro_store_href' => $chapterAdminRouteContext->contentBlockStoreHref(),
+                                    'primary_intro_block' => $primaryIntroBlock
+                                        ? $publicScriptureData->contentBlock($primaryIntroBlock)
+                                        : null,
+                                    'primary_intro_update_href' => $primaryIntroBlock
+                                        ? $chapterAdminRouteContext->contentBlockUpdateHref($primaryIntroBlock)
+                                        : null,
+                                    'primary_intro_destroy_href' => $primaryIntroBlock
+                                        ? $chapterAdminRouteContext->contentBlockDestroyHref($primaryIntroBlock)
+                                        : null,
+                                    'intro_block_types' => $chapterAdminRouteContext->contentBlockTypes(),
+                                    'intro_default_region' => $chapterAdminRouteContext->defaultIntroBlockRegion(),
+                                ],
+                            ];
+                        })
                         ->values()
                         ->all(),
                 ];

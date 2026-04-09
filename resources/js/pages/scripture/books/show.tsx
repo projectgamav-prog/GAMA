@@ -3,10 +3,12 @@ import {
     resolveBookHeaderSurfaces,
 } from '@/admin/integrations/scripture/books';
 import { BookPublicMediaSection } from '@/components/scripture/book-public-media-section';
+import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
 import { ScriptureBookChapterList } from '@/components/scripture/scripture-book-chapter-list';
 import { ScriptureBookContentBlockRegion } from '@/components/scripture/scripture-book-content-block-region';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { Badge } from '@/components/ui/badge';
+import { useVisibleAdminControls } from '@/hooks/use-admin-context';
 import ScriptureLayout from '@/layouts/scripture-layout';
 import type { BookShowProps, BreadcrumbItem } from '@/types';
 
@@ -17,6 +19,7 @@ export default function BookShow({
     admin,
     book_sections,
 }: BookShowProps) {
+    const showAdminControls = useVisibleAdminControls();
     const bookEntity = {
         entityType: 'book' as const,
         entityId: book.id,
@@ -25,7 +28,7 @@ export default function BookShow({
     const { identitySurface, introSurface, actionsSurface } = resolveBookHeaderSurfaces({
         book,
         admin,
-        enabled: isAdmin,
+        enabled: showAdminControls,
     });
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -36,6 +39,8 @@ export default function BookShow({
 
     return (
         <ScriptureLayout title={book.title} breadcrumbs={breadcrumbs}>
+            <ScriptureAdminModeBar />
+
             <ScripturePageIntroCard
                 entityMeta={{
                     ...bookEntity,
@@ -63,20 +68,20 @@ export default function BookShow({
             <BookPublicMediaSection
                 book={book}
                 admin={admin}
-                isAdmin={isAdmin}
+                isAdmin={showAdminControls}
             />
 
             <ScriptureBookContentBlockRegion
                 book={book}
                 blocks={content_blocks}
-                isAdmin={isAdmin}
+                isAdmin={showAdminControls}
                 admin={admin}
             />
 
             <ScriptureBookChapterList
                 book={book}
                 bookSections={book_sections}
-                showAdminControls={isAdmin}
+                showAdminControls={showAdminControls}
                 admin={admin}
             />
         </ScriptureLayout>

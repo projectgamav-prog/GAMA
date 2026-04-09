@@ -3,7 +3,7 @@ import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import { AdminModuleHostGroup } from '@/admin/core/AdminModuleHostGroup';
 import type { AdminSurfaceContract } from '@/admin/surfaces/core/surface-contracts';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
-import { ScriptureIntroBlock } from '@/components/scripture/scripture-intro-block';
+import { ScriptureIntroDropdown } from '@/components/scripture/scripture-intro-dropdown';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type {
@@ -71,10 +71,9 @@ export function ScriptureSectionGroupWrapper({
                         )}
                     </div>
 
-                    <ScriptureIntroBlock
-                        label={introLabel}
+                    <ScriptureIntroDropdown
                         block={introBlock}
-                        variant="header"
+                        contentLabel={introLabel}
                     />
                 </CardHeader>
 

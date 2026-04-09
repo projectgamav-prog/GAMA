@@ -6,8 +6,11 @@ use App\Models\Book;
 use App\Models\BookSection;
 use App\Models\Chapter;
 use App\Models\ChapterSection;
+use App\Models\ContentBlock;
 use App\Models\Verse;
 use App\Models\VerseCardGroup;
+use App\Support\Scripture\Admin\PrimaryPublishedEditableContentBlock;
+use App\Support\Scripture\Admin\VerseAdminRouteContext;
 use Illuminate\Support\Collection;
 
 /**
@@ -67,6 +70,10 @@ class BuildChapterVerseReaderData
                         ->inCanonicalOrder()
                         ->with([
                             'translations',
+                            'contentBlocks' => fn ($contentBlockQuery) => $contentBlockQuery
+                                ->published()
+                                ->orderBy('sort_order')
+                                ->orderBy('id'),
                             'verseCardGroupItem.verseCardGroup.items.verse',
                         ])
                         ->withCount([
@@ -239,6 +246,13 @@ class BuildChapterVerseReaderData
         ChapterSection $section,
         Verse $verse,
     ): array {
+        $primaryIntroBlock = $this->primaryVerseIntroBlock(
+            $book,
+            $bookSection,
+            $chapter,
+            $section,
+            $verse,
+        );
         $explanationHref = route('scripture.chapters.verses.show', [
             'book' => $book,
             'bookSection' => $bookSection,
@@ -252,6 +266,9 @@ class BuildChapterVerseReaderData
             'slug' => $verse->slug,
             'number' => $verse->number,
             'text' => $verse->text,
+            'intro_block' => $primaryIntroBlock
+                ? $this->contentBlockData($primaryIntroBlock)
+                : null,
             'explanation_href' => $explanationHref,
             'video_href' => $verse->published_video_blocks_count > 0
                 ? $explanationHref.'#published-notes'
@@ -271,6 +288,50 @@ class BuildChapterVerseReaderData
         return $verse->translations
             ->firstWhere('language_code', $languageCode)
             ?->text;
+    }
+
+    private function primaryVerseIntroBlock(
+        Book $book,
+        BookSection $bookSection,
+        Chapter $chapter,
+        ChapterSection $section,
+        Verse $verse,
+    ): ?ContentBlock {
+        $contentBlocks = $verse->relationLoaded('contentBlocks')
+            ? collect($verse->contentBlocks)
+            : $verse->contentBlocks()
+                ->published()
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get();
+        $adminRouteContext = new VerseAdminRouteContext(
+            $book,
+            $bookSection,
+            $chapter,
+            $section,
+            $verse,
+        );
+
+        return PrimaryPublishedEditableContentBlock::resolve(
+            $contentBlocks,
+            fn (ContentBlock $block): bool => $adminRouteContext->isEditableIntroBlock($block),
+        );
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function contentBlockData(ContentBlock $block): array
+    {
+        return [
+            'id' => $block->id,
+            'region' => $block->region,
+            'block_type' => $block->block_type,
+            'title' => $block->title,
+            'body' => $block->body,
+            'data_json' => $block->data_json,
+            'sort_order' => $block->sort_order,
+        ];
     }
 
     /**

@@ -1,11 +1,11 @@
 import type { ReactNode } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { ScriptureContentBlock } from '@/types/scripture';
+import type { PublicContentBlock } from '@/types/content-blocks';
 import { ScriptureEntityRegion } from './scripture-entity-region';
 
 type Props = {
-    block: ScriptureContentBlock;
+    block: PublicContentBlock;
     headerAction?: ReactNode;
     inlineEditor?: ReactNode;
 };

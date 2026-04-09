@@ -1,12 +1,6 @@
-export type ScriptureContentBlock = {
-    id: number;
-    region: string;
-    block_type: string;
-    title: string | null;
-    body: string | null;
-    data_json: Record<string, unknown> | null;
-    sort_order: number;
-};
+import type { PublicContentBlock } from './content-blocks';
+
+export type ScriptureContentBlock = PublicContentBlock;
 
 export type ScriptureContentBlockInsertionMode =
     | 'start'
@@ -197,6 +191,19 @@ export type ScriptureChapterAdmin = {
     content_block_delete_hrefs: Record<string, string>;
 };
 
+export type ScriptureChapterRowAdmin = Pick<
+    ScriptureChapterAdmin,
+    | 'full_edit_href'
+    | 'identity_update_href'
+    | 'destroy_href'
+    | 'intro_store_href'
+    | 'primary_intro_block'
+    | 'primary_intro_update_href'
+    | 'primary_intro_destroy_href'
+    | 'intro_block_types'
+    | 'intro_default_region'
+>;
+
 export type ScriptureBookCardAdmin = Pick<
     ScriptureBookAdmin,
     'details_update_href' | 'full_edit_href' | 'canonical_edit_href'
@@ -341,6 +348,7 @@ export type ScriptureChapter = {
     title: string | null;
     href: string;
     intro_block?: ScriptureContentBlock | null;
+    admin?: ScriptureChapterRowAdmin | null;
 };
 
 export type ScriptureChapterSection = {
@@ -411,6 +419,7 @@ export type ScriptureReaderVerse = {
     slug: string;
     number: string | null;
     text: string;
+    intro_block?: ScriptureContentBlock | null;
     explanation_href: string;
     video_href: string | null;
     translations: Record<ScriptureReaderLanguage, string | null>;

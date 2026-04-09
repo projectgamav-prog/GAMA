@@ -157,6 +157,7 @@ export const verseNearbyCreateModule = defineAdminModule({
         {
             actionKey: 'create_row',
             defaultLabel: 'Add Nearby Verse',
+            dynamicLabel: () => 'Add Nearby Verse',
             placement: 'dropdown',
             openMode: 'inline',
             priority: 40,

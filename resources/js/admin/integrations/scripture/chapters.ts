@@ -5,7 +5,11 @@ import {
     createChapterIdentitySurface,
     createChapterIntroSurface,
 } from '@/admin/surfaces/scripture/chapters/surface-builders';
-import type { ScriptureChapter, ScriptureChapterAdmin } from '@/types';
+import type {
+    ScriptureChapter,
+    ScriptureChapterAdmin,
+    ScriptureChapterRowAdmin,
+} from '@/types';
 
 export {
     chapterIdentityEditorModule,
@@ -25,7 +29,7 @@ export function resolveChapterHeaderSurfaces({
 }: {
     chapter: ScriptureChapter;
     chapterTitle: string;
-    admin?: ScriptureChapterAdmin | null;
+    admin?: ScriptureChapterAdmin | ScriptureChapterRowAdmin | null;
     enabled?: boolean;
 }) {
     if (!enabled || !admin) {

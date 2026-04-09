@@ -9,6 +9,7 @@ import {
 } from '@/admin/integrations/sections';
 import { ScriptureChapterVerseRowAdmin } from '@/components/scripture/scripture-chapter-verse-row-admin';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
+import { ScriptureIntroDropdown } from '@/components/scripture/scripture-intro-dropdown';
 import {
     SCRIPTURE_INLINE_ADMIN_PANEL_CLASS_NAME,
     ScriptureSectionGroupWrapper,
@@ -171,6 +172,8 @@ function ScriptureVerseReaderRow({
                     showAdminControls={showAdminControls}
                     sharedAdmin={verseAdminShared}
                 />
+
+                <ScriptureIntroDropdown block={verse.intro_block ?? null} />
 
                 <p className="text-[1.02rem] leading-8">{verse.text}</p>
 

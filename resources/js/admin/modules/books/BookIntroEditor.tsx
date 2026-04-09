@@ -59,8 +59,8 @@ function BookIntroEditor({
                 title={hasIntro ? 'Book intro' : 'Add book intro'}
                 description={
                     isCompact
-                        ? 'Update the public summary shown for this book on the library page.'
-                        : 'Update the public introductory copy shown on the book detail or overview page.'
+                        ? 'Update the public intro shown for this book on the library card.'
+                        : 'Update the public intro shown for this book across its public book pages.'
                 }
                 fullEditHref={fullEditHref}
                 mode={hasIntro ? 'edit' : 'create'}
