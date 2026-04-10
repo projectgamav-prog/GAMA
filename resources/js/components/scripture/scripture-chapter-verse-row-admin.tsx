@@ -85,7 +85,12 @@ export function ScriptureChapterVerseRowAdmin({
     }
 
     return (
-        <div className="space-y-2">
+        <div
+            className="space-y-2"
+            data-scripture-admin-scope="verse-row"
+            data-entity-id={verse.id}
+            data-entity-slug={verse.slug}
+        >
             <AdminModuleHostGroup
                 surfaces={[
                     identitySurface,

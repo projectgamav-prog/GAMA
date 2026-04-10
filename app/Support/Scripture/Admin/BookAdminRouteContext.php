@@ -55,6 +55,8 @@ class BookAdminRouteContext
 
     public function contentBlockStoreHref(): string
     {
+        // Fallback-only path for protected full-edit maintenance of legacy
+        // registered editorial blocks.
         return route('scripture.books.admin.content-blocks.store', $this->routeParameters());
     }
 

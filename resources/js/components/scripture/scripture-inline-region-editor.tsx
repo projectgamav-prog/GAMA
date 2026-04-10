@@ -77,6 +77,7 @@ export function ScriptureInlineRegionEditor({
                 <Button
                     type="button"
                     variant="outline"
+                    data-scripture-editor-action="cancel"
                     onClick={onCancel}
                     disabled={processing}
                 >
@@ -84,10 +85,20 @@ export function ScriptureInlineRegionEditor({
                 </Button>
                 {fullEditHref && (
                     <Button asChild variant="outline">
-                        <Link href={fullEditHref}>Full edit</Link>
+                        <Link
+                            href={fullEditHref}
+                            data-scripture-editor-action="full-edit"
+                        >
+                            Full edit
+                        </Link>
                     </Button>
                 )}
-                <Button type="button" onClick={onSave} disabled={processing}>
+                <Button
+                    type="button"
+                    data-scripture-editor-action="save"
+                    onClick={onSave}
+                    disabled={processing}
+                >
                     {processing ? processingLabel : saveLabel}
                 </Button>
             </div>

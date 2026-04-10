@@ -15,6 +15,10 @@ import {
     createVerseRowActionsSurface,
     createVerseTranslationsSurface,
 } from '@/admin/surfaces/scripture/verses/surface-builders';
+import {
+    resolveVerseIdentitySurfaceContext,
+    type VerseIdentitySurfaceContext,
+} from './identity-surface-context';
 import type {
     ScriptureChapterVerseSharedAdmin,
     ScriptureReaderVerseAdmin,
@@ -61,7 +65,7 @@ export function resolveVerseHeaderSurfaces({
     verseMeta: ScriptureVerseMeta | null;
     characters: ScriptureVerseCharacterAssignment[];
     admin?: ScriptureVerseAdmin | ScriptureReaderVerseAdmin | null;
-    context?: 'verse_page' | 'chapter_page_row';
+    context?: VerseIdentitySurfaceContext;
     returnToHref?: string | null;
     enabled?: boolean;
 }) {
@@ -73,20 +77,17 @@ export function resolveVerseHeaderSurfaces({
         };
     }
 
+    const identityContext = resolveVerseIdentitySurfaceContext(context);
+
     return {
         identitySurface: createVerseIdentitySurface({
             verse,
             updateHref: admin.identity_update_href,
             fullEditHref: admin.full_edit_href,
-            regionKey:
-                context === 'chapter_page_row'
-                    ? 'verse_list_row_identity'
-                    : 'verse_identity',
+            regionKey: identityContext.regionKey,
             returnToHref,
-            editorDescription:
-                context === 'chapter_page_row'
-                    ? 'Update the canonical verse text, number, and slug directly from this verse row on the chapter page.'
-                    : 'Update the canonical verse text, number, and slug without leaving the public verse detail page.',
+            editorDescription: identityContext.editorDescription,
+            semanticContext: identityContext.semanticContext,
         }),
         introSurface: createVerseIntroSurface({
             verse,

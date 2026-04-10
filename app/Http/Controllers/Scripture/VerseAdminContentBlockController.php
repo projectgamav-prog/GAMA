@@ -19,6 +19,12 @@ use App\Support\Scripture\Admin\VisibleContentBlockSequence;
 use App\Support\Scripture\Admin\VerseAdminRouteContext;
 use Illuminate\Http\RedirectResponse;
 
+/**
+ * Transitional fallback controller for canonical full-edit verse note blocks.
+ *
+ * Public scripture pages no longer mount the older owner-attached live block
+ * authoring flow. This controller remains only as a protected admin fallback.
+ */
 class VerseAdminContentBlockController extends Controller
 {
     /**

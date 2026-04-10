@@ -5,6 +5,10 @@ import {
     createChapterIdentitySurface,
     createChapterIntroSurface,
 } from '@/admin/surfaces/scripture/chapters/surface-builders';
+import {
+    resolveChapterIdentitySurfaceContext,
+    type ChapterIdentitySurfaceContext,
+} from './identity-surface-context';
 import type {
     ScriptureChapter,
     ScriptureChapterAdmin,
@@ -32,7 +36,7 @@ export function resolveChapterHeaderSurfaces({
     chapter: ScriptureChapter;
     chapterTitle: string;
     admin?: ScriptureChapterAdmin | ScriptureChapterRowAdmin | null;
-    context?: 'chapter_page' | 'book_page_row';
+    context?: ChapterIdentitySurfaceContext;
     returnToHref?: string | null;
     enabled?: boolean;
 }) {
@@ -44,20 +48,17 @@ export function resolveChapterHeaderSurfaces({
         };
     }
 
+    const identityContext = resolveChapterIdentitySurfaceContext(context);
+
     return {
         identitySurface: createChapterIdentitySurface({
             chapter,
             updateHref: admin.identity_update_href,
             fullEditHref: admin.full_edit_href,
-            regionKey:
-                context === 'book_page_row'
-                    ? 'chapter_list_row_identity'
-                    : 'chapter_identity',
+            regionKey: identityContext.regionKey,
             returnToHref,
-            editorDescription:
-                context === 'book_page_row'
-                    ? 'Update the canonical chapter slug, number, and title directly from this chapter row on the book page.'
-                    : 'Update the canonical chapter slug, number, and title without leaving the public chapter page.',
+            editorDescription: identityContext.editorDescription,
+            semanticContext: identityContext.semanticContext,
         }),
         introSurface: createChapterIntroSurface({
             chapter,

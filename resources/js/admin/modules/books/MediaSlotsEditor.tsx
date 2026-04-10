@@ -17,6 +17,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { defineAdminModule } from '@/admin/core/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/core/module-types';
 import {
+    getActiveBookMediaSlotRoles,
     getBookMediaSlotMeta,
     getBookMediaSlotOptions,
     getDefaultBookMediaSlotRole,
@@ -244,6 +245,7 @@ function CreateMediaAssignmentCard({
 
                         <Button
                             type="button"
+                            data-book-media-action="create"
                             onClick={() => {
                                 form.transform((data) => ({
                                     ...data,
@@ -461,6 +463,8 @@ function MediaAssignmentEditorCard({
 
                 <Button
                     type="button"
+                    data-book-media-action="save"
+                    data-book-media-assignment-id={assignment.id}
                     onClick={() => {
                         form.transform((data) => ({
                             ...data,
@@ -481,6 +485,8 @@ function MediaAssignmentEditorCard({
                     <Button
                         type="button"
                         variant="destructive"
+                        data-book-media-action="delete"
+                        data-book-media-assignment-id={assignment.id}
                         onClick={() =>
                             form.delete(assignment.destroy_href!, {
                                 preserveScroll: true,
@@ -522,11 +528,11 @@ function MediaSlotsEditor({
         metadata.fullEditHref,
         'media_slots',
     );
+    const activeSlotRoles = getActiveBookMediaSlotRoles();
     const slotRoles = Array.from(
         new Set([
             ...metadata.assignments.map((assignment) => assignment.role),
-            'hero_media',
-            'supporting_media',
+            ...activeSlotRoles,
         ]),
     );
 
@@ -575,7 +581,7 @@ function MediaSlotsEditor({
                     storeHref={metadata.storeHref}
                     nextSortOrder={metadata.nextSortOrder}
                     availableMedia={metadata.availableMedia}
-                    slotRoles={slotRoles}
+                    slotRoles={activeSlotRoles}
                     onSuccess={handleMutationSuccess}
                 />
 

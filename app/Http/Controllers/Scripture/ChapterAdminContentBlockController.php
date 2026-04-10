@@ -17,6 +17,12 @@ use App\Support\Scripture\Admin\RegisteredContentBlockOrdering;
 use App\Support\Scripture\Admin\VisibleContentBlockSequence;
 use Illuminate\Http\RedirectResponse;
 
+/**
+ * Transitional fallback controller for canonical full-edit chapter-owned blocks.
+ *
+ * The live public scripture authoring path no longer uses this controller.
+ * Keep it only for protected full-edit maintenance of persisted editorial data.
+ */
 class ChapterAdminContentBlockController extends Controller
 {
     /**

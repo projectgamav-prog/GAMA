@@ -9,6 +9,11 @@ This is the implementation-facing companion to:
 It describes the current live scripture admin surface architecture after the
 retired public block-authoring path was removed from active scripture pages.
 
+Read alongside:
+- `docs/admin-architecture.md`
+- `docs/admin-module-integration.md`
+- `docs/public-admin-page-authoring.md` when the task touches same-layout live authoring rules
+
 ## Scope
 
 This document covers the active canonical editing path for:
@@ -205,6 +210,7 @@ Shared entity action modules:
 - `EntityDeleteAction`
 
 Shared intro helpers used by active modules:
+- `resources/js/admin/modules/intros/`
 - `RegisteredEntityIntroEditor`
 - `RegisteredIntroBlockEditor`
 
@@ -220,6 +226,8 @@ Important nuance:
   admin fallback
 - backend content-block routes/controllers still exist where full edit still
   needs them
+- those remaining controllers and route-context helpers should be treated as
+  fallback-only seams, not as the primary mental model for new public/admin work
 - that backend fallback is not the same thing as the retired public live path
 
 ## How future scripture pages should expose surfaces

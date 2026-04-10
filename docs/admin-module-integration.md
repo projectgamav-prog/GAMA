@@ -57,6 +57,12 @@ Recommended shape:
 - thin adapter component that reads the surface contract
 - `defineAdminModule(...)` export
 
+Shared family note:
+- intro-specific canonical helpers now live under
+  `resources/js/admin/modules/intros/`
+- do not place intro/surface helpers under a generic `blocks` family unless
+  they truly describe generic block infrastructure
+
 The module should receive only:
 - `surface`
 - `module`
@@ -131,6 +137,12 @@ Examples:
 - verse detail identity is not the same semantic context as verse row identity
   on the chapter page
 
+Preferred implementation pattern:
+- keep the page-level vs row-level semantic distinction in a shared integration
+  helper or typed context resolver
+- let surface builders receive already-resolved semantic context metadata rather
+  than duplicating string branches in every integration file
+
 ## 7. How to adapt an outside component safely
 
 Recommended procedure:
@@ -195,6 +207,9 @@ Do not:
 - hardcode page-specific hacks into reusable module infrastructure
 - let an outside component own routing semantics that should come from surfaces
 - bypass metadata readers with ad hoc object access everywhere
+- route new work through transitional full-edit content-block fallback
+  controllers when the task is really about the active live canonical module
+  path
 
 ## 11. Practical checklist before merging a new module
 

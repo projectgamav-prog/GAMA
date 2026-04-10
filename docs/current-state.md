@@ -84,6 +84,13 @@ After completing a task:
   - the old `CmsEligibleRegionExperiment` component was removed because exposed regions now resolve through the real shared region system
   - the active canonical registry now reflects the real working module families instead of carrying dead public-block compatibility files
   - book media slot editor defaults no longer hardcode the retired overview-video role as the create default in the active editor helpers
+  - the remaining shared intro helpers were re-homed from `resources/js/admin/modules/blocks/` into `resources/js/admin/modules/intros/` so the active module families read more honestly
+  - chapter/verse row-vs-page identity semantics now resolve through a shared typed integration helper instead of duplicated string branches
+  - the remaining canonical full-edit content-block controllers and route-context helpers are now explicitly marked as transitional fallback seams in code/docs instead of looking like the active public authoring path
+  - the legacy `overview_video` media role is now treated as explicit compatibility-only metadata in the active editor helpers instead of a normal create-path slot
+  - a narrow headless Chrome smoke script now exists for the real inline admin path:
+    - `scripts/scripture-admin-inline-smoke.mjs`
+    - it covers book identity, chapter-row identity, verse-row identity, one intro editor, and the active media-slot path when a persisted assignment is available
 
 ### CMS page foundation and composition
 - Authenticated CMS workspace exists at:
@@ -268,6 +275,7 @@ But richer authoring is still postponed:
 - Legacy content-block models, routes, and full-edit tools still exist in the backend for canonical admin fallback and already-saved editorial data; they are no longer treated as the active public scripture authoring direction.
 - Legacy canonical content-block backend controllers, route contexts, and duplication/reorder helpers still exist for full-edit/admin fallback and already-saved editorial data, but they are now clearly transitional rather than part of the active public admin module path.
 - The repaired edit-existing-content path still needs a broader browser pass across the remaining active inline/grouped and full-edit surfaces so the on-page editors, mounted context copy, and post-save refresh behavior are confirmed outside feature tests.
+- The new smoke layer is intentionally narrow; it is not a full E2E suite yet.
 
 ## Current UX condition
 
@@ -308,21 +316,19 @@ But richer authoring is still postponed:
 Do not drift into fake abstractions detached from either the canonical schema or the CMS data model.
 
 ## Immediate next priority when resuming
-1. Extend the live CMS interaction model without widening CMS scope too quickly:
+1. Move into the next product-facing phase from a cleaner base:
+   - header/footer work
+   - broader page structuring
+   - later CMS layout/content improvements
+2. Keep the active scripture admin path trustworthy while that phase begins:
+   - extend browser validation across the remaining grouped/full-edit canonical surfaces as needed
+   - preserve the new narrow smoke layer for the active inline editors
+   - keep row/page semantics and same-page behavior honest
+3. Extend the live CMS interaction model only after the next product-facing structure work is ready:
    - keep published CMS pages interactive for permitted users
    - preserve the locked same-layout public-page-first authoring rule as live composition expands
-   - keep routine add/edit controls attached directly to eligible layout elements instead of drifting back into detached control shells
-   - extend the new shared exposed-region model to more eligible pages without dragging canonical structure into CMS
    - preserve the stable `manifest.ts` / `renderer.tsx` / `editor.tsx` / `types.ts` / `defaults.ts` / `index.tsx` contract
-2. Improve the first CMS module family only where it materially helps live authoring:
-   - richer text editing
-   - media selection/upload
-   - better module-level validation feedback
-   - stronger generic destination authoring polish for button-based linking
-   - attach-existing-page vs create-new-page flows during button/link authoring
-3. Reassess public CMS discovery/navigation only after the live composition flow is stable.
-4. Return to the remaining canonical delete/full-edit/detail-top polish items without reintroducing page-local hacks.
-5. Keep the restored scripture browse baseline trustworthy:
+4. Keep the restored scripture browse baseline trustworthy:
    - preserve the full enabled-corpus development seed baseline
    - avoid narrowing local browse state back to a Bhagavad Gita-only dataset unless a task explicitly needs a narrow test seeder
    - continue phasing out overlapping live canonical block controls only where a clear CMS/exposed-region replacement already exists

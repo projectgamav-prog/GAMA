@@ -40,6 +40,7 @@ export type IdentityContractMetadata<TEntity> = {
     fullEditHref: string;
     returnToHref?: string | null;
     editorDescription?: string | null;
+    semanticContext?: 'page' | 'row' | null;
 };
 
 export type IntroContractMetadata<TEntity> = {
@@ -120,6 +121,10 @@ export function getIdentityContractMetadata<TEntity>(
             (typeof metadata.editorDescription === 'string' ||
                 metadata.editorDescription === null ||
                 metadata.editorDescription === undefined) &&
+            (metadata.semanticContext === 'page' ||
+                metadata.semanticContext === 'row' ||
+                metadata.semanticContext === null ||
+                metadata.semanticContext === undefined) &&
             typeof metadata.entityRecord === 'object' &&
             metadata.entityRecord !== null,
     );

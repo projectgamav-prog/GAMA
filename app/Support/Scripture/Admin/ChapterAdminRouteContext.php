@@ -53,6 +53,8 @@ class ChapterAdminRouteContext
 
     public function contentBlockStoreHref(): string
     {
+        // Fallback-only path for protected full-edit maintenance of chapter
+        // editorial blocks.
         return route('scripture.chapters.admin.content-blocks.store', $this->routeParameters());
     }
 

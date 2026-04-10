@@ -10,6 +10,24 @@ Current priority: keep canonical scripture pages thin and schema-driven, and bui
 Implementation companions:
 - `docs/scripture-admin-editing.md` for the active canonical public/admin surface system
 - `docs/admin-module-integration.md` for adapting outside React components into the admin module architecture
+- `docs/public-admin-page-authoring.md` for the locked same-layout public/admin authoring rules on eligible pages
+
+## 0. Admin documentation set
+Treat the admin docs as one maintained set instead of isolated notes.
+
+- `docs/admin-architecture.md`
+  Top-level source of truth for canonical admin and CMS boundaries.
+- `docs/scripture-admin-editing.md`
+  Practical guide for the active canonical scripture surface/module path.
+- `docs/admin-module-integration.md`
+  Implementation guide for adapting inside-project or outside React components into the canonical admin and CMS module systems.
+- `docs/public-admin-page-authoring.md`
+  Same-layout and in-place authoring rules for public/admin page behavior.
+
+When touching canonical scripture admin work:
+- read `admin-architecture.md`
+- read `scripture-admin-editing.md`
+- read `admin-module-integration.md` if the task affects reusable modules or outside-component adaptation
 
 ## 1. Locked architecture context
 This project is not greenfield. The admin system already has a locked direction, and Codex must work inside it rather than improvising page-specific patterns.
@@ -118,6 +136,7 @@ CMS integration policy:
 - Canonical integrations normalize schema context.
 - Canonical modules define qualification and actions.
 - Canonical hosts resolve placement and render buttons/actions.
+- Canonical shared intro helpers live in the intro module family, not in a generic block family.
 - Button labels should not be page-hardcoded where avoidable.
 - Closed-state launchers should stay compact and grouped.
 - Open editor forms may remain larger.
@@ -129,6 +148,7 @@ Canonical/editorial owner-attached blocks:
 - reusable editorial units
 - attach through the existing polymorphic `content_blocks` owner pattern
 - remain appropriate for canonical scripture and related editorial entities
+- the remaining canonical content-block controllers/routes are transitional full-edit fallback seams, not the active public authoring path
 
 CMS page composition blocks:
 - belong to `page_containers`

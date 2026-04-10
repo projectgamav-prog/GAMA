@@ -1,6 +1,6 @@
 import { defineAdminModule } from '@/admin/core/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/core/module-types';
-import { RegisteredIntroBlockEditor } from '@/admin/modules/blocks/RegisteredIntroBlockEditor';
+import { RegisteredIntroBlockEditor } from '@/admin/modules/intros/RegisteredIntroBlockEditor';
 import { getSectionGroupMetadata } from '@/admin/surfaces/sections/surface-types';
 
 function SectionIntroEditor({

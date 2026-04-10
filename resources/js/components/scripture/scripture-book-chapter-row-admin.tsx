@@ -39,9 +39,15 @@ export function ScriptureBookChapterRowAdmin({
     }
 
     return (
-        <AdminModuleHostGroup
-            surfaces={[identitySurface, introSurface, actionsSurface]}
-            className={panelClassName}
-        />
+        <div
+            data-scripture-admin-scope="chapter-row"
+            data-entity-id={chapter.id}
+            data-entity-slug={chapter.slug}
+        >
+            <AdminModuleHostGroup
+                surfaces={[identitySurface, introSurface, actionsSurface]}
+                className={panelClassName}
+            />
+        </div>
     );
 }

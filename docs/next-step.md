@@ -42,47 +42,34 @@ Before any implementation prompt, tell Codex:
 
 ## Immediate focus
 
-### 1. Keep the active book-schema edit path trustworthy
-The next pass should stay focused on the active existing-content edit path before any new structural work:
-- continue the browser pass across the repaired edit-existing-content surfaces across books, book sections, chapters, chapter sections, verses, verse meta, and active verse support editors
-- pay special attention to grouped inline editors on public schema pages:
-  - grouped section row editors on book and chapter pages
-- keep confirming that grouped inline editors use the right mounted semantics and return to the correct page context after save
+### 1. Start the next product-facing phase from the cleaned base
+The next pass can move into headers/footers or broader page structuring work, but it should preserve the now-cleaner admin/module boundary:
+- keep the public/admin same-layout rule intact
+- keep canonical scripture pages thin and surface-driven
+- keep CMS exposure generic and supplementary on non-CMS pages
+- keep the active inline editors on the real page instead of detouring back into workspace-first habits
+
+### 2. Keep the active scripture editing path trustworthy while that work begins
+- continue the browser pass across the remaining grouped inline editors and the always-mounted full-edit cards that still matter
 - use the same end-to-end standard that exposed the earlier dummy-editor bug:
   - actual browser submit
   - request fired
   - database row changed
   - UI visibly updated after save
-- keep confirming that always-mounted full-edit cards keep showing refreshed values after save instead of stale pre-save form state
+- keep the new narrow smoke layer alive:
+  - `scripts/scripture-admin-inline-smoke.mjs`
+- extend it only where it materially protects the active public/admin editing path
 - keep ignoring retired public scripture block-authoring paths while auditing edit behavior
-- do not reintroduce the retired public scripture block-module branch while cleaning or extending canonical admin surfaces
 - leave canonical full-edit and protected schema editing intact where no safe replacement exists yet
 
-This still needs to preserve the broader trustworthy state:
-- keep the full enabled-corpus development seed baseline intact for local browse behavior
-- do not narrow local browse state back to Bhagavad Gita only unless a task explicitly needs a narrow seeder
-- continue tracing the shared exposed-region model on eligible pages so the CMS path is real, not just theoretically mounted
-- keep removing overlapping legacy live canonical block controls only where a real CMS/exposed-region replacement already exists
-- leave canonical full-edit and protected schema editing intact where no safe replacement exists yet
-
-### 2. Extend the live CMS interaction model carefully
-The CMS page/container/block foundation is now runtime-validated, and the first live-page composition exposure exists on published CMS pages for permitted users.
-
-The next CMS task should focus on the live interaction seam:
+### 3. Extend live CMS interaction only after the next structural phase is ready
 - preserve the locked same-layout rule so admins compose on the real page layout with augmentation controls instead of a separate builder shell
-- preserve the new in-place attachment rule so controls stay on the actual container/block area instead of drifting into detached bottom-of-page shells
+- preserve the in-place attachment rule so controls stay on the actual container/block area instead of drifting into detached shells
 - preserve the compact-controls rule so live add/edit affordances stay small by default and only expand after click
 - preserve the no-dashboard-redirect rule so routine live add/edit flows stay on the same public-looking page
-- extend the new shared exposed-region model across additional eligible live pages without making users hunt through dashboard page records first
-- keep CMS composition interactive on published pages for permitted users
-- preserve the page -> container -> block grammar while shifting the workflow toward in-place composition
-- decide how more site regions should expose add-section / add-content / add-buttons entry points
 - keep the normalized CMS page baseline stable and avoid reintroducing fresh migration drift in the page/exposed-region layer
-- keep CMS integration touchpoints minimal and same-origin-safe
-- decide the draft-safe same-layout preview path so draft authoring does not drift back into workspace-first habits
 
-### 3. Improve the first CMS module family carefully
-After the live composition flow is stable, improve the first registry modules where it materially helps authoring:
+### 4. Improve the first CMS module family carefully when it materially helps authoring
 - richer text editing than raw HTML
 - media selection/upload workflow
 - stronger button group authoring polish and validation feedback
@@ -92,22 +79,6 @@ After the live composition flow is stable, improve the first registry modules wh
 
 Do not overbuild category-management UI yet.
 Do not move CMS modules into scripture module folders.
-
-### 4. Reassess broader exposure and phase-outs
-Once live composition and editing are stable, reassess:
-- whether CMS pages need a light public index/discovery path
-- whether layout keys need stricter semantics
-- whether public page presentation needs stronger empty-state or layout polish
-- which old canonical owner-attached block-add flows should stay canonical-specific and which should be phased out when universal content regions cover the same use case
-- the remaining book and chapter live content-block regions, which are still transitional because they do not yet have a shared CMS-region replacement
-
-Do not overbuild a full CMS site-builder in one jump.
-
-### 5. Return to the remaining canonical polish items
-Once the CMS foundation is stable, resume the still-open canonical cleanup:
-- remaining delete-heavy browser validation
-- re-check Full Edit usefulness for translations/commentaries
-- later move the shared Intro dropdown concept to canonical detail-page tops
 
 ### 5. Keep architecture discipline
 As new work continues:
@@ -137,10 +108,10 @@ Safe direction:
 - remote/external module integration through the frozen CMS manifest contract after that
 
 ## Practical restart order
-1. Keep scripture browsing and exposed-region cleanup trustworthy
-2. Extend live CMS composition exposure
-3. Improve module authoring where it helps
-4. Reassess broader exposure and phase-outs
+1. Start headers/footers or page-structure work from the cleaned architecture base
+2. Keep scripture editing/browser confidence healthy with the narrow smoke layer and targeted browser checks
+3. Extend live CMS composition exposure only where the next product-facing phase needs it
+4. Improve module authoring where it helps
 5. Resume outstanding canonical polish work
 
 ## Success condition for the next phase

@@ -1,7 +1,7 @@
 import { defineAdminModule } from '@/admin/core/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/core/module-types';
 import { getIntroContractMetadata } from '@/admin/surfaces/core/contract-readers';
-import { RegisteredEntityIntroEditor } from '@/admin/modules/blocks/RegisteredEntityIntroEditor';
+import { RegisteredEntityIntroEditor } from '@/admin/modules/intros/RegisteredEntityIntroEditor';
 import type { ScriptureChapter } from '@/types';
 
 function ChapterIntroEditor({

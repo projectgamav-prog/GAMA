@@ -15,6 +15,13 @@ use App\Support\Scripture\Admin\RegisteredContentBlock;
 use App\Support\Scripture\Admin\VisibleContentBlockSequence;
 use Illuminate\Http\RedirectResponse;
 
+/**
+ * Transitional fallback controller for canonical full-edit registered blocks.
+ *
+ * This controller intentionally remains outside the active public live editing
+ * path. Keep it available for protected full-edit maintenance of already-saved
+ * editorial block data until that fallback is formally retired.
+ */
 class BookAdminContentBlockController extends Controller
 {
     /**

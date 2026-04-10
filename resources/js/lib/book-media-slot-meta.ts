@@ -5,7 +5,17 @@ export type BookMediaSlotMeta = {
     description: string;
 };
 
+export const ACTIVE_BOOK_MEDIA_SLOT_ROLES = [
+    'hero_media',
+    'supporting_media',
+] as const;
+
 export const BOOK_MEDIA_SLOT_META: Record<string, BookMediaSlotMeta> = {
+    overview_video: {
+        label: 'Legacy Overview Video',
+        description:
+            'Legacy compatibility slot retained for already-saved book media assignments. It is no longer part of the normal active book media workflow.',
+    },
     hero_media: {
         label: 'Hero Media',
         description:
@@ -41,4 +51,8 @@ export function getDefaultBookMediaSlotRole(
     roles: string[] | null | undefined,
 ): string {
     return getBookMediaSlotOptions(roles)[0]?.role ?? 'hero_media';
+}
+
+export function getActiveBookMediaSlotRoles(): string[] {
+    return [...ACTIVE_BOOK_MEDIA_SLOT_ROLES];
 }

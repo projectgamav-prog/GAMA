@@ -23,6 +23,7 @@ type ChapterIdentitySurfaceArgs = {
     regionKey?: string;
     returnToHref?: string | null;
     editorDescription?: string | null;
+    semanticContext?: 'page' | 'row' | null;
 };
 
 type ChapterIntroSurfaceArgs = {
@@ -49,6 +50,7 @@ export function createChapterIdentitySurface({
     regionKey = 'chapter_identity',
     returnToHref = null,
     editorDescription = null,
+    semanticContext = 'page',
 }: ChapterIdentitySurfaceArgs): AdminSurfaceContract<IdentityContractMetadata<ScriptureChapter>> {
     return createInlineEditorSurface({
         surfaceKey: CHAPTER_IDENTITY_SURFACE_KEY,
@@ -63,6 +65,7 @@ export function createChapterIdentitySurface({
             fullEditHref,
             returnToHref,
             editorDescription,
+            semanticContext,
         },
     });
 }

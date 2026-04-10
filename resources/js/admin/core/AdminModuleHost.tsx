@@ -128,6 +128,7 @@ export function AdminModuleHost({
     const resolvedActionContent =
         resolvedActions.length > 0 ? (
             <AdminModuleActionRenderer
+                surface={surface}
                 actions={resolvedActions}
                 activeActionKey={activeActionKey}
                 onAction={handleAction}

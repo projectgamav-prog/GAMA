@@ -1,3 +1,4 @@
+import type { AdminSurfaceContract } from '../surfaces/core/surface-contracts';
 import { MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,12 +11,14 @@ import { cn } from '@/lib/utils';
 import type { AdminResolvedModuleAction } from './module-types';
 
 type Props = {
+    surface: AdminSurfaceContract;
     actions: readonly AdminResolvedModuleAction[];
     activeActionKey: string | null;
     onAction: (action: AdminResolvedModuleAction) => void;
 };
 
 export function AdminModuleActionRenderer({
+    surface,
     actions,
     activeActionKey,
     onAction,
@@ -39,6 +42,11 @@ export function AdminModuleActionRenderer({
                     key={action.key}
                     type="button"
                     size="sm"
+                    data-admin-action-key={action.key}
+                    data-admin-module-key={action.module.key}
+                    data-admin-entity={surface.entity}
+                    data-admin-entity-id={surface.entityId}
+                    data-admin-region-key={surface.regionKey ?? undefined}
                     variant={
                         activeActionKey === action.key
                             ? 'secondary'
@@ -65,6 +73,10 @@ export function AdminModuleActionRenderer({
                         <Button
                             type="button"
                             size="sm"
+                            data-admin-action-key="dropdown:more"
+                            data-admin-entity={surface.entity}
+                            data-admin-entity-id={surface.entityId}
+                            data-admin-region-key={surface.regionKey ?? undefined}
                             variant="outline"
                             className="h-7 rounded-md border border-border/80 bg-background px-2.5 text-xs font-medium text-foreground shadow-sm hover:bg-muted"
                         >
@@ -76,6 +88,10 @@ export function AdminModuleActionRenderer({
                         {dropdownActions.map((action) => (
                             <DropdownMenuItem
                                 key={action.key}
+                                data-admin-action-key={action.key}
+                                data-admin-entity={surface.entity}
+                                data-admin-entity-id={surface.entityId}
+                                data-admin-region-key={surface.regionKey ?? undefined}
                                 onSelect={() => onAction(action)}
                             >
                                 {action.label}

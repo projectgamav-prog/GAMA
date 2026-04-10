@@ -102,6 +102,10 @@ class VerseAdminRouteContext
         ]));
     }
 
+    /**
+     * Fallback-only path for protected full-edit maintenance of persisted
+     * verse note blocks.
+     */
     public function contentBlockStoreHref(): string
     {
         return route('scripture.chapters.verses.admin.content-blocks.store', $this->routeParameters());

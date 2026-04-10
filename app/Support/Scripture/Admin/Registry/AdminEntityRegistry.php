@@ -191,7 +191,7 @@ class AdminEntityRegistry
                 classification: AdminFieldClassification::EDITORIAL,
                 group: AdminFieldGroup::SUPPORTING,
                 options: ['overview_video', 'hero_media', 'supporting_media'],
-                helpText: 'Choose a registered public slot. Add new slot types through registration, not free-form roles.',
+                helpText: 'Choose a registered public slot. hero_media and supporting_media are the active options. overview_video remains only for legacy compatibility with older assignments.',
             ),
             'media_assignment_title_override' => new AdminFieldDefinition(
                 key: 'media_assignment_title_override',

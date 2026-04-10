@@ -145,6 +145,8 @@ Route::prefix('books')
                 Route::delete('', [BookAdminDeleteController::class, 'destroy'])
                     ->name('destroy');
 
+                // Transitional fallback only: protected full-edit maintenance
+                // for already-saved book editorial blocks.
                 Route::post('content-blocks', [BookAdminContentBlockController::class, 'store'])
                     ->name('content-blocks.store');
 
@@ -254,6 +256,8 @@ Route::prefix('books')
                 Route::delete('', [ChapterAdminDeleteController::class, 'destroy'])
                     ->name('destroy');
 
+                // Transitional fallback only: protected full-edit maintenance
+                // for already-saved chapter editorial blocks.
                 Route::post('content-blocks', [ChapterAdminContentBlockController::class, 'store'])
                     ->name('content-blocks.store');
 
@@ -385,6 +389,8 @@ Route::prefix('books')
                     [VerseAdminCommentaryController::class, 'destroy'],
                 )->name('commentaries.destroy');
 
+                // Transitional fallback only: protected full-edit maintenance
+                // for already-saved verse note blocks.
                 Route::post('content-blocks', [VerseAdminContentBlockController::class, 'store'])
                     ->name('content-blocks.store');
 

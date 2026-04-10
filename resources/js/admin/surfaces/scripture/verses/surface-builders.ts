@@ -34,6 +34,7 @@ type VerseIdentitySurfaceArgs = {
     regionKey?: string;
     returnToHref?: string | null;
     editorDescription?: string | null;
+    semanticContext?: 'page' | 'row' | null;
 };
 
 type VerseIntroSurfaceArgs = {
@@ -85,6 +86,7 @@ export function createVerseIdentitySurface({
     regionKey = 'verse_identity',
     returnToHref = null,
     editorDescription = null,
+    semanticContext = 'page',
 }: VerseIdentitySurfaceArgs): AdminSurfaceContract<IdentityContractMetadata<ScriptureVerse>> {
     return createInlineEditorSurface({
         surfaceKey: VERSE_IDENTITY_SURFACE_KEY,
@@ -99,6 +101,7 @@ export function createVerseIdentitySurface({
             fullEditHref,
             returnToHref,
             editorDescription,
+            semanticContext,
         },
     });
 }
