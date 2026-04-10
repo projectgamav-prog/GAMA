@@ -85,7 +85,7 @@ export default function CmsPagesIndex({
 
                     <Heading
                         title="CMS Pages"
-                        description="Create universal non-canonical pages here. Each CMS page becomes its own composition root, then grows through ordered containers and CMS blocks instead of scripture-shaped assumptions."
+                        description="Create universal CMS pages here. Each page becomes its own composition root, then grows through ordered containers and CMS blocks."
                     />
                 </div>
 
@@ -249,9 +249,9 @@ export default function CmsPagesIndex({
                                 model.
                             </p>
                             <p>
-                                Canonical scripture pages stay separate and
-                                schema-driven. CMS pages live beside them, not
-                                inside their hierarchy.
+                                Other domain-specific page systems stay
+                                separate. CMS pages live beside them, not
+                                inside their hierarchies.
                             </p>
                             <p>
                                 The builder stays intentionally narrow here:

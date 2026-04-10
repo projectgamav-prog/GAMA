@@ -39,14 +39,22 @@ Before any implementation prompt, tell Codex:
 
 ## Immediate focus
 
-### 1. Prepare the CMS registry for future external module work
-The CMS page/container/block foundation is now browser-validated and operational.
+### 1. Use the frozen CMS module contract for future external module work
+The CMS page/container/block foundation is now browser-validated and runtime-validated on the applied MySQL schema.
 
 The next CMS task should focus on the extension seam:
 - define how future external or remote React/TSX modules plug into the current manifest registry
 - keep module folders portable and easy to copy in
+- preserve the frozen local module shape:
+  - `manifest.ts`
+  - `renderer.tsx`
+  - `editor.tsx`
+  - `types.ts`
+  - `defaults.ts`
+  - `index.tsx`
 - keep CMS integration touchpoints minimal
 - preserve same-origin-safe CMS navigation behavior
+- do not casually change the page -> container -> block grammar while doing this
 
 ### 2. Improve the first CMS module family carefully
 After the composition flow is stable, improve the first registry modules where it materially helps authoring:
@@ -76,6 +84,7 @@ As new work continues:
 - canonical scripture remains schema-driven
 - CMS composition remains page -> container -> block
 - CMS modules remain registry-based under `resources/js/admin/cms/`
+- CMS modules remain independent from canonical admin internals
 - pages stay thin
 - admin logic stays out of page-local hacks
 
@@ -90,6 +99,7 @@ Safe direction:
 - container structure second
 - block composition third
 - richer authoring UX later
+- remote/external module integration through the frozen CMS manifest contract after that
 
 ## Practical restart order
 1. Define the next CMS external-module integration seam

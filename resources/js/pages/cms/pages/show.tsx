@@ -226,8 +226,8 @@ export default function CmsPageShow({
                         <CardHeader className="gap-3">
                             <CardTitle>Composition Direction</CardTitle>
                             <CardDescription>
-                                CMS composition is now independent from the
-                                canonical scripture schema.
+                                CMS composition now uses its own independent
+                                page-container-block model.
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4 text-sm leading-6 text-muted-foreground">
@@ -240,8 +240,8 @@ export default function CmsPageShow({
                             </p>
                             <p>
                                 The module registry for those blocks now lives
-                                under `resources/js/admin/cms/`, separate from
-                                scripture admin modules.
+                                under `resources/js/admin/cms/` as its own
+                                CMS-local system.
                             </p>
 
                             <div className="flex flex-wrap gap-2">

@@ -63,6 +63,12 @@ This is the structural seam that decides whether content:
 
 Do not flatten CMS composition back into a single page-owned block list.
 
+The active CMS editing grammar is:
+- create a new container = create a new card/section
+- add a block to a container = keep content inside the same card/section
+- move up/down = reorder containers or blocks without changing the ownership model
+- delete = remove only the selected CMS node and any children it owns
+
 ## 4. CMS module architecture
 CMS modules must stay independent from scripture admin modules.
 
@@ -84,19 +90,24 @@ Each CMS module manifest should declare, at minimum:
 
 Future helpers/validation can extend this contract, but do not hardcode modules into page files.
 
-The current preferred CMS module folder shape is:
+The CMS module folder shape is now treated as stable for the current foundation:
 - `resources/js/admin/cms/modules/<module-key>/manifest.ts`
 - `resources/js/admin/cms/modules/<module-key>/renderer.tsx`
 - `resources/js/admin/cms/modules/<module-key>/editor.tsx`
 - `resources/js/admin/cms/modules/<module-key>/types.ts`
 - `resources/js/admin/cms/modules/<module-key>/defaults.ts`
-- a small barrel entry for registry import
+- `resources/js/admin/cms/modules/<module-key>/index.tsx`
 
 This folder shape is part of the CMS portability goal:
 - modules should be easy to prototype outside the project
 - then copied in with minimal refactoring
 - then registered through the CMS manifest registry
 - without touching scripture admin modules
+
+CMS integration policy:
+- CMS may link to canonical scripture routes or entities through clean URLs and normal data contracts.
+- Future scripture-aware CMS content should arrive through dedicated CMS modules or bridge adapters.
+- CMS modules must not directly depend on canonical admin module internals, surface builders, or qualification logic.
 
 ## 5. Canonical admin philosophy
 - Canonical pages expose semantic facts.
@@ -151,6 +162,7 @@ This does not replace the canonical page-local host system. It is the universal 
 - CMS pages remain generic and page-record-driven.
 - CMS composition stays page -> container -> block.
 - CMS modules stay in the dedicated CMS registry structure.
+- CMS module manifests and folder shape stay stable unless a deliberate architecture change is required.
 - New CMS work should extend the universal page system, not create isolated one-off features.
 
 ## 10. What Codex must not do

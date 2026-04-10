@@ -41,6 +41,7 @@ After completing a task:
   - `page_containers`
   - `page_blocks`
 - Dedicated CMS frontend registry/core/editor/renderer code now lives under `resources/js/admin/cms/`.
+- The CMS module contract and module folder shape are now being treated as stable foundation seams for future external React/TSX module integration.
 
 ### Canonical scripture public flow
 - Book list: `scripture.books.index`
@@ -91,12 +92,12 @@ After completing a task:
   - `button_group`
   - `media`
 - CMS module folders now follow a predictable portable shape under `resources/js/admin/cms/modules/<module>/`:
-  - `manifest`
-  - `renderer`
-  - `editor`
-  - `types`
-  - `defaults`
-  - a module barrel entry
+  - `manifest.ts`
+  - `renderer.tsx`
+  - `editor.tsx`
+  - `types.ts`
+  - `defaults.ts`
+  - `index.tsx`
 - CMS manifests now support the core module contract plus an optional `validate` hook.
 - Public CMS pages now render ordered containers, and each container renders its ordered CMS blocks through the dedicated CMS renderer path.
 - The CMS composition foundation has now been browser-validated for:
@@ -117,12 +118,21 @@ After completing a task:
   - public page rendering
   - page delete
 - CMS admin redirects and action hrefs now stay same-origin and relative, which keeps Inertia navigation stable even when the local host differs from `APP_URL`.
+- Actual CMS migration/runtime validation has now run cleanly on the active MySQL database:
+  - `pages`, `page_containers`, and `page_blocks` are applied
+  - foreign keys are present
+  - page delete cascades to its containers and blocks
+  - container delete removes only that container and its blocks
+  - block delete compacts ordering without corrupting unrelated records
+  - container/block move up/down remains correct after deletes
+- The focused CMS coupling audit did not find direct scripture-module imports or scripture-admin dependencies inside the CMS core, registry, renderers, editors, controllers, or requests. The remaining scripture-flavored CMS UI copy was cleaned up in this hardening pass.
 
 ## Partially working
 
 ### CMS composition workflow depth
 - The core structure is real and active.
 - The workspace now makes the same-container vs new-container decision explicit.
+- The composition grammar is now frozen as page -> container -> block.
 - Container placement is structurally supported for:
   - above the current container list
   - below an existing container
@@ -131,7 +141,8 @@ After completing a task:
   - below an existing block inside the same container
 
 But the CMS workflow is still intentionally narrow:
-- no drag/drop or move/reorder UI yet
+- no drag/drop reorder UI yet
+- button-based move up/down is the active reorder control
 - no block publish state or scheduling yet
 - no richer page template system yet
 
@@ -139,7 +150,7 @@ But the CMS workflow is still intentionally narrow:
 - Rich text works through a simple HTML-based editor.
 - Button group works with multi-button config, alignment, and layout options.
 - Media works with image/video URL fields plus width/aspect settings.
-- The CMS module contract is now stable enough for future portable-module work, but external module loading itself is still not built.
+- The CMS module contract and folder shape are now frozen enough for future portable-module work, but external module loading itself is still not built.
 
 But richer authoring is still postponed:
 - no rich text WYSIWYG yet
@@ -190,8 +201,9 @@ But richer authoring is still postponed:
 Do not drift into fake abstractions detached from either the canonical schema or the CMS data model.
 
 ## Immediate next priority when resuming
-1. Define the next CMS extension seam without widening page-specific features too quickly:
+1. Use the frozen CMS foundation to define the next extension seam without widening CMS scope too quickly:
    - decide how future external/remote CMS modules register into the current manifest registry
+   - preserve the stable `manifest.ts` / `renderer.tsx` / `editor.tsx` / `types.ts` / `defaults.ts` / `index.tsx` contract
    - keep module integration touchpoints minimal and same-origin-safe
 2. Improve the first CMS module family only where it materially helps authoring:
    - richer text editing
