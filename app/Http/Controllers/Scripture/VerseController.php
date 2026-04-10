@@ -14,11 +14,9 @@ use App\Models\Verse;
 use App\Support\AdminContext\AdminContext;
 use App\Support\Cms\Regions\CmsExposedRegionRegistry;
 use App\Support\Cms\Regions\CmsExposedRegionResolver;
-use App\Support\Scripture\Admin\ContentBlockCapabilityPayload;
 use App\Support\Scripture\Admin\PrimaryPublishedEditableContentBlock;
 use App\Support\Scripture\Admin\Registry\AdminEntityRegistry;
 use App\Support\Scripture\Admin\VerseRelationAdminData;
-use App\Support\Scripture\Admin\VisibleContentBlockSequence;
 use App\Support\Scripture\Admin\VerseAdminRouteContext;
 use App\Support\Scripture\PublicScriptureData;
 use Illuminate\Http\Request;
@@ -80,14 +78,6 @@ class VerseController extends Controller
             $contentBlocks,
             fn (ContentBlock $block): bool => $adminRouteContext->isEditableIntroBlock($block),
         );
-        $noteBlocks = $primaryIntroBlock instanceof ContentBlock
-            ? $contentBlocks
-                ->reject(
-                    fn (ContentBlock $block): bool => (int) $block->getKey() === (int) $primaryIntroBlock->getKey(),
-                )
-                ->values()
-            : $contentBlocks;
-
         return Inertia::render('scripture/chapters/verses/show', [
             'book' => $publicScriptureData->book($book),
             'book_section' => $publicScriptureData->bookSection($book, $bookSection),
@@ -129,7 +119,6 @@ class VerseController extends Controller
             'recitations' => $publicScriptureData->recitations($verse->recitations),
             'topics' => $publicScriptureData->topics($verse->topicAssignments),
             'characters' => $publicScriptureData->characters($verse->characterAssignments),
-            'content_blocks' => $publicScriptureData->contentBlocks($noteBlocks),
             'cms_regions' => $regionResolver->resolve([
                 $regionRegistry->verseSupplementary(
                     $verse,
@@ -147,7 +136,6 @@ class VerseController extends Controller
                 ? $this->verseAdminPayload(
                     $verse,
                     $adminRouteContext,
-                    $noteBlocks,
                     $primaryIntroBlock,
                     $publicScriptureData,
                     $adminEntityDefinition,
@@ -157,18 +145,15 @@ class VerseController extends Controller
     }
 
     /**
-     * @param  Collection<int, \App\Models\ContentBlock>  $contentBlocks
      * @return array<string, mixed>
      */
     private function verseAdminPayload(
         Verse $verse,
         VerseAdminRouteContext $adminRouteContext,
-        Collection $contentBlocks,
         ?ContentBlock $primaryIntroBlock,
         PublicScriptureData $publicScriptureData,
         \App\Support\Scripture\Admin\Registry\AdminEntityDefinition $adminEntityDefinition,
     ): array {
-        $visibleSequence = new VisibleContentBlockSequence($contentBlocks);
         $translationSources = TranslationSource::query()
             ->orderBy('sort_order')
             ->orderBy('id')
@@ -231,21 +216,6 @@ class VerseController extends Controller
                 : null,
             'intro_block_types' => $adminRouteContext->contentBlockTypes(),
             'intro_default_region' => $adminRouteContext->defaultIntroBlockRegion(),
-            'content_block_store_href' => $adminRouteContext->contentBlockStoreHref(),
-            'content_block_types' => $adminRouteContext->contentBlockTypes(),
-            'content_block_default_region' => $adminRouteContext->defaultContentBlockRegion(),
-            ...ContentBlockCapabilityPayload::build(
-                $contentBlocks,
-                $visibleSequence,
-                fn (ContentBlock $block): bool => $adminRouteContext->isEditableNoteBlock($block),
-                fn (ContentBlock $block): bool => $adminRouteContext->isDuplicableNoteBlock($block),
-                fn (ContentBlock $block): string => $adminRouteContext->contentBlockUpdateHref($block),
-                fn (ContentBlock $block): string => $adminRouteContext->contentBlockMoveUpHref($block),
-                fn (ContentBlock $block): string => $adminRouteContext->contentBlockMoveDownHref($block),
-                fn (ContentBlock $block): string => $adminRouteContext->contentBlockReorderHref($block),
-                fn (ContentBlock $block): string => $adminRouteContext->contentBlockDuplicateHref($block),
-                fn (ContentBlock $block): string => $adminRouteContext->contentBlockDestroyHref($block),
-            ),
         ];
     }
 }

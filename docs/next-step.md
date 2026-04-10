@@ -40,7 +40,17 @@ Before any implementation prompt, tell Codex:
 
 ## Immediate focus
 
-### 1. Extend the live CMS interaction model carefully
+### 1. Keep scripture browsing and exposed-region cleanup trustworthy
+The local development corpus baseline is restored, verse detail no longer crashes, and the supplementary verse CMS region now has the clearer live path on that page.
+
+The next cleanup task should preserve that trustworthy state:
+- keep the full enabled-corpus development seed baseline intact for local browse behavior
+- do not narrow local browse state back to Bhagavad Gita only unless a task explicitly needs a narrow seeder
+- continue tracing the shared exposed-region model on eligible pages so the CMS path is real, not just theoretically mounted
+- keep removing overlapping legacy live canonical block controls only where a real CMS/exposed-region replacement already exists
+- leave canonical full-edit and protected schema editing intact where no safe replacement exists yet
+
+### 2. Extend the live CMS interaction model carefully
 The CMS page/container/block foundation is now runtime-validated, and the first live-page composition exposure exists on published CMS pages for permitted users.
 
 The next CMS task should focus on the live interaction seam:
@@ -56,7 +66,7 @@ The next CMS task should focus on the live interaction seam:
 - keep CMS integration touchpoints minimal and same-origin-safe
 - decide the draft-safe same-layout preview path so draft authoring does not drift back into workspace-first habits
 
-### 2. Improve the first CMS module family carefully
+### 3. Improve the first CMS module family carefully
 After the live composition flow is stable, improve the first registry modules where it materially helps authoring:
 - richer text editing than raw HTML
 - media selection/upload workflow
@@ -68,17 +78,17 @@ After the live composition flow is stable, improve the first registry modules wh
 Do not overbuild category-management UI yet.
 Do not move CMS modules into scripture module folders.
 
-### 3. Reassess broader exposure and phase-outs
+### 4. Reassess broader exposure and phase-outs
 Once live composition and editing are stable, reassess:
 - whether CMS pages need a light public index/discovery path
 - whether layout keys need stricter semantics
 - whether public page presentation needs stronger empty-state or layout polish
-- whether the legacy `scripture.books.overview` page should be retired or repurposed on its own merits
 - which old canonical owner-attached block-add flows should stay canonical-specific and which should be phased out when universal content regions cover the same use case
+- the remaining book and chapter live content-block regions, which are still transitional because they do not yet have a shared CMS-region replacement
 
 Do not overbuild a full CMS site-builder in one jump.
 
-### 4. Return to the remaining canonical polish items
+### 5. Return to the remaining canonical polish items
 Once the CMS foundation is stable, resume the still-open canonical cleanup:
 - remaining delete-heavy browser validation
 - re-check Full Edit usefulness for translations/commentaries
@@ -112,10 +122,11 @@ Safe direction:
 - remote/external module integration through the frozen CMS manifest contract after that
 
 ## Practical restart order
-1. Extend live CMS composition exposure
-2. Improve module authoring where it helps
-3. Reassess broader exposure and phase-outs
-4. Resume outstanding canonical polish work
+1. Keep scripture browsing and exposed-region cleanup trustworthy
+2. Extend live CMS composition exposure
+3. Improve module authoring where it helps
+4. Reassess broader exposure and phase-outs
+5. Resume outstanding canonical polish work
 
 ## Success condition for the next phase
 When resuming, the goal is not "add lots of CMS quickly."

@@ -28,11 +28,6 @@ class BookAdminRouteContext
         return route('scripture.books.show', $this->routeParameters());
     }
 
-    public function overviewHref(): string
-    {
-        return route('scripture.books.overview', $this->routeParameters());
-    }
-
     public function detailsUpdateHref(): string
     {
         return route('scripture.books.admin.details.update', $this->routeParameters());

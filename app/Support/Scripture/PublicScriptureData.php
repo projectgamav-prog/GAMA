@@ -53,7 +53,6 @@ class PublicScriptureData
             'title' => $book->title,
             'description' => $book->description,
             'href' => $this->bookHref($book),
-            'overview_href' => $this->bookOverviewHref($book),
             'media_slots' => $this->bookMediaSlots($book),
         ];
     }
@@ -548,17 +547,7 @@ class PublicScriptureData
                 && $assignment->status === 'published')
             ->values();
 
-        $overviewAssignments = $mediaAssignments
-            ->filter(fn (MediaAssignment $assignment) => $assignment->role === 'overview_video')
-            ->values();
-
         return [
-            'overview_video' => $this->firstBookMediaSlot(
-                $overviewAssignments,
-                requireMediaType: 'video',
-            ) ?? ($overviewAssignments->isEmpty()
-                ? $this->legacyOverviewVideoSlot($book)
-                : null),
             'hero_media' => $this->firstBookMediaSlot(
                 $mediaAssignments
                     ->filter(fn (MediaAssignment $assignment) => $assignment->role === 'hero_media')
@@ -631,49 +620,6 @@ class PublicScriptureData
             'title' => $assignment->title_override ?? $media->title,
             'caption' => $assignment->caption_override ?? $media->caption,
             'media' => $mediaPayload,
-        ];
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    private function legacyOverviewVideoSlot(Book $book): ?array
-    {
-        if (! $book->relationLoaded('contentBlocks')) {
-            return null;
-        }
-
-        $videoBlocks = collect($book->contentBlocks)
-            ->filter(fn (mixed $block) => $block instanceof ContentBlock
-                && $block->status === 'published'
-                && $block->block_type === 'video'
-                && filled(data_get($block->data_json, 'url')))
-            ->values();
-
-        $videoBlock = $videoBlocks->firstWhere('region', 'overview');
-
-        if (! $videoBlock instanceof ContentBlock) {
-            $videoBlock = $videoBlocks->first();
-        }
-
-        if (! $videoBlock instanceof ContentBlock) {
-            return null;
-        }
-
-        return [
-            'role' => 'overview_video',
-            'title' => $videoBlock->title,
-            'caption' => $videoBlock->body ?? data_get($videoBlock->data_json, 'caption'),
-            'media' => [
-                'id' => null,
-                'media_type' => 'video',
-                'title' => $videoBlock->title,
-                'alt_text' => null,
-                'caption' => data_get($videoBlock->data_json, 'caption') ?? $videoBlock->body,
-                'url' => data_get($videoBlock->data_json, 'url'),
-                'path' => null,
-                'poster_url' => data_get($videoBlock->data_json, 'poster'),
-            ],
         ];
     }
 
@@ -783,11 +729,6 @@ class PublicScriptureData
     private function bookHref(Book $book): string
     {
         return route('scripture.books.show', $book);
-    }
-
-    private function bookOverviewHref(Book $book): string
-    {
-        return route('scripture.books.overview', $book);
     }
 
     private function dictionaryEntryHref(DictionaryEntry $entry): string

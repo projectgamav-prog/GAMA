@@ -5,7 +5,6 @@ import {
 import { BookPublicMediaSection } from '@/components/scripture/book-public-media-section';
 import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
 import { ScriptureBookChapterList } from '@/components/scripture/scripture-book-chapter-list';
-import { ScriptureBookContentBlockRegion } from '@/components/scripture/scripture-book-content-block-region';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { Badge } from '@/components/ui/badge';
 import { useVisibleAdminControls } from '@/hooks/use-admin-context';
@@ -14,7 +13,6 @@ import type { BookShowProps, BreadcrumbItem } from '@/types';
 
 export default function BookShow({
     book,
-    content_blocks,
     isAdmin,
     admin,
     book_sections,
@@ -69,13 +67,6 @@ export default function BookShow({
                 book={book}
                 admin={admin}
                 isAdmin={showAdminControls}
-            />
-
-            <ScriptureBookContentBlockRegion
-                book={book}
-                blocks={content_blocks}
-                isAdmin={showAdminControls}
-                admin={admin}
             />
 
             <ScriptureBookChapterList

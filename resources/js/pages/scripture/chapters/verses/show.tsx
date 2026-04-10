@@ -20,7 +20,6 @@ import { ScriptureIntroBlock } from '@/components/scripture/scripture-intro-bloc
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { ScriptureReadingNavigationActions } from '@/components/scripture/scripture-reading-navigation-actions';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
-import { ScriptureVerseContentBlockRegion } from '@/components/scripture/scripture-verse-content-block-region';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -65,7 +64,6 @@ export default function VerseShow({
     recitations,
     topics,
     characters,
-    content_blocks,
     cms_regions = [],
     admin,
 }: VerseShowProps) {
@@ -961,14 +959,6 @@ export default function VerseShow({
                 </ScriptureSection>
             )}
 
-            <ScriptureVerseContentBlockRegion
-                verse={verse}
-                verseTitle={verseTitle}
-                blocks={content_blocks}
-                showAdminControls={showAdminControls}
-                admin={admin}
-            />
-
             {shouldShowUniversalCmsRegion && universalCmsRegion && (
                 <ScriptureSection
                     entityMeta={{
@@ -982,6 +972,7 @@ export default function VerseShow({
                     <CmsExposedRegion region={universalCmsRegion} />
                 </ScriptureSection>
             )}
+
         </ScriptureLayout>
     );
 }

@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 
 export type ScriptureNavigationActionKey =
-    | 'go_to_structure_overview'
     | 'open_book'
     | 'open_chapter'
     | 'open_verse_detail'
@@ -47,13 +46,6 @@ const NAVIGATION_PRESENTATIONS: Record<
     ScriptureNavigationActionKey,
     NavigationPresentation
 > = {
-    go_to_structure_overview: {
-        actionKey: 'go_to_structure_overview',
-        label: 'Continue to Scripture Structure',
-        variant: 'default',
-        icon: ArrowRight,
-        iconPosition: 'end',
-    },
     open_book: {
         actionKey: 'open_book',
         label: 'Open Book',

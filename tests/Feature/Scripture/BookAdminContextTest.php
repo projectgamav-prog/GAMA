@@ -27,7 +27,6 @@ beforeEach(function () {
 
     $this->booksIndexRoute = route('scripture.books.index');
     $this->showRoute = route('scripture.books.show', $this->book);
-    $this->overviewRoute = route('scripture.books.overview', $this->book);
     $this->bookStoreRoute = route('scripture.books.admin.store');
     $this->bookSectionStoreRoute = route('scripture.book-sections.admin.store', [
         'book' => $this->book,
@@ -82,13 +81,6 @@ test('guests and non editors cannot access protected book admin context', functi
             ->where('admin', null),
         );
 
-    $this->get($this->overviewRoute)
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->where('isAdmin', false)
-            ->where('admin', null),
-        );
-
     $this->get($this->fullEditRoute)
         ->assertRedirect(route('login'));
 
@@ -130,14 +122,6 @@ test('guests and non editors cannot access protected book admin context', functi
             ->where('adminContext.canAccess', false)
             ->where('adminContext.isVisible', false)
             ->where('adminContext.visibilityUrl', null)
-            ->where('admin', null),
-        );
-
-    $this->actingAs($nonEditor)
-        ->get($this->overviewRoute)
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->where('isAdmin', false)
             ->where('admin', null),
         );
 
@@ -195,7 +179,7 @@ test('guests and non editors cannot access protected book admin context', functi
     $this->actingAs($nonEditor)
         ->post($this->mediaAssignmentStoreRoute, [
             'media_id' => 1,
-            'role' => 'overview_video',
+            'role' => 'hero_media',
             'title_override' => 'Blocked media',
             'caption_override' => 'This should not be created.',
             'sort_order' => 1,
@@ -204,29 +188,8 @@ test('guests and non editors cannot access protected book admin context', functi
         ->assertForbidden();
 });
 
-test('authorized editors receive registered book admin props on book detail, overview, and library index', function () {
+test('authorized editors receive registered book admin props on book detail and library index', function () {
     $editor = User::query()->where('email', 'editor1@example.com')->firstOrFail();
-    $textBlock = $this->book->contentBlocks()
-        ->where('block_type', 'text')
-        ->firstOrFail();
-    $quoteBlock = $this->book->contentBlocks()
-        ->where('block_type', 'quote')
-        ->firstOrFail();
-    $imageBlock = $this->book->contentBlocks()->create([
-        'region' => 'overview',
-        'block_type' => 'image',
-        'title' => 'Editable admin image',
-        'body' => 'Image block shown on the public book page.',
-        'data_json' => [
-            'url' => 'https://example.test/book-admin-image.jpg',
-            'alt' => 'Editable public admin image',
-        ],
-        'sort_order' => 99,
-        'status' => 'published',
-    ]);
-    $videoBlock = $this->book->contentBlocks()
-        ->where('block_type', 'video')
-        ->firstOrFail();
     $sectionIntroBlock = $this->bookSection->contentBlocks()->create([
         'region' => 'overview',
         'block_type' => 'text',
@@ -287,20 +250,6 @@ test('authorized editors receive registered book admin props on book detail, ove
         );
 
     $this->actingAs($editor)
-        ->get($this->overviewRoute)
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->where('adminContext.canAccess', true)
-            ->where('adminContext.isVisible', false)
-            ->where('isAdmin', true)
-            ->where('admin.identity_update_href', $this->identityUpdateRoute)
-            ->where('admin.details_update_href', $this->detailsUpdateRoute)
-            ->where('admin.full_edit_href', $this->fullEditRoute)
-            ->where('admin.canonical_edit_href', $this->canonicalEditRoute)
-            ->where('admin.media_assignment_store_href', $this->mediaAssignmentStoreRoute),
-        );
-
-    $this->actingAs($editor)
         ->get($this->booksIndexRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
@@ -329,60 +278,6 @@ test('authorized editors receive registered book admin props on book detail, ove
             ->where('admin.details_update_href', $this->detailsUpdateRoute)
             ->where('admin.full_edit_href', $this->fullEditRoute)
             ->where('admin.canonical_edit_href', $this->canonicalEditRoute)
-            ->where('admin.content_block_store_href', $this->contentBlockStoreRoute)
-            ->where('admin.content_block_types', ['text', 'quote', 'image'])
-            ->where('admin.content_block_default_region', 'overview')
-            ->where('admin.content_block_regions', ['overview', 'highlights'])
-            ->where(
-                "admin.content_block_update_hrefs.{$textBlock->id}",
-                route('scripture.books.admin.content-blocks.update', [
-                    'book' => $this->book,
-                    'contentBlock' => $textBlock,
-                ]),
-            )
-            ->where(
-                "admin.content_block_update_hrefs.{$quoteBlock->id}",
-                route('scripture.books.admin.content-blocks.update', [
-                    'book' => $this->book,
-                    'contentBlock' => $quoteBlock,
-                ]),
-            )
-            ->where(
-                "admin.content_block_update_hrefs.{$imageBlock->id}",
-                route('scripture.books.admin.content-blocks.update', [
-                    'book' => $this->book,
-                    'contentBlock' => $imageBlock,
-                ]),
-            )
-            ->missing("admin.content_block_duplicate_hrefs.{$imageBlock->id}")
-            ->missing("admin.content_block_update_hrefs.{$videoBlock->id}"),
-        );
-
-    $this->actingAs($editor)
-        ->get($this->overviewRoute)
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->where('isAdmin', true)
-            ->where('admin.full_edit_href', $this->fullEditRoute)
-            ->where('admin.canonical_edit_href', $this->canonicalEditRoute)
-            ->where('admin.content_block_store_href', $this->contentBlockStoreRoute)
-            ->where('admin.content_block_types', ['text', 'quote', 'image'])
-            ->where('admin.content_block_default_region', 'overview')
-            ->where('admin.content_block_regions', ['overview', 'highlights'])
-            ->where(
-                "admin.content_block_update_hrefs.{$quoteBlock->id}",
-                route('scripture.books.admin.content-blocks.update', [
-                    'book' => $this->book,
-                    'contentBlock' => $quoteBlock,
-                ]),
-            )
-            ->where(
-                "admin.content_block_update_hrefs.{$imageBlock->id}",
-                route('scripture.books.admin.content-blocks.update', [
-                    'book' => $this->book,
-                    'contentBlock' => $imageBlock,
-                ]),
-            )
             ->where('admin.media_assignment_store_href', $this->mediaAssignmentStoreRoute),
         );
 });
@@ -464,15 +359,6 @@ test('authorized editors can update book description across book surfaces', func
             ),
         );
 
-    $this->actingAs($editor)
-        ->get($this->overviewRoute)
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->where(
-                'book.description',
-                'Updated editorial book description from admin context.',
-            ),
-        );
 });
 
 test('authorized editors can update basic book section row details from grouped book surfaces', function () {
@@ -586,7 +472,7 @@ test('authorized editors can manage book section intro blocks from grouped book 
         );
 });
 
-test('authorized editors can manage registered book content blocks while unregistered block types stay protected', function () {
+test('full edit keeps book content block management available while unregistered block types stay protected', function () {
     $editor = User::query()->where('email', 'editor3@example.com')->firstOrFail();
 
     $book = Book::query()->create([
@@ -626,8 +512,8 @@ test('authorized editors can manage registered book content blocks while unregis
     $videoBlock = $book->contentBlocks()->create([
         'region' => 'overview',
         'block_type' => 'video',
-        'title' => 'Protected legacy video',
-        'body' => 'Still rendered publicly but not editable through the registered block editor.',
+        'title' => 'Protected legacy video block',
+        'body' => 'Still stored in the backend but not editable through the registered block editor.',
         'data_json' => ['url' => 'https://example.test/book-video.mp4'],
         'sort_order' => 3,
         'status' => 'published',
@@ -727,22 +613,7 @@ test('authorized editors can manage registered book content blocks while unregis
             ->where('admin_content_blocks.2.block_type', 'image')
             ->where('admin_content_blocks.2.data_json.url', 'https://example.test/fresh-book-image.jpg')
             ->has('protected_content_blocks', 1)
-            ->where('protected_content_blocks.0.title', 'Protected legacy video'),
-        );
-
-    $this->get($showRoute)
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->has('content_blocks', 2)
-            ->where('content_blocks.0.title', 'Updated published book note')
-            ->where('content_blocks.1.title', 'Updated published image')
-            ->where('content_blocks.1.data_json.url', 'https://example.test/updated-book-image.jpg')
-            ->where('content_blocks.1.data_json.alt', 'Updated book image alt text')
-            ->where('book.media_slots.overview_video.title', 'Protected legacy video')
-            ->where(
-                'book.media_slots.overview_video.media.url',
-                'https://example.test/book-video.mp4',
-            ),
+            ->where('protected_content_blocks.0.title', 'Protected legacy video block'),
         );
 
     expect($newImage->status)->toBe('draft');
@@ -756,292 +627,7 @@ test('authorized editors can manage registered book content blocks while unregis
             'alt' => 'Updated book image alt text',
         ]);
     expect(ContentBlock::query()->findOrFail($videoBlock->id)->title)
-        ->toBe('Protected legacy video');
-});
-
-test('authorized editors can create book content blocks at contextual insertion points', function () {
-    $editor = User::query()->where('email', 'editor3@example.com')->firstOrFail();
-
-    $book = Book::query()->create([
-        'slug' => 'book-inline-insertions',
-        'number' => '100',
-        'title' => 'Book Inline Insertions',
-        'description' => 'Book used for contextual insertion ordering tests.',
-    ]);
-
-    $showRoute = route('scripture.books.show', $book);
-    $storeRoute = route('scripture.books.admin.content-blocks.store', $book);
-
-    $firstBlock = $book->contentBlocks()->create([
-        'region' => 'overview',
-        'block_type' => 'text',
-        'title' => 'First published note',
-        'body' => 'First note body.',
-        'data_json' => null,
-        'sort_order' => 10,
-        'status' => 'published',
-    ]);
-
-    $videoBlock = $book->contentBlocks()->create([
-        'region' => 'overview',
-        'block_type' => 'video',
-        'title' => 'Hidden video note',
-        'body' => 'Legacy video block that should stay outside the inline flow.',
-        'data_json' => ['url' => 'https://example.test/hidden-video.mp4'],
-        'sort_order' => 20,
-        'status' => 'published',
-    ]);
-
-    $lastBlock = $book->contentBlocks()->create([
-        'region' => 'highlights',
-        'block_type' => 'quote',
-        'title' => 'Last published quote',
-        'body' => 'Last quote body.',
-        'data_json' => null,
-        'sort_order' => 30,
-        'status' => 'published',
-    ]);
-
-    $this->actingAs($editor)
-        ->from($showRoute)
-        ->post($storeRoute, [
-            'block_type' => 'text',
-            'title' => 'Inserted at start',
-            'body' => 'Placed before the first public block.',
-            'region' => 'overview',
-            'status' => 'published',
-            'insertion_mode' => 'start',
-        ])
-        ->assertRedirect($showRoute);
-
-    $this->actingAs($editor)
-        ->from($showRoute)
-        ->post($storeRoute, [
-            'block_type' => 'quote',
-            'title' => 'Inserted between blocks',
-            'body' => 'Placed between the first and last visible blocks.',
-            'region' => 'overview',
-            'status' => 'published',
-            'insertion_mode' => 'after',
-            'relative_block_id' => $firstBlock->id,
-        ])
-        ->assertRedirect($showRoute);
-
-    $this->actingAs($editor)
-        ->from($showRoute)
-        ->post($storeRoute, [
-            'block_type' => 'text',
-            'title' => 'Inserted at end',
-            'body' => 'Placed after the last visible block.',
-            'region' => 'highlights',
-            'status' => 'published',
-            'insertion_mode' => 'end',
-        ])
-        ->assertRedirect($showRoute);
-
-    expect(
-        $book->contentBlocks()
-            ->orderBy('sort_order')
-            ->pluck('sort_order')
-            ->all(),
-    )->toBe([1, 2, 3, 4, 5, 6]);
-
-    expect(
-        $book->contentBlocks()
-            ->published()
-            ->where('block_type', '!=', 'video')
-            ->orderBy('sort_order')
-            ->pluck('title')
-            ->all(),
-    )->toBe([
-        'Inserted at start',
-        'First published note',
-        'Inserted between blocks',
-        'Last published quote',
-        'Inserted at end',
-    ]);
-
-    expect(ContentBlock::query()->findOrFail($videoBlock->id)->sort_order)
-        ->toBe(4);
-
-    $this->actingAs($editor)
-        ->withCookie(AdminContext::VISIBILITY_COOKIE, '1')
-        ->get($showRoute)
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->where('content_blocks.0.title', 'Inserted at start')
-            ->where('content_blocks.1.title', 'First published note')
-            ->where('content_blocks.2.title', 'Inserted between blocks')
-            ->where('content_blocks.3.title', 'Last published quote')
-            ->where('content_blocks.4.title', 'Inserted at end')
-            ->where(
-                "admin.content_block_update_hrefs.{$firstBlock->id}",
-                route('scripture.books.admin.content-blocks.update', [
-                    'book' => $book,
-                    'contentBlock' => $firstBlock,
-                ]),
-            ),
-        );
-
-    expect($lastBlock->fresh()->sort_order)->toBe(5);
-});
-
-test('authorized editors can manage visible book blocks from the public page', function () {
-    $editor = User::query()->where('email', 'editor3@example.com')->firstOrFail();
-
-    $book = Book::query()->create([
-        'slug' => 'book-public-block-management',
-        'number' => '109',
-        'title' => 'Book Public Block Management',
-        'description' => 'Book used for public block management tests.',
-    ]);
-
-    $showRoute = route('scripture.books.show', $book);
-
-    $firstBlock = $book->contentBlocks()->create([
-        'region' => 'overview',
-        'block_type' => 'text',
-        'title' => 'First published note',
-        'body' => 'First body.',
-        'data_json' => null,
-        'sort_order' => 1,
-        'status' => 'published',
-    ]);
-
-    $secondBlock = $book->contentBlocks()->create([
-        'region' => 'overview',
-        'block_type' => 'text',
-        'title' => 'Second published note',
-        'body' => 'Second body.',
-        'data_json' => null,
-        'sort_order' => 2,
-        'status' => 'published',
-    ]);
-
-    $quoteBlock = $book->contentBlocks()->create([
-        'region' => 'overview',
-        'block_type' => 'quote',
-        'title' => 'Closing quote',
-        'body' => 'Quote body.',
-        'data_json' => null,
-        'sort_order' => 3,
-        'status' => 'published',
-    ]);
-
-    $this->actingAs($editor)
-        ->withCookie(AdminContext::VISIBILITY_COOKIE, '1')
-        ->get($showRoute)
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->where(
-                "admin.content_block_move_down_hrefs.{$firstBlock->id}",
-                route('scripture.books.admin.content-blocks.move-down', [
-                    'book' => $book,
-                    'contentBlock' => $firstBlock,
-                ]),
-            )
-            ->where(
-                "admin.content_block_reorder_hrefs.{$firstBlock->id}",
-                route('scripture.books.admin.content-blocks.move', [
-                    'book' => $book,
-                    'contentBlock' => $firstBlock,
-                ]),
-            )
-            ->missing("admin.content_block_move_up_hrefs.{$firstBlock->id}")
-            ->where(
-                "admin.content_block_move_up_hrefs.{$secondBlock->id}",
-                route('scripture.books.admin.content-blocks.move-up', [
-                    'book' => $book,
-                    'contentBlock' => $secondBlock,
-                ]),
-            )
-            ->where(
-                "admin.content_block_duplicate_hrefs.{$firstBlock->id}",
-                route('scripture.books.admin.content-blocks.duplicate', [
-                    'book' => $book,
-                    'contentBlock' => $firstBlock,
-                ]),
-            )
-            ->where(
-                "admin.content_block_duplicate_hrefs.{$quoteBlock->id}",
-                route('scripture.books.admin.content-blocks.duplicate', [
-                    'book' => $book,
-                    'contentBlock' => $quoteBlock,
-                ]),
-            )
-            ->where(
-                "admin.content_block_delete_hrefs.{$quoteBlock->id}",
-                route('scripture.books.admin.content-blocks.destroy', [
-                    'book' => $book,
-                    'contentBlock' => $quoteBlock,
-                ]),
-            ),
-        );
-
-    $this->actingAs($editor)
-        ->from($showRoute)
-        ->post(route('scripture.books.admin.content-blocks.move', [
-            'book' => $book,
-            'contentBlock' => $firstBlock,
-        ]), [
-            'relative_block_id' => $secondBlock->id,
-            'position' => 'after',
-        ])
-        ->assertRedirect($showRoute);
-
-    expect(
-        $book->fresh()
-            ->contentBlocks()
-            ->published()
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->pluck('title')
-            ->all(),
-    )->toBe([
-        'Second published note',
-        'First published note',
-        'Closing quote',
-    ]);
-
-    $this->actingAs($editor)
-        ->from($showRoute)
-        ->post(route('scripture.books.admin.content-blocks.duplicate', [
-            'book' => $book,
-            'contentBlock' => $secondBlock,
-        ]))
-        ->assertRedirect($showRoute);
-
-    expect(
-        $book->fresh()
-            ->contentBlocks()
-            ->published()
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->pluck('title')
-            ->all(),
-    )->toBe([
-        'Second published note',
-        'Second published note Copy',
-        'First published note',
-        'Closing quote',
-    ]);
-
-    $this->actingAs($editor)
-        ->from($showRoute)
-        ->delete(route('scripture.books.admin.content-blocks.destroy', [
-            'book' => $book,
-            'contentBlock' => $quoteBlock,
-        ]))
-        ->assertRedirect($showRoute);
-
-    $this->get($showRoute)
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->where('content_blocks.0.title', 'Second published note')
-            ->where('content_blocks.1.title', 'Second published note Copy')
-            ->where('content_blocks.2.title', 'First published note')
-            ->has('content_blocks', 3),
-        );
+        ->toBe('Protected legacy video block');
 });
 
 test('authorized editors can manage book media assignments and access canonical protected book identity view', function () {
@@ -1070,9 +656,9 @@ test('authorized editors can manage book media assignments and access canonical 
 
     $existingAssignment = $book->mediaAssignments()->create([
         'media_id' => $mediaOne->id,
-        'role' => 'overview_video',
-        'title_override' => 'Existing overview slot',
-        'caption_override' => 'Existing caption',
+        'role' => 'hero_media',
+        'title_override' => 'Existing hero slot',
+        'caption_override' => 'Existing hero caption',
         'sort_order' => 1,
         'status' => 'published',
         'meta_json' => ['keep' => true],

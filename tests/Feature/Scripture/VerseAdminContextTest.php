@@ -263,16 +263,21 @@ test('authorized editors can toggle protected admin visibility and receive verse
             ))
             ->where('admin.commentaries.sources.0.id', $commentarySource->id)
             ->where('admin.commentaries.sources.0.slug', 'sridhara')
-            ->where('admin.content_block_store_href', $this->contentBlockStoreRoute)
-            ->where('admin.content_block_types', ['text', 'quote', 'image'])
-            ->where('admin.content_block_default_region', 'study')
             ->where(
-                "admin.content_block_update_hrefs.{$publishedBlock->id}",
-                route('scripture.chapters.verses.admin.content-blocks.update', [
-                    ...$this->verseRouteParameters,
-                    'contentBlock' => $publishedBlock,
-                ]),
-            ),
+                'cms_regions.0.key',
+                "scripture-verse-{$this->firstVerse->id}-supplementary",
+            )
+            ->where(
+                'cms_regions.0.admin.return_to',
+                route('scripture.chapters.verses.show', $this->verseRouteParameters, false),
+            )
+            ->where(
+                'cms_regions.0.admin.bootstrap_store_href',
+                route('cms.exposed-regions.containers.store', [
+                    'regionKey' => "scripture-verse-{$this->firstVerse->id}-supplementary",
+                ], false),
+            )
+            ->where('cms_regions.0.admin.page', null),
         );
 
     $hideResponse = $this->actingAs($editor)
@@ -535,7 +540,7 @@ test('authorized editors can manage verse intro blocks separately from verse ide
                 'verse.intro_block.data_json.alt',
                 'Verse intro illustration',
             )
-            ->where('content_blocks', [])
+            ->missing('content_blocks')
             ->where('admin.intro_store_href', $this->contentBlockStoreRoute)
             ->where('admin.primary_intro_block.id', $introBlock->id)
             ->where(
@@ -700,8 +705,7 @@ test('authorized editors can manage verse note blocks while public verse page st
     $this->get($this->verseShowRoute)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->has('content_blocks', 1)
-            ->where('content_blocks.0.title', 'Published verse note'),
+            ->missing('content_blocks'),
         );
 
     expect($newDraftBlock->status)->toBe('draft');
@@ -739,7 +743,7 @@ test('content block update hard fails when the block is not owned by the current
         ->toBe('Other verse block');
 });
 
-test('content block editing is limited to verse owned registered note blocks', function () {
+test('full edit keeps verse note block editing limited to verse owned registered note blocks', function () {
     $editor = User::query()->where('email', 'admin@example.com')->firstOrFail();
 
     $textBlock = $this->firstVerse->contentBlocks()->create([
@@ -784,36 +788,6 @@ test('content block editing is limited to verse owned registered note blocks', f
         'sort_order' => 4,
         'status' => 'published',
     ]);
-
-    $this->actingAs($editor)
-        ->withCookie(AdminContext::VISIBILITY_COOKIE, '1')
-        ->get($this->verseShowRoute)
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->where(
-                "admin.content_block_update_hrefs.{$textBlock->id}",
-                route('scripture.chapters.verses.admin.content-blocks.update', [
-                    ...$this->verseRouteParameters,
-                    'contentBlock' => $textBlock,
-                ]),
-            )
-            ->where(
-                "admin.content_block_update_hrefs.{$quoteBlock->id}",
-                route('scripture.chapters.verses.admin.content-blocks.update', [
-                    ...$this->verseRouteParameters,
-                    'contentBlock' => $quoteBlock,
-                ]),
-            )
-            ->where(
-                "admin.content_block_update_hrefs.{$imageBlock->id}",
-                route('scripture.chapters.verses.admin.content-blocks.update', [
-                    ...$this->verseRouteParameters,
-                    'contentBlock' => $imageBlock,
-                ]),
-            )
-            ->missing("admin.content_block_duplicate_hrefs.{$imageBlock->id}")
-            ->missing("admin.content_block_update_hrefs.{$videoBlock->id}"),
-        );
 
     $this->actingAs($editor)
         ->from($this->fullEditRoute)
@@ -940,209 +914,5 @@ test('verse note creation uses shared ordering when sort order inserts before ex
             ->where('admin_content_blocks.0.block_type', 'quote')
             ->where('admin_content_blocks.1.title', 'Existing first note')
             ->where('admin_content_blocks.2.title', 'Existing second note'),
-        );
-});
-
-test('verse note creation accepts contextual insertion points and preserves ordering', function () {
-    $editor = User::query()->where('email', 'editor3@example.com')->firstOrFail();
-
-    $this->firstVerse->contentBlocks()->create([
-        'region' => 'study',
-        'block_type' => 'text',
-        'title' => 'Existing first note',
-        'body' => 'First note body.',
-        'data_json' => null,
-        'sort_order' => 1,
-        'status' => 'published',
-    ]);
-
-    $anchorBlock = $this->firstVerse->contentBlocks()->create([
-        'region' => 'study',
-        'block_type' => 'text',
-        'title' => 'Existing second note',
-        'body' => 'Second note body.',
-        'data_json' => null,
-        'sort_order' => 2,
-        'status' => 'published',
-    ]);
-
-    $this->actingAs($editor)
-        ->from($this->verseShowRoute)
-        ->post($this->contentBlockStoreRoute, [
-            'block_type' => 'quote',
-            'title' => 'Inserted quote',
-            'body' => 'Inserted from the public page flow.',
-            'region' => 'study',
-            'status' => 'published',
-            'insertion_mode' => 'before',
-            'relative_block_id' => $anchorBlock->id,
-        ])
-        ->assertRedirect($this->verseShowRoute);
-
-    $orderedTitles = $this->firstVerse->fresh()
-        ->contentBlocks()
-        ->orderBy('sort_order')
-        ->orderBy('id')
-        ->pluck('title')
-        ->all();
-    $orderedSortOrders = $this->firstVerse->fresh()
-        ->contentBlocks()
-        ->orderBy('sort_order')
-        ->orderBy('id')
-        ->pluck('sort_order')
-        ->all();
-
-    expect($orderedTitles)->toBe([
-        'Existing first note',
-        'Inserted quote',
-        'Existing second note',
-    ]);
-    expect($orderedSortOrders)->toBe([1, 2, 3]);
-    expect(
-        $this->firstVerse->fresh()
-            ->contentBlocks()
-            ->where('title', 'Inserted quote')
-            ->value('block_type'),
-    )->toBe('quote');
-});
-
-test('authorized editors can manage verse note blocks from the public page', function () {
-    $editor = User::query()->where('email', 'editor3@example.com')->firstOrFail();
-
-    $firstBlock = $this->firstVerse->contentBlocks()->create([
-        'region' => 'study',
-        'block_type' => 'text',
-        'title' => 'First published note',
-        'body' => 'First body.',
-        'data_json' => null,
-        'sort_order' => 1,
-        'status' => 'published',
-    ]);
-
-    $secondBlock = $this->firstVerse->contentBlocks()->create([
-        'region' => 'study',
-        'block_type' => 'text',
-        'title' => 'Second published note',
-        'body' => 'Second body.',
-        'data_json' => null,
-        'sort_order' => 2,
-        'status' => 'published',
-    ]);
-
-    $thirdBlock = $this->firstVerse->contentBlocks()->create([
-        'region' => 'study',
-        'block_type' => 'text',
-        'title' => 'Third published note',
-        'body' => 'Third body.',
-        'data_json' => null,
-        'sort_order' => 3,
-        'status' => 'published',
-    ]);
-
-    $this->actingAs($editor)
-        ->withCookie(AdminContext::VISIBILITY_COOKIE, '1')
-        ->get($this->verseShowRoute)
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->where(
-                "admin.content_block_move_down_hrefs.{$firstBlock->id}",
-                route('scripture.chapters.verses.admin.content-blocks.move-down', [
-                    ...$this->verseRouteParameters,
-                    'contentBlock' => $firstBlock,
-                ]),
-            )
-            ->where(
-                "admin.content_block_reorder_hrefs.{$firstBlock->id}",
-                route('scripture.chapters.verses.admin.content-blocks.move', [
-                    ...$this->verseRouteParameters,
-                    'contentBlock' => $firstBlock,
-                ]),
-            )
-            ->where(
-                "admin.content_block_move_up_hrefs.{$secondBlock->id}",
-                route('scripture.chapters.verses.admin.content-blocks.move-up', [
-                    ...$this->verseRouteParameters,
-                    'contentBlock' => $secondBlock,
-                ]),
-            )
-            ->where(
-                "admin.content_block_duplicate_hrefs.{$secondBlock->id}",
-                route('scripture.chapters.verses.admin.content-blocks.duplicate', [
-                    ...$this->verseRouteParameters,
-                    'contentBlock' => $secondBlock,
-                ]),
-            )
-            ->where(
-                "admin.content_block_delete_hrefs.{$thirdBlock->id}",
-                route('scripture.chapters.verses.admin.content-blocks.destroy', [
-                    ...$this->verseRouteParameters,
-                    'contentBlock' => $thirdBlock,
-                ]),
-            ),
-        );
-
-    $this->actingAs($editor)
-        ->from($this->verseShowRoute)
-        ->post(route('scripture.chapters.verses.admin.content-blocks.move', [
-            ...$this->verseRouteParameters,
-            'contentBlock' => $firstBlock,
-        ]), [
-            'relative_block_id' => $secondBlock->id,
-            'position' => 'after',
-        ])
-        ->assertRedirect($this->verseShowRoute);
-
-    expect(
-        $this->firstVerse->fresh()
-            ->contentBlocks()
-            ->published()
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->pluck('title')
-            ->all(),
-    )->toBe([
-        'Second published note',
-        'First published note',
-        'Third published note',
-    ]);
-
-    $this->actingAs($editor)
-        ->from($this->verseShowRoute)
-        ->post(route('scripture.chapters.verses.admin.content-blocks.duplicate', [
-            ...$this->verseRouteParameters,
-            'contentBlock' => $secondBlock,
-        ]))
-        ->assertRedirect($this->verseShowRoute);
-
-    expect(
-        $this->firstVerse->fresh()
-            ->contentBlocks()
-            ->published()
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->pluck('title')
-            ->all(),
-    )->toBe([
-        'Second published note',
-        'Second published note Copy',
-        'First published note',
-        'Third published note',
-    ]);
-
-    $this->actingAs($editor)
-        ->from($this->verseShowRoute)
-        ->delete(route('scripture.chapters.verses.admin.content-blocks.destroy', [
-            ...$this->verseRouteParameters,
-            'contentBlock' => $thirdBlock,
-        ]))
-        ->assertRedirect($this->verseShowRoute);
-
-    $this->get($this->verseShowRoute)
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->where('content_blocks.0.title', 'Second published note')
-            ->where('content_blocks.1.title', 'Second published note Copy')
-            ->where('content_blocks.2.title', 'First published note')
-            ->has('content_blocks', 3),
         );
 });

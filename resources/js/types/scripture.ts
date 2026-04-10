@@ -136,15 +136,6 @@ export type ScriptureVerseAdmin = {
     primary_intro_destroy_href: string | null;
     intro_block_types: string[];
     intro_default_region: string;
-    content_block_store_href: string;
-    content_block_types: string[];
-    content_block_default_region: string;
-    content_block_update_hrefs: Record<string, string>;
-    content_block_move_up_hrefs: Record<string, string>;
-    content_block_move_down_hrefs: Record<string, string>;
-    content_block_reorder_hrefs: Record<string, string>;
-    content_block_duplicate_hrefs: Record<string, string>;
-    content_block_delete_hrefs: Record<string, string>;
 };
 
 export type ScriptureBookAdmin = {
@@ -154,16 +145,6 @@ export type ScriptureBookAdmin = {
     canonical_edit_href: string;
     destroy_href: string;
     book_section_store_href: string;
-    content_block_store_href: string;
-    content_block_types: string[];
-    content_block_default_region: string;
-    content_block_regions: string[];
-    content_block_update_hrefs: Record<string, string>;
-    content_block_move_up_hrefs: Record<string, string>;
-    content_block_move_down_hrefs: Record<string, string>;
-    content_block_reorder_hrefs: Record<string, string>;
-    content_block_duplicate_hrefs: Record<string, string>;
-    content_block_delete_hrefs: Record<string, string>;
     media_assignment_store_href?: string;
     media_assignments?: ScriptureAdminMediaAssignment[];
     available_media?: ScriptureAdminMediaSummary[];
@@ -181,15 +162,6 @@ export type ScriptureChapterAdmin = {
     primary_intro_destroy_href: string | null;
     intro_block_types: string[];
     intro_default_region: string;
-    content_block_store_href: string;
-    content_block_types: string[];
-    content_block_default_region: string;
-    content_block_update_hrefs: Record<string, string>;
-    content_block_move_up_hrefs: Record<string, string>;
-    content_block_move_down_hrefs: Record<string, string>;
-    content_block_reorder_hrefs: Record<string, string>;
-    content_block_duplicate_hrefs: Record<string, string>;
-    content_block_delete_hrefs: Record<string, string>;
 };
 
 export type ScriptureChapterRowAdmin = Pick<
@@ -305,7 +277,6 @@ export type ScriptureBook = {
     title: string;
     description?: string | null;
     href: string;
-    overview_href: string;
     media_slots: ScriptureBookMediaSlots;
     admin?: ScriptureBookCardAdmin | null;
 };
@@ -329,7 +300,6 @@ export type ScriptureBookMediaSlot = {
 };
 
 export type ScriptureBookMediaSlots = {
-    overview_video: ScriptureBookMediaSlot | null;
     hero_media: ScriptureBookMediaSlot | null;
     supporting_media: ScriptureBookMediaSlot[];
 };
@@ -697,7 +667,6 @@ export type ScriptureVerseCharacterAssignment = {
 
 export type BookShowProps = {
     book: ScriptureBook;
-    content_blocks: ScriptureContentBlock[];
     isAdmin: boolean;
     admin?: ScriptureBookAdmin | null;
     book_sections: Array<
@@ -705,13 +674,6 @@ export type BookShowProps = {
             chapters: ScriptureChapter[];
         }
     >;
-};
-
-export type BookOverviewProps = {
-    book: ScriptureBook;
-    content_blocks: ScriptureContentBlock[];
-    isAdmin: boolean;
-    admin?: ScriptureBookAdmin | null;
 };
 
 export type BooksIndexProps = {
@@ -753,7 +715,6 @@ export type ChapterShowProps = {
     book: ScriptureBook;
     book_section: ScriptureBookSection;
     chapter: ScriptureChapter;
-    content_blocks: ScriptureContentBlock[];
     reader_languages: ScriptureReaderLanguage[];
     default_language: ScriptureReaderLanguage | null;
     chapter_sections: Array<
@@ -783,7 +744,6 @@ export type VerseShowProps = {
     recitations: ScriptureVerseRecitation[];
     topics: ScriptureVerseTopicAssignment[];
     characters: ScriptureVerseCharacterAssignment[];
-    content_blocks: ScriptureContentBlock[];
     cms_regions?: CmsExposedRegion[];
     isAdmin: boolean;
     admin?: ScriptureVerseAdmin | null;

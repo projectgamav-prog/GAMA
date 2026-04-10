@@ -115,9 +115,6 @@ Route::prefix('books')
         Route::get('/', [BookController::class, 'index'])
             ->name('books.index');
 
-        Route::get('{book:slug}/overview', [BookController::class, 'overview'])
-            ->name('books.overview');
-
         Route::get('{book:slug}', [BookController::class, 'show'])
             ->name('books.show');
 

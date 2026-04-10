@@ -50,6 +50,7 @@ After completing a task:
 - Chapter list: `scripture.books.show`
 - Verse list: `scripture.chapters.show`
 - Verse detail: `scripture.chapters.verses.show`
+- Local development browse state is back to the expected multi-book corpus baseline after `migrate:fresh --seed`; the development seed now imports all enabled scripture books before layering Bhagavad Gita-specific editorial fixtures.
 
 ### Canonical scripture admin state
 - Verse translations/commentaries stay schema-driven from the real verse tables and relations.
@@ -134,6 +135,12 @@ After completing a task:
 - The first non-CMS proof targets are now active:
   - home page exposes a shared CMS region
   - verse detail exposes a supplementary CMS region below the canonical verse flow
+- Verse detail CMS activation is now understood and stable:
+  - the shared exposed-region resolver does return the supplementary verse region and admin bootstrap payload
+  - admin capability reaches verse detail through the normal shared admin context
+  - the main activation problem was overlap with the older verse-owned note-block editing surface, not a missing CMS region payload
+- Verse detail now treats the supplementary CMS region as the primary live in-place composition path on that page.
+- The older verse-owned published-notes section still renders published canonical note blocks, but its live add/edit/move/delete controls have been removed from the verse detail page to reduce overlap with the supplementary CMS region.
 - Placement context on the live CMS page is now inferred from the clicked zone:
   - page
   - container when applicable
@@ -215,7 +222,7 @@ But richer authoring is still postponed:
 - The public CMS shell is real, but broader public discovery/navigation is still not built.
 - External or remote CMS module registration is still not built yet.
 - CMS module categories are manifest-ready, but category-management UI is still postponed.
-- The legacy `scripture.books.overview` page still exists and should be reassessed separately from CMS once its long-term role is decided.
+- The old public `scripture.books.overview` path and watch-overview dropdown behavior have been retired from the active scripture browsing experience.
 - Page creation is still workspace-first; interactive attach-or-create page flows for buttons/links are not built yet.
 - Shared region exposure is now real on home and verse detail, but it is still narrow:
   - backing CMS pages are internal region records resolved by exposure key
@@ -225,18 +232,23 @@ But richer authoring is still postponed:
 - Live CMS pages now have in-place adders, but deeper inline editing of existing containers/blocks still leans on the workspace as a fallback.
 - Workspace fallback still exists for broader CMS management and deeper utility work, but the routine live add/edit actions no longer default-redirect there.
 - Live add flows are now compact by default, but the new-container path on nonblank pages is still not attached in this narrower pass.
+- Verse detail now has one clearer live authoring path, but broader non-CMS region rollout and richer same-page editing depth are still future work.
 
 ### Remaining canonical polish
 - The broader delete-heavy browser pass for some canonical structural/intro/media surfaces is still worth finishing.
 - Translation/commentary Full Edit still needs another usefulness review.
 - The later detail-page intro-dropdown phase for canonical detail tops is still not built.
-- Book/chapter/verse owner-attached content-block add flows still exist on canonical pages. They remain valid for canonical editorial blocks today, but they should be reassessed carefully if a broader universal content layer starts covering some of the same user-facing composition needs.
+- Book/chapter full-edit owner-attached content-block management still exists as a transitional admin fallback, but the older public live add/edit block path is now being retired from the active scripture browsing experience.
+- Verse detail no longer exposes the older live verse-owned block controls on the public page, but the underlying verse-owned note-block system still exists through full edit and other canonical admin routes.
+- Legacy content-block models, routes, and full-edit tools still exist in the backend for canonical admin fallback and already-saved editorial data; they are no longer treated as the active public scripture authoring direction.
 
 ## Current UX condition
 
 ### Canonical scripture UX
 - The active canonical admin UX is more local, more truthful, and less dependent on detouring into deeper pages for common edits.
 - Intro presentation is more consistent across canonical cards.
+- Verse detail is cleaner than before because the supplementary CMS region is now the only live composition path on that page; the older verse-owned notes remain visible without competing live authoring controls.
+- Book, chapter, and verse public scripture pages are also cleaner because the older owner-attached public add/edit block controls and watch-overview UI are being removed from the active browsing path.
 
 ### CMS page UX
 - The CMS page flow is no longer just a record shell. It is now a real composition system that exists both in the workspace and, in a first narrow form, on the live published CMS page itself for permitted users.
@@ -283,6 +295,10 @@ Do not drift into fake abstractions detached from either the canonical schema or
    - attach-existing-page vs create-new-page flows during button/link authoring
 3. Reassess public CMS discovery/navigation only after the live composition flow is stable.
 4. Return to the remaining canonical delete/full-edit/detail-top polish items without reintroducing page-local hacks.
+5. Keep the restored scripture browse baseline trustworthy:
+   - preserve the full enabled-corpus development seed baseline
+   - avoid narrowing local browse state back to a Bhagavad Gita-only dataset unless a task explicitly needs a narrow test seeder
+   - continue phasing out overlapping live canonical block controls only where a clear CMS/exposed-region replacement already exists
 
 ## Do not forget
 - `admin-architecture.md` is the authoritative architecture document.

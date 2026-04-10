@@ -13,9 +13,7 @@ use App\Support\AdminContext\AdminContext;
 use App\Support\Scripture\Admin\BookAdminRouteContext;
 use App\Support\Scripture\Admin\BookSectionAdminRouteContext;
 use App\Support\Scripture\Admin\ChapterAdminRouteContext;
-use App\Support\Scripture\Admin\ContentBlockCapabilityPayload;
 use App\Support\Scripture\Admin\PrimaryPublishedEditableContentBlock;
-use App\Support\Scripture\Admin\VisibleContentBlockSequence;
 use App\Support\Scripture\PublicScriptureData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -52,32 +50,6 @@ class BookController extends Controller
     }
 
     /**
-     * Display a dedicated public overview page for the book.
-     */
-    public function overview(
-        Request $request,
-        Book $book,
-        PublicScriptureData $publicScriptureData,
-    ): Response {
-        $this->loadPublicBookMediaRelations($book);
-        $contentBlocks = $this->publicBookContentBlocks($book);
-        $isAdmin = AdminContext::canAccess($request->user());
-
-        return Inertia::render('scripture/books/overview', [
-            'book' => $publicScriptureData->book($book),
-            'content_blocks' => $publicScriptureData->contentBlocks($contentBlocks),
-            'isAdmin' => $isAdmin,
-            'admin' => $isAdmin
-                ? $this->bookAdminPayload(
-                    $book,
-                    $contentBlocks,
-                    includeMediaManagement: true,
-                )
-                : null,
-        ]);
-    }
-
-    /**
      * Display a read-only scripture book page.
      */
     public function show(
@@ -107,16 +79,12 @@ class BookController extends Controller
         ]);
         $this->loadPublicBookMediaRelations($book);
 
-        $contentBlocks = $this->publicBookContentBlocks($book);
-
         return Inertia::render('scripture/books/show', [
             'book' => $publicScriptureData->book($book),
-            'content_blocks' => $publicScriptureData->contentBlocks($contentBlocks),
             'isAdmin' => $isAdmin,
             'admin' => $isAdmin
                 ? $this->bookAdminPayload(
                     $book,
-                    $contentBlocks,
                     includeMediaManagement: true,
                 )
                 : null,
@@ -144,37 +112,17 @@ class BookController extends Controller
                 ->where('status', 'published')
                 ->with('media')
                 ->orderBy('sort_order'),
-            'contentBlocks' => fn ($query) => $query
-                ->published()
-                ->where('block_type', 'video')
-                ->orderBy('sort_order'),
         ];
     }
 
     /**
-     * @return Collection<int, ContentBlock>
-     */
-    private function publicBookContentBlocks(Book $book)
-    {
-        return $book->contentBlocks()
-            ->published()
-            ->where('block_type', '!=', 'video')
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->get();
-    }
-
-    /**
-     * @param  Collection<int, ContentBlock>  $contentBlocks
      * @return array<string, mixed>
      */
     private function bookAdminPayload(
         Book $book,
-        Collection $contentBlocks,
         bool $includeMediaManagement = false,
     ): array {
         $adminRouteContext = new BookAdminRouteContext($book);
-        $visibleSequence = new VisibleContentBlockSequence($contentBlocks);
         $payload = [
             'identity_update_href' => $adminRouteContext->identityUpdateHref(),
             'details_update_href' => $adminRouteContext->detailsUpdateHref(),
@@ -184,22 +132,6 @@ class BookController extends Controller
             'book_section_store_href' => route(
                 'scripture.book-sections.admin.store',
                 ['book' => $book],
-            ),
-            'content_block_store_href' => $adminRouteContext->contentBlockStoreHref(),
-            'content_block_types' => $adminRouteContext->editableContentBlockTypes(),
-            'content_block_default_region' => $adminRouteContext->creatableContentBlockRegions()[0],
-            'content_block_regions' => $adminRouteContext->creatableContentBlockRegions(),
-            ...ContentBlockCapabilityPayload::build(
-                $contentBlocks,
-                $visibleSequence,
-                fn (ContentBlock $block): bool => $adminRouteContext->isEditableContentBlock($block),
-                fn (ContentBlock $block): bool => $adminRouteContext->isDuplicableContentBlock($block),
-                fn (ContentBlock $block): string => $adminRouteContext->contentBlockUpdateHref($block),
-                fn (ContentBlock $block): string => $adminRouteContext->contentBlockMoveUpHref($block),
-                fn (ContentBlock $block): string => $adminRouteContext->contentBlockMoveDownHref($block),
-                fn (ContentBlock $block): string => $adminRouteContext->contentBlockReorderHref($block),
-                fn (ContentBlock $block): string => $adminRouteContext->contentBlockDuplicateHref($block),
-                fn (ContentBlock $block): string => $adminRouteContext->contentBlockDestroyHref($block),
             ),
         ];
 

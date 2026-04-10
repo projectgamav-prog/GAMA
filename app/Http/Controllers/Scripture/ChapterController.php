@@ -15,12 +15,10 @@ use App\Models\Verse;
 use App\Support\AdminContext\AdminContext;
 use App\Support\Scripture\Admin\ChapterAdminRouteContext;
 use App\Support\Scripture\Admin\ChapterSectionAdminRouteContext;
-use App\Support\Scripture\Admin\ContentBlockCapabilityPayload;
 use App\Support\Scripture\Admin\PrimaryPublishedEditableContentBlock;
 use App\Support\Scripture\Admin\Registry\AdminEntityRegistry;
 use App\Support\Scripture\Admin\VerseAdminRouteContext;
 use App\Support\Scripture\Admin\VerseRelationAdminData;
-use App\Support\Scripture\Admin\VisibleContentBlockSequence;
 use App\Support\Scripture\PublicScriptureData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -53,13 +51,6 @@ class ChapterController extends Controller
             $contentBlocks,
             $adminRouteContext,
         );
-        $noteBlocks = $primaryIntroBlock instanceof ContentBlock
-            ? $contentBlocks
-                ->reject(
-                    fn (ContentBlock $block): bool => (int) $block->getKey() === (int) $primaryIntroBlock->getKey(),
-                )
-                ->values()
-            : $contentBlocks;
         $readerData = $buildChapterVerseReaderData->handle(
             $book,
             $bookSection,
@@ -91,14 +82,12 @@ class ChapterController extends Controller
                     ? $publicScriptureData->contentBlock($primaryIntroBlock)
                     : null,
             ],
-            'content_blocks' => $publicScriptureData->contentBlocks($noteBlocks),
             'reader_languages' => $readerData['reader_languages'],
             'default_language' => $readerData['default_language'],
             'isAdmin' => $isAdmin,
             'admin' => $isAdmin
                 ? $this->chapterAdminPayload(
                     $adminRouteContext,
-                    $noteBlocks,
                     $primaryIntroBlock,
                     $publicScriptureData,
                 )
@@ -134,17 +123,13 @@ class ChapterController extends Controller
     }
 
     /**
-     * @param  Collection<int, ContentBlock>  $contentBlocks
      * @return array<string, mixed>
      */
     private function chapterAdminPayload(
         ChapterAdminRouteContext $adminRouteContext,
-        Collection $contentBlocks,
         ?ContentBlock $primaryIntroBlock,
         PublicScriptureData $publicScriptureData,
     ): array {
-        $visibleSequence = new VisibleContentBlockSequence($contentBlocks);
-
         return [
             'full_edit_href' => $adminRouteContext->fullEditHref(),
             'identity_update_href' => $adminRouteContext->identityUpdateHref(),
@@ -165,21 +150,6 @@ class ChapterController extends Controller
                 : null,
             'intro_block_types' => $adminRouteContext->contentBlockTypes(),
             'intro_default_region' => $adminRouteContext->defaultIntroBlockRegion(),
-            'content_block_store_href' => $adminRouteContext->contentBlockStoreHref(),
-            'content_block_types' => $adminRouteContext->contentBlockTypes(),
-            'content_block_default_region' => $adminRouteContext->defaultContentBlockRegion(),
-            ...ContentBlockCapabilityPayload::build(
-                $contentBlocks,
-                $visibleSequence,
-                fn (ContentBlock $block): bool => $adminRouteContext->isEditableNoteBlock($block),
-                fn (ContentBlock $block): bool => $adminRouteContext->isDuplicableNoteBlock($block),
-                fn (ContentBlock $block): string => $adminRouteContext->contentBlockUpdateHref($block),
-                fn (ContentBlock $block): string => $adminRouteContext->contentBlockMoveUpHref($block),
-                fn (ContentBlock $block): string => $adminRouteContext->contentBlockMoveDownHref($block),
-                fn (ContentBlock $block): string => $adminRouteContext->contentBlockReorderHref($block),
-                fn (ContentBlock $block): string => $adminRouteContext->contentBlockDuplicateHref($block),
-                fn (ContentBlock $block): string => $adminRouteContext->contentBlockDestroyHref($block),
-            ),
         ];
     }
 

@@ -2,7 +2,6 @@ import { AdminModuleHostGroup } from '@/admin/core/AdminModuleHostGroup';
 import { resolveChapterHeaderSurfaces } from '@/admin/integrations/scripture/chapters';
 import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
 import { ScriptureChapterVerseList } from '@/components/scripture/scripture-chapter-verse-list';
-import { ScriptureChapterContentBlockRegion } from '@/components/scripture/scripture-chapter-content-block-region';
 import { ScriptureIntroBlock } from '@/components/scripture/scripture-intro-block';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { ScriptureReadingNavigationActions } from '@/components/scripture/scripture-reading-navigation-actions';
@@ -20,7 +19,6 @@ export default function ChapterShow({
     book,
     book_section,
     chapter,
-    content_blocks,
     reader_languages,
     default_language,
     chapter_sections,
@@ -130,14 +128,6 @@ export default function ChapterShow({
                     ]}
                 />
             </ScripturePageIntroCard>
-
-            <ScriptureChapterContentBlockRegion
-                chapter={chapter}
-                chapterTitle={chapterTitle}
-                blocks={content_blocks}
-                showAdminControls={showAdminControls}
-                admin={admin}
-            />
 
             <ScriptureChapterVerseList
                 chapter={chapter}

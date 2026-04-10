@@ -10,7 +10,6 @@ import type {
     ScriptureBookAdmin,
     ScriptureBookMediaSlot,
 } from '@/types/scripture';
-import { BookOverviewVideoDisclosure } from './book-overview-video-disclosure';
 import { ScriptureSection } from './scripture-section';
 
 type Props = {
@@ -79,11 +78,8 @@ function BookMediaSlotCard({ slot }: { slot: ScriptureBookMediaSlot }) {
 }
 
 export function BookPublicMediaSection({ book, admin, isAdmin }: Props) {
-    const { overview_video, hero_media, supporting_media } = book.media_slots;
-    const hasMedia =
-        overview_video !== null ||
-        hero_media !== null ||
-        supporting_media.length > 0;
+    const { hero_media, supporting_media } = book.media_slots;
+    const hasMedia = hero_media !== null || supporting_media.length > 0;
     const mediaSurface = resolveBookMediaSurface({
         book,
         admin,
@@ -122,9 +118,6 @@ export function BookPublicMediaSection({ book, admin, isAdmin }: Props) {
                     </div>
                 )}
 
-                {overview_video && (
-                    <BookOverviewVideoDisclosure slot={overview_video} />
-                )}
                 {hero_media && <BookMediaSlotCard slot={hero_media} />}
                 {supporting_media.map((slot, index) => (
                     <BookMediaSlotCard

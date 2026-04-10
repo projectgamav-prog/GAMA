@@ -77,7 +77,7 @@ class AdminEntityRegistry
                 editModes: [AdminEditMode::CONTEXTUAL, AdminEditMode::FULL],
                 classification: AdminFieldClassification::EDITORIAL,
                 group: AdminFieldGroup::EDITORIAL,
-                helpText: 'Editorial summary shown in the shared page intro on books.show and books.overview.',
+                helpText: 'Editorial summary shown in the shared page intro on the canonical book page.',
             ),
             'content_block_region' => new AdminFieldDefinition(
                 key: 'content_block_region',
@@ -282,7 +282,7 @@ class AdminEntityRegistry
                 new AdminRegionDefinition(
                     key: 'content_blocks',
                     label: 'Editorial block regions',
-                    surface: 'books.show, books.overview',
+                    surface: 'books.admin.full-edit',
                     description: 'Registered long-form copy regions for overview, highlights, quotes, and similar public Book sections.',
                     fieldKeys: [
                         'content_block_region',
@@ -311,7 +311,7 @@ class AdminEntityRegistry
                         'content_block_status',
                     ],
                     capabilityHint: 'content_blocks',
-                    helpText: 'Use region keys intentionally. Registered image blocks are supported here, while video belongs in the overview_video media slot.',
+                    helpText: 'Use region keys intentionally. Registered image blocks are supported here, while video remains a protected legacy block/media concern outside the public page flow.',
                     methods: [
                         new AdminRegionMethodDefinition(
                             family: AdminMethodFamily::CONTENT_BLOCK_CREATE,
@@ -359,7 +359,7 @@ class AdminEntityRegistry
                     key: 'book_media_slots',
                     label: 'Public media slots',
                     surface: 'books.show',
-                    description: 'Registered Book media surfaces for Watch Overview, hero presentation, and supporting media cards.',
+                    description: 'Registered Book media surfaces for hero presentation and supporting media cards, with legacy slot roles still managed in full edit.',
                     fieldKeys: [
                         'media_assignment_media_id',
                         'media_assignment_role',
@@ -378,7 +378,7 @@ class AdminEntityRegistry
                         'media_assignment_status',
                     ],
                     capabilityHint: 'media',
-                    helpText: 'overview_video drives Watch Overview, hero_media is the lead slot, and supporting_media fills the follow-on cards.',
+                    helpText: 'hero_media is the lead public slot and supporting_media fills the follow-on cards. Older slot roles may still exist in the backend during transition.',
                     methods: [
                         new AdminRegionMethodDefinition(
                             family: AdminMethodFamily::MEDIA_SLOT_EDIT,

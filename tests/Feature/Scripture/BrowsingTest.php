@@ -115,28 +115,11 @@ test('books page lists available public scripture books', function () {
             ->has('books', 3)
             ->where('books.0.slug', 'empty-book')
             ->where('books.0.number', '1')
-            ->where('books.0.overview_href', route('scripture.books.overview', $emptyBook))
-            ->where('books.0.media_slots.overview_video', null)
             ->where('books.0.media_slots.hero_media', null)
             ->where('books.0.media_slots.supporting_media', [])
-            ->missing('books.0.overview_video')
             ->where('books.0.href', route('scripture.books.show', $emptyBook))
             ->where('books.1.slug', 'ramcharitmanas')
             ->where('books.1.number', '2')
-            ->where('books.1.overview_href', route('scripture.books.overview', $ramcharitmanas))
-            ->where('books.1.media_slots.overview_video.title', 'Ram Overview Slot')
-            ->where(
-                'books.1.media_slots.overview_video.caption',
-                'Registered overview video for Ramcharitmanas.',
-            )
-            ->where(
-                'books.1.media_slots.overview_video.media.url',
-                'https://example.test/assets/ram-overview.mp4',
-            )
-            ->where(
-                'books.1.media_slots.overview_video.media.poster_url',
-                'https://example.test/assets/ram-overview-poster.jpg',
-            )
             ->where('books.1.media_slots.hero_media.title', 'Ram Hero Slot')
             ->where(
                 'books.1.media_slots.hero_media.media.url',
@@ -150,44 +133,12 @@ test('books page lists available public scripture books', function () {
             ->where('books.1.href', route('scripture.books.show', $ramcharitmanas))
             ->where('books.2.slug', 'bhagavad-gita')
             ->where('books.2.number', '3')
-            ->where('books.2.overview_href', route('scripture.books.overview', $this->book))
-            ->where('books.2.media_slots.overview_video.role', 'overview_video')
-            ->where('books.2.media_slots.overview_video.title', 'Bhagavad Gita Overview')
-            ->where(
-                'books.2.media_slots.overview_video.media.url',
-                'https://example.test/assets/bhagavad-gita-overview.mp4',
-            )
             ->where('books.2.media_slots.hero_media', null)
             ->where('books.2.media_slots.supporting_media', [])
             ->where(
                 'books.2.href',
                 route('scripture.books.show', $this->book),
             ),
-        );
-});
-
-test('book overview page renders published editorial content separately from canonical browse', function () {
-    $response = $this->get(route('scripture.books.overview', $this->book));
-
-    $response
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->component('scripture/books/overview')
-            ->where('book.number', '1')
-            ->where('book.title', 'Bhagavad Gita')
-            ->where('book.href', route('scripture.books.show', $this->book))
-            ->where('book.overview_href', route('scripture.books.overview', $this->book))
-            ->where('book.media_slots.overview_video.title', 'Bhagavad Gita Overview')
-            ->where(
-                'book.media_slots.overview_video.media.url',
-                'https://example.test/assets/bhagavad-gita-overview.mp4',
-            )
-            ->where('book.media_slots.hero_media', null)
-            ->where('book.media_slots.supporting_media', [])
-            ->has('content_blocks', 2)
-            ->where('content_blocks.0.region', 'overview')
-            ->where('content_blocks.0.block_type', 'text')
-            ->where('content_blocks.1.block_type', 'quote'),
         );
 });
 
@@ -200,12 +151,8 @@ test('book page is displayed for scripture browsing', function () {
             ->component('scripture/books/show')
             ->where('book.number', '1')
             ->where('book.title', 'Bhagavad Gita')
-            ->where('book.media_slots.overview_video.title', 'Bhagavad Gita Overview')
-            ->where(
-                'book.media_slots.overview_video.media.url',
-                'https://example.test/assets/bhagavad-gita-overview.mp4',
-            )
-            ->has('content_blocks', 2)
+            ->where('book.media_slots.hero_media', null)
+            ->where('book.media_slots.supporting_media', [])
             ->has('book_sections', 1)
             ->where(
                 'book_sections.0.href',
@@ -215,7 +162,7 @@ test('book page is displayed for scripture browsing', function () {
         );
 });
 
-test('book overview and browse pages share the same registered media slot payload for non gita books', function () {
+test('book page only exposes active public media slots for non gita books', function () {
     app(ScriptureJsonImporter::class)->import('ramcharitmanas');
 
     $book = Book::query()
@@ -267,31 +214,6 @@ test('book overview and browse pages share the same registered media slot payloa
         'status' => 'published',
     ]);
 
-    $overviewResponse = $this->get(route('scripture.books.overview', $book));
-
-    $overviewResponse
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->component('scripture/books/overview')
-            ->where('book.slug', 'ramcharitmanas')
-            ->where('book.media_slots.overview_video.title', 'Shared overview slot')
-            ->where(
-                'book.media_slots.overview_video.media.url',
-                'https://example.test/assets/ram-overview-shared.mp4',
-            )
-            ->where('book.media_slots.hero_media.title', 'Shared hero slot')
-            ->where(
-                'book.media_slots.hero_media.media.url',
-                'https://example.test/assets/ram-hero-shared.jpg',
-            )
-            ->has('book.media_slots.supporting_media', 1)
-            ->where(
-                'book.media_slots.supporting_media.0.media.url',
-                'https://example.test/assets/ram-supporting-shared.mp4',
-            )
-            ->where('content_blocks', []),
-        );
-
     $showResponse = $this->get(route('scripture.books.show', $book));
 
     $showResponse
@@ -299,11 +221,6 @@ test('book overview and browse pages share the same registered media slot payloa
         ->assertInertia(fn (Assert $page) => $page
             ->component('scripture/books/show')
             ->where('book.slug', 'ramcharitmanas')
-            ->where('book.media_slots.overview_video.title', 'Shared overview slot')
-            ->where(
-                'book.media_slots.overview_video.media.url',
-                'https://example.test/assets/ram-overview-shared.mp4',
-            )
             ->where('book.media_slots.hero_media.title', 'Shared hero slot')
             ->where(
                 'book.media_slots.hero_media.media.url',
@@ -333,7 +250,6 @@ test('chapter page is displayed and supports zero published content blocks', fun
                 'book_section.href',
                 route('scripture.books.show', $this->book).'#section-main',
             )
-            ->where('content_blocks', [])
             ->has('chapter_sections', $this->chapter->chapterSections()->count())
             ->where('chapter_sections.0.verses_count', $this->chapterSection->verses()->count()),
         );
@@ -484,8 +400,6 @@ test('verse detail page is displayed with translations commentaries and publishe
                 "scripture-verse-{$this->firstVerse->id}-supplementary",
             )
             ->where('cms_regions.0.containers', [])
-            ->has('content_blocks', 1)
-            ->where('content_blocks.0.title', 'Published verse note'),
         );
 });
 

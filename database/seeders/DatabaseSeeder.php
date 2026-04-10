@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             DevelopmentUserSeeder::class,
+            ScriptureCorpusDevelopmentSeeder::class,
             BhagavadGitaDevelopmentSeeder::class,
         ]);
     }

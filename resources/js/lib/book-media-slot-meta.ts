@@ -6,15 +6,10 @@ export type BookMediaSlotMeta = {
 };
 
 export const BOOK_MEDIA_SLOT_META: Record<string, BookMediaSlotMeta> = {
-    overview_video: {
-        label: 'Overview Video',
-        description:
-            'Registered video slot used in the shared public Book media section and related book-level media presentations.',
-    },
     hero_media: {
         label: 'Hero Media',
         description:
-            'Primary book-level media shown first on the public overview and show pages.',
+            'Primary book-level media shown first on the public canonical book page.',
     },
     supporting_media: {
         label: 'Supporting Media',
