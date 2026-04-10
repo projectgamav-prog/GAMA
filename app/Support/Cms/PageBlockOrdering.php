@@ -4,8 +4,8 @@ namespace App\Support\Cms;
 
 use App\Models\PageBlock;
 use App\Models\PageContainer;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
 
 class PageBlockOrdering
 {
@@ -61,6 +61,16 @@ class PageBlockOrdering
 
             $this->persistOrder($orderedBlocks);
         });
+    }
+
+    public function moveUp(PageContainer $pageContainer, PageBlock $pageBlock): bool
+    {
+        return $this->move($pageContainer, $pageBlock, 'up');
+    }
+
+    public function moveDown(PageContainer $pageContainer, PageBlock $pageBlock): bool
+    {
+        return $this->move($pageContainer, $pageBlock, 'down');
     }
 
     /**
@@ -127,6 +137,47 @@ class PageBlockOrdering
         $pageContainer->pageBlocks()
             ->where('sort_order', '>=', $sortOrder)
             ->increment('sort_order');
+    }
+
+    private function move(
+        PageContainer $pageContainer,
+        PageBlock $pageBlock,
+        string $direction,
+    ): bool {
+        return DB::transaction(function () use ($pageContainer, $pageBlock, $direction): bool {
+            $orderedBlocks = $this->normalize($pageContainer)
+                ->values();
+            $currentIndex = $orderedBlocks->search(
+                fn (PageBlock $block): bool => (int) $block->getKey() === (int) $pageBlock->getKey(),
+            );
+
+            if (! is_int($currentIndex)) {
+                return false;
+            }
+
+            $targetIndex = $direction === 'up'
+                ? $currentIndex - 1
+                : $currentIndex + 1;
+
+            if (! $orderedBlocks->has($targetIndex)) {
+                return false;
+            }
+
+            $currentBlock = $orderedBlocks->get($currentIndex);
+            $targetBlock = $orderedBlocks->get($targetIndex);
+
+            if (! $currentBlock instanceof PageBlock
+                || ! $targetBlock instanceof PageBlock) {
+                return false;
+            }
+
+            $orderedBlocks->put($currentIndex, $targetBlock);
+            $orderedBlocks->put($targetIndex, $currentBlock);
+
+            $this->persistOrder($orderedBlocks);
+
+            return true;
+        });
     }
 
     /**

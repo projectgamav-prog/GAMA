@@ -1,5 +1,5 @@
-import { router, useForm } from '@inertiajs/react';
-import { Layers3, Plus, Save, Trash2 } from 'lucide-react';
+import { useForm } from '@inertiajs/react';
+import { ArrowDown, ArrowUp, Layers3, Plus, Save, Trash2 } from 'lucide-react';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,10 @@ import type {
     CmsPage,
 } from '@/types';
 import { CmsBlockRenderer } from '../components/CmsBlockRenderer';
+import {
+    CmsDeleteActionButton,
+    CmsPostActionButton,
+} from '../components/CmsActionButtons';
 import { CmsContainerRenderer } from '../components/CmsContainerRenderer';
 import { CmsModuleEditor } from '../components/CmsModuleEditor';
 import { cmsModules, defaultCmsModuleValue } from '../core/module-registry';
@@ -108,35 +112,6 @@ function ModuleSelect({
                 ))}
             </SelectContent>
         </Select>
-    );
-}
-
-function DangerButton({
-    label,
-    confirmMessage,
-    href,
-}: {
-    label: string;
-    confirmMessage: string;
-    href: string;
-}) {
-    return (
-        <Button
-            type="button"
-            variant="destructive"
-            onClick={() => {
-                if (! window.confirm(confirmMessage)) {
-                    return;
-                }
-
-                router.delete(href, {
-                    preserveScroll: true,
-                });
-            }}
-        >
-            <Trash2 className="size-4" />
-            {label}
-        </Button>
     );
 }
 
@@ -260,6 +235,7 @@ function ContainerInsertForm({
 
                     <CmsModuleEditor
                         moduleKey={form.data.module_key}
+                        idPrefix={formKey}
                         value={modulePayloadFromForm(form.data)}
                         onChange={(nextValue) =>
                             form.setData({
@@ -362,6 +338,7 @@ function BlockInsertForm({
 
                     <CmsModuleEditor
                         moduleKey={form.data.module_key}
+                        idPrefix={formKey}
                         value={modulePayloadFromForm(form.data)}
                         onChange={(nextValue) =>
                             form.setData({
@@ -421,11 +398,24 @@ function BlockEditorCard({
                         </CardDescription>
                     </div>
 
-                    <DangerButton
-                        label="Delete block"
-                        confirmMessage="Delete this block from the current container?"
-                        href={block.destroy_href}
-                    />
+                    <div className="flex flex-wrap gap-2">
+                        <CmsPostActionButton
+                            href={block.move_up_href}
+                            label="Move up"
+                            icon={ArrowUp}
+                        />
+                        <CmsPostActionButton
+                            href={block.move_down_href}
+                            label="Move down"
+                            icon={ArrowDown}
+                        />
+                        <CmsDeleteActionButton
+                            href={block.destroy_href}
+                            label="Delete block"
+                            confirmMessage="Delete this block from the current container?"
+                            icon={Trash2}
+                        />
+                    </div>
                 </div>
             </CardHeader>
             <CardContent className="space-y-5">
@@ -466,6 +456,7 @@ function BlockEditorCard({
 
                     <CmsModuleEditor
                         moduleKey={form.data.module_key}
+                        idPrefix={`block-${block.id}`}
                         value={modulePayloadFromForm(form.data)}
                         onChange={(nextValue) =>
                             form.setData({
@@ -538,11 +529,24 @@ function ContainerEditorCard({
                         </CardDescription>
                     </div>
 
-                    <DangerButton
-                        label="Delete container"
-                        confirmMessage="Delete this container and every block inside it?"
-                        href={container.destroy_href}
-                    />
+                    <div className="flex flex-wrap gap-2">
+                        <CmsPostActionButton
+                            href={container.move_up_href}
+                            label="Move up"
+                            icon={ArrowUp}
+                        />
+                        <CmsPostActionButton
+                            href={container.move_down_href}
+                            label="Move down"
+                            icon={ArrowDown}
+                        />
+                        <CmsDeleteActionButton
+                            href={container.destroy_href}
+                            label="Delete container"
+                            confirmMessage="Delete this container and every block inside it?"
+                            icon={Trash2}
+                        />
+                    </div>
                 </div>
             </CardHeader>
             <CardContent className="space-y-6 pt-6">
@@ -692,6 +696,11 @@ export function CmsCompositionEditor({ page, containers }: Props) {
             </Card>
 
             <ContainerInsertForm
+                key={
+                    containers.length > 0
+                        ? 'page-container-insert-start'
+                        : 'page-container-insert-empty'
+                }
                 actionHref={page.container_store_href}
                 formKey={
                     containers.length > 0
@@ -718,6 +727,7 @@ export function CmsCompositionEditor({ page, containers }: Props) {
                         <div key={container.id} className="space-y-6">
                             <ContainerEditorCard container={container} />
                             <ContainerInsertForm
+                                key={`page-container-insert-after-${container.id}`}
                                 actionHref={page.container_store_href}
                                 formKey={`page-container-insert-after-${container.id}`}
                                 insertionMode="after"

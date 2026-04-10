@@ -28,6 +28,7 @@ export type CmsPageSummary = {
 export type CmsPage = CmsPageSummary & {
     created_at: string | null;
     updated_at: string | null;
+    destroy_href: string;
     container_store_href: string;
 };
 
@@ -46,6 +47,8 @@ export type CmsAdminBlock = {
     sort_order: number;
     update_href: string;
     destroy_href: string;
+    move_up_href: string | null;
+    move_down_href: string | null;
 };
 
 export type CmsPublicBlock = {
@@ -63,6 +66,8 @@ export type CmsAdminContainer = {
     sort_order: number;
     update_href: string;
     destroy_href: string;
+    move_up_href: string | null;
+    move_down_href: string | null;
     block_store_href: string;
     blocks: CmsAdminBlock[];
 };

@@ -31,8 +31,8 @@ class PublicPageData
             'slug' => $page->slug,
             'status' => $page->status,
             'layout_key' => $page->layout_key,
-            'workspace_href' => route('cms.pages.show', $page),
-            'public_href' => route('pages.show', $page),
+            'workspace_href' => route('cms.pages.show', $page, false),
+            'public_href' => route('pages.show', $page, false),
             'container_count' => $this->containerCount($page),
             'block_count' => $this->blockCount($page),
         ];
@@ -47,7 +47,8 @@ class PublicPageData
             ...$this->adminIndexEntry($page),
             'created_at' => $page->created_at?->toAtomString(),
             'updated_at' => $page->updated_at?->toAtomString(),
-            'container_store_href' => route('cms.pages.containers.store', $page),
+            'destroy_href' => route('cms.pages.destroy', $page, false),
+            'container_store_href' => route('cms.pages.containers.store', $page, false),
         ];
     }
 
@@ -69,10 +70,18 @@ class PublicPageData
      */
     public function adminContainers(Page $page): array
     {
-        return collect(
+        $orderedContainers = collect(
             $page->relationLoaded('pageContainers') ? $page->pageContainers : [],
-        )
-            ->map(fn (PageContainer $pageContainer) => $this->adminContainer($page, $pageContainer))
+        )->values();
+        $containerCount = $orderedContainers->count();
+
+        return $orderedContainers
+            ->map(fn (PageContainer $pageContainer, int $index) => $this->adminContainer(
+                $page,
+                $pageContainer,
+                $index,
+                $containerCount,
+            ))
             ->values()
             ->all();
     }
@@ -126,8 +135,19 @@ class PublicPageData
     /**
      * @return array<string, mixed>
      */
-    private function adminContainer(Page $page, PageContainer $pageContainer): array
-    {
+    private function adminContainer(
+        Page $page,
+        PageContainer $pageContainer,
+        int $index,
+        int $containerCount,
+    ): array {
+        $orderedBlocks = collect(
+            $pageContainer->relationLoaded('pageBlocks')
+                ? $pageContainer->pageBlocks
+                : [],
+        )->values();
+        $blockCount = $orderedBlocks->count();
+
         return [
             'id' => $pageContainer->id,
             'label' => $pageContainer->label,
@@ -136,24 +156,34 @@ class PublicPageData
             'update_href' => route('cms.pages.containers.update', [
                 'page' => $page,
                 'pageContainer' => $pageContainer,
-            ]),
+            ], false),
             'destroy_href' => route('cms.pages.containers.destroy', [
                 'page' => $page,
                 'pageContainer' => $pageContainer,
-            ]),
+            ], false),
+            'move_up_href' => $index > 0
+                ? route('cms.pages.containers.move-up', [
+                    'page' => $page,
+                    'pageContainer' => $pageContainer,
+                ], false)
+                : null,
+            'move_down_href' => $index < ($containerCount - 1)
+                ? route('cms.pages.containers.move-down', [
+                    'page' => $page,
+                    'pageContainer' => $pageContainer,
+                ], false)
+                : null,
             'block_store_href' => route('cms.pages.containers.blocks.store', [
                 'page' => $page,
                 'pageContainer' => $pageContainer,
-            ]),
-            'blocks' => collect(
-                $pageContainer->relationLoaded('pageBlocks')
-                    ? $pageContainer->pageBlocks
-                    : [],
-            )
-                ->map(fn (PageBlock $pageBlock) => $this->adminBlock(
+            ], false),
+            'blocks' => $orderedBlocks
+                ->map(fn (PageBlock $pageBlock, int $blockIndex) => $this->adminBlock(
                     $page,
                     $pageContainer,
                     $pageBlock,
+                    $blockIndex,
+                    $blockCount,
                 ))
                 ->values()
                 ->all(),
@@ -188,6 +218,8 @@ class PublicPageData
         Page $page,
         PageContainer $pageContainer,
         PageBlock $pageBlock,
+        int $index,
+        int $blockCount,
     ): array {
         return [
             'id' => $pageBlock->id,
@@ -199,12 +231,26 @@ class PublicPageData
                 'page' => $page,
                 'pageContainer' => $pageContainer,
                 'pageBlock' => $pageBlock,
-            ]),
+            ], false),
             'destroy_href' => route('cms.pages.containers.blocks.destroy', [
                 'page' => $page,
                 'pageContainer' => $pageContainer,
                 'pageBlock' => $pageBlock,
-            ]),
+            ], false),
+            'move_up_href' => $index > 0
+                ? route('cms.pages.containers.blocks.move-up', [
+                    'page' => $page,
+                    'pageContainer' => $pageContainer,
+                    'pageBlock' => $pageBlock,
+                ], false)
+                : null,
+            'move_down_href' => $index < ($blockCount - 1)
+                ? route('cms.pages.containers.blocks.move-down', [
+                    'page' => $page,
+                    'pageContainer' => $pageContainer,
+                    'pageBlock' => $pageBlock,
+                ], false)
+                : null,
         ];
     }
 

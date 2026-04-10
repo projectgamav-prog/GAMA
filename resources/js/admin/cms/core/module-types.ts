@@ -5,6 +5,8 @@ import type {
     CmsModulePayload,
 } from '@/types';
 
+export type { CmsModulePayload } from '@/types';
+
 export type CmsModuleRendererMode = 'admin' | 'public';
 
 export type CmsModuleRendererProps = {
@@ -15,8 +17,13 @@ export type CmsModuleRendererProps = {
 export type CmsModuleEditorProps = {
     value: CmsModulePayload;
     onChange: (next: CmsModulePayload) => void;
+    idPrefix: string;
     errors: Record<string, string | undefined>;
 };
+
+export type CmsModuleValidationHook = (
+    value: CmsModulePayload,
+) => Record<string, string | undefined>;
 
 export type CmsModuleManifest = {
     key: CmsModuleKey;
@@ -27,4 +34,11 @@ export type CmsModuleManifest = {
     defaultConfig: Record<string, unknown>;
     Renderer: (props: CmsModuleRendererProps) => ReactNode;
     Editor: (props: CmsModuleEditorProps) => ReactNode;
+    validate?: CmsModuleValidationHook;
 };
+
+export function defineCmsModuleManifest(
+    manifest: CmsModuleManifest,
+): CmsModuleManifest {
+    return manifest;
+}

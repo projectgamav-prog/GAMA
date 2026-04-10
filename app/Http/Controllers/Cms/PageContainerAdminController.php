@@ -51,7 +51,7 @@ class PageContainerAdminController extends Controller
             null,
         );
 
-        return redirect()->route('cms.pages.show', $page, 303);
+        return redirect()->to(route('cms.pages.show', $page, false), 303);
     }
 
     public function update(
@@ -64,7 +64,7 @@ class PageContainerAdminController extends Controller
             'container_type' => trim((string) $request->validated('container_type')),
         ]);
 
-        return redirect()->route('cms.pages.show', $page, 303);
+        return redirect()->to(route('cms.pages.show', $page, false), 303);
     }
 
     public function destroy(
@@ -74,7 +74,27 @@ class PageContainerAdminController extends Controller
     ): RedirectResponse {
         $pageContainerOrdering->remove($page, $pageContainer);
 
-        return redirect()->route('cms.pages.show', $page, 303);
+        return redirect()->to(route('cms.pages.show', $page, false), 303);
+    }
+
+    public function moveUp(
+        Page $page,
+        PageContainer $pageContainer,
+        PageContainerOrdering $pageContainerOrdering,
+    ): RedirectResponse {
+        $pageContainerOrdering->moveUp($page, $pageContainer);
+
+        return redirect()->to(route('cms.pages.show', $page, false), 303);
+    }
+
+    public function moveDown(
+        Page $page,
+        PageContainer $pageContainer,
+        PageContainerOrdering $pageContainerOrdering,
+    ): RedirectResponse {
+        $pageContainerOrdering->moveDown($page, $pageContainer);
+
+        return redirect()->to(route('cms.pages.show', $page, false), 303);
     }
 
     private function nullableString(mixed $value): ?string

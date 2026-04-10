@@ -41,7 +41,7 @@ class PageBlockAdminController extends Controller
             $relativeBlock,
         );
 
-        return redirect()->route('cms.pages.show', $page, 303);
+        return redirect()->to(route('cms.pages.show', $page, false), 303);
     }
 
     public function update(
@@ -63,7 +63,7 @@ class PageBlockAdminController extends Controller
             'config_json' => $payload['config'],
         ]);
 
-        return redirect()->route('cms.pages.show', $page, 303);
+        return redirect()->to(route('cms.pages.show', $page, false), 303);
     }
 
     public function destroy(
@@ -74,7 +74,29 @@ class PageBlockAdminController extends Controller
     ): RedirectResponse {
         $pageBlockOrdering->remove($pageContainer, $pageBlock);
 
-        return redirect()->route('cms.pages.show', $page, 303);
+        return redirect()->to(route('cms.pages.show', $page, false), 303);
+    }
+
+    public function moveUp(
+        Page $page,
+        PageContainer $pageContainer,
+        PageBlock $pageBlock,
+        PageBlockOrdering $pageBlockOrdering,
+    ): RedirectResponse {
+        $pageBlockOrdering->moveUp($pageContainer, $pageBlock);
+
+        return redirect()->to(route('cms.pages.show', $page, false), 303);
+    }
+
+    public function moveDown(
+        Page $page,
+        PageContainer $pageContainer,
+        PageBlock $pageBlock,
+        PageBlockOrdering $pageBlockOrdering,
+    ): RedirectResponse {
+        $pageBlockOrdering->moveDown($pageContainer, $pageBlock);
+
+        return redirect()->to(route('cms.pages.show', $page, false), 303);
     }
 
     private function nullableString(mixed $value): ?string

@@ -7,6 +7,7 @@ type Props = {
     moduleKey: string;
     value: CmsModulePayload;
     onChange: (next: CmsModulePayload) => void;
+    idPrefix: string;
     errors: Record<string, string | undefined>;
 };
 
@@ -14,6 +15,7 @@ export function CmsModuleEditor({
     moduleKey,
     value,
     onChange,
+    idPrefix,
     errors,
 }: Props) {
     const manifest = getCmsModuleManifest(moduleKey);
@@ -33,6 +35,10 @@ export function CmsModuleEditor({
     }
 
     const Editor = manifest.Editor;
+    const mergedErrors = {
+        ...(manifest.validate?.(value) ?? {}),
+        ...errors,
+    };
 
     return (
         <div className="space-y-4">
@@ -48,7 +54,8 @@ export function CmsModuleEditor({
             <Editor
                 value={value}
                 onChange={onChange}
-                errors={errors}
+                idPrefix={idPrefix}
+                errors={mergedErrors}
             />
         </div>
     );

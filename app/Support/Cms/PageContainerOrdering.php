@@ -4,8 +4,8 @@ namespace App\Support\Cms;
 
 use App\Models\Page;
 use App\Models\PageContainer;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
 
 class PageContainerOrdering
 {
@@ -61,6 +61,16 @@ class PageContainerOrdering
 
             $this->persistOrder($orderedContainers);
         });
+    }
+
+    public function moveUp(Page $page, PageContainer $pageContainer): bool
+    {
+        return $this->move($page, $pageContainer, 'up');
+    }
+
+    public function moveDown(Page $page, PageContainer $pageContainer): bool
+    {
+        return $this->move($page, $pageContainer, 'down');
     }
 
     /**
@@ -127,6 +137,47 @@ class PageContainerOrdering
         $page->pageContainers()
             ->where('sort_order', '>=', $sortOrder)
             ->increment('sort_order');
+    }
+
+    private function move(
+        Page $page,
+        PageContainer $pageContainer,
+        string $direction,
+    ): bool {
+        return DB::transaction(function () use ($page, $pageContainer, $direction): bool {
+            $orderedContainers = $this->normalize($page)
+                ->values();
+            $currentIndex = $orderedContainers->search(
+                fn (PageContainer $container): bool => (int) $container->getKey() === (int) $pageContainer->getKey(),
+            );
+
+            if (! is_int($currentIndex)) {
+                return false;
+            }
+
+            $targetIndex = $direction === 'up'
+                ? $currentIndex - 1
+                : $currentIndex + 1;
+
+            if (! $orderedContainers->has($targetIndex)) {
+                return false;
+            }
+
+            $currentContainer = $orderedContainers->get($currentIndex);
+            $targetContainer = $orderedContainers->get($targetIndex);
+
+            if (! $currentContainer instanceof PageContainer
+                || ! $targetContainer instanceof PageContainer) {
+                return false;
+            }
+
+            $orderedContainers->put($currentIndex, $targetContainer);
+            $orderedContainers->put($targetIndex, $currentContainer);
+
+            $this->persistOrder($orderedContainers);
+
+            return true;
+        });
     }
 
     /**

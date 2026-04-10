@@ -72,10 +72,17 @@ After completing a task:
   - create page
   - list pages
   - edit page identity/status/layout key
+  - delete page
   - create a new container with its first block
+  - create a new container above existing containers
+  - create a new container below an existing container
   - add a block inside an existing container
+  - add a block at the top of a container
+  - add a block below an existing block
   - edit existing containers
   - edit existing blocks
+  - move containers up/down
+  - move blocks up/down
   - delete containers
   - delete blocks
   - open the public page when published
@@ -83,7 +90,33 @@ After completing a task:
   - `rich_text`
   - `button_group`
   - `media`
+- CMS module folders now follow a predictable portable shape under `resources/js/admin/cms/modules/<module>/`:
+  - `manifest`
+  - `renderer`
+  - `editor`
+  - `types`
+  - `defaults`
+  - a module barrel entry
+- CMS manifests now support the core module contract plus an optional `validate` hook.
 - Public CMS pages now render ordered containers, and each container renders its ordered CMS blocks through the dedicated CMS renderer path.
+- The CMS composition foundation has now been browser-validated for:
+  - Add Page create flow
+  - page list visibility
+  - page update flow
+  - create container
+  - create container above/below
+  - add block at top of container
+  - add block below an existing block
+  - edit each current module type
+  - edit container
+  - move container up/down
+  - move block up/down
+  - delete block
+  - delete container
+  - draft-vs-published public route behavior
+  - public page rendering
+  - page delete
+- CMS admin redirects and action hrefs now stay same-origin and relative, which keeps Inertia navigation stable even when the local host differs from `APP_URL`.
 
 ## Partially working
 
@@ -99,8 +132,6 @@ After completing a task:
 
 But the CMS workflow is still intentionally narrow:
 - no drag/drop or move/reorder UI yet
-- no page delete flow yet
-- no container move flow for already-created containers
 - no block publish state or scheduling yet
 - no richer page template system yet
 
@@ -108,6 +139,7 @@ But the CMS workflow is still intentionally narrow:
 - Rich text works through a simple HTML-based editor.
 - Button group works with multi-button config, alignment, and layout options.
 - Media works with image/video URL fields plus width/aspect settings.
+- The CMS module contract is now stable enough for future portable-module work, but external module loading itself is still not built.
 
 But richer authoring is still postponed:
 - no rich text WYSIWYG yet
@@ -116,22 +148,10 @@ But richer authoring is still postponed:
 
 ## Needs improvement / still watch closely
 
-### CMS browser validation
-- The independent CMS composition flow still needs a real browser pass for:
-  - Add Page create flow
-  - page identity update flow
-  - create container
-  - add block inside container
-  - edit container
-  - edit block
-  - delete container
-  - delete block
-  - draft-vs-published public route behavior
-
 ### CMS next capability gaps
-- Reordering and movement are the next operational gap in the CMS builder.
-- Page delete is still missing.
 - The public CMS shell is real, but broader public discovery/navigation is still not built.
+- External or remote CMS module registration is still not built yet.
+- CMS module categories are manifest-ready, but category-management UI is still postponed.
 
 ### Remaining canonical polish
 - The broader delete-heavy browser pass for some canonical structural/intro/media surfaces is still worth finishing.
@@ -145,9 +165,9 @@ But richer authoring is still postponed:
 - Intro presentation is more consistent across canonical cards.
 
 ### CMS page UX
-- The CMS page flow is no longer just a record shell. It is now a real composition workspace.
+- The CMS page flow is no longer just a record shell. It is now a real and browser-validated composition workspace.
 - Editors can now decide locally whether content belongs in the same card/container or in a new one.
-- The CMS builder is still foundation-first rather than feature-complete.
+- The CMS builder is now operational for core page/container/block CRUD and movement, but it is still foundation-first rather than feature-complete.
 
 ## Important architecture reminders
 
@@ -170,23 +190,15 @@ But richer authoring is still postponed:
 Do not drift into fake abstractions detached from either the canonical schema or the CMS data model.
 
 ## Immediate next priority when resuming
-1. Browser-validate the CMS composition foundation end to end:
-   - page create
-   - page update
-   - create container
-   - add block
-   - edit/delete container
-   - edit/delete block
-   - draft vs published public behavior
-2. Add the next operational CMS basics without overbuilding:
-   - container/block movement or reordering
-   - page delete
-3. Improve the first CMS module family only where it materially helps composition:
+1. Define the next CMS extension seam without widening page-specific features too quickly:
+   - decide how future external/remote CMS modules register into the current manifest registry
+   - keep module integration touchpoints minimal and same-origin-safe
+2. Improve the first CMS module family only where it materially helps authoring:
    - richer text editing
    - media selection/upload
-   - better module-level validation UX
-4. Reassess public CMS discovery/navigation only after the composition flow is stable.
-5. Return to the remaining canonical delete/full-edit/detail-top polish items without reintroducing page-local hacks.
+   - better module-level validation feedback
+3. Reassess public CMS discovery/navigation only after the composition flow is stable.
+4. Return to the remaining canonical delete/full-edit/detail-top polish items without reintroducing page-local hacks.
 
 ## Do not forget
 - `admin-architecture.md` is the authoritative architecture document.

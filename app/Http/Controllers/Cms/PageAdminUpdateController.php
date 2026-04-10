@@ -25,7 +25,7 @@ class PageAdminUpdateController extends Controller
             'layout_key' => $this->nullableString($validated['layout_key'] ?? null),
         ]);
 
-        return redirect()->route('cms.pages.show', $page, 303);
+        return redirect()->to(route('cms.pages.show', $page, false), 303);
     }
 
     private function nullableString(mixed $value): ?string

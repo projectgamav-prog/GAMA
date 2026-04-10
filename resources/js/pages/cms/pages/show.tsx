@@ -1,6 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { Globe2, Save } from 'lucide-react';
+import { Globe2, Save, Trash2 } from 'lucide-react';
 import { CmsCompositionEditor } from '@/admin/cms/workspace/CmsCompositionEditor';
+import { CmsDeleteActionButton } from '@/admin/cms/components/CmsActionButtons';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
@@ -257,6 +258,12 @@ export default function CmsPageShow({
                                         </Link>
                                     </Button>
                                 )}
+                                <CmsDeleteActionButton
+                                    href={page.destroy_href}
+                                    label="Delete page"
+                                    confirmMessage="Delete this CMS page and all of its containers and blocks?"
+                                    icon={Trash2}
+                                />
                             </div>
                         </CardContent>
                     </Card>

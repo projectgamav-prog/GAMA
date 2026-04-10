@@ -80,8 +80,23 @@ Each CMS module manifest should declare, at minimum:
 - `defaultConfig`
 - `Renderer`
 - `Editor`
+- optional `validate`
 
 Future helpers/validation can extend this contract, but do not hardcode modules into page files.
+
+The current preferred CMS module folder shape is:
+- `resources/js/admin/cms/modules/<module-key>/manifest.ts`
+- `resources/js/admin/cms/modules/<module-key>/renderer.tsx`
+- `resources/js/admin/cms/modules/<module-key>/editor.tsx`
+- `resources/js/admin/cms/modules/<module-key>/types.ts`
+- `resources/js/admin/cms/modules/<module-key>/defaults.ts`
+- a small barrel entry for registry import
+
+This folder shape is part of the CMS portability goal:
+- modules should be easy to prototype outside the project
+- then copied in with minimal refactoring
+- then registered through the CMS manifest registry
+- without touching scripture admin modules
 
 ## 5. Canonical admin philosophy
 - Canonical pages expose semantic facts.
@@ -154,6 +169,7 @@ This does not replace the canonical page-local host system. It is the universal 
 - If a workflow needs new CMS content in the same card, add a block inside the container.
 - If a workflow needs a new card/section, create a new container.
 - If CMS modules expand, add them through the registry/manifest path rather than special page code.
+- If CMS module folders change, keep the manifest/renderer/editor/types/defaults contract predictable.
 - If a later CMS workflow needs richer editing, extend the universal CMS module system rather than inventing a special page feature.
 
 ## 12. Reporting expectations
