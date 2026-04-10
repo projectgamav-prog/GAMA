@@ -12,6 +12,8 @@ use App\Models\ContentBlock;
 use App\Models\TranslationSource;
 use App\Models\Verse;
 use App\Support\AdminContext\AdminContext;
+use App\Support\Cms\Regions\CmsExposedRegionRegistry;
+use App\Support\Cms\Regions\CmsExposedRegionResolver;
 use App\Support\Scripture\Admin\ContentBlockCapabilityPayload;
 use App\Support\Scripture\Admin\PrimaryPublishedEditableContentBlock;
 use App\Support\Scripture\Admin\Registry\AdminEntityRegistry;
@@ -38,6 +40,8 @@ class VerseController extends Controller
         Verse $verse,
         PublicScriptureData $publicScriptureData,
         AdminEntityRegistry $adminEntityRegistry,
+        CmsExposedRegionRegistry $regionRegistry,
+        CmsExposedRegionResolver $regionResolver,
     ): Response {
         $verse->load([
             'translations',
@@ -126,6 +130,18 @@ class VerseController extends Controller
             'topics' => $publicScriptureData->topics($verse->topicAssignments),
             'characters' => $publicScriptureData->characters($verse->characterAssignments),
             'content_blocks' => $publicScriptureData->contentBlocks($noteBlocks),
+            'cms_regions' => $regionResolver->resolve([
+                $regionRegistry->verseSupplementary(
+                    $verse,
+                    route('scripture.chapters.verses.show', [
+                        'book' => $book,
+                        'bookSection' => $bookSection,
+                        'chapter' => $chapter,
+                        'chapterSection' => $chapterSection,
+                        'verse' => $verse,
+                    ], false),
+                ),
+            ], $request->user()),
             'isAdmin' => $isAdmin,
             'admin' => $isAdmin
                 ? $this->verseAdminPayload(

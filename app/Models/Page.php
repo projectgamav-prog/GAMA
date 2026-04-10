@@ -42,4 +42,9 @@ class Page extends Model
     {
         return $query->where('status', 'published');
     }
+
+    public function scopeExposedRegion(Builder $query): Builder
+    {
+        return $query->whereNotNull('exposure_key');
+    }
 }

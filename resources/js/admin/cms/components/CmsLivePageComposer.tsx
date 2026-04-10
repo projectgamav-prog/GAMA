@@ -390,12 +390,16 @@ function LiveContainerCard({
 type Props = {
     page: CmsPage;
     containers: CmsAdminContainer[];
+    returnTo?: string;
 };
 
 export function CmsLivePageComposer({
     page,
     containers,
+    returnTo,
 }: Props) {
+    const redirectTarget = returnTo ?? page.public_href;
+
     if (containers.length === 0) {
         return (
             <CmsContainerEdgeAdderZone
@@ -405,7 +409,7 @@ export function CmsLivePageComposer({
                 relativeContainerId={null}
                 isBlankRegion
                 compact
-                returnTo={page.public_href}
+                returnTo={redirectTarget}
             />
         );
     }
@@ -416,7 +420,7 @@ export function CmsLivePageComposer({
                 <LiveContainerCard
                     key={container.id}
                     container={container}
-                    returnTo={page.public_href}
+                    returnTo={redirectTarget}
                 />
             ))}
         </div>

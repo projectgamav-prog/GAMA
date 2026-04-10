@@ -65,6 +65,7 @@ After completing a task:
   - `/cms/pages/{page:slug}`
 - Public CMS page shell exists at:
   - `/pages/{page:slug}`
+- Non-CMS pages can now declare shared CMS exposure regions that resolve supplementary CMS content without changing canonical page ownership.
 - Published CMS pages now expose live composition controls for permitted users when admin visibility is enabled.
 - Live CMS composition controls are now content-aware:
   - blank region: `Add Card` and `Add Button`
@@ -128,6 +129,10 @@ After completing a task:
   - container edit and delete from compact attached actions
   - block edit and delete from compact attached actions
 - Live Add Card, Add Button, Add Block, Edit card, and Edit block now stay on the same public-looking page instead of redirecting to the CMS workspace after submit.
+- Shared exposed CMS regions on non-CMS pages now use the same compact in-place authoring model and same-page return path.
+- The first non-CMS proof targets are now active:
+  - home page exposes a shared CMS region
+  - verse detail exposes a supplementary CMS region below the canonical verse flow
 - Placement context on the live CMS page is now inferred from the clicked zone:
   - page
   - container when applicable
@@ -175,7 +180,7 @@ After completing a task:
 - The first live-page CMS composition exposure is now in place on published CMS pages for permitted users.
 - Live CMS authoring now mounts directly into the actual container layout rather than through a detached control stack at the bottom of the page.
 - Live CMS container and block update/delete no longer require leaving the real page just to reach the first attached affordance.
-- The first non-CMS experiment mount now exists on verse detail through a CMS-local universal region component. It is intentionally blank and currently exposes only the blank-region adders.
+- Non-CMS page regions now resolve through a shared exposure-key model instead of the earlier verse-detail experiment shell.
 - Container placement is structurally supported for:
   - above the current container list
   - below an existing container
@@ -209,7 +214,10 @@ But richer authoring is still postponed:
 - CMS module categories are manifest-ready, but category-management UI is still postponed.
 - The legacy `scripture.books.overview` page still exists and should be reassessed separately from CMS once its long-term role is decided.
 - Page creation is still workspace-first; interactive attach-or-create page flows for buttons/links are not built yet.
-- Universal region persistence outside CMS pages is not built yet; the verse-detail mount is still an experiment shell.
+- Shared region exposure is now real on home and verse detail, but it is still narrow:
+  - backing CMS pages are internal region records resolved by exposure key
+  - broader eligible-page rollout is not built yet
+  - region-specific workspace cleanup and polish are not built yet
 - Draft-safe same-layout CMS authoring is still transitional because live in-place composition currently centers on published CMS pages; a real draft preview path is still a future need.
 - Live CMS pages now have in-place adders, but deeper inline editing of existing containers/blocks still leans on the workspace as a fallback.
 - Workspace fallback still exists for broader CMS management and deeper utility work, but the routine live add/edit actions no longer default-redirect there.
@@ -232,6 +240,7 @@ But richer authoring is still postponed:
 - Editors can now decide locally whether content belongs in the same card/container or in a new one, and the UI only exposes the adders that make sense for the current structural state.
 - On live CMS pages, routine add controls are now attached directly to the actual container layout instead of appearing in a detached composition shell below the content.
 - Those live add controls now stay compact by default, and existing containers/blocks have their first attached edit/delete affordances on the real page.
+- Home and verse detail now reuse the same CMS exposure component to render supplementary region content and in-place admin controls without changing their underlying page ownership.
 - The CMS builder is now operational for core page/container/block CRUD and movement, but it is still foundation-first rather than feature-complete.
 - The CMS workspace still exists for identity management, listing, diagnostics, and support editing, but it is no longer treated as the preferred authoring surface in architecture or workspace copy.
 - CMS linking is now expected to happen through generic CMS modules, especially button destinations, instead of per-entity scripture schema linkage.
@@ -261,7 +270,7 @@ Do not drift into fake abstractions detached from either the canonical schema or
    - keep published CMS pages interactive for permitted users
    - preserve the locked same-layout public-page-first authoring rule as live composition expands
    - keep routine add/edit controls attached directly to eligible layout elements instead of drifting back into detached control shells
-   - define how future site regions can expose universal composition controls with real persistence, not just experiment shells, without dragging canonical structure into CMS
+   - extend the new shared exposed-region model to more eligible pages without dragging canonical structure into CMS
    - preserve the stable `manifest.ts` / `renderer.tsx` / `editor.tsx` / `types.ts` / `defaults.ts` / `index.tsx` contract
 2. Improve the first CMS module family only where it materially helps live authoring:
    - richer text editing

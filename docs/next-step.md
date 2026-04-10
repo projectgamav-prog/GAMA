@@ -48,11 +48,10 @@ The next CMS task should focus on the live interaction seam:
 - preserve the new in-place attachment rule so controls stay on the actual container/block area instead of drifting into detached bottom-of-page shells
 - preserve the compact-controls rule so live add/edit affordances stay small by default and only expand after click
 - preserve the no-dashboard-redirect rule so routine live add/edit flows stay on the same public-looking page
-- define how universal composition regions appear across live pages without making users hunt through dashboard page records first
+- extend the new shared exposed-region model across additional eligible live pages without making users hunt through dashboard page records first
 - keep CMS composition interactive on published pages for permitted users
 - preserve the page -> container -> block grammar while shifting the workflow toward in-place composition
-- decide how future site regions will expose add-section / add-content / add-buttons entry points
-- turn the current verse-detail experiment into a persisted universal region model if that direction still holds
+- decide how more site regions should expose add-section / add-content / add-buttons entry points
 - keep CMS integration touchpoints minimal and same-origin-safe
 - decide the draft-safe same-layout preview path so draft authoring does not drift back into workspace-first habits
 

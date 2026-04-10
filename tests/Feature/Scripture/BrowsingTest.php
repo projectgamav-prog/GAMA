@@ -479,6 +479,11 @@ test('verse detail page is displayed with translations commentaries and publishe
                 'characters.0.character.href',
                 route('scripture.characters.show', $character),
             )
+            ->where(
+                'cms_regions.0.key',
+                "scripture-verse-{$this->firstVerse->id}-supplementary",
+            )
+            ->where('cms_regions.0.containers', [])
             ->has('content_blocks', 1)
             ->where('content_blocks.0.title', 'Published verse note'),
         );
@@ -916,6 +921,10 @@ test('verse detail page includes adjacent verse navigation inside the current ch
             ->component('scripture/chapters/verses/show')
             ->where('previous_verse', null)
             ->where('next_verse.number', $this->secondVerse->number)
+            ->where(
+                'cms_regions.0.key',
+                "scripture-verse-{$this->firstVerse->id}-supplementary",
+            )
             ->where(
                 'next_verse.href',
                 route('scripture.chapters.verses.show', [

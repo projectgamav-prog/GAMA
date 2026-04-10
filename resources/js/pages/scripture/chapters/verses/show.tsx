@@ -7,7 +7,7 @@ import {
     Tag,
     Users,
 } from 'lucide-react';
-import { CmsEligibleRegionExperiment } from '@/admin/cms/components/CmsEligibleRegionExperiment';
+import { CmsExposedRegion } from '@/admin/cms/components/CmsExposedRegion';
 import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import { AdminModuleHostGroup } from '@/admin/core/AdminModuleHostGroup';
 import {
@@ -66,9 +66,15 @@ export default function VerseShow({
     topics,
     characters,
     content_blocks,
+    cms_regions = [],
     admin,
 }: VerseShowProps) {
     const showAdminControls = useVisibleAdminControls();
+    const universalCmsRegion = cms_regions[0] ?? null;
+    const shouldShowUniversalCmsRegion =
+        universalCmsRegion !== null &&
+        (universalCmsRegion.containers.length > 0 ||
+            (showAdminControls && universalCmsRegion.admin !== null));
     const chapterTitle = chapterLabel(chapter.number, chapter.title);
     const bookSectionTitle = sectionLabel(
         book_section.number,
@@ -963,21 +969,17 @@ export default function VerseShow({
                 admin={admin}
             />
 
-            {showAdminControls && (
+            {shouldShowUniversalCmsRegion && universalCmsRegion && (
                 <ScriptureSection
                     entityMeta={{
                         ...verseEntity,
-                        region: 'universal_content_experiment',
+                        region: 'universal_content_region',
                         capabilityHint: 'cms',
                     }}
                     title="Universal Content Region"
-                    description="First verse-detail experiment for the universal CMS layer. This stays separate from canonical verse structure and existing verse-owned editorial blocks."
+                    description="Supplementary CMS content for verse detail. This stays separate from canonical verse structure and existing verse-owned editorial blocks."
                 >
-                    <CmsEligibleRegionExperiment
-                        title="Verse Detail Universal Region"
-                        description="This is the first book-schema experiment for mounting the universal CMS composition layer on a live canonical page. The region is blank, so it only exposes Add Card and Add Button."
-                        regionKey={`verse-${verse.id}`}
-                    />
+                    <CmsExposedRegion region={universalCmsRegion} />
                 </ScriptureSection>
             )}
         </ScriptureLayout>

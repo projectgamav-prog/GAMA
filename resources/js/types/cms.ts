@@ -100,3 +100,16 @@ export type CmsPublicPageShowProps = {
         containers: CmsAdminContainer[];
     } | null;
 };
+
+export type CmsExposedRegion = {
+    key: string;
+    label: string;
+    description: string | null;
+    containers: CmsPublicContainer[];
+    admin?: {
+        return_to: string;
+        bootstrap_store_href: string;
+        page: CmsPage | null;
+        containers: CmsAdminContainer[];
+    } | null;
+};

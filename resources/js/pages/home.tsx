@@ -1,8 +1,10 @@
 import { Head, Link, usePage } from '@inertiajs/react';
+import { CmsExposedRegion } from '@/admin/cms/components/CmsExposedRegion';
 import { AuthenticatedUtilityNav } from '@/components/authenticated-utility-nav';
 import { Button } from '@/components/ui/button';
 import { login, register } from '@/routes';
 import { index as scriptureBooksIndex } from '@/routes/scripture/books';
+import type { CmsExposedRegion as CmsExposedRegionPayload } from '@/types';
 
 type HomeProps = {
     canRegister: boolean;
@@ -11,10 +13,20 @@ type HomeProps = {
         description: string | null;
         href: string;
     } | null;
+    cms_regions: CmsExposedRegionPayload[];
 };
 
-export default function Home({ canRegister, featured_book }: HomeProps) {
+export default function Home({
+    canRegister,
+    featured_book,
+    cms_regions,
+}: HomeProps) {
     const { auth, name } = usePage().props;
+    const homePrimaryRegion = cms_regions[0] ?? null;
+    const shouldShowHomePrimaryRegion =
+        homePrimaryRegion !== null &&
+        (homePrimaryRegion.containers.length > 0 ||
+            homePrimaryRegion.admin !== null);
 
     return (
         <>
@@ -135,6 +147,26 @@ export default function Home({ canRegister, featured_book }: HomeProps) {
                                     </p>
                                 </div>
                             </div>
+
+                            {shouldShowHomePrimaryRegion && homePrimaryRegion && (
+                                <section className="space-y-4">
+                                    <div className="space-y-2">
+                                        <p className="text-sm font-semibold tracking-[0.2em] text-muted-foreground uppercase">
+                                            Supplementary Region
+                                        </p>
+                                        <h2 className="text-2xl font-semibold tracking-tight">
+                                            Home Page CMS Region
+                                        </h2>
+                                        <p className="max-w-2xl text-sm leading-7 text-muted-foreground">
+                                            Supplementary universal content can
+                                            appear here without changing the
+                                            protected scripture structure.
+                                        </p>
+                                    </div>
+
+                                    <CmsExposedRegion region={homePrimaryRegion} />
+                                </section>
+                            )}
                         </section>
 
                         <aside className="rounded-[2rem] border border-amber-200/80 bg-white/90 p-7 shadow-[0_24px_80px_-40px_rgba(120,79,21,0.45)] backdrop-blur dark:border-amber-500/20 dark:bg-white/5 dark:shadow-[0_24px_80px_-40px_rgba(0,0,0,0.75)]">

@@ -78,6 +78,7 @@ This rule applies to CMS pages now and should guide future eligible live pages.
 
 - CMS pages are the active implementation target
 - future eligible pages may expose the same authoring behavior through the universal content layer
+- non-CMS pages may declare shared CMS regions that resolve supplementary CMS containers and blocks without turning those pages into CMS-owned routes
 - canonical scripture structure remains protected
 - universal content composition may appear on scripture-related pages only as augmentation, never as canonical schema mutation
 

@@ -1,3 +1,4 @@
+import type { CmsExposedRegion } from './cms';
 import type { PublicContentBlock } from './content-blocks';
 
 export type ScriptureContentBlock = PublicContentBlock;
@@ -783,6 +784,7 @@ export type VerseShowProps = {
     topics: ScriptureVerseTopicAssignment[];
     characters: ScriptureVerseCharacterAssignment[];
     content_blocks: ScriptureContentBlock[];
+    cms_regions?: CmsExposedRegion[];
     isAdmin: boolean;
     admin?: ScriptureVerseAdmin | null;
 };

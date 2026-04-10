@@ -3,12 +3,21 @@
 use App\Http\Controllers\Cms\PageAdminCreateController;
 use App\Http\Controllers\Cms\PageAdminDeleteController;
 use App\Http\Controllers\Cms\PageAdminUpdateController;
+use App\Http\Controllers\Cms\ExposedRegionContainerController;
 use App\Http\Controllers\Cms\PageBlockAdminController;
 use App\Http\Controllers\Cms\PageContainerAdminController;
 use App\Http\Controllers\Cms\PageController;
 use App\Http\Controllers\Cms\PageWorkspaceController;
 use App\Http\Middleware\EnsureCanAccessAdminContext;
 use Illuminate\Support\Facades\Route;
+
+Route::middleware(['auth', EnsureCanAccessAdminContext::class])
+    ->prefix('cms/exposed-regions')
+    ->name('cms.exposed-regions.')
+    ->group(function () {
+        Route::post('{regionKey}/containers', [ExposedRegionContainerController::class, 'store'])
+            ->name('containers.store');
+    });
 
 Route::middleware(['auth', EnsureCanAccessAdminContext::class])
     ->prefix('cms/pages')
