@@ -52,6 +52,7 @@ The next CMS task should focus on the live interaction seam:
 - keep CMS composition interactive on published pages for permitted users
 - preserve the page -> container -> block grammar while shifting the workflow toward in-place composition
 - decide how more site regions should expose add-section / add-content / add-buttons entry points
+- keep the normalized CMS page baseline stable and avoid reintroducing fresh migration drift in the page/exposed-region layer
 - keep CMS integration touchpoints minimal and same-origin-safe
 - decide the draft-safe same-layout preview path so draft authoring does not drift back into workspace-first habits
 

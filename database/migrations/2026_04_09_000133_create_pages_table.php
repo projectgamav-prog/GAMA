@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('slug')->unique();
+            $table->string('exposure_key')->nullable()->unique();
             $table->string('status')->default('draft');
             $table->string('layout_key')->nullable();
             $table->timestamps();

@@ -76,6 +76,7 @@ After completing a task:
 - CMS page records support:
   - `title`
   - `slug`
+  - nullable `exposure_key`
   - `status`
   - optional `layout_key`
 - CMS page workspace now supports:
@@ -163,6 +164,7 @@ After completing a task:
 - CMS admin redirects and action hrefs now stay same-origin and relative, which keeps Inertia navigation stable even when the local host differs from `APP_URL`.
 - Actual CMS migration/runtime validation has now run cleanly on the active MySQL database:
   - `pages`, `page_containers`, and `page_blocks` are applied
+  - the normalized `pages` baseline now includes `exposure_key`
   - foreign keys are present
   - page delete cascades to its containers and blocks
   - container delete removes only that container and its blocks
@@ -170,6 +172,7 @@ After completing a task:
   - container/block move up/down remains correct after deletes
 - The focused CMS coupling audit did not find direct scripture-module imports or scripture-admin dependencies inside the CMS core, registry, renderers, editors, controllers, or requests. The remaining scripture-flavored CMS UI copy was cleaned up in this hardening pass.
 - The incorrect book-specific CMS overview bridge direction was removed from schema, scripture payloads, scripture UI, and the development seed. A local database may still contain previously created `bhagavad-gita-overview` CMS data from that earlier wrong pass, but the application code no longer depends on it.
+- The CMS page/exposed-region migration drift is now cleaned up: fresh rebuilds create the final intended `pages` schema directly, so verse detail and other exposed-region pages no longer depend on a missing follow-up migration.
 
 ## Partially working
 
