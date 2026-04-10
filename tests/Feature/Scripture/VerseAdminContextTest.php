@@ -629,6 +629,17 @@ test('authorized editors can update verse meta without wiping untouched full-edi
             ->where('verse_meta.keywords_json.0', 'clarity')
             ->where('verse_meta.study_flags_json.0', 'memorization'),
         );
+
+    $this->actingAs($editor)
+        ->get($this->fullEditRoute)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('verse_meta.summary_short', 'Context-aware summary')
+            ->where('verse_meta.scene_location', 'Kurukshetra')
+            ->where('verse_meta.is_featured', true)
+            ->where('verse_meta.keywords_json.0', 'clarity')
+            ->where('verse_meta.study_flags_json.0', 'memorization'),
+        );
 });
 
 test('authorized editors can manage verse note blocks while public verse page stays published only', function () {

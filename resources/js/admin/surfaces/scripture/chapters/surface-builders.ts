@@ -1,5 +1,4 @@
 import {
-    CHAPTER_CONTENT_BLOCKS_SURFACE_KEY,
     CHAPTER_IDENTITY_SURFACE_KEY,
     CHAPTER_INTRO_SURFACE_KEY,
 } from '@/admin/surfaces/core/surface-keys';
@@ -21,6 +20,9 @@ type ChapterIdentitySurfaceArgs = {
     chapter: ScriptureChapter;
     updateHref: string;
     fullEditHref: string;
+    regionKey?: string;
+    returnToHref?: string | null;
+    editorDescription?: string | null;
 };
 
 type ChapterIntroSurfaceArgs = {
@@ -44,18 +46,23 @@ export function createChapterIdentitySurface({
     chapter,
     updateHref,
     fullEditHref,
+    regionKey = 'chapter_identity',
+    returnToHref = null,
+    editorDescription = null,
 }: ChapterIdentitySurfaceArgs): AdminSurfaceContract<IdentityContractMetadata<ScriptureChapter>> {
     return createInlineEditorSurface({
         surfaceKey: CHAPTER_IDENTITY_SURFACE_KEY,
         contractKey: 'identity',
         entity: 'chapter',
         entityId: chapter.id,
-        regionKey: 'chapter_identity',
+        regionKey,
         capabilities: ['edit', 'full_edit'],
         metadata: {
             entityRecord: chapter,
             updateHref,
             fullEditHref,
+            returnToHref,
+            editorDescription,
         },
     });
 }

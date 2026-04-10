@@ -3,25 +3,6 @@ import type { PublicContentBlock } from './content-blocks';
 
 export type ScriptureContentBlock = PublicContentBlock;
 
-export type ScriptureContentBlockInsertionMode =
-    | 'start'
-    | 'before'
-    | 'after'
-    | 'end';
-
-export type ScriptureContentBlockInsertionPoint = {
-    insertion_mode: ScriptureContentBlockInsertionMode;
-    relative_block_id: number | null;
-    suggested_region: string | null;
-    label: string;
-};
-
-export type ScriptureContentBlockReorderMeta = {
-    positionInRegion: number;
-    totalInRegion: number;
-    regionLabel: string;
-};
-
 export type ScriptureAdminEditMode = 'contextual' | 'full' | 'canonical';
 
 export type ScriptureAdminEditModeStatus = 'active' | 'planned' | 'disabled';

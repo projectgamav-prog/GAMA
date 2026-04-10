@@ -37,13 +37,28 @@ Before any implementation prompt, tell Codex:
 - treat manual pages as CMS
 - keep CMS composition independent from canonical scripture assumptions
 - if the task touches CMS architecture or CMS modules, also read `cms-architecture.md`
+- if the task touches canonical admin surface/module work, also read `scripture-admin-editing.md`
+- if the task adapts outside React/components into admin or CMS modules, also read `admin-module-integration.md`
 
 ## Immediate focus
 
-### 1. Keep scripture browsing and exposed-region cleanup trustworthy
-The local development corpus baseline is restored, verse detail no longer crashes, and the supplementary verse CMS region now has the clearer live path on that page.
+### 1. Keep the active book-schema edit path trustworthy
+The next pass should stay focused on the active existing-content edit path before any new structural work:
+- continue the browser pass across the repaired edit-existing-content surfaces across books, book sections, chapters, chapter sections, verses, verse meta, and active verse support editors
+- pay special attention to grouped inline editors on public schema pages:
+  - grouped section row editors on book and chapter pages
+- keep confirming that grouped inline editors use the right mounted semantics and return to the correct page context after save
+- use the same end-to-end standard that exposed the earlier dummy-editor bug:
+  - actual browser submit
+  - request fired
+  - database row changed
+  - UI visibly updated after save
+- keep confirming that always-mounted full-edit cards keep showing refreshed values after save instead of stale pre-save form state
+- keep ignoring retired public scripture block-authoring paths while auditing edit behavior
+- do not reintroduce the retired public scripture block-module branch while cleaning or extending canonical admin surfaces
+- leave canonical full-edit and protected schema editing intact where no safe replacement exists yet
 
-The next cleanup task should preserve that trustworthy state:
+This still needs to preserve the broader trustworthy state:
 - keep the full enabled-corpus development seed baseline intact for local browse behavior
 - do not narrow local browse state back to Bhagavad Gita only unless a task explicitly needs a narrow seeder
 - continue tracing the shared exposed-region model on eligible pages so the CMS path is real, not just theoretically mounted

@@ -14,6 +14,7 @@ type ChapterIdentityFormData = {
     slug: string;
     number: string;
     title: string;
+    return_to: string;
 };
 
 function ChapterIdentityEditor({
@@ -25,6 +26,7 @@ function ChapterIdentityEditor({
         slug: '',
         number: '',
         title: '',
+        return_to: '',
     });
 
     if (metadata === null) {
@@ -43,14 +45,15 @@ function ChapterIdentityEditor({
             slug: metadata.entityRecord.slug,
             number: metadata.entityRecord.number ?? '',
             title: metadata.entityRecord.title ?? '',
+            return_to: metadata.returnToHref ?? '',
         });
         form.clearErrors();
     }, [
         activation.isActive,
-        form,
         metadata.entityRecord.number,
         metadata.entityRecord.slug,
         metadata.entityRecord.title,
+        metadata.returnToHref,
     ]);
 
     const fullEditHref = buildScriptureAdminSectionHref(
@@ -66,7 +69,10 @@ function ChapterIdentityEditor({
         <div className="basis-full pt-2">
             <ScriptureInlineRegionEditor
                 title="Chapter identity"
-                description="Update the canonical chapter slug, number, and title without leaving the public chapter page."
+                description={
+                    metadata.editorDescription ??
+                    'Update the canonical chapter slug, number, and title without leaving the public chapter page.'
+                }
                 fullEditHref={fullEditHref}
                 onCancel={() => {
                     form.reset();

@@ -38,6 +38,8 @@ export type IdentityContractMetadata<TEntity> = {
     entityRecord: TEntity;
     updateHref: string;
     fullEditHref: string;
+    returnToHref?: string | null;
+    editorDescription?: string | null;
 };
 
 export type IntroContractMetadata<TEntity> = {
@@ -112,6 +114,12 @@ export function getIdentityContractMetadata<TEntity>(
         (metadata) =>
             typeof metadata.updateHref === 'string' &&
             typeof metadata.fullEditHref === 'string' &&
+            (typeof metadata.returnToHref === 'string' ||
+                metadata.returnToHref === null ||
+                metadata.returnToHref === undefined) &&
+            (typeof metadata.editorDescription === 'string' ||
+                metadata.editorDescription === null ||
+                metadata.editorDescription === undefined) &&
             typeof metadata.entityRecord === 'object' &&
             metadata.entityRecord !== null,
     );

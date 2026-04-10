@@ -1,4 +1,5 @@
 import { Link, useForm } from '@inertiajs/react';
+import { useEffect } from 'react';
 import { SquareArrowOutUpRight } from 'lucide-react';
 import InputError from '@/components/input-error';
 import {
@@ -40,6 +41,15 @@ function ChapterIdentityEditorCard({
         number: chapter.number ?? '',
         title: chapter.title ?? '',
     });
+
+    useEffect(() => {
+        form.setData({
+            slug: chapter.slug,
+            number: chapter.number ?? '',
+            title: chapter.title ?? '',
+        });
+        form.clearErrors();
+    }, [chapter.number, chapter.slug, chapter.title, form]);
 
     const submit = () => {
         form.patch(updateHref, {

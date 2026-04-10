@@ -15,6 +15,7 @@ type Props = {
     verse: ScriptureReaderVerse;
     sectionTitle: string;
     showAdminControls: boolean;
+    returnToHref?: string | null;
     sharedAdmin?: ScriptureChapterVerseSharedAdmin | null;
     panelClassName?: string;
 };
@@ -23,6 +24,7 @@ export function ScriptureChapterVerseRowAdmin({
     verse,
     sectionTitle,
     showAdminControls,
+    returnToHref = null,
     sharedAdmin = null,
     panelClassName = 'flex flex-wrap items-center gap-1.5',
 }: Props) {
@@ -47,6 +49,8 @@ export function ScriptureChapterVerseRowAdmin({
         verseMeta: verse.verse_meta ?? null,
         characters: verse.characters ?? [],
         admin: verse.admin,
+        context: 'chapter_page_row',
+        returnToHref,
         enabled: showAdminControls,
     });
     const rowActionSurface = resolveVerseRowActionSurface({

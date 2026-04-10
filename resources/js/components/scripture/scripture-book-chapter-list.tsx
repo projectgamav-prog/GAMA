@@ -180,6 +180,7 @@ export function ScriptureBookChapterList({
                                                     showAdminControls={
                                                         showAdminControls
                                                     }
+                                                    returnToHref={book.href}
                                                     panelClassName={
                                                         panelClassName
                                                     }

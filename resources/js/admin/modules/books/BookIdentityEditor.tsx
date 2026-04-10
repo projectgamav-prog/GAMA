@@ -47,7 +47,6 @@ function BookIdentityEditor({
         form.clearErrors();
     }, [
         activation.isActive,
-        form,
         metadata.entityRecord.number,
         metadata.entityRecord.slug,
         metadata.entityRecord.title,

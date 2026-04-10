@@ -15,6 +15,7 @@ type VerseIdentityFormData = {
     slug: string;
     number: string;
     text: string;
+    return_to: string;
 };
 
 function VerseIdentityEditor({
@@ -26,6 +27,7 @@ function VerseIdentityEditor({
         slug: '',
         number: '',
         text: '',
+        return_to: '',
     });
 
     if (metadata === null) {
@@ -44,14 +46,15 @@ function VerseIdentityEditor({
             slug: metadata.entityRecord.slug,
             number: metadata.entityRecord.number ?? '',
             text: metadata.entityRecord.text,
+            return_to: metadata.returnToHref ?? '',
         });
         form.clearErrors();
     }, [
         activation.isActive,
-        form,
         metadata.entityRecord.number,
         metadata.entityRecord.slug,
         metadata.entityRecord.text,
+        metadata.returnToHref,
     ]);
 
     const fullEditHref = buildScriptureAdminSectionHref(
@@ -67,7 +70,10 @@ function VerseIdentityEditor({
         <div className="basis-full pt-2">
             <ScriptureInlineRegionEditor
                 title="Verse identity"
-                description="Update the canonical verse text, number, and slug without leaving the public verse detail page."
+                description={
+                    metadata.editorDescription ??
+                    'Update the canonical verse text, number, and slug without leaving the public verse detail page.'
+                }
                 fullEditHref={fullEditHref}
                 onCancel={() => {
                     form.reset();

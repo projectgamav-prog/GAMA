@@ -24,6 +24,9 @@ beforeEach(function () {
     $this->bookSection = $this->book->bookSections()
         ->where('slug', 'main')
         ->firstOrFail();
+    $this->chapter = $this->bookSection->chapters()
+        ->where('slug', 'chapter-1')
+        ->firstOrFail();
 
     $this->booksIndexRoute = route('scripture.books.index');
     $this->showRoute = route('scripture.books.show', $this->book);
@@ -35,6 +38,14 @@ beforeEach(function () {
         'book' => $this->book,
         'bookSection' => $this->bookSection,
     ]);
+    $this->chapterIdentityUpdateRoute = route(
+        'scripture.chapters.admin.identity.update',
+        [
+            'book' => $this->book,
+            'bookSection' => $this->bookSection,
+            'chapter' => $this->chapter,
+        ],
+    );
     $this->bookSectionDetailsUpdateRoute = route(
         'scripture.book-sections.admin.details.update',
         [
@@ -226,6 +237,18 @@ test('authorized editors receive registered book admin props on book detail and 
                 $this->chapterStoreRoute,
             )
             ->where(
+                'book_sections.0.chapters.0.admin.identity_update_href',
+                $this->chapterIdentityUpdateRoute,
+            )
+            ->where(
+                'book_sections.0.chapters.0.admin.full_edit_href',
+                route('scripture.chapters.admin.full-edit', [
+                    'book' => $this->book,
+                    'bookSection' => $this->bookSection,
+                    'chapter' => $this->chapter,
+                ]),
+            )
+            ->where(
                 'book_sections.0.admin.intro_store_href',
                 $this->bookSectionIntroStoreRoute,
             )
@@ -359,6 +382,16 @@ test('authorized editors can update book description across book surfaces', func
             ),
         );
 
+    $this->actingAs($editor)
+        ->get($this->fullEditRoute)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where(
+                'book.description',
+                'Updated editorial book description from admin context.',
+            ),
+        );
+
 });
 
 test('authorized editors can update basic book section row details from grouped book surfaces', function () {
@@ -384,6 +417,53 @@ test('authorized editors can update basic book section row details from grouped 
             ->where(
                 'book_sections.0.admin.details_update_href',
                 $this->bookSectionDetailsUpdateRoute,
+            ),
+        );
+});
+
+test('authorized editors can update chapter identity from the book page chapter list and stay on the book page', function () {
+    $editor = User::query()->where('email', 'editor2@example.com')->firstOrFail();
+
+    $this->actingAs($editor)
+        ->from($this->showRoute)
+        ->patch($this->chapterIdentityUpdateRoute, [
+            'slug' => 'chapter-1-book-row-updated',
+            'number' => '1B',
+            'title' => 'Updated From Book Row',
+            'return_to' => $this->showRoute,
+        ])
+        ->assertRedirect($this->showRoute);
+
+    $updatedChapter = $this->chapter->fresh();
+
+    expect($updatedChapter->slug)->toBe('chapter-1-book-row-updated');
+    expect($updatedChapter->number)->toBe('1B');
+    expect($updatedChapter->title)->toBe('Updated From Book Row');
+
+    $this->actingAs($editor)
+        ->get($this->showRoute)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where(
+                'book_sections.0.chapters',
+                fn ($chapters): bool => collect($chapters)->contains(
+                    fn ($chapter): bool => $chapter['slug'] === 'chapter-1-book-row-updated'
+                        && $chapter['number'] === '1B'
+                        && $chapter['title'] === 'Updated From Book Row'
+                        && $chapter['href'] === route('scripture.chapters.show', [
+                            'book' => $this->book,
+                            'bookSection' => $this->bookSection,
+                            'chapter' => $updatedChapter,
+                        ])
+                        && ($chapter['admin']['identity_update_href'] ?? null) === route(
+                            'scripture.chapters.admin.identity.update',
+                            [
+                                'book' => $this->book,
+                                'bookSection' => $this->bookSection,
+                                'chapter' => $updatedChapter,
+                            ],
+                        ),
+                ),
             ),
         );
 });

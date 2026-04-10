@@ -41,14 +41,7 @@ export type AdminSemanticActionKey =
     | 'edit_commentaries'
     | 'edit_media'
     | 'create_row'
-    | 'create_block'
-    | 'manage_blocks'
-    | 'reorder_blocks'
-    | 'edit_block'
-    | 'duplicate_block'
-    | 'delete_block'
-    | 'full_edit_block'
-    | 'full_edit_region';
+    | 'delete_entity';
 
 export type AdminModuleActionFamily =
     | 'edit'

@@ -1,4 +1,5 @@
 import { useForm } from '@inertiajs/react';
+import { useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +16,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { BookAdminSourceLabel } from '@/components/scripture/book-admin-source-label';
 import {
+    getDefaultBookMediaSlotRole,
     getBookMediaSlotMeta,
     getBookMediaSlotOptions,
 } from '@/lib/book-media-slot-meta';
@@ -76,15 +78,30 @@ export function CreateBookMediaAssignmentCard({
     nextSortOrder: number;
 }) {
     const slotOptions = getBookMediaSlotOptions(roleField.options);
+    const defaultRole = getDefaultBookMediaSlotRole(roleField.options);
 
     const form = useForm<MediaAssignmentFormData>({
         media_id: availableMedia[0] ? String(availableMedia[0].id) : '',
-        role: roleField.options?.[0] ?? 'overview_video',
+        role: defaultRole,
         title_override: '',
         caption_override: '',
         sort_order: String(nextSortOrder),
         status: 'draft',
     });
+
+    useEffect(() => {
+        if (form.isDirty || form.processing) {
+            return;
+        }
+
+        form.setData((data) => ({
+            ...data,
+            media_id: availableMedia[0] ? String(availableMedia[0].id) : '',
+            role: defaultRole,
+            sort_order: String(nextSortOrder),
+        }));
+        form.clearErrors();
+    }, [availableMedia, defaultRole, form, nextSortOrder]);
 
     return (
         <Card>
@@ -319,6 +336,18 @@ export function BookMediaAssignmentEditorCard({
         sort_order: String(assignment.sort_order),
         status: assignment.status,
     });
+
+    useEffect(() => {
+        form.setData({
+            media_id: String(assignment.media_id),
+            role: assignment.role,
+            title_override: assignment.title_override ?? '',
+            caption_override: assignment.caption_override ?? '',
+            sort_order: String(assignment.sort_order),
+            status: assignment.status,
+        });
+        form.clearErrors();
+    }, [assignment, form]);
 
     return (
         <Card id={`media-assignment-${assignment.id}`}>

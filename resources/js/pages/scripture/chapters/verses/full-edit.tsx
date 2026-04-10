@@ -1,4 +1,5 @@
 import { Link, useForm } from '@inertiajs/react';
+import { useEffect } from 'react';
 import { SquareArrowOutUpRight } from 'lucide-react';
 import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import { resolveVerseRelationSurfaces } from '@/admin/integrations/scripture/verses';
@@ -65,6 +66,15 @@ function VerseIdentityEditorCard({
         number: verse.number ?? '',
         text: verse.text,
     });
+
+    useEffect(() => {
+        form.setData({
+            slug: verse.slug,
+            number: verse.number ?? '',
+            text: verse.text,
+        });
+        form.clearErrors();
+    }, [form, verse.number, verse.slug, verse.text]);
 
     const submit = () => {
         form.patch(updateHref, {
@@ -171,6 +181,35 @@ function VerseMetaEditorCard({
     });
     const errors = form.errors as Record<string, string>;
     const characterOptions = getUniqueVerseCharacterOptions(characters);
+
+    useEffect(() => {
+        form.setData({
+            primary_speaker_character_id:
+                verseMeta?.primary_speaker_character_id !== null &&
+                verseMeta?.primary_speaker_character_id !== undefined
+                    ? String(verseMeta.primary_speaker_character_id)
+                    : NONE_VALUE,
+            primary_listener_character_id:
+                verseMeta?.primary_listener_character_id !== null &&
+                verseMeta?.primary_listener_character_id !== undefined
+                    ? String(verseMeta.primary_listener_character_id)
+                    : NONE_VALUE,
+            summary_short: verseMeta?.summary_short ?? '',
+            scene_location: verseMeta?.scene_location ?? '',
+            narrative_phase: verseMeta?.narrative_phase ?? '',
+            teaching_mode: verseMeta?.teaching_mode ?? '',
+            difficulty_level: verseMeta?.difficulty_level ?? '',
+            memorization_priority: String(
+                verseMeta?.memorization_priority ?? 0,
+            ),
+            is_featured: verseMeta?.is_featured ?? false,
+            keywords_text: formatAdminList(verseMeta?.keywords_json ?? null),
+            study_flags_text: formatAdminList(
+                verseMeta?.study_flags_json ?? null,
+            ),
+        });
+        form.clearErrors();
+    }, [form, verseMeta]);
 
     const submit = () => {
         form.transform((data) => ({

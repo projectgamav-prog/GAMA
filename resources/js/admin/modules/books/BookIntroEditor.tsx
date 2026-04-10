@@ -41,7 +41,7 @@ function BookIntroEditor({ surface, activation }: AdminModuleComponentProps) {
             description: metadata.textValue ?? '',
         });
         form.clearErrors();
-    }, [activation.isActive, form, metadata.textValue]);
+    }, [activation.isActive, metadata.textValue]);
 
     const fullEditHref = buildScriptureAdminSectionHref(
         metadata.fullEditHref,

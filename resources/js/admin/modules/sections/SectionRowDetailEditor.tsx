@@ -40,7 +40,7 @@ function SectionRowDetailEditor({
             title: metadata.rowTitle ?? '',
         });
         form.clearErrors();
-    }, [activation.isActive, form, metadata.rowNumber, metadata.rowTitle]);
+    }, [activation.isActive, metadata.rowNumber, metadata.rowTitle]);
 
     const editorTitle = `${metadata.groupLabel} details`;
 

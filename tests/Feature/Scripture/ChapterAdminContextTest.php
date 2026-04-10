@@ -368,6 +368,80 @@ test('authorized editors can update basic chapter section row details across gro
         );
 });
 
+test('authorized editors can update chapter identity from full edit and see refreshed chapter values', function () {
+    $editor = User::query()->where('email', 'editor2@example.com')->firstOrFail();
+    $identityUpdateRoute = route(
+        'scripture.chapters.admin.identity.update',
+        chapterRouteParameters($this->book, $this->bookSection, $this->chapter),
+    );
+
+    $this->actingAs($editor)
+        ->from($this->fullEditRoute)
+        ->patch($identityUpdateRoute, [
+            'slug' => 'chapter-1-updated',
+            'number' => '1A',
+            'title' => 'Arjuna Reframed',
+        ])
+        ->assertRedirect(route(
+            'scripture.chapters.admin.full-edit',
+            chapterRouteParameters(
+                $this->book,
+                $this->bookSection,
+                $this->chapter->fresh(),
+            ),
+        ));
+
+    expect($this->chapter->fresh()->slug)->toBe('chapter-1-updated');
+    expect($this->chapter->fresh()->number)->toBe('1A');
+    expect($this->chapter->fresh()->title)->toBe('Arjuna Reframed');
+
+    $updatedFullEditRoute = route(
+        'scripture.chapters.admin.full-edit',
+        chapterRouteParameters(
+            $this->book,
+            $this->bookSection,
+            $this->chapter->fresh(),
+        ),
+    );
+
+    $this->actingAs($editor)
+        ->get($updatedFullEditRoute)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('chapter.slug', 'chapter-1-updated')
+            ->where('chapter.number', '1A')
+            ->where('chapter.title', 'Arjuna Reframed'),
+        );
+});
+
+test('authorized editors can update chapter identity from the chapter page and follow the updated chapter route', function () {
+    $editor = User::query()->where('email', 'editor2@example.com')->firstOrFail();
+    $identityUpdateRoute = route(
+        'scripture.chapters.admin.identity.update',
+        chapterRouteParameters($this->book, $this->bookSection, $this->chapter),
+    );
+
+    $this->actingAs($editor)
+        ->from($this->chapterShowRoute)
+        ->patch($identityUpdateRoute, [
+            'slug' => 'chapter-1-page-updated',
+            'number' => '1C',
+            'title' => 'Updated From Chapter Page',
+        ])
+        ->assertRedirect(route(
+            'scripture.chapters.show',
+            chapterRouteParameters(
+                $this->book,
+                $this->bookSection,
+                $this->chapter->fresh(),
+            ),
+        ));
+
+    expect($this->chapter->fresh()->slug)->toBe('chapter-1-page-updated');
+    expect($this->chapter->fresh()->number)->toBe('1C');
+    expect($this->chapter->fresh()->title)->toBe('Updated From Chapter Page');
+});
+
 test('authorized editors can manage chapter section intro blocks across grouped chapter surfaces', function () {
     $editor = User::query()->where('email', 'editor3@example.com')->firstOrFail();
 

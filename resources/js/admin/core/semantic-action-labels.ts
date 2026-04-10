@@ -5,9 +5,6 @@ import {
     getStructuredMetaContractMetadata,
 } from '@/admin/surfaces/core/contract-readers';
 import {
-    getBlockCreateMetadata,
-} from '@/admin/surfaces/blocks/surface-types';
-import {
     getSectionCreateMetadata,
     getSectionGroupMetadata,
 } from '@/admin/surfaces/sections/surface-types';
@@ -98,23 +95,8 @@ function resolveSemanticAdminActionLabel(
 
             return metadata ? `Add ${metadata.entityLabel}` : 'Add Row';
         }
-        case 'create_block':
-            return 'Add Block';
-        case 'edit_block':
-            return 'Edit';
-        case 'manage_blocks':
-            return 'Manage Blocks';
-        case 'reorder_blocks':
-            return 'Reorder Blocks';
-        case 'duplicate_block':
-            return surface.blockType
-                ? `Duplicate ${scriptureAdminStartCase(surface.blockType)}`
-                : 'Duplicate';
-        case 'delete_block':
+        case 'delete_entity':
             return 'Delete';
-        case 'full_edit_block':
-        case 'full_edit_region':
-            return 'Full Edit';
         default:
             return null;
     }
@@ -133,12 +115,4 @@ export function resolveAdminActionLabel(
         action.defaultLabel ??
         scriptureAdminStartCase(action.actionKey.replaceAll('_', ' '))
     );
-}
-
-export function resolveBlockCreatePrompt(surface: AdminSurfaceContract): string {
-    const metadata = getBlockCreateMetadata(surface);
-
-    return metadata?.placementLabel
-        ? `Insert published content ${metadata.placementLabel.toLowerCase()} without leaving the current public surface.`
-        : 'Insert published content without leaving the current public surface.';
 }

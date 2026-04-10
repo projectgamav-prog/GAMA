@@ -62,6 +62,7 @@ type VerseReaderRowProps = {
     language: ScriptureReaderLanguage;
     hasReaderLanguages: boolean;
     sectionTitle: string;
+    returnToHref: string;
     showAdminControls: boolean;
     verseAdminShared?: ScriptureChapterVerseSharedAdmin | null;
 };
@@ -71,6 +72,7 @@ type VerseReaderCardPanelProps = {
     language: ScriptureReaderLanguage;
     hasReaderLanguages: boolean;
     sectionTitle: string;
+    returnToHref: string;
     showAdminControls: boolean;
     verseAdminShared?: ScriptureChapterVerseSharedAdmin | null;
 };
@@ -81,6 +83,7 @@ function ScriptureVerseReaderRow({
     language,
     hasReaderLanguages,
     sectionTitle,
+    returnToHref,
     showAdminControls,
     verseAdminShared = null,
 }: VerseReaderRowProps) {
@@ -170,6 +173,7 @@ function ScriptureVerseReaderRow({
                     verse={verse}
                     sectionTitle={sectionTitle}
                     showAdminControls={showAdminControls}
+                    returnToHref={returnToHref}
                     sharedAdmin={verseAdminShared}
                 />
 
@@ -209,6 +213,7 @@ function ScriptureVerseReaderCardPanel({
     language,
     hasReaderLanguages,
     sectionTitle,
+    returnToHref,
     showAdminControls,
     verseAdminShared = null,
 }: VerseReaderCardPanelProps) {
@@ -244,6 +249,7 @@ function ScriptureVerseReaderCardPanel({
                         language={language}
                         hasReaderLanguages={hasReaderLanguages}
                         sectionTitle={sectionTitle}
+                        returnToHref={returnToHref}
                         showAdminControls={showAdminControls}
                         verseAdminShared={verseAdminShared}
                     />
@@ -446,6 +452,7 @@ export function ScriptureChapterVerseList({
                                         language={language}
                                         hasReaderLanguages={hasReaderLanguages}
                                         sectionTitle={sectionTitle}
+                                        returnToHref={chapter.href}
                                         showAdminControls={showAdminControls}
                                         verseAdminShared={verseAdminShared}
                                     />

@@ -52,6 +52,8 @@ export function resolveVerseHeaderSurfaces({
     verseMeta,
     characters,
     admin,
+    context = 'verse_page',
+    returnToHref = null,
     enabled = true,
 }: {
     verse: ScriptureVerse;
@@ -59,6 +61,8 @@ export function resolveVerseHeaderSurfaces({
     verseMeta: ScriptureVerseMeta | null;
     characters: ScriptureVerseCharacterAssignment[];
     admin?: ScriptureVerseAdmin | ScriptureReaderVerseAdmin | null;
+    context?: 'verse_page' | 'chapter_page_row';
+    returnToHref?: string | null;
     enabled?: boolean;
 }) {
     if (!enabled || !admin) {
@@ -74,6 +78,15 @@ export function resolveVerseHeaderSurfaces({
             verse,
             updateHref: admin.identity_update_href,
             fullEditHref: admin.full_edit_href,
+            regionKey:
+                context === 'chapter_page_row'
+                    ? 'verse_list_row_identity'
+                    : 'verse_identity',
+            returnToHref,
+            editorDescription:
+                context === 'chapter_page_row'
+                    ? 'Update the canonical verse text, number, and slug directly from this verse row on the chapter page.'
+                    : 'Update the canonical verse text, number, and slug without leaving the public verse detail page.',
         }),
         introSurface: createVerseIntroSurface({
             verse,

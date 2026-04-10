@@ -1,4 +1,5 @@
 import { Link, useForm } from '@inertiajs/react';
+import { useEffect } from 'react';
 import { ShieldAlert, SquareArrowOutUpRight } from 'lucide-react';
 import {
     CreateBookContentBlockCard,
@@ -47,6 +48,13 @@ function BookDescriptionEditorCard({
     const form = useForm<BookDetailsFormData>({
         description: bookDescription ?? '',
     });
+
+    useEffect(() => {
+        form.setData({
+            description: bookDescription ?? '',
+        });
+        form.clearErrors();
+    }, [bookDescription, form]);
 
     return (
         <Card>

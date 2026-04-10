@@ -36,3 +36,9 @@ export function getBookMediaSlotOptions(
         ...getBookMediaSlotMeta(role),
     }));
 }
+
+export function getDefaultBookMediaSlotRole(
+    roles: string[] | null | undefined,
+): string {
+    return getBookMediaSlotOptions(roles)[0]?.role ?? 'hero_media';
+}

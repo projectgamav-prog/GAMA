@@ -1,4 +1,5 @@
 import { useForm } from '@inertiajs/react';
+import { useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import InputError from '@/components/input-error';
 import { ScriptureAdminSourceLabel } from '@/components/scripture/scripture-admin-source-label';
@@ -202,6 +203,27 @@ export function CreateScriptureAdminContentBlockCard({
         status: 'draft',
     });
     const showsImageFields = form.data.block_type === 'image';
+
+    useEffect(() => {
+        if (form.isDirty || form.processing) {
+            return;
+        }
+
+        form.setData((data) => ({
+            ...data,
+            block_type: fixedBlockType ?? typeOptions[0] ?? 'text',
+            region: defaultRegion ?? regionOptions[0] ?? 'overview',
+            sort_order: String(nextSortOrder),
+        }));
+        form.clearErrors();
+    }, [
+        defaultRegion,
+        fixedBlockType,
+        form,
+        nextSortOrder,
+        regionOptions,
+        typeOptions,
+    ]);
 
     return (
         <Card>
@@ -415,6 +437,20 @@ export function ScriptureAdminContentBlockEditorCard({
         status: block.status,
     });
     const showsImageFields = form.data.block_type === 'image';
+
+    useEffect(() => {
+        form.setData({
+            block_type: fixedBlockType ?? block.block_type,
+            title: block.title ?? '',
+            body: block.body ?? '',
+            media_url: blockDataValue(block, 'url'),
+            alt_text: blockDataValue(block, 'alt'),
+            region: block.region,
+            sort_order: String(block.sort_order),
+            status: block.status,
+        });
+        form.clearErrors();
+    }, [block, fixedBlockType, form]);
 
     return (
         <Card

@@ -1,5 +1,4 @@
 import type { AdminModuleDefinition } from './module-types';
-import { blockAdminModules } from '@/admin/integrations/blocks';
 import { entityActionAdminModules } from '@/admin/integrations/entity-actions';
 import { bookAdminModules } from '@/admin/integrations/scripture/books';
 import { chapterAdminModules } from '@/admin/integrations/scripture/chapters';
@@ -45,7 +44,6 @@ export const adminModuleRegistry = defineAdminModuleRegistry([
     ...verseAdminModules,
     ...sectionAdminModules,
     ...entityActionAdminModules,
-    ...blockAdminModules,
 ]);
 
 export function getRegisteredAdminModules(): readonly AdminModuleDefinition[] {

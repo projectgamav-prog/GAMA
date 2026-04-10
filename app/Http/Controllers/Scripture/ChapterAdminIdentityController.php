@@ -36,6 +36,14 @@ class ChapterAdminIdentityController extends Controller
             'bookSection' => $bookSection,
             'chapter' => $chapter,
         ];
+        $returnTo = $this->returnTo(
+            $request->input('return_to'),
+            $request->getSchemeAndHttpHost(),
+        );
+
+        if ($returnTo !== null) {
+            return redirect()->to($returnTo, 303);
+        }
 
         if (is_string($referer) && str_contains($referer, '/admin/full-edit')) {
             return redirect()->route(
@@ -61,5 +69,35 @@ class ChapterAdminIdentityController extends Controller
         $trimmed = trim($value);
 
         return $trimmed === '' ? null : $trimmed;
+    }
+
+    private function returnTo(mixed $value, string $currentHost): ?string
+    {
+        if (! is_string($value)) {
+            return null;
+        }
+
+        $trimmed = trim($value);
+
+        if ($trimmed === '') {
+            return null;
+        }
+
+        if (str_starts_with($trimmed, '/')) {
+            return str_starts_with($trimmed, '//') ? null : $trimmed;
+        }
+
+        if (! str_starts_with($trimmed, $currentHost)) {
+            return null;
+        }
+
+        $path = parse_url($trimmed, PHP_URL_PATH);
+        $query = parse_url($trimmed, PHP_URL_QUERY);
+
+        if (! is_string($path) || $path === '') {
+            return null;
+        }
+
+        return $query ? sprintf('%s?%s', $path, $query) : $path;
     }
 }

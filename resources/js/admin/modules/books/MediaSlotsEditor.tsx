@@ -16,7 +16,11 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { defineAdminModule } from '@/admin/core/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/core/module-types';
-import { getBookMediaSlotMeta } from '@/lib/book-media-slot-meta';
+import {
+    getBookMediaSlotMeta,
+    getBookMediaSlotOptions,
+    getDefaultBookMediaSlotRole,
+} from '@/lib/book-media-slot-meta';
 import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
 import type {
     ScriptureAdminMediaAssignment,
@@ -32,12 +36,6 @@ type MediaAssignmentFormData = {
     sort_order: string;
     status: 'draft' | 'published';
 };
-
-const MEDIA_SLOT_ROLES = [
-    'overview_video',
-    'hero_media',
-    'supporting_media',
-] as const;
 
 function MediaSlotPurposeCard({ role }: { role: string }) {
     const slot = getBookMediaSlotMeta(role);
@@ -61,16 +59,19 @@ function CreateMediaAssignmentCard({
     storeHref,
     nextSortOrder,
     availableMedia,
+    slotRoles,
     onSuccess,
 }: {
     storeHref: string;
     nextSortOrder: number;
     availableMedia: ScriptureAdminMediaSummary[];
+    slotRoles: string[];
     onSuccess: () => void;
 }) {
+    const slotOptions = getBookMediaSlotOptions(slotRoles);
     const form = useForm<MediaAssignmentFormData>({
         media_id: availableMedia[0] ? String(availableMedia[0].id) : '',
-        role: MEDIA_SLOT_ROLES[0],
+        role: getDefaultBookMediaSlotRole(slotRoles),
         title_override: '',
         caption_override: '',
         sort_order: String(nextSortOrder),
@@ -138,9 +139,12 @@ function CreateMediaAssignmentCard({
                                         <SelectValue placeholder="Choose slot" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {MEDIA_SLOT_ROLES.map((role) => (
-                                            <SelectItem key={role} value={role}>
-                                                {getBookMediaSlotMeta(role).label}
+                                        {slotOptions.map((option) => (
+                                            <SelectItem
+                                                key={option.role}
+                                                value={option.role}
+                                            >
+                                                {option.label}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -266,12 +270,15 @@ function CreateMediaAssignmentCard({
 function MediaAssignmentEditorCard({
     assignment,
     availableMedia,
+    slotRoles,
     onSuccess,
 }: {
     assignment: ScriptureAdminMediaAssignment;
     availableMedia: ScriptureAdminMediaSummary[];
+    slotRoles: string[];
     onSuccess: () => void;
 }) {
+    const slotOptions = getBookMediaSlotOptions(slotRoles);
     const form = useForm<MediaAssignmentFormData>({
         media_id: String(assignment.media_id),
         role: assignment.role,
@@ -359,9 +366,12 @@ function MediaAssignmentEditorCard({
                                 <SelectValue placeholder="Choose slot" />
                             </SelectTrigger>
                             <SelectContent>
-                                {MEDIA_SLOT_ROLES.map((role) => (
-                                    <SelectItem key={role} value={role}>
-                                        {getBookMediaSlotMeta(role).label}
+                                {slotOptions.map((option) => (
+                                    <SelectItem
+                                        key={option.role}
+                                        value={option.role}
+                                    >
+                                        {option.label}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -512,6 +522,13 @@ function MediaSlotsEditor({
         metadata.fullEditHref,
         'media_slots',
     );
+    const slotRoles = Array.from(
+        new Set([
+            ...metadata.assignments.map((assignment) => assignment.role),
+            'hero_media',
+            'supporting_media',
+        ]),
+    );
 
     if (!activation.isActive) {
         return null;
@@ -558,6 +575,7 @@ function MediaSlotsEditor({
                     storeHref={metadata.storeHref}
                     nextSortOrder={metadata.nextSortOrder}
                     availableMedia={metadata.availableMedia}
+                    slotRoles={slotRoles}
                     onSuccess={handleMutationSuccess}
                 />
 
@@ -566,6 +584,7 @@ function MediaSlotsEditor({
                         key={assignment.id}
                         assignment={assignment}
                         availableMedia={metadata.availableMedia}
+                        slotRoles={slotRoles}
                         onSuccess={handleMutationSuccess}
                     />
                 ))}

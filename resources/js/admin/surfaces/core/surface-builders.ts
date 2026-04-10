@@ -16,10 +16,6 @@ import type {
 import { resolveSemanticSurfaceKey } from './surface-keys';
 
 export const EDITOR_SURFACE_CAPABILITIES = ['edit', 'full_edit'] as const;
-export const BLOCK_CREATE_SURFACE_CAPABILITIES = [
-    'add_block',
-    'full_edit',
-] as const;
 
 type AdminSurfaceCallback = (...args: any[]) => void;
 
@@ -176,32 +172,6 @@ export function createSheetEditorModuleSurface<
             ...(metadata ?? ({} as TExtra)),
             session,
             onOpenChange,
-        },
-    });
-}
-
-export function createInsertControlSurface<TMetadata>(
-    args: Omit<BuildSurfaceArgs<TMetadata>, 'slot'>,
-): AdminSurfaceContract<TMetadata> {
-    return createAdminSurface({
-        ...args,
-        slot: 'insert_control',
-        presentation: args.presentation ?? {
-            placement: 'inline',
-            variant: 'compact',
-        },
-    });
-}
-
-export function createBlockActionsSurface<TMetadata>(
-    args: Omit<BuildSurfaceArgs<TMetadata>, 'slot'>,
-): AdminSurfaceContract<TMetadata> {
-    return createAdminSurface({
-        ...args,
-        slot: 'block_actions',
-        presentation: args.presentation ?? {
-            placement: 'inline',
-            variant: 'compact',
         },
     });
 }

@@ -44,6 +44,8 @@ After completing a task:
 - The CMS module contract and module folder shape are now being treated as stable foundation seams for future external React/TSX module integration.
 - `docs/cms-architecture.md` now exists as the focused CMS architecture brief that complements the broader project architecture doc.
 - `docs/public-admin-page-authoring.md` now exists as the focused same-layout live authoring brief for public/admin page behavior.
+- `docs/scripture-admin-editing.md` now reflects the active canonical surface/module system instead of the retired public scripture block-authoring model.
+- `docs/admin-module-integration.md` now documents the practical procedure for adapting outside React components into the canonical admin module system and the CMS module registry safely.
 
 ### Canonical scripture public flow
 - Book list: `scripture.books.index`
@@ -59,6 +61,29 @@ After completing a task:
 - Intro dropdowns are active on book cards, book-section cards/groups, chapter cards, chapter-section cards/groups, and verse rows where intro content exists.
 - The current book-schema CRUD slice remains active for books, book sections, chapters, chapter sections, verses, verse intro/meta, verse translations/commentaries, relevant note-block surfaces, and book media slots.
 - Canonical scripture pages no longer carry book-specific CMS page bridge fields or overview-page linkage logic.
+- The active edit-existing-content path has now been tightened across the book schema:
+  - open-on-demand inline editors for books, sections, chapters, chapter sections, verses, verse meta, and verse relation editors still hydrate through activation/remount correctly
+  - grouped inline identity editing is now context-aware where it stays active on list pages:
+    - chapter identity editing from the book page chapter list now mounts as a chapter-row editor instead of borrowing chapter-page semantics
+    - the chapter-row save path now returns to the book page instead of detouring into the chapter page route
+    - verse-row identity editing on the chapter page now uses row-specific wording instead of verse-detail wording
+  - the real browser-path dummy-editor bug is now fixed for the active inline book-schema editors that shared the same reset pattern:
+    - book identity
+    - book intro
+    - book section / chapter section grouped row details
+    - chapter identity
+    - verse identity
+  - root cause: those inline editors were resetting from server metadata on re-render because their hydration `useEffect` depended on the live `useForm()` object, which made the current local edits snap back while typing and produced stale submit payloads
+  - browser validation now confirms the active row identity editors submit real requests with edited values:
+    - chapter identity from the book page chapter list sends a `PATCH` to the chapter identity route, updates the chapter row in the database, and re-renders the book page with the updated chapter title/slug/number
+    - verse identity from the chapter page verse list sends a `PATCH` to the verse identity route, updates the verse row in the database, and re-renders the chapter page with the updated verse row
+  - the always-mounted full-edit cards for book description, chapter identity, verse identity/meta, registered content blocks, and book media assignments now resync from fresh Inertia props after save instead of holding stale pre-save values in local form state
+- The public admin surface/module system has had a focused cleanup pass:
+  - the dead retired public scripture block-module registry branch was removed from the active admin module registry
+  - the dead retired public scripture block surface builders and inline block-create helpers were removed
+  - the old `CmsEligibleRegionExperiment` component was removed because exposed regions now resolve through the real shared region system
+  - the active canonical registry now reflects the real working module families instead of carrying dead public-block compatibility files
+  - book media slot editor defaults no longer hardcode the retired overview-video role as the create default in the active editor helpers
 
 ### CMS page foundation and composition
 - Authenticated CMS workspace exists at:
@@ -241,6 +266,8 @@ But richer authoring is still postponed:
 - Book/chapter full-edit owner-attached content-block management still exists as a transitional admin fallback, but the older public live add/edit block path is now being retired from the active scripture browsing experience.
 - Verse detail no longer exposes the older live verse-owned block controls on the public page, but the underlying verse-owned note-block system still exists through full edit and other canonical admin routes.
 - Legacy content-block models, routes, and full-edit tools still exist in the backend for canonical admin fallback and already-saved editorial data; they are no longer treated as the active public scripture authoring direction.
+- Legacy canonical content-block backend controllers, route contexts, and duplication/reorder helpers still exist for full-edit/admin fallback and already-saved editorial data, but they are now clearly transitional rather than part of the active public admin module path.
+- The repaired edit-existing-content path still needs a broader browser pass across the remaining active inline/grouped and full-edit surfaces so the on-page editors, mounted context copy, and post-save refresh behavior are confirmed outside feature tests.
 
 ## Current UX condition
 
@@ -303,4 +330,6 @@ Do not drift into fake abstractions detached from either the canonical schema or
 ## Do not forget
 - `admin-architecture.md` is the authoritative architecture document.
 - `cms-architecture.md` is the focused CMS companion document for CMS-specific architecture work.
+- `scripture-admin-editing.md` is the practical companion for the active canonical admin surface/module path.
+- `admin-module-integration.md` is the practical companion for future outside React/component integration into the admin module system.
 - Future Codex prompts should explicitly tell Codex to read `admin-architecture.md` first.

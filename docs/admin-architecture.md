@@ -7,6 +7,10 @@ Purpose: preserve the locked semantic-surface admin architecture for canonical s
 
 Current priority: keep canonical scripture pages thin and schema-driven, and build CMS pages through their own page/container/block composition system with a dedicated CMS module registry.
 
+Implementation companions:
+- `docs/scripture-admin-editing.md` for the active canonical public/admin surface system
+- `docs/admin-module-integration.md` for adapting outside React components into the admin module architecture
+
 ## 1. Locked architecture context
 This project is not greenfield. The admin system already has a locked direction, and Codex must work inside it rather than improvising page-specific patterns.
 
@@ -175,6 +179,7 @@ The public-page-first CMS rule is now locked:
 - CMS composition stays page -> container -> block.
 - CMS modules stay in the dedicated CMS registry structure.
 - CMS module manifests and folder shape stay stable unless a deliberate architecture change is required.
+- Future canonical pages should expose semantic surfaces and let reusable modules qualify rather than importing editor implementations directly.
 - New CMS work should extend the universal page system, not create isolated one-off features.
 
 ## 10. What Codex must not do

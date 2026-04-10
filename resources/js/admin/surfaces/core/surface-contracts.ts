@@ -13,12 +13,7 @@ export type AdminSurfaceCapability =
     | 'create_row'
     | 'full_edit'
     | 'add_block'
-    | 'add_block_bottom'
-    | 'reorder'
-    | 'drag_reorder'
-    | 'duplicate'
     | 'delete'
-    | 'manage_blocks'
     | 'manage_media'
     | 'manage_relations';
 
@@ -28,20 +23,13 @@ export type AdminSurfaceContractKey =
     | 'structured_meta'
     | 'entity_actions'
     | 'relation_rows'
-    | 'block_region'
-    | 'registered_block'
-    | 'block_actions'
     | 'media_slots'
     | 'section_collection'
     | 'section_group';
 
 export type AdminSurfaceIdentifier = string | number;
 
-export type AdminSurfaceSlot =
-    | 'inline_editor'
-    | 'sheet_editor'
-    | 'insert_control'
-    | 'block_actions';
+export type AdminSurfaceSlot = 'inline_editor' | 'sheet_editor';
 
 export type AdminSurfacePlacement =
     | 'inline'

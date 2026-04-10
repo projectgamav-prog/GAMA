@@ -6,12 +6,14 @@ import type { ScriptureChapter } from '@/types';
 type Props = {
     chapter: ScriptureChapter;
     showAdminControls: boolean;
+    returnToHref?: string | null;
     panelClassName?: string;
 };
 
 export function ScriptureBookChapterRowAdmin({
     chapter,
     showAdminControls,
+    returnToHref = null,
     panelClassName = 'flex flex-wrap items-center gap-1.5',
 }: Props) {
     if (!showAdminControls || !chapter.admin) {
@@ -27,6 +29,8 @@ export function ScriptureBookChapterRowAdmin({
         chapter,
         chapterTitle,
         admin: chapter.admin,
+        context: 'book_page_row',
+        returnToHref,
         enabled: showAdminControls,
     });
 
