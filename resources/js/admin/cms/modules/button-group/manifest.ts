@@ -31,8 +31,39 @@ const validateButtonGroup = (
             errors[`data_json.buttons.${index}.label`] = 'Button label is required.';
         }
 
-        if (button.href.trim() === '') {
-            errors[`data_json.buttons.${index}.href`] = 'Button destination is required.';
+        if (
+            ! ['url', 'cms_page', 'scripture_route'].includes(
+                button.destination_type,
+            )
+        ) {
+            errors[`data_json.buttons.${index}.destination_type`] =
+                'Choose a valid destination type.';
+        }
+
+        if (
+            button.destination_type === 'url'
+            && (button.url === null || button.url.trim() === '')
+        ) {
+            errors[`data_json.buttons.${index}.url`] =
+                'Button URL is required.';
+        }
+
+        if (
+            button.destination_type === 'cms_page'
+            && (button.cms_page_slug === null
+                || button.cms_page_slug.trim() === '')
+        ) {
+            errors[`data_json.buttons.${index}.cms_page_slug`] =
+                'CMS page slug is required.';
+        }
+
+        if (
+            button.destination_type === 'scripture_route'
+            && (button.scripture_path === null
+                || button.scripture_path.trim() === '')
+        ) {
+            errors[`data_json.buttons.${index}.scripture_path`] =
+                'Scripture path is required.';
         }
 
         if (

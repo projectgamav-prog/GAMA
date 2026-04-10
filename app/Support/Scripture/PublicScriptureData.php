@@ -12,7 +12,6 @@ use App\Models\ContentBlock;
 use App\Models\DictionaryEntry;
 use App\Models\Media;
 use App\Models\MediaAssignment;
-use App\Models\Page;
 use App\Models\Topic;
 use App\Models\TopicVerseAssignment;
 use App\Models\Verse;
@@ -30,10 +29,6 @@ use App\Models\VerseTranslation;
  */
 class PublicScriptureData
 {
-    public function __construct(
-        private readonly BookOverviewPageBridgeData $bookOverviewPageBridgeData,
-    ) {}
-
     /**
      * @param  iterable<int, Book>  $books
      * @return list<array<string, mixed>>
@@ -59,7 +54,6 @@ class PublicScriptureData
             'description' => $book->description,
             'href' => $this->bookHref($book),
             'overview_href' => $this->bookOverviewHref($book),
-            'overview_page_href' => $this->bookOverviewPageHref($book),
             'media_slots' => $this->bookMediaSlots($book),
         ];
     }
@@ -794,19 +788,6 @@ class PublicScriptureData
     private function bookOverviewHref(Book $book): string
     {
         return route('scripture.books.overview', $book);
-    }
-
-    private function bookOverviewPageHref(Book $book): ?string
-    {
-        $overviewPage = $book->relationLoaded('overviewPage')
-            ? $book->overviewPage
-            : null;
-
-        if (! $overviewPage instanceof Page) {
-            return null;
-        }
-
-        return $this->bookOverviewPageBridgeData->publicHref($overviewPage);
     }
 
     private function dictionaryEntryHref(DictionaryEntry $entry): string

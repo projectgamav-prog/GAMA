@@ -150,11 +150,23 @@ Do not bring back old chapter-section gateway pages or similar canonical detours
 ## 8. Active admin flows
 Canonical scripture admin remains contextual and surface-attached on the canonical pages.
 
-CMS admin now uses a dedicated workspace:
+CMS admin now has two interaction layers:
+- live CMS page composition on published CMS pages for permitted users
+- a dedicated CMS workspace for supporting record management and deeper composition work
+
+The dedicated CMS workspace remains:
 - `cms.pages.index`
 - `cms.pages.show`
 
 This does not replace the canonical page-local host system. It is the universal CMS direction for non-canonical pages only.
+
+The public-page-first CMS rule is now locked:
+- content-managed pages must use the same core layout for public users and admins
+- admin mode may augment that real page with controls, overlays, adders, and edit affordances
+- admin mode must not rely on a fundamentally separate builder layout for routine composition
+- CMS workspace pages remain supportive utilities for listing, search, diagnostics, and management rather than the primary authoring surface
+- this same-layout plus admin-augmentation behavior should stay consistent across eligible pages site-wide
+- routine live authoring controls should attach directly to the relevant layout element instead of appearing as a detached builder shell below the page
 
 ## 9. What Codex must preserve
 - Canonical scripture pages remain thin and surface-driven.
@@ -177,7 +189,8 @@ This does not replace the canonical page-local host system. It is the universal 
 
 ## 11. Practical guardrails for the next passes
 - If work touches canonical scripture pages, keep using semantic surfaces and module qualification.
-- If work touches manual pages, route it through the CMS page/container/block model and the dedicated CMS workspace.
+- If work touches manual pages, route it through the CMS page/container/block model and the live page first, with the CMS workspace as support tooling.
+- Prefer exposing CMS composition on the real page layout; use the workspace as a support surface, not the routine authoring path.
 - If a workflow needs new CMS content in the same card, add a block inside the container.
 - If a workflow needs a new card/section, create a new container.
 - If CMS modules expand, add them through the registry/manifest path rather than special page code.

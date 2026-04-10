@@ -1,16 +1,24 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { CmsContainerRenderer } from '@/admin/cms/components/CmsContainerRenderer';
+import { CmsLiveModeBar } from '@/admin/cms/components/CmsLiveModeBar';
+import {
+    CmsLivePageComposer,
+    CmsPublicContainerStack,
+} from '@/admin/cms/components/CmsLivePageComposer';
 import { AuthenticatedUtilityNav } from '@/components/authenticated-utility-nav';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useVisibleAdminControls } from '@/hooks/use-admin-context';
 import { home, login } from '@/routes';
 import type { CmsPublicPageShowProps } from '@/types';
 
 export default function CmsPublicPageShow({
     page,
     containers,
+    isAdmin,
+    admin,
 }: CmsPublicPageShowProps) {
     const { auth, name } = usePage().props;
+    const showAdminControls = useVisibleAdminControls();
 
     return (
         <>
@@ -43,6 +51,12 @@ export default function CmsPublicPageShow({
 
                     <main className="flex-1 py-12">
                         <div className="space-y-8">
+                            {isAdmin && admin && (
+                                <CmsLiveModeBar
+                                    workspaceHref={admin.page.workspace_href}
+                                />
+                            )}
+
                             <div className="space-y-4">
                                 <div className="flex flex-wrap items-center gap-2">
                                     <Badge variant="outline">CMS Page</Badge>
@@ -72,20 +86,15 @@ export default function CmsPublicPageShow({
                                 </div>
                             </div>
 
-                            {containers.length > 0 ? (
-                                <div className="space-y-6">
-                                    {containers.map((container) => (
-                                        <CmsContainerRenderer
-                                            key={container.id}
-                                            container={container}
-                                        />
-                                    ))}
-                                </div>
+                            {showAdminControls && admin ? (
+                                <CmsLivePageComposer
+                                    page={admin.page}
+                                    containers={admin.containers}
+                                />
                             ) : (
-                                <div className="rounded-[2rem] border border-dashed border-border/70 bg-background/85 p-8 text-sm leading-7 text-muted-foreground">
-                                    This page is published, but it does not
-                                    have any containers yet.
-                                </div>
+                                <CmsPublicContainerStack
+                                    containers={containers}
+                                />
                             )}
                         </div>
                     </main>

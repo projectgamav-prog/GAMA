@@ -10,10 +10,14 @@ use App\Models\PageBlock;
 use App\Models\PageContainer;
 use App\Support\Cms\CmsModuleRegistry;
 use App\Support\Cms\PageBlockOrdering;
+use App\Support\Cms\ResolvesCmsAuthoringRedirect;
+use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 
 class PageBlockAdminController extends Controller
 {
+    use ResolvesCmsAuthoringRedirect;
+
     public function store(
         PageBlockAdminStoreRequest $request,
         Page $page,
@@ -41,7 +45,7 @@ class PageBlockAdminController extends Controller
             $relativeBlock,
         );
 
-        return redirect()->to(route('cms.pages.show', $page, false), 303);
+        return redirect()->to($this->resolveRedirectTarget($request, $page), 303);
     }
 
     public function update(
@@ -63,10 +67,11 @@ class PageBlockAdminController extends Controller
             'config_json' => $payload['config'],
         ]);
 
-        return redirect()->to(route('cms.pages.show', $page, false), 303);
+        return redirect()->to($this->resolveRedirectTarget($request, $page), 303);
     }
 
     public function destroy(
+        Request $request,
         Page $page,
         PageContainer $pageContainer,
         PageBlock $pageBlock,
@@ -74,10 +79,11 @@ class PageBlockAdminController extends Controller
     ): RedirectResponse {
         $pageBlockOrdering->remove($pageContainer, $pageBlock);
 
-        return redirect()->to(route('cms.pages.show', $page, false), 303);
+        return redirect()->to($this->resolveRedirectTarget($request, $page), 303);
     }
 
     public function moveUp(
+        Request $request,
         Page $page,
         PageContainer $pageContainer,
         PageBlock $pageBlock,
@@ -85,10 +91,11 @@ class PageBlockAdminController extends Controller
     ): RedirectResponse {
         $pageBlockOrdering->moveUp($pageContainer, $pageBlock);
 
-        return redirect()->to(route('cms.pages.show', $page, false), 303);
+        return redirect()->to($this->resolveRedirectTarget($request, $page), 303);
     }
 
     public function moveDown(
+        Request $request,
         Page $page,
         PageContainer $pageContainer,
         PageBlock $pageBlock,
@@ -96,7 +103,7 @@ class PageBlockAdminController extends Controller
     ): RedirectResponse {
         $pageBlockOrdering->moveDown($pageContainer, $pageBlock);
 
-        return redirect()->to(route('cms.pages.show', $page, false), 303);
+        return redirect()->to($this->resolveRedirectTarget($request, $page), 303);
     }
 
     private function nullableString(mixed $value): ?string

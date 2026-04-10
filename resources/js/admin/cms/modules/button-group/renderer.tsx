@@ -6,6 +6,7 @@ import {
     getButtonGroupAlignmentClass,
     getButtonGroupButtons,
     getButtonGroupLayout,
+    resolveButtonHref,
 } from './types';
 
 export function ButtonGroupRenderer({
@@ -40,7 +41,7 @@ export function ButtonGroupRenderer({
             {buttons.map((button, index) => (
                 <a
                     key={`${button.label}-${index}`}
-                    href={button.href || '#'}
+                    href={resolveButtonHref(button)}
                     target={button.open_in_new_tab ? '_blank' : undefined}
                     rel={
                         button.open_in_new_tab

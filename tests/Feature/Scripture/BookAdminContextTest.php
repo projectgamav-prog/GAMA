@@ -21,7 +21,6 @@ beforeEach(function () {
     $this->book = Book::query()
         ->where('slug', 'bhagavad-gita')
         ->firstOrFail();
-    $this->overviewPage = $this->book->overviewPage()->firstOrFail();
     $this->bookSection = $this->book->bookSections()
         ->where('slug', 'main')
         ->firstOrFail();
@@ -249,9 +248,7 @@ test('authorized editors receive registered book admin props on book detail, ove
             ->where('admin.identity_update_href', $this->identityUpdateRoute)
             ->where('admin.details_update_href', $this->detailsUpdateRoute)
             ->where('admin.full_edit_href', $this->fullEditRoute)
-            ->where('admin.canonical_edit_href', $this->canonicalEditRoute)
-            ->where('admin.overview_page_id', $this->overviewPage->id)
-            ->where('admin.cms_pages_index_href', route('cms.pages.index', absolute: false)),
+            ->where('admin.canonical_edit_href', $this->canonicalEditRoute),
         )
         ->assertInertia(fn (Assert $page) => $page
             ->where('book_sections.0.intro_block.id', $sectionIntroBlock->id)
@@ -321,9 +318,7 @@ test('authorized editors receive registered book admin props on book detail, ove
             ->where(
                 'books.0.admin.canonical_edit_href',
                 route('scripture.books.admin.canonical-edit', $this->book),
-            )
-            ->where('books.0.admin.overview_page_id', $this->overviewPage->id)
-            ->where('books.0.admin.cms_pages_index_href', route('cms.pages.index', absolute: false)),
+            ),
         );
 
     $this->actingAs($editor)
@@ -477,34 +472,6 @@ test('authorized editors can update book description across book surfaces', func
                 'book.description',
                 'Updated editorial book description from admin context.',
             ),
-        );
-});
-
-test('authorized editors can associate a CMS overview page through the book details surface', function () {
-    $editor = User::query()->where('email', 'editor2@example.com')->firstOrFail();
-    $overviewPage = \App\Models\Page::query()->create([
-        'title' => 'Associated overview page',
-        'slug' => 'associated-overview-page',
-        'status' => 'published',
-        'layout_key' => 'standard',
-    ]);
-
-    $this->actingAs($editor)
-        ->from($this->showRoute)
-        ->patch($this->detailsUpdateRoute, [
-            'description' => $this->book->description,
-            'overview_page_id' => (string) $overviewPage->id,
-        ])
-        ->assertRedirect($this->showRoute);
-
-    expect($this->book->fresh()->overview_page_id)->toBe($overviewPage->id);
-
-    $this->actingAs($editor)
-        ->get($this->showRoute)
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->where('book.overview_page_href', route('pages.show', $overviewPage))
-            ->where('admin.overview_page_id', $overviewPage->id),
         );
 });
 

@@ -10,10 +10,14 @@ use App\Models\PageContainer;
 use App\Support\Cms\CmsModuleRegistry;
 use App\Support\Cms\PageBlockOrdering;
 use App\Support\Cms\PageContainerOrdering;
+use App\Support\Cms\ResolvesCmsAuthoringRedirect;
+use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 
 class PageContainerAdminController extends Controller
 {
+    use ResolvesCmsAuthoringRedirect;
+
     public function store(
         PageContainerAdminStoreRequest $request,
         Page $page,
@@ -51,7 +55,7 @@ class PageContainerAdminController extends Controller
             null,
         );
 
-        return redirect()->to(route('cms.pages.show', $page, false), 303);
+        return redirect()->to($this->resolveRedirectTarget($request, $page), 303);
     }
 
     public function update(
@@ -64,37 +68,40 @@ class PageContainerAdminController extends Controller
             'container_type' => trim((string) $request->validated('container_type')),
         ]);
 
-        return redirect()->to(route('cms.pages.show', $page, false), 303);
+        return redirect()->to($this->resolveRedirectTarget($request, $page), 303);
     }
 
     public function destroy(
+        Request $request,
         Page $page,
         PageContainer $pageContainer,
         PageContainerOrdering $pageContainerOrdering,
     ): RedirectResponse {
         $pageContainerOrdering->remove($page, $pageContainer);
 
-        return redirect()->to(route('cms.pages.show', $page, false), 303);
+        return redirect()->to($this->resolveRedirectTarget($request, $page), 303);
     }
 
     public function moveUp(
+        Request $request,
         Page $page,
         PageContainer $pageContainer,
         PageContainerOrdering $pageContainerOrdering,
     ): RedirectResponse {
         $pageContainerOrdering->moveUp($page, $pageContainer);
 
-        return redirect()->to(route('cms.pages.show', $page, false), 303);
+        return redirect()->to($this->resolveRedirectTarget($request, $page), 303);
     }
 
     public function moveDown(
+        Request $request,
         Page $page,
         PageContainer $pageContainer,
         PageContainerOrdering $pageContainerOrdering,
     ): RedirectResponse {
         $pageContainerOrdering->moveDown($page, $pageContainer);
 
-        return redirect()->to(route('cms.pages.show', $page, false), 303);
+        return redirect()->to($this->resolveRedirectTarget($request, $page), 303);
     }
 
     private function nullableString(mixed $value): ?string

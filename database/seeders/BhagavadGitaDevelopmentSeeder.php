@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Book;
 use App\Models\Character;
-use App\Models\Page;
 use App\Models\Topic;
 use App\Support\Scripture\ScriptureJsonImporter;
 use Illuminate\Database\Seeder;
@@ -65,84 +64,6 @@ class BhagavadGitaDevelopmentSeeder extends Seeder
                 'sort_order' => 1,
             ],
         );
-
-        $overviewPage = Page::query()->updateOrCreate(
-            ['slug' => 'bhagavad-gita-overview'],
-            [
-                'title' => 'Bhagavad Gita Overview',
-                'status' => 'published',
-                'layout_key' => 'standard',
-            ],
-        );
-
-        $introContainer = $overviewPage->pageContainers()->updateOrCreate(
-            [
-                'label' => 'Overview intro',
-                'container_type' => 'card',
-            ],
-            [
-                'sort_order' => 1,
-            ],
-        );
-
-        $actionsContainer = $overviewPage->pageContainers()->updateOrCreate(
-            [
-                'label' => 'Continue reading',
-                'container_type' => 'section',
-            ],
-            [
-                'sort_order' => 2,
-            ],
-        );
-
-        $introContainer->pageBlocks()->updateOrCreate(
-            [
-                'module_key' => 'rich_text',
-                'sort_order' => 1,
-            ],
-            [
-                'data_json' => [
-                    'html' => '<p>The Bhagavad Gita frames a crisis of action, duty, and identity inside a battlefield dialogue. This first CMS-backed overview page exists to prove that book-level overview experiences can live in the independent CMS system while canonical chapter and verse structure stays scripture-owned.</p><p>Use the canonical book page to browse sections and chapters. Use this CMS page for broader orientation, framing, and future non-canonical editorial composition.</p>',
-                ],
-                'config_json' => [
-                    'align' => 'left',
-                    'max_width' => 'wide',
-                ],
-            ],
-        );
-
-        $actionsContainer->pageBlocks()->updateOrCreate(
-            [
-                'module_key' => 'button_group',
-                'sort_order' => 1,
-            ],
-            [
-                'data_json' => [
-                    'buttons' => [
-                        [
-                            'label' => 'Open Bhagavad Gita',
-                            'href' => route('scripture.books.show', $book),
-                            'variant' => 'default',
-                            'open_in_new_tab' => false,
-                        ],
-                        [
-                            'label' => 'Back to Books',
-                            'href' => route('scripture.books.index'),
-                            'variant' => 'outline',
-                            'open_in_new_tab' => false,
-                        ],
-                    ],
-                ],
-                'config_json' => [
-                    'layout' => 'auto',
-                    'alignment' => 'stretch',
-                ],
-            ],
-        );
-
-        $book->update([
-            'overview_page_id' => $overviewPage->id,
-        ]);
 
         $book->contentBlocks()->updateOrCreate(
             [

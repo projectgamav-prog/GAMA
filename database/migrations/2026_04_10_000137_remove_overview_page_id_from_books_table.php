@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (! Schema::hasColumn('books', 'overview_page_id')) {
+            return;
+        }
+
         Schema::table('books', function (Blueprint $table) {
-            $table->foreignId('overview_page_id')
-                ->nullable()
-                ->after('description')
-                ->constrained('pages')
-                ->nullOnDelete();
+            $table->dropConstrainedForeignId('overview_page_id');
         });
     }
 
@@ -25,8 +25,16 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (Schema::hasColumn('books', 'overview_page_id')) {
+            return;
+        }
+
         Schema::table('books', function (Blueprint $table) {
-            $table->dropConstrainedForeignId('overview_page_id');
+            $table->foreignId('overview_page_id')
+                ->nullable()
+                ->after('description')
+                ->constrained('pages')
+                ->nullOnDelete();
         });
     }
 };

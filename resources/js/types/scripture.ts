@@ -1,5 +1,4 @@
 import type { PublicContentBlock } from './content-blocks';
-import type { CmsPageStatus } from './cms';
 
 export type ScriptureContentBlock = PublicContentBlock;
 
@@ -152,9 +151,6 @@ export type ScriptureBookAdmin = {
     details_update_href: string;
     full_edit_href: string;
     canonical_edit_href: string;
-    overview_page_id: number | null;
-    overview_page_options: ScriptureCmsPageOption[];
-    cms_pages_index_href: string | null;
     destroy_href: string;
     book_section_store_href: string;
     content_block_store_href: string;
@@ -213,9 +209,6 @@ export type ScriptureBookCardAdmin = Pick<
     | 'details_update_href'
     | 'full_edit_href'
     | 'canonical_edit_href'
-    | 'overview_page_id'
-    | 'overview_page_options'
-    | 'cms_pages_index_href'
 >;
 
 export type ScriptureBooksIndexAdmin = {
@@ -312,18 +305,8 @@ export type ScriptureBook = {
     description?: string | null;
     href: string;
     overview_href: string;
-    overview_page_href: string | null;
     media_slots: ScriptureBookMediaSlots;
     admin?: ScriptureBookCardAdmin | null;
-};
-
-export type ScriptureCmsPageOption = {
-    id: number;
-    title: string;
-    slug: string;
-    status: CmsPageStatus;
-    workspace_href: string;
-    public_href: string | null;
 };
 
 export type ScriptureBookMedia = {
@@ -848,9 +831,6 @@ export type BookFullEditProps = {
     };
     admin_entity: ScriptureRegisteredAdminEntity;
     admin_details_update_href: string;
-    admin_overview_page_id: number | null;
-    admin_overview_page_options: ScriptureCmsPageOption[];
-    admin_cms_pages_index_href: string;
     admin_content_block_store_href: string;
     admin_media_assignment_store_href: string;
     next_content_block_sort_order: number;

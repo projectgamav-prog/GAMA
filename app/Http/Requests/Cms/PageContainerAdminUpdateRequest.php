@@ -23,6 +23,7 @@ class PageContainerAdminUpdateRequest extends FormRequest
         return [
             'label' => ['nullable', 'string', 'max:255'],
             'container_type' => ['required', 'string', 'in:card,section'],
+            'return_to' => ['nullable', 'string', 'max:500'],
         ];
     }
 }

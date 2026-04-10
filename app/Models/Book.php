@@ -6,7 +6,6 @@ use App\Support\Scripture\CanonicalScriptureOrder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -36,14 +35,6 @@ class Book extends Model
         return $this->belongsToMany(BookCategory::class, 'book_category_assignments')
             ->withTimestamps()
             ->orderBy('sort_order');
-    }
-
-    /**
-     * Get the optional CMS overview page linked from this book.
-     */
-    public function overviewPage(): BelongsTo
-    {
-        return $this->belongsTo(Page::class, 'overview_page_id');
     }
 
     /**

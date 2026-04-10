@@ -14,6 +14,7 @@ CMS is its own system.
 - CMS must not depend on canonical admin/module internals.
 - CMS must not import canonical surface builders, qualification rules, or page-local admin behaviors as permanent CMS architecture.
 - CMS may link to scripture routes or reference scripture entities through clean data contracts, but that is not the same as sharing internals.
+- CMS page association/linking should happen through generic CMS modules and destination contracts, not per-entity canonical schema foreign keys unless a later architecture decision explicitly requires one.
 
 ## 2. CMS composition model
 The active CMS composition model is:
@@ -55,6 +56,44 @@ Meaning:
 
 Do not introduce new composition abstractions in routine CMS work unless the architecture is being deliberately revised.
 
+## 3.1 CMS interaction model
+The composition grammar stays the same, but the preferred user-facing workflow is no longer dashboard-first.
+
+- content-managed pages must render the same core page layout for public users and admins
+- admins should edit in place on the real page and see the real final layout while editing
+- admin mode may add controls, overlays, adders, and edit affordances to that real page
+- admin mode must not switch routine composition into a fundamentally separate page-builder layout
+- default visible live controls should stay compact, with deeper chooser/configuration UI revealed only after click
+- permitted users should be able to compose on live CMS pages
+- meaningful add-section and add-content controls should appear in place
+- the CMS workspace still exists, but it is a supporting record-management view rather than the primary authoring experience
+- page creation and page-linking should grow out of interactive composition flows, especially button/link authoring
+- live composition controls should stay content-aware and minimal rather than exposing every adder everywhere
+
+This does not mean canonical scripture structure becomes CMS-managed.
+It means universal content composition should be exposed interactively where the content lives.
+
+Same-layout rule:
+- public users and admins share the same core content-managed page layout
+- the admin experience is an augmentation layer on that page, not a separate builder shell
+- routine live composition controls attach directly to the affected container/block area rather than appearing as a detached bottom-of-page shell
+
+Dashboard/workspace rule:
+- dashboard/workspace pages are valid for listing, search, management, diagnostics, and utilities
+- dashboard/workspace must not become the primary place for routine page composition
+
+Universal mechanism rule:
+- the same public-plus-admin augmentation behavior should apply across eligible pages site-wide
+- canonical scripture structure remains protected, but the universal content composition mechanism should stay consistent
+
+Current content-aware adder grammar:
+- blank region: show only `Add Card` and `Add Button`
+- blank-region clicks derive page-level container insertion automatically
+- existing containers expose top and bottom in-place controls for `Add Block` and `Add Button`
+- top/bottom clicks should derive insertion mode and ordering automatically from the clicked zone
+- existing live containers and blocks should expose compact attached edit/delete affordances where those actions already exist in CMS scope
+- adders should use progressive reveal instead of dumping every field at once
+
 ## 4. CMS module contract
 CMS modules are registry-based and manifest-driven.
 
@@ -81,6 +120,8 @@ Contract expectations:
 - `Renderer` renders the module payload in admin/public contexts
 - `Editor` owns the authoring UI for that module payload
 - `validate` is optional and provides module-local validation feedback
+- module-local linking behavior should stay generic and portable; for example, button-style modules may target CMS pages, scripture routes, or plain URLs through their own manifest-owned data contract
+- module-local linking workflows should eventually support both attaching an existing CMS page and creating a new CMS page from within interactive authoring flows where appropriate
 
 Do not hardcode module behavior into page files when it belongs in the manifest-driven module system.
 
@@ -136,3 +177,5 @@ Keep these rules locked unless the CMS architecture is being deliberately revise
 - the module folder structure remains stable
 - pages stay thin
 - CMS behavior stays in CMS-local systems, not page-local hacks
+- live-page composition is the preferred CMS interaction model for permitted users; the workspace remains supportive, not primary
+- content-managed pages use the same core layout for public users and admins, with admin augmentation layered onto the real page

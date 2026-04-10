@@ -94,4 +94,9 @@ export type CmsPageShowProps = {
 export type CmsPublicPageShowProps = {
     page: CmsPublicPage;
     containers: CmsPublicContainer[];
+    isAdmin: boolean;
+    admin?: {
+        page: CmsPage;
+        containers: CmsAdminContainer[];
+    } | null;
 };

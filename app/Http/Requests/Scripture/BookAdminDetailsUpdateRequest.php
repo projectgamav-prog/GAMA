@@ -23,7 +23,6 @@ class BookAdminDetailsUpdateRequest extends FormRequest
     {
         $this->merge([
             'description' => $this->normalizedString($this->input('description')),
-            'overview_page_id' => $this->normalizedOverviewPageId($this->input('overview_page_id')),
         ]);
     }
 
@@ -39,7 +38,6 @@ class BookAdminDetailsUpdateRequest extends FormRequest
 
         return [
             'description' => $definition->field('description')->validationRules(),
-            'overview_page_id' => ['nullable', 'integer', 'exists:pages,id'],
         ];
     }
 
@@ -54,30 +52,4 @@ class BookAdminDetailsUpdateRequest extends FormRequest
         return $trimmed === '' ? null : $trimmed;
     }
 
-    private function normalizedOverviewPageId(mixed $value): mixed
-    {
-        if ($value === null || $value === '') {
-            return null;
-        }
-
-        if (is_int($value)) {
-            return $value;
-        }
-
-        if (is_string($value)) {
-            $trimmed = trim($value);
-
-            if ($trimmed === '') {
-                return null;
-            }
-
-            if (ctype_digit($trimmed)) {
-                return (int) $trimmed;
-            }
-
-            return $trimmed;
-        }
-
-        return $value;
-    }
 }

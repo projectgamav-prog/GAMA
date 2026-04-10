@@ -7,6 +7,7 @@ import {
     Tag,
     Users,
 } from 'lucide-react';
+import { CmsEligibleRegionExperiment } from '@/admin/cms/components/CmsEligibleRegionExperiment';
 import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import { AdminModuleHostGroup } from '@/admin/core/AdminModuleHostGroup';
 import {
@@ -961,6 +962,24 @@ export default function VerseShow({
                 showAdminControls={showAdminControls}
                 admin={admin}
             />
+
+            {showAdminControls && (
+                <ScriptureSection
+                    entityMeta={{
+                        ...verseEntity,
+                        region: 'universal_content_experiment',
+                        capabilityHint: 'cms',
+                    }}
+                    title="Universal Content Region"
+                    description="First verse-detail experiment for the universal CMS layer. This stays separate from canonical verse structure and existing verse-owned editorial blocks."
+                >
+                    <CmsEligibleRegionExperiment
+                        title="Verse Detail Universal Region"
+                        description="This is the first book-schema experiment for mounting the universal CMS composition layer on a live canonical page. The region is blank, so it only exposes Add Card and Add Button."
+                        regionKey={`verse-${verse.id}`}
+                    />
+                </ScriptureSection>
+            )}
         </ScriptureLayout>
     );
 }

@@ -82,7 +82,7 @@ export default function CmsPageShow({
 
                     <Heading
                         title={page.title}
-                        description="CMS pages now compose through independent page containers and CMS blocks. Identity stays lightweight here, while composition stays in the dedicated CMS workspace below."
+                        description="Keep page identity lightweight here. Routine composition should happen on the real page layout when available, while this workspace stays a support surface for management, diagnostics, and utility editing."
                     />
                 </div>
 
@@ -226,8 +226,10 @@ export default function CmsPageShow({
                         <CardHeader className="gap-3">
                             <CardTitle>Composition Direction</CardTitle>
                             <CardDescription>
-                                CMS composition now uses its own independent
-                                page-container-block model.
+                                CMS composition uses its own independent
+                                page-container-block model, but this workspace
+                                is a support view rather than the primary
+                                authoring surface.
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4 text-sm leading-6 text-muted-foreground">
@@ -239,9 +241,10 @@ export default function CmsPageShow({
                                 a new card.
                             </p>
                             <p>
-                                The module registry for those blocks now lives
-                                under `resources/js/admin/cms/` as its own
-                                CMS-local system.
+                                Admins should normally compose on the real page
+                                layout so they see the final result while
+                                editing. Use this workspace for support tasks,
+                                identity management, and utility edits.
                             </p>
 
                             <div className="flex flex-wrap gap-2">
@@ -254,7 +257,7 @@ export default function CmsPageShow({
                                     <Button asChild>
                                         <Link href={page.public_href}>
                                             <Globe2 className="size-4" />
-                                            Open public page
+                                            Open real page
                                         </Link>
                                     </Button>
                                 )}

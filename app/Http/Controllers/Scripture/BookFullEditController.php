@@ -10,7 +10,6 @@ use App\Models\MediaAssignment;
 use App\Support\Scripture\Admin\BookAdminRouteContext;
 use App\Support\Scripture\Admin\RegisteredContentBlockData;
 use App\Support\Scripture\Admin\Registry\AdminEntityRegistry;
-use App\Support\Scripture\BookOverviewPageBridgeData;
 use App\Support\Scripture\PublicScriptureData;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -24,9 +23,7 @@ class BookFullEditController extends Controller
         Book $book,
         PublicScriptureData $publicScriptureData,
         AdminEntityRegistry $adminEntityRegistry,
-        BookOverviewPageBridgeData $bookOverviewPageBridgeData,
     ): Response {
-        $book->load('overviewPage');
         $contentBlocks = $book->contentBlocks()
             ->get();
         $mediaAssignments = $book->mediaAssignments()
@@ -62,11 +59,6 @@ class BookFullEditController extends Controller
                 ->definition('book')
                 ->toArray(),
             'admin_details_update_href' => $adminRouteContext->detailsUpdateHref(),
-            'admin_overview_page_id' => $book->overview_page_id === null
-                ? null
-                : (int) $book->overview_page_id,
-            'admin_overview_page_options' => $bookOverviewPageBridgeData->adminOptions(),
-            'admin_cms_pages_index_href' => $bookOverviewPageBridgeData->cmsPagesIndexHref(),
             'admin_content_block_store_href' => $adminRouteContext->contentBlockStoreHref(),
             'admin_media_assignment_store_href' => $adminRouteContext->mediaAssignmentStoreHref(),
             'next_content_block_sort_order' => $nextContentBlockSortOrder,

@@ -43,6 +43,7 @@ After completing a task:
 - Dedicated CMS frontend registry/core/editor/renderer code now lives under `resources/js/admin/cms/`.
 - The CMS module contract and module folder shape are now being treated as stable foundation seams for future external React/TSX module integration.
 - `docs/cms-architecture.md` now exists as the focused CMS architecture brief that complements the broader project architecture doc.
+- `docs/public-admin-page-authoring.md` now exists as the focused same-layout live authoring brief for public/admin page behavior.
 
 ### Canonical scripture public flow
 - Book list: `scripture.books.index`
@@ -56,8 +57,7 @@ After completing a task:
 - Chapter-row controls on the book page are active and browser-validated for identity, intro, delete confirmation, and editor-mode visibility.
 - Intro dropdowns are active on book cards, book-section cards/groups, chapter cards, chapter-section cards/groups, and verse rows where intro content exists.
 - The current book-schema CRUD slice remains active for books, book sections, chapters, chapter sections, verses, verse intro/meta, verse translations/commentaries, relevant note-block surfaces, and book media slots.
-- Books can now optionally bridge to a CMS overview page through `books.overview_page_id` without embedding CMS rendering into canonical scripture pages.
-- The existing book details/introduction admin flow now supports selecting a linked CMS overview page and opening the CMS pages workspace from the same edit surface.
+- Canonical scripture pages no longer carry book-specific CMS page bridge fields or overview-page linkage logic.
 
 ### CMS page foundation and composition
 - Authenticated CMS workspace exists at:
@@ -65,6 +65,11 @@ After completing a task:
   - `/cms/pages/{page:slug}`
 - Public CMS page shell exists at:
   - `/pages/{page:slug}`
+- Published CMS pages now expose live composition controls for permitted users when admin visibility is enabled.
+- Live CMS composition controls are now content-aware:
+  - blank region: `Add Card` and `Add Button`
+  - container edges: `Add Card` and `Add Button`
+  - inside container block areas: `Add Block` and `Add Button`
 - CMS page create works through the Add Page flow in the CMS workspace.
 - Dashboard exposes a CMS pages entry point and Add Page link for admin-context users.
 - CMS page records support:
@@ -94,6 +99,10 @@ After completing a task:
   - `rich_text`
   - `button_group`
   - `media`
+- `button_group` now supports generic destination modes:
+  - `url`
+  - `cms_page`
+  - `scripture_route`
 - CMS module folders now follow a predictable portable shape under `resources/js/admin/cms/modules/<module>/`:
   - `manifest.ts`
   - `renderer.tsx`
@@ -103,7 +112,32 @@ After completing a task:
   - `index.tsx`
 - CMS manifests now support the core module contract plus an optional `validate` hook.
 - Public CMS pages now render ordered containers, and each container renders its ordered CMS blocks through the dedicated CMS renderer path.
-- The first real scripture-to-CMS bridge is now active: the Bhagavad Gita development seed creates a published CMS overview page and associates it to the Bhagavad Gita book through the new overview-page bridge.
+- The same CMS composition engine can now be exposed directly on published CMS pages for permitted users, so section/block authoring no longer has to start from dashboard record hunting.
+- The strict public-page-first CMS authoring rule is now locked:
+  - admins and public users share the same core content-managed page layout
+  - admin mode augments the real page instead of switching to a separate builder layout
+  - the CMS workspace remains supportive management tooling, not the primary routine authoring surface
+- The detached bottom-of-page live composition shell has been removed from the routine CMS page editing path.
+- Live CMS adders are now attached directly to the real page layout:
+  - blank page: `Add Card` and `Add Button`
+  - existing container top: `Add Block` and `Add Button`
+  - existing container bottom: `Add Block` and `Add Button`
+- The default visible live adders are now compact attached buttons instead of inline mini-panels, and the chooser/config UI only opens after click.
+- Live attached CMS CRUD now includes:
+  - create from compact in-place add buttons
+  - container edit and delete from compact attached actions
+  - block edit and delete from compact attached actions
+- Live Add Card, Add Button, Add Block, Edit card, and Edit block now stay on the same public-looking page instead of redirecting to the CMS workspace after submit.
+- Placement context on the live CMS page is now inferred from the clicked zone:
+  - page
+  - container when applicable
+  - top vs bottom placement
+  - insertion mode
+  - relative ordering target
+- The live adder shell now uses progressive reveal:
+  - card creation: choose container type first, then go deeper into the chosen type
+  - button creation: button-group options are split into button and layout steps
+  - block creation: choose a category first, then a block type inside that category
 - The CMS composition foundation has now been browser-validated for:
   - Add Page create flow
   - page list visibility
@@ -130,6 +164,7 @@ After completing a task:
   - block delete compacts ordering without corrupting unrelated records
   - container/block move up/down remains correct after deletes
 - The focused CMS coupling audit did not find direct scripture-module imports or scripture-admin dependencies inside the CMS core, registry, renderers, editors, controllers, or requests. The remaining scripture-flavored CMS UI copy was cleaned up in this hardening pass.
+- The incorrect book-specific CMS overview bridge direction was removed from schema, scripture payloads, scripture UI, and the development seed. A local database may still contain previously created `bhagavad-gita-overview` CMS data from that earlier wrong pass, but the application code no longer depends on it.
 
 ## Partially working
 
@@ -137,22 +172,27 @@ After completing a task:
 - The core structure is real and active.
 - The workspace now makes the same-container vs new-container decision explicit.
 - The composition grammar is now frozen as page -> container -> block.
+- The first live-page CMS composition exposure is now in place on published CMS pages for permitted users.
+- Live CMS authoring now mounts directly into the actual container layout rather than through a detached control stack at the bottom of the page.
+- Live CMS container and block update/delete no longer require leaving the real page just to reach the first attached affordance.
+- The first non-CMS experiment mount now exists on verse detail through a CMS-local universal region component. It is intentionally blank and currently exposes only the blank-region adders.
 - Container placement is structurally supported for:
   - above the current container list
   - below an existing container
 - Block placement is structurally supported for:
-  - at the top of a container
-  - below an existing block inside the same container
+  - at the top of a container block area
+  - at the bottom of a container block area
 
 But the CMS workflow is still intentionally narrow:
 - no drag/drop reorder UI yet
 - button-based move up/down is the active reorder control
 - no block publish state or scheduling yet
 - no richer page template system yet
+- verse detail is only a first experiment mount; persisted universal region ownership outside CMS pages is not built yet
 
 ### CMS module UX
 - Rich text works through a simple HTML-based editor.
-- Button group works with multi-button config, alignment, and layout options.
+- Button group works with multi-button config, alignment, layout options, generic destination typing, and progressive button-vs-layout steps.
 - Media works with image/video URL fields plus width/aspect settings.
 - The CMS module contract and folder shape are now frozen enough for future portable-module work, but external module loading itself is still not built.
 
@@ -167,25 +207,34 @@ But richer authoring is still postponed:
 - The public CMS shell is real, but broader public discovery/navigation is still not built.
 - External or remote CMS module registration is still not built yet.
 - CMS module categories are manifest-ready, but category-management UI is still postponed.
-- The legacy `scripture.books.overview` page still exists beside the new CMS overview bridge and should be reassessed once more book-level overview usage has moved onto CMS pages.
+- The legacy `scripture.books.overview` page still exists and should be reassessed separately from CMS once its long-term role is decided.
+- Page creation is still workspace-first; interactive attach-or-create page flows for buttons/links are not built yet.
+- Universal region persistence outside CMS pages is not built yet; the verse-detail mount is still an experiment shell.
+- Draft-safe same-layout CMS authoring is still transitional because live in-place composition currently centers on published CMS pages; a real draft preview path is still a future need.
+- Live CMS pages now have in-place adders, but deeper inline editing of existing containers/blocks still leans on the workspace as a fallback.
+- Workspace fallback still exists for broader CMS management and deeper utility work, but the routine live add/edit actions no longer default-redirect there.
+- Live add flows are now compact by default, but the new-container path on nonblank pages is still not attached in this narrower pass.
 
 ### Remaining canonical polish
 - The broader delete-heavy browser pass for some canonical structural/intro/media surfaces is still worth finishing.
 - Translation/commentary Full Edit still needs another usefulness review.
 - The later detail-page intro-dropdown phase for canonical detail tops is still not built.
+- Book/chapter/verse owner-attached content-block add flows still exist on canonical pages. They remain valid for canonical editorial blocks today, but they should be reassessed carefully if a broader universal content layer starts covering some of the same user-facing composition needs.
 
 ## Current UX condition
 
 ### Canonical scripture UX
 - The active canonical admin UX is more local, more truthful, and less dependent on detouring into deeper pages for common edits.
 - Intro presentation is more consistent across canonical cards.
-- Book cards and book page headers now expose an Overview button only when the linked CMS overview page exists and is published.
 
 ### CMS page UX
-- The CMS page flow is no longer just a record shell. It is now a real and browser-validated composition workspace.
-- Editors can now decide locally whether content belongs in the same card/container or in a new one.
+- The CMS page flow is no longer just a record shell. It is now a real composition system that exists both in the workspace and, in a first narrow form, on the live published CMS page itself for permitted users.
+- Editors can now decide locally whether content belongs in the same card/container or in a new one, and the UI only exposes the adders that make sense for the current structural state.
+- On live CMS pages, routine add controls are now attached directly to the actual container layout instead of appearing in a detached composition shell below the content.
+- Those live add controls now stay compact by default, and existing containers/blocks have their first attached edit/delete affordances on the real page.
 - The CMS builder is now operational for core page/container/block CRUD and movement, but it is still foundation-first rather than feature-complete.
-- CMS is now being used by a real scripture bridge case: Bhagavad Gita can open a normal CMS overview page from scripture UI, while canonical routing and chapter/verse structure stay unchanged.
+- The CMS workspace still exists for identity management, listing, diagnostics, and support editing, but it is no longer treated as the preferred authoring surface in architecture or workspace copy.
+- CMS linking is now expected to happen through generic CMS modules, especially button destinations, instead of per-entity scripture schema linkage.
 
 ## Important architecture reminders
 
@@ -208,15 +257,19 @@ But richer authoring is still postponed:
 Do not drift into fake abstractions detached from either the canonical schema or the CMS data model.
 
 ## Immediate next priority when resuming
-1. Use the frozen CMS foundation to define the next extension seam without widening CMS scope too quickly:
-   - decide how future external/remote CMS modules register into the current manifest registry
+1. Extend the live CMS interaction model without widening CMS scope too quickly:
+   - keep published CMS pages interactive for permitted users
+   - preserve the locked same-layout public-page-first authoring rule as live composition expands
+   - keep routine add/edit controls attached directly to eligible layout elements instead of drifting back into detached control shells
+   - define how future site regions can expose universal composition controls with real persistence, not just experiment shells, without dragging canonical structure into CMS
    - preserve the stable `manifest.ts` / `renderer.tsx` / `editor.tsx` / `types.ts` / `defaults.ts` / `index.tsx` contract
-   - keep module integration touchpoints minimal and same-origin-safe
-2. Improve the first CMS module family only where it materially helps authoring:
+2. Improve the first CMS module family only where it materially helps live authoring:
    - richer text editing
    - media selection/upload
    - better module-level validation feedback
-3. Reassess public CMS discovery/navigation only after the composition flow is stable.
+   - stronger generic destination authoring polish for button-based linking
+   - attach-existing-page vs create-new-page flows during button/link authoring
+3. Reassess public CMS discovery/navigation only after the live composition flow is stable.
 4. Return to the remaining canonical delete/full-edit/detail-top polish items without reintroducing page-local hacks.
 
 ## Do not forget

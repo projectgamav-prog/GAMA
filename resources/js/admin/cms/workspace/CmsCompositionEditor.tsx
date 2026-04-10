@@ -1,5 +1,5 @@
 import { useForm } from '@inertiajs/react';
-import { ArrowDown, ArrowUp, Layers3, Plus, Save, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, Layers3, Save, Trash2 } from 'lucide-react';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -26,9 +26,12 @@ import type {
     CmsContainerType,
     CmsInsertionMode,
     CmsModuleKey,
-    CmsModulePayload,
     CmsPage,
 } from '@/types';
+import {
+    CmsContainerEdgeAdderZone,
+    CmsInsideContainerAdderZone,
+} from '../components/CmsCompositionAdders';
 import { CmsBlockRenderer } from '../components/CmsBlockRenderer';
 import {
     CmsDeleteActionButton,
@@ -41,19 +44,10 @@ import { cmsModules, defaultCmsModuleValue } from '../core/module-registry';
 type Props = {
     page: CmsPage;
     containers: CmsAdminContainer[];
+    mode?: 'workspace' | 'live';
 };
 
 type CmsFormRecord = Record<string, any>;
-
-type ContainerInsertFormData = {
-    label: string;
-    container_type: CmsContainerType;
-    insertion_mode: CmsInsertionMode;
-    relative_container_id: number | null;
-    module_key: CmsModuleKey;
-    data_json: CmsFormRecord;
-    config_json: CmsFormRecord;
-};
 
 type BlockFormData = {
     insertion_mode: CmsInsertionMode;
@@ -79,10 +73,9 @@ const resolveModuleKey = (moduleKey: string): CmsModuleKey =>
 
 const resolveContainerType = (containerType: string): CmsContainerType =>
     containerType === 'section' ? 'section' : 'card';
-
 const modulePayloadFromForm = (
     form: Pick<BlockFormData, 'data_json' | 'config_json'>,
-): CmsModulePayload => ({
+) => ({
     data: form.data_json,
     config: form.config_json,
 });
@@ -112,257 +105,6 @@ function ModuleSelect({
                 ))}
             </SelectContent>
         </Select>
-    );
-}
-
-function ContainerInsertForm({
-    actionHref,
-    formKey,
-    insertionMode,
-    relativeContainerId,
-    title,
-    description,
-}: {
-    actionHref: string;
-    formKey: string;
-    insertionMode: CmsInsertionMode;
-    relativeContainerId: number | null;
-    title: string;
-    description: string;
-}) {
-    const buildInitialData = (
-        moduleKey: CmsModuleKey = defaultModuleKey,
-    ): ContainerInsertFormData => {
-        const defaults = defaultCmsModuleValue(moduleKey);
-
-        return {
-            label: '',
-            container_type: 'card',
-            insertion_mode: insertionMode,
-            relative_container_id: relativeContainerId,
-            module_key: moduleKey,
-            data_json: defaults.data,
-            config_json: defaults.config,
-        };
-    };
-
-    const form = useForm<ContainerInsertFormData>(buildInitialData());
-
-    return (
-        <Card className="border-dashed border-border/70 bg-muted/15 shadow-none">
-            <CardHeader className="gap-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                    <Plus className="size-4" />
-                    {title}
-                </CardTitle>
-                <CardDescription>{description}</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <form
-                    className="space-y-5"
-                    onSubmit={(event) => {
-                        event.preventDefault();
-
-                        form.post(actionHref, {
-                            preserveScroll: true,
-                        });
-                    }}
-                >
-                    <div className="grid gap-4 md:grid-cols-2">
-                        <div className="grid gap-2">
-                            <Label htmlFor={`${formKey}-container-type`}>
-                                Container type
-                            </Label>
-                            <Select
-                                value={form.data.container_type}
-                                onValueChange={(nextValue) =>
-                                    form.setData(
-                                        'container_type',
-                                        nextValue as CmsContainerType,
-                                    )
-                                }
-                            >
-                                <SelectTrigger
-                                    id={`${formKey}-container-type`}
-                                    className="w-full"
-                                >
-                                    <SelectValue placeholder="Choose container type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="card">Card</SelectItem>
-                                    <SelectItem value="section">
-                                        Section
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <InputError message={form.errors.container_type} />
-                        </div>
-
-                        <div className="grid gap-2">
-                            <Label htmlFor={`${formKey}-container-label`}>
-                                Container label
-                            </Label>
-                            <Input
-                                id={`${formKey}-container-label`}
-                                value={form.data.label}
-                                onChange={(event) =>
-                                    form.setData('label', event.target.value)
-                                }
-                                placeholder="Hero card"
-                            />
-                            <InputError message={form.errors.label} />
-                        </div>
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label htmlFor={`${formKey}-module`}>First block module</Label>
-                        <ModuleSelect
-                            id={`${formKey}-module`}
-                            value={form.data.module_key}
-                            onValueChange={(nextValue) => {
-                                const defaults = defaultCmsModuleValue(nextValue);
-
-                                form.setData({
-                                    ...form.data,
-                                    module_key: nextValue,
-                                    data_json: defaults.data,
-                                    config_json: defaults.config,
-                                });
-                            }}
-                        />
-                        <InputError message={form.errors.module_key} />
-                    </div>
-
-                    <CmsModuleEditor
-                        moduleKey={form.data.module_key}
-                        idPrefix={formKey}
-                        value={modulePayloadFromForm(form.data)}
-                        onChange={(nextValue) =>
-                            form.setData({
-                                ...form.data,
-                                data_json: nextValue.data,
-                                config_json: nextValue.config,
-                            })
-                        }
-                        errors={form.errors}
-                    />
-
-                    <div className="flex flex-wrap items-center gap-3">
-                        <Button type="submit" disabled={form.processing}>
-                            <Plus className="size-4" />
-                            {form.processing
-                                ? 'Creating container...'
-                                : 'Create container'}
-                        </Button>
-                        <p className="text-sm leading-6 text-muted-foreground">
-                            Choose this path when the content should become its
-                            own card or section rather than stay inside an
-                            existing container.
-                        </p>
-                    </div>
-                </form>
-            </CardContent>
-        </Card>
-    );
-}
-
-function BlockInsertForm({
-    actionHref,
-    formKey,
-    insertionMode,
-    relativeBlockId,
-    title,
-    description,
-}: {
-    actionHref: string;
-    formKey: string;
-    insertionMode: CmsInsertionMode;
-    relativeBlockId: number | null;
-    title: string;
-    description: string;
-}) {
-    const buildInitialData = (
-        moduleKey: CmsModuleKey = defaultModuleKey,
-    ): BlockFormData => {
-        const defaults = defaultCmsModuleValue(moduleKey);
-
-        return {
-            insertion_mode: insertionMode,
-            relative_block_id: relativeBlockId,
-            module_key: moduleKey,
-            data_json: defaults.data,
-            config_json: defaults.config,
-        };
-    };
-
-    const form = useForm<BlockFormData>(buildInitialData());
-
-    return (
-        <Card className="border-dashed border-border/70 bg-muted/15 shadow-none">
-            <CardHeader className="gap-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                    <Plus className="size-4" />
-                    {title}
-                </CardTitle>
-                <CardDescription>{description}</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <form
-                    className="space-y-5"
-                    onSubmit={(event) => {
-                        event.preventDefault();
-
-                        form.post(actionHref, {
-                            preserveScroll: true,
-                        });
-                    }}
-                >
-                    <div className="grid gap-2">
-                        <Label htmlFor={`${formKey}-module`}>Module</Label>
-                        <ModuleSelect
-                            id={`${formKey}-module`}
-                            value={form.data.module_key}
-                            onValueChange={(nextValue) => {
-                                const defaults = defaultCmsModuleValue(nextValue);
-
-                                form.setData({
-                                    ...form.data,
-                                    module_key: nextValue,
-                                    data_json: defaults.data,
-                                    config_json: defaults.config,
-                                });
-                            }}
-                        />
-                        <InputError message={form.errors.module_key} />
-                    </div>
-
-                    <CmsModuleEditor
-                        moduleKey={form.data.module_key}
-                        idPrefix={formKey}
-                        value={modulePayloadFromForm(form.data)}
-                        onChange={(nextValue) =>
-                            form.setData({
-                                ...form.data,
-                                data_json: nextValue.data,
-                                config_json: nextValue.config,
-                            })
-                        }
-                        errors={form.errors}
-                    />
-
-                    <div className="flex flex-wrap items-center gap-3">
-                        <Button type="submit" disabled={form.processing}>
-                            <Plus className="size-4" />
-                            {form.processing ? 'Adding block...' : 'Add block'}
-                        </Button>
-                        <p className="text-sm leading-6 text-muted-foreground">
-                            Use this path when the new content belongs inside
-                            the current card or section.
-                        </p>
-                    </div>
-                </form>
-            </CardContent>
-        </Card>
     );
 }
 
@@ -628,36 +370,37 @@ function ContainerEditorCard({
                     />
                 </div>
 
-                <BlockInsertForm
+                <CmsInsideContainerAdderZone
                     actionHref={container.block_store_href}
-                    formKey={`container-${container.id}-block-start`}
+                    formKeyPrefix={`container-${container.id}-block-start`}
                     insertionMode="start"
                     relativeBlockId={null}
-                    title="Add block at the top of this container"
-                    description="This places the new block above the current container content."
                 />
 
                 <div className="space-y-4">
                     {container.blocks.map((block) => (
-                        <div key={block.id} className="space-y-4">
-                            <BlockEditorCard block={block} />
-                            <BlockInsertForm
-                                actionHref={container.block_store_href}
-                                formKey={`container-${container.id}-block-after-${block.id}`}
-                                insertionMode="after"
-                                relativeBlockId={block.id}
-                                title="Add block below this block"
-                                description="Use this to place content between blocks or at the bottom of the current container."
-                            />
-                        </div>
+                        <BlockEditorCard key={block.id} block={block} />
                     ))}
                 </div>
+
+                <CmsInsideContainerAdderZone
+                    actionHref={container.block_store_href}
+                    formKeyPrefix={`container-${container.id}-block-end`}
+                    insertionMode="after"
+                    relativeBlockId={
+                        container.blocks[container.blocks.length - 1]?.id ?? null
+                    }
+                />
             </CardContent>
         </Card>
     );
 }
 
-export function CmsCompositionEditor({ page, containers }: Props) {
+export function CmsCompositionEditor({
+    page,
+    containers,
+    mode = 'workspace',
+}: Props) {
     return (
         <div className="space-y-6">
             <Card>
@@ -673,13 +416,14 @@ export function CmsCompositionEditor({ page, containers }: Props) {
                     </div>
                     <CardTitle className="flex items-center gap-2">
                         <Layers3 className="size-5" />
-                        Page Containers and Blocks
+                        {mode === 'live'
+                            ? 'Live Page Composition'
+                            : 'Page Containers and Blocks'}
                     </CardTitle>
                     <CardDescription>
-                        Pages own ordered containers, and containers own ordered
-                        blocks. Create a new container when content should
-                        become a new card or layout section. Add a block inside
-                        a container when the content belongs in the same card.
+                        {mode === 'live'
+                            ? 'Compose this published page in place. Create a new container when content should become a new card or layout section, and add a block inside a container when the content belongs in the same card.'
+                            : 'Pages own ordered containers, and containers own ordered blocks. This workspace mirrors that structure for support editing, while routine composition should stay on the real page layout when available.'}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-5 text-sm leading-6 text-muted-foreground">
@@ -689,36 +433,23 @@ export function CmsCompositionEditor({ page, containers }: Props) {
                         between blocks inside the same card.
                     </p>
                     <p>
-                        The workspace below keeps that choice local instead of
-                        hiding it behind page-specific hacks.
+                        {mode === 'live'
+                            ? 'These controls now appear directly on the live page for permitted users instead of forcing record-hunting through the dashboard first.'
+                            : 'Use this support view for management and utility edits without turning it into a separate builder shell.'}
                     </p>
                 </CardContent>
             </Card>
 
-            <ContainerInsertForm
-                key={
-                    containers.length > 0
-                        ? 'page-container-insert-start'
-                        : 'page-container-insert-empty'
-                }
+            <CmsContainerEdgeAdderZone
                 actionHref={page.container_store_href}
-                formKey={
+                formKeyPrefix={
                     containers.length > 0
-                        ? 'page-container-insert-start'
-                        : 'page-container-insert-empty'
+                        ? 'page-container-edge-start'
+                        : 'page-container-edge-empty'
                 }
                 insertionMode={containers.length > 0 ? 'start' : 'end'}
                 relativeContainerId={null}
-                title={
-                    containers.length > 0
-                        ? 'Create a container above all current containers'
-                        : 'Create the first container on this page'
-                }
-                description={
-                    containers.length > 0
-                        ? 'Use this when the new content should start in its own card or section at the top of the page.'
-                        : 'A page starts empty. Create the first container, then add more blocks inside it or add more containers below.'
-                }
+                isBlankRegion={containers.length === 0}
             />
 
             {containers.length > 0 ? (
@@ -726,14 +457,11 @@ export function CmsCompositionEditor({ page, containers }: Props) {
                     {containers.map((container) => (
                         <div key={container.id} className="space-y-6">
                             <ContainerEditorCard container={container} />
-                            <ContainerInsertForm
-                                key={`page-container-insert-after-${container.id}`}
+                            <CmsContainerEdgeAdderZone
                                 actionHref={page.container_store_href}
-                                formKey={`page-container-insert-after-${container.id}`}
+                                formKeyPrefix={`page-container-edge-after-${container.id}`}
                                 insertionMode="after"
                                 relativeContainerId={container.id}
-                                title="Create a new container below this one"
-                                description="Choose this when the next content should break out into a new card or layout section instead of staying inside the current container."
                             />
                         </div>
                     ))}

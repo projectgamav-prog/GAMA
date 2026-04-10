@@ -1,3 +1,4 @@
+import { type ReactNode } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { CmsAdminBlock, CmsAdminContainer, CmsPublicBlock, CmsPublicContainer } from '@/types';
@@ -14,11 +15,15 @@ type RenderableContainer = {
 type Props = {
     container: RenderableContainer | CmsAdminContainer | CmsPublicContainer;
     mode?: 'admin' | 'public';
+    topControls?: ReactNode;
+    bottomControls?: ReactNode;
 };
 
 export function CmsContainerRenderer({
     container,
     mode = 'public',
+    topControls = null,
+    bottomControls = null,
 }: Props) {
     const isCard = container.container_type === 'card';
 
@@ -44,6 +49,8 @@ export function CmsContainerRenderer({
                 </div>
             )}
 
+            {topControls}
+
             {container.blocks.length > 0 ? (
                 <div className="space-y-5">
                     {container.blocks.map((block) => (
@@ -59,6 +66,8 @@ export function CmsContainerRenderer({
                     This container does not contain any blocks yet.
                 </div>
             )}
+
+            {bottomControls}
         </section>
     );
 }

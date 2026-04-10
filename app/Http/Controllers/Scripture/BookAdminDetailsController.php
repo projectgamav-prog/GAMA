@@ -18,7 +18,6 @@ class BookAdminDetailsController extends Controller
     ): RedirectResponse {
         $book->update([
             'description' => $request->validated('description'),
-            'overview_page_id' => $request->validated('overview_page_id'),
         ]);
 
         return redirect()->back(status: 303);

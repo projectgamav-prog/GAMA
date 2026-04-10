@@ -6,13 +6,6 @@ import {
     ProtectedContentBlockCard,
 } from '@/components/scripture/book-admin-content-block-cards';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import {
     CreateBookMediaAssignmentCard,
     BookMediaAssignmentEditorCard,
 } from '@/components/scripture/book-admin-media-assignment-cards';
@@ -40,35 +33,20 @@ import type {
 
 type BookDetailsFormData = {
     description: string;
-    overview_page_id: string;
 };
-
-const NO_OVERVIEW_PAGE_VALUE = '__none__';
 
 function BookDescriptionEditorCard({
     bookDescription,
-    overviewPageId,
-    overviewPageOptions,
-    cmsPagesIndexHref,
     updateHref,
     field,
 }: {
     bookDescription: string | null | undefined;
-    overviewPageId: number | null;
-    overviewPageOptions: BookFullEditProps['admin_overview_page_options'];
-    cmsPagesIndexHref: string;
     updateHref: string;
     field: ScriptureRegisteredAdminField;
 }) {
     const form = useForm<BookDetailsFormData>({
         description: bookDescription ?? '',
-        overview_page_id:
-            overviewPageId === null ? '' : String(overviewPageId),
     });
-    const selectedOverviewPage =
-        overviewPageOptions.find(
-            (page) => String(page.id) === form.data.overview_page_id,
-        ) ?? null;
 
     return (
         <Card>
@@ -97,59 +75,6 @@ function BookDescriptionEditorCard({
                     <InputError message={form.errors.description} />
                 </div>
 
-                <div className="grid gap-2">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                        <Label htmlFor="book_full_overview_page">
-                            CMS overview page
-                        </Label>
-                        <Button asChild variant="outline" size="sm">
-                            <Link href={cmsPagesIndexHref}>
-                                <SquareArrowOutUpRight className="size-4" />
-                                Open CMS Pages
-                            </Link>
-                        </Button>
-                    </div>
-                    <Select
-                        value={
-                            form.data.overview_page_id || NO_OVERVIEW_PAGE_VALUE
-                        }
-                        onValueChange={(value) =>
-                            form.setData(
-                                'overview_page_id',
-                                value === NO_OVERVIEW_PAGE_VALUE ? '' : value,
-                            )
-                        }
-                    >
-                        <SelectTrigger id="book_full_overview_page">
-                            <SelectValue placeholder="No CMS overview page linked" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value={NO_OVERVIEW_PAGE_VALUE}>
-                                No CMS overview page
-                            </SelectItem>
-                            {overviewPageOptions.map((page) => (
-                                <SelectItem
-                                    key={page.id}
-                                    value={String(page.id)}
-                                >
-                                    {page.title} ({page.status})
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <p className="text-sm text-muted-foreground">
-                        Use this bridge to point the book at a normal CMS page
-                        for Overview buttons. Draft pages stay hidden publicly.
-                    </p>
-                    {selectedOverviewPage && (
-                        <p className="text-sm text-muted-foreground">
-                            Linked page: {selectedOverviewPage.title} (
-                            {selectedOverviewPage.status})
-                        </p>
-                    )}
-                    <InputError message={form.errors.overview_page_id} />
-                </div>
-
                 <div className="flex items-center gap-3">
                     <Button
                         type="button"
@@ -175,9 +100,6 @@ export default function BookFullEdit({
     book,
     admin_entity,
     admin_details_update_href,
-    admin_overview_page_id,
-    admin_overview_page_options,
-    admin_cms_pages_index_href,
     admin_content_block_store_href,
     admin_media_assignment_store_href,
     next_content_block_sort_order,
@@ -381,14 +303,11 @@ export default function BookFullEdit({
             <ScriptureSection
                 adminTargetSection="details"
                 title="Page Intro Copy"
-                description="Registered editorial copy for the canonical book surfaces, plus the optional bridge to a CMS overview page."
+                description="Registered editorial copy for the canonical book surfaces."
                 action={<Badge variant="outline">book_intro</Badge>}
             >
                 <BookDescriptionEditorCard
                     bookDescription={book.description}
-                    overviewPageId={admin_overview_page_id}
-                    overviewPageOptions={admin_overview_page_options}
-                    cmsPagesIndexHref={admin_cms_pages_index_href}
                     updateHref={admin_details_update_href}
                     field={fields.description}
                 />

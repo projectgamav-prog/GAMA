@@ -38,6 +38,7 @@ class PageBlockAdminStoreRequest extends FormRequest
                 'string',
                 Rule::in(CmsModuleRegistry::keys()),
             ],
+            'return_to' => ['nullable', 'string', 'max:500'],
             'data_json' => ['nullable', 'array'],
             'config_json' => ['nullable', 'array'],
         ];
