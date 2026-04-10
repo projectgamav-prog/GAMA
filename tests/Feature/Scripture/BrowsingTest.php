@@ -116,6 +116,7 @@ test('books page lists available public scripture books', function () {
             ->where('books.0.slug', 'empty-book')
             ->where('books.0.number', '1')
             ->where('books.0.overview_href', route('scripture.books.overview', $emptyBook))
+            ->where('books.0.overview_page_href', null)
             ->where('books.0.media_slots.overview_video', null)
             ->where('books.0.media_slots.hero_media', null)
             ->where('books.0.media_slots.supporting_media', [])
@@ -124,6 +125,7 @@ test('books page lists available public scripture books', function () {
             ->where('books.1.slug', 'ramcharitmanas')
             ->where('books.1.number', '2')
             ->where('books.1.overview_href', route('scripture.books.overview', $ramcharitmanas))
+            ->where('books.1.overview_page_href', null)
             ->where('books.1.media_slots.overview_video.title', 'Ram Overview Slot')
             ->where(
                 'books.1.media_slots.overview_video.caption',
@@ -151,6 +153,10 @@ test('books page lists available public scripture books', function () {
             ->where('books.2.slug', 'bhagavad-gita')
             ->where('books.2.number', '3')
             ->where('books.2.overview_href', route('scripture.books.overview', $this->book))
+            ->where(
+                'books.2.overview_page_href',
+                route('pages.show', ['page' => 'bhagavad-gita-overview']),
+            )
             ->where('books.2.media_slots.overview_video.role', 'overview_video')
             ->where('books.2.media_slots.overview_video.title', 'Bhagavad Gita Overview')
             ->where(
@@ -177,6 +183,10 @@ test('book overview page renders published editorial content separately from can
             ->where('book.title', 'Bhagavad Gita')
             ->where('book.href', route('scripture.books.show', $this->book))
             ->where('book.overview_href', route('scripture.books.overview', $this->book))
+            ->where(
+                'book.overview_page_href',
+                route('pages.show', ['page' => 'bhagavad-gita-overview']),
+            )
             ->where('book.media_slots.overview_video.title', 'Bhagavad Gita Overview')
             ->where(
                 'book.media_slots.overview_video.media.url',
@@ -200,6 +210,10 @@ test('book page is displayed for scripture browsing', function () {
             ->component('scripture/books/show')
             ->where('book.number', '1')
             ->where('book.title', 'Bhagavad Gita')
+            ->where(
+                'book.overview_page_href',
+                route('pages.show', ['page' => 'bhagavad-gita-overview']),
+            )
             ->where('book.media_slots.overview_video.title', 'Bhagavad Gita Overview')
             ->where(
                 'book.media_slots.overview_video.media.url',

@@ -2,6 +2,7 @@ import {
     ArrowLeft,
     ArrowRight,
     BookOpenText,
+    FileText,
     MessageSquareQuote,
     PlayCircle,
     type LucideIcon,
@@ -9,6 +10,7 @@ import {
 
 export type ScriptureNavigationActionKey =
     | 'go_to_structure_overview'
+    | 'open_book_overview_page'
     | 'open_book'
     | 'open_chapter'
     | 'open_verse_detail'
@@ -53,6 +55,13 @@ const NAVIGATION_PRESENTATIONS: Record<
         variant: 'default',
         icon: ArrowRight,
         iconPosition: 'end',
+    },
+    open_book_overview_page: {
+        actionKey: 'open_book_overview_page',
+        label: 'Overview',
+        variant: 'outline',
+        icon: FileText,
+        iconPosition: 'start',
     },
     open_book: {
         actionKey: 'open_book',

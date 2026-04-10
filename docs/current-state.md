@@ -42,6 +42,7 @@ After completing a task:
   - `page_blocks`
 - Dedicated CMS frontend registry/core/editor/renderer code now lives under `resources/js/admin/cms/`.
 - The CMS module contract and module folder shape are now being treated as stable foundation seams for future external React/TSX module integration.
+- `docs/cms-architecture.md` now exists as the focused CMS architecture brief that complements the broader project architecture doc.
 
 ### Canonical scripture public flow
 - Book list: `scripture.books.index`
@@ -55,6 +56,8 @@ After completing a task:
 - Chapter-row controls on the book page are active and browser-validated for identity, intro, delete confirmation, and editor-mode visibility.
 - Intro dropdowns are active on book cards, book-section cards/groups, chapter cards, chapter-section cards/groups, and verse rows where intro content exists.
 - The current book-schema CRUD slice remains active for books, book sections, chapters, chapter sections, verses, verse intro/meta, verse translations/commentaries, relevant note-block surfaces, and book media slots.
+- Books can now optionally bridge to a CMS overview page through `books.overview_page_id` without embedding CMS rendering into canonical scripture pages.
+- The existing book details/introduction admin flow now supports selecting a linked CMS overview page and opening the CMS pages workspace from the same edit surface.
 
 ### CMS page foundation and composition
 - Authenticated CMS workspace exists at:
@@ -100,6 +103,7 @@ After completing a task:
   - `index.tsx`
 - CMS manifests now support the core module contract plus an optional `validate` hook.
 - Public CMS pages now render ordered containers, and each container renders its ordered CMS blocks through the dedicated CMS renderer path.
+- The first real scripture-to-CMS bridge is now active: the Bhagavad Gita development seed creates a published CMS overview page and associates it to the Bhagavad Gita book through the new overview-page bridge.
 - The CMS composition foundation has now been browser-validated for:
   - Add Page create flow
   - page list visibility
@@ -163,6 +167,7 @@ But richer authoring is still postponed:
 - The public CMS shell is real, but broader public discovery/navigation is still not built.
 - External or remote CMS module registration is still not built yet.
 - CMS module categories are manifest-ready, but category-management UI is still postponed.
+- The legacy `scripture.books.overview` page still exists beside the new CMS overview bridge and should be reassessed once more book-level overview usage has moved onto CMS pages.
 
 ### Remaining canonical polish
 - The broader delete-heavy browser pass for some canonical structural/intro/media surfaces is still worth finishing.
@@ -174,11 +179,13 @@ But richer authoring is still postponed:
 ### Canonical scripture UX
 - The active canonical admin UX is more local, more truthful, and less dependent on detouring into deeper pages for common edits.
 - Intro presentation is more consistent across canonical cards.
+- Book cards and book page headers now expose an Overview button only when the linked CMS overview page exists and is published.
 
 ### CMS page UX
 - The CMS page flow is no longer just a record shell. It is now a real and browser-validated composition workspace.
 - Editors can now decide locally whether content belongs in the same card/container or in a new one.
 - The CMS builder is now operational for core page/container/block CRUD and movement, but it is still foundation-first rather than feature-complete.
+- CMS is now being used by a real scripture bridge case: Bhagavad Gita can open a normal CMS overview page from scripture UI, while canonical routing and chapter/verse structure stay unchanged.
 
 ## Important architecture reminders
 
@@ -214,4 +221,5 @@ Do not drift into fake abstractions detached from either the canonical schema or
 
 ## Do not forget
 - `admin-architecture.md` is the authoritative architecture document.
+- `cms-architecture.md` is the focused CMS companion document for CMS-specific architecture work.
 - Future Codex prompts should explicitly tell Codex to read `admin-architecture.md` first.

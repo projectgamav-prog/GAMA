@@ -36,6 +36,7 @@ Before any implementation prompt, tell Codex:
 - keep canonical scripture pages thin and surface-driven
 - treat manual pages as CMS
 - keep CMS composition independent from canonical scripture assumptions
+- if the task touches CMS architecture or CMS modules, also read `cms-architecture.md`
 
 ## Immediate focus
 
@@ -70,6 +71,7 @@ Once composition and editing are stable, reassess:
 - whether CMS pages need a light public index/discovery path
 - whether layout keys need stricter semantics
 - whether public page presentation needs stronger empty-state or layout polish
+- whether the legacy `scripture.books.overview` page should be retired after the new scripture-to-CMS overview bridge is stable
 
 Do not overbuild a full CMS site-builder in one jump.
 
@@ -85,6 +87,7 @@ As new work continues:
 - CMS composition remains page -> container -> block
 - CMS modules remain registry-based under `resources/js/admin/cms/`
 - CMS modules remain independent from canonical admin internals
+- scripture pages may link to CMS pages through narrow associations, but should not embed CMS rendering directly
 - pages stay thin
 - admin logic stays out of page-local hacks
 

@@ -68,6 +68,9 @@ export function resolveBookHeaderSurfaces({
             book,
             updateHref: admin.details_update_href,
             fullEditHref: admin.full_edit_href,
+            overviewPageId: admin.overview_page_id,
+            overviewPageOptions: admin.overview_page_options,
+            cmsPagesIndexHref: admin.cms_pages_index_href,
             presentation,
         }),
         actionsSurface: createBookActionsSurface({
@@ -97,6 +100,9 @@ export function resolveBookCardIntroSurface({
         book,
         updateHref: book.admin.details_update_href,
         fullEditHref: book.admin.full_edit_href,
+        overviewPageId: book.admin.overview_page_id,
+        overviewPageOptions: book.admin.overview_page_options,
+        cmsPagesIndexHref: book.admin.cms_pages_index_href,
         presentation,
     });
 }

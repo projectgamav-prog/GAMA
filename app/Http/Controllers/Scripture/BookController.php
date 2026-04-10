@@ -16,6 +16,7 @@ use App\Support\Scripture\Admin\ChapterAdminRouteContext;
 use App\Support\Scripture\Admin\ContentBlockCapabilityPayload;
 use App\Support\Scripture\Admin\PrimaryPublishedEditableContentBlock;
 use App\Support\Scripture\Admin\VisibleContentBlockSequence;
+use App\Support\Scripture\BookOverviewPageBridgeData;
 use App\Support\Scripture\PublicScriptureData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -30,13 +31,23 @@ class BookController extends Controller
     public function index(
         Request $request,
         PublicScriptureData $publicScriptureData,
+        BookOverviewPageBridgeData $bookOverviewPageBridgeData,
     ): Response
     {
         $books = Book::query()
-            ->with($this->publicBookMediaRelations())
+            ->with([
+                ...$this->publicBookMediaRelations(),
+                'overviewPage',
+            ])
             ->inCanonicalOrder()
             ->get();
         $isAdmin = AdminContext::canAccess($request->user());
+        $overviewPageOptions = $isAdmin
+            ? $bookOverviewPageBridgeData->adminOptions()
+            : [];
+        $cmsPagesIndexHref = $isAdmin
+            ? $bookOverviewPageBridgeData->cmsPagesIndexHref()
+            : null;
 
         return Inertia::render('scripture/books/index', [
             'isAdmin' => $isAdmin,
@@ -44,7 +55,12 @@ class BookController extends Controller
             'books' => $books
                 ->map(fn (Book $book) => [
                     ...$publicScriptureData->book($book),
-                    'admin' => $this->bookCardAdminPayload($book, $isAdmin),
+                    'admin' => $this->bookCardAdminPayload(
+                        $book,
+                        $isAdmin,
+                        $overviewPageOptions,
+                        $cmsPagesIndexHref,
+                    ),
                 ])
                 ->values()
                 ->all(),
@@ -58,10 +74,18 @@ class BookController extends Controller
         Request $request,
         Book $book,
         PublicScriptureData $publicScriptureData,
+        BookOverviewPageBridgeData $bookOverviewPageBridgeData,
     ): Response {
+        $book->load('overviewPage');
         $this->loadPublicBookMediaRelations($book);
         $contentBlocks = $this->publicBookContentBlocks($book);
         $isAdmin = AdminContext::canAccess($request->user());
+        $overviewPageOptions = $isAdmin
+            ? $bookOverviewPageBridgeData->adminOptions()
+            : [];
+        $cmsPagesIndexHref = $isAdmin
+            ? $bookOverviewPageBridgeData->cmsPagesIndexHref()
+            : null;
 
         return Inertia::render('scripture/books/overview', [
             'book' => $publicScriptureData->book($book),
@@ -71,6 +95,8 @@ class BookController extends Controller
                 ? $this->bookAdminPayload(
                     $book,
                     $contentBlocks,
+                    $overviewPageOptions,
+                    $cmsPagesIndexHref,
                     includeMediaManagement: true,
                 )
                 : null,
@@ -84,10 +110,18 @@ class BookController extends Controller
         Request $request,
         Book $book,
         PublicScriptureData $publicScriptureData,
+        BookOverviewPageBridgeData $bookOverviewPageBridgeData,
     ): Response {
         $isAdmin = AdminContext::canAccess($request->user());
+        $overviewPageOptions = $isAdmin
+            ? $bookOverviewPageBridgeData->adminOptions()
+            : [];
+        $cmsPagesIndexHref = $isAdmin
+            ? $bookOverviewPageBridgeData->cmsPagesIndexHref()
+            : null;
 
         $book->load([
+            'overviewPage',
             'bookSections' => fn ($query) => $query
                 ->inCanonicalOrder()
                 ->with([
@@ -117,6 +151,8 @@ class BookController extends Controller
                 ? $this->bookAdminPayload(
                     $book,
                     $contentBlocks,
+                    $overviewPageOptions,
+                    $cmsPagesIndexHref,
                     includeMediaManagement: true,
                 )
                 : null,
@@ -171,6 +207,8 @@ class BookController extends Controller
     private function bookAdminPayload(
         Book $book,
         Collection $contentBlocks,
+        array $overviewPageOptions,
+        ?string $cmsPagesIndexHref,
         bool $includeMediaManagement = false,
     ): array {
         $adminRouteContext = new BookAdminRouteContext($book);
@@ -180,6 +218,11 @@ class BookController extends Controller
             'details_update_href' => $adminRouteContext->detailsUpdateHref(),
             'full_edit_href' => $adminRouteContext->fullEditHref(),
             'canonical_edit_href' => $adminRouteContext->canonicalEditHref(),
+            'overview_page_id' => $book->overview_page_id === null
+                ? null
+                : (int) $book->overview_page_id,
+            'overview_page_options' => $overviewPageOptions,
+            'cms_pages_index_href' => $cmsPagesIndexHref,
             'destroy_href' => $adminRouteContext->destroyHref(),
             'book_section_store_href' => route(
                 'scripture.book-sections.admin.store',
@@ -270,6 +313,8 @@ class BookController extends Controller
     private function bookCardAdminPayload(
         Book $book,
         bool $isAdmin,
+        array $overviewPageOptions,
+        ?string $cmsPagesIndexHref,
     ): ?array {
         if (! $isAdmin) {
             return null;
@@ -281,6 +326,11 @@ class BookController extends Controller
             'details_update_href' => $adminRouteContext->detailsUpdateHref(),
             'full_edit_href' => $adminRouteContext->fullEditHref(),
             'canonical_edit_href' => $adminRouteContext->canonicalEditHref(),
+            'overview_page_id' => $book->overview_page_id === null
+                ? null
+                : (int) $book->overview_page_id,
+            'overview_page_options' => $overviewPageOptions,
+            'cms_pages_index_href' => $cmsPagesIndexHref,
         ];
     }
 

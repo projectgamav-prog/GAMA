@@ -12,6 +12,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { resolveScriptureNavigationAction } from '@/lib/scripture-navigation-actions';
 import type { ScriptureBook } from '@/types';
 
@@ -40,7 +41,15 @@ function ScriptureBookLibraryCard({
         actionKey: 'open_book',
         href: book.href,
     });
+    const overviewAction =
+        book.overview_page_href === null
+            ? null
+            : resolveScriptureNavigationAction({
+                  actionKey: 'open_book_overview_page',
+                  href: book.overview_page_href,
+              });
     const BookActionIcon = bookAction?.icon;
+    const OverviewActionIcon = overviewAction?.icon;
 
     return (
         <ScriptureEntityRegion
@@ -83,6 +92,21 @@ function ScriptureBookLibraryCard({
                                     <BookActionIcon className="size-4" />
                                 )}
                         </Link>
+                    )}
+                    {overviewAction && (
+                        <Button asChild size="sm" variant="outline">
+                            <Link href={overviewAction.href}>
+                                {overviewAction.iconPosition === 'start' &&
+                                    OverviewActionIcon && (
+                                        <OverviewActionIcon className="size-4" />
+                                    )}
+                                {overviewAction.label}
+                                {overviewAction.iconPosition === 'end' &&
+                                    OverviewActionIcon && (
+                                        <OverviewActionIcon className="size-4" />
+                                    )}
+                            </Link>
+                        </Button>
                     )}
                 </CardFooter>
             </Card>

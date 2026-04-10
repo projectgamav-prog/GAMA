@@ -15,6 +15,7 @@ import type {
     ScriptureAdminMediaAssignment,
     ScriptureAdminMediaSummary,
     ScriptureBook,
+    ScriptureCmsPageOption,
 } from '@/types';
 import type {
     EntityActionsContractMetadata,
@@ -33,6 +34,9 @@ type BookIntroSurfaceArgs = {
     book: ScriptureBook;
     updateHref: string;
     fullEditHref: string;
+    overviewPageId: number | null;
+    overviewPageOptions: ScriptureCmsPageOption[];
+    cmsPagesIndexHref: string | null;
     presentation?: AdminSurfacePresentation | null;
 };
 
@@ -74,6 +78,9 @@ export function createBookIntroSurface({
     book,
     updateHref,
     fullEditHref,
+    overviewPageId,
+    overviewPageOptions,
+    cmsPagesIndexHref,
     presentation,
 }: BookIntroSurfaceArgs): AdminSurfaceContract<IntroContractMetadata<ScriptureBook>> {
     return createInlineEditorSurface({
@@ -94,6 +101,9 @@ export function createBookIntroSurface({
             updateHref,
             storeHref: null,
             fullEditHref,
+            overviewPageId,
+            overviewPageOptions,
+            cmsPagesIndexHref,
         },
     });
 }

@@ -17,20 +17,10 @@ class BookAdminDetailsController extends Controller
         Book $book,
     ): RedirectResponse {
         $book->update([
-            'description' => $this->nullableString($request->validated('description')),
+            'description' => $request->validated('description'),
+            'overview_page_id' => $request->validated('overview_page_id'),
         ]);
 
         return redirect()->back(status: 303);
-    }
-
-    private function nullableString(mixed $value): ?string
-    {
-        if (! is_string($value)) {
-            return null;
-        }
-
-        $trimmed = trim($value);
-
-        return $trimmed === '' ? null : $trimmed;
     }
 }

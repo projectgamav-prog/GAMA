@@ -7,6 +7,7 @@ import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mo
 import { ScriptureBookChapterList } from '@/components/scripture/scripture-book-chapter-list';
 import { ScriptureBookContentBlockRegion } from '@/components/scripture/scripture-book-content-block-region';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
+import { ScriptureReadingNavigationActions } from '@/components/scripture/scripture-reading-navigation-actions';
 import { Badge } from '@/components/ui/badge';
 import { useVisibleAdminControls } from '@/hooks/use-admin-context';
 import ScriptureLayout from '@/layouts/scripture-layout';
@@ -58,6 +59,18 @@ export default function BookShow({
                 }
                 title={book.title}
                 description={book.description ?? undefined}
+                headerAction={
+                    book.overview_page_href ? (
+                        <ScriptureReadingNavigationActions
+                            actions={[
+                                {
+                                    actionKey: 'open_book_overview_page',
+                                    href: book.overview_page_href,
+                                },
+                            ]}
+                        />
+                    ) : null
+                }
                 contentClassName="space-y-4"
             >
                 <AdminModuleHostGroup
