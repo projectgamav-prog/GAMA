@@ -6,6 +6,7 @@ import {
     Settings,
     ShieldCheck,
     Sparkles,
+    Waypoints,
 } from 'lucide-react';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +21,7 @@ import {
 import AppLayout from '@/layouts/app-layout';
 import { home } from '@/routes';
 import { index as cmsPagesIndex } from '@/routes/cms/pages';
+import { index as adminNavigationIndex } from '@/routes/admin/navigation';
 import { edit as appearanceEdit } from '@/routes/appearance';
 import { edit as profileEdit } from '@/routes/profile';
 import { index as scriptureBooksIndex } from '@/routes/scripture/books';
@@ -134,6 +136,35 @@ export default function Dashboard({
                                             href={`${cmsPagesIndex().url}#create-page`}
                                         >
                                             Add page
+                                        </Link>
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {canAccessAdminContext && (
+                        <Card>
+                            <CardHeader className="gap-3">
+                                <CardTitle className="flex items-center gap-2">
+                                    <Waypoints className="size-5" />
+                                    Global navigation
+                                </CardTitle>
+                                <CardDescription>
+                                    Manage the structured header tree and the
+                                    shared link targets it uses.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <p className="text-sm leading-6 text-muted-foreground">
+                                    Header navigation now runs through a
+                                    reusable structured tree instead of
+                                    hardcoded page shell links.
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                    <Button asChild>
+                                        <Link href={adminNavigationIndex()}>
+                                            Open navigation workspace
                                         </Link>
                                     </Button>
                                 </div>

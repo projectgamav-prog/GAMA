@@ -31,39 +31,45 @@ const validateButtonGroup = (
             errors[`data_json.buttons.${index}.label`] = 'Button label is required.';
         }
 
-        if (
-            ! ['url', 'cms_page', 'scripture_route'].includes(
-                button.destination_type,
-            )
-        ) {
-            errors[`data_json.buttons.${index}.destination_type`] =
+        if (! ['url', 'cms_page', 'route', 'scripture'].includes(button.target.type)) {
+            errors[`data_json.buttons.${index}.target.type`] =
                 'Choose a valid destination type.';
         }
 
         if (
-            button.destination_type === 'url'
-            && (button.url === null || button.url.trim() === '')
+            button.target.type === 'url'
+            && (button.target.value.url === null
+                || button.target.value.url.trim() === '')
         ) {
-            errors[`data_json.buttons.${index}.url`] =
+            errors[`data_json.buttons.${index}.target.value.url`] =
                 'Button URL is required.';
         }
 
         if (
-            button.destination_type === 'cms_page'
-            && (button.cms_page_slug === null
-                || button.cms_page_slug.trim() === '')
+            button.target.type === 'cms_page'
+            && (button.target.value.slug === null
+                || button.target.value.slug.trim() === '')
         ) {
-            errors[`data_json.buttons.${index}.cms_page_slug`] =
+            errors[`data_json.buttons.${index}.target.value.slug`] =
                 'CMS page slug is required.';
         }
 
         if (
-            button.destination_type === 'scripture_route'
-            && (button.scripture_path === null
-                || button.scripture_path.trim() === '')
+            button.target.type === 'route'
+            && (button.target.value.key === null
+                || button.target.value.key.trim() === '')
         ) {
-            errors[`data_json.buttons.${index}.scripture_path`] =
-                'Scripture path is required.';
+            errors[`data_json.buttons.${index}.target.value.key`] =
+                'Choose an internal route.';
+        }
+
+        if (
+            button.target.type === 'scripture'
+            && (button.target.value.kind === null
+                || button.target.value.kind.trim() === '')
+        ) {
+            errors[`data_json.buttons.${index}.target.value.kind`] =
+                'Choose a scripture target.';
         }
 
         if (

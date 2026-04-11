@@ -42,9 +42,13 @@ export function ButtonGroupRenderer({
                 <a
                     key={`${button.label}-${index}`}
                     href={resolveButtonHref(button)}
-                    target={button.open_in_new_tab ? '_blank' : undefined}
+                    target={
+                        button.open_in_new_tab || button.target.behavior?.new_tab
+                            ? '_blank'
+                            : undefined
+                    }
                     rel={
-                        button.open_in_new_tab
+                        button.open_in_new_tab || button.target.behavior?.new_tab
                             ? 'noreferrer noopener'
                             : undefined
                     }

@@ -1,17 +1,19 @@
+import {
+    createDefaultLinkTarget,
+    normalizeLinkTarget,
+    resolveLinkTargetHref,
+} from '@/lib/link-targets';
+import type { LinkTarget } from '@/types';
+
 export type ButtonVariant = 'default' | 'secondary' | 'outline' | 'ghost';
 
 export type ButtonGroupLayout = 'auto' | 'stack' | 'inline';
 
 export type ButtonGroupAlignment = 'start' | 'center' | 'end' | 'stretch';
 
-export type ButtonDestinationType = 'url' | 'cms_page' | 'scripture_route';
-
 export type ButtonItem = {
     label: string;
-    destination_type: ButtonDestinationType;
-    url: string | null;
-    cms_page_slug: string | null;
-    scripture_path: string | null;
+    target: LinkTarget;
     variant: ButtonVariant;
     open_in_new_tab: boolean;
 };
@@ -27,23 +29,10 @@ export type ButtonGroupConfig = {
 
 export const createDefaultButton = (): ButtonItem => ({
     label: 'New button',
-    destination_type: 'url',
-    url: '',
-    cms_page_slug: null,
-    scripture_path: null,
+    target: createDefaultLinkTarget('url'),
     variant: 'default',
     open_in_new_tab: false,
 });
-
-function normalizeString(value: unknown): string | null {
-    if (typeof value !== 'string') {
-        return null;
-    }
-
-    const trimmed = value.trim();
-
-    return trimmed === '' ? null : trimmed;
-}
 
 export const getButtonGroupButtons = (
     data: Record<string, unknown>,
@@ -63,41 +52,62 @@ export const getButtonGroupButtons = (
                 : 'href' in button
                   ? 'url'
                   : 'url';
-        const legacyHref = normalizeString(button.href);
+        const legacyHref = normalizeLegacyString(button.href);
+        const openInNewTab = Boolean(button.open_in_new_tab);
 
         return {
             label:
                 typeof button.label === 'string' ? button.label : 'New button',
-            destination_type: destinationType,
-            url:
-                destinationType === 'url'
-                    ? normalizeString(button.url) ?? legacyHref
-                    : normalizeString(button.url),
-            cms_page_slug: normalizeString(button.cms_page_slug),
-            scripture_path: normalizeString(button.scripture_path),
+            target:
+                normalizeLinkTarget(button.target) ??
+                (destinationType === 'cms_page'
+                    ? {
+                          type: 'cms_page',
+                          value: {
+                              slug: normalizeLegacyString(
+                                  button.cms_page_slug,
+                              ),
+                          },
+                          behavior: {
+                              new_tab: openInNewTab,
+                          },
+                      }
+                    : destinationType === 'scripture_route'
+                      ? {
+                            type: 'url',
+                            value: {
+                                url: normalizeLegacyString(
+                                    button.scripture_path,
+                                ),
+                            },
+                            behavior: {
+                                new_tab: openInNewTab,
+                            },
+                        }
+                      : {
+                            type: 'url',
+                            value: {
+                                url:
+                                    normalizeLegacyString(button.url)
+                                    ?? legacyHref,
+                            },
+                            behavior: {
+                                new_tab: openInNewTab,
+                            },
+                        }),
             variant:
                 button.variant === 'secondary' ||
                 button.variant === 'outline' ||
                 button.variant === 'ghost'
                     ? button.variant
                     : 'default',
-            open_in_new_tab: Boolean(button.open_in_new_tab),
+            open_in_new_tab: openInNewTab,
         };
     });
 };
 
 export function resolveButtonHref(button: ButtonItem): string {
-    if (button.destination_type === 'cms_page') {
-        return button.cms_page_slug ? `/pages/${button.cms_page_slug}` : '#';
-    }
-
-    if (button.destination_type === 'scripture_route') {
-        return button.scripture_path?.startsWith('/')
-            ? button.scripture_path
-            : '#';
-    }
-
-    return button.url ?? '#';
+    return resolveLinkTargetHref(button.target) ?? '#';
 }
 
 export const getButtonGroupLayout = (
@@ -140,3 +150,13 @@ export const getButtonGroupAlignmentClass = (
         stretch: 'justify-items-stretch',
     }[alignment];
 };
+
+function normalizeLegacyString(value: unknown): string | null {
+    if (typeof value !== 'string') {
+        return null;
+    }
+
+    const trimmed = value.trim();
+
+    return trimmed === '' ? null : trimmed;
+}

@@ -262,6 +262,14 @@ async function getFieldValue(client, selector) {
 }
 
 async function toggleScriptureAdminControls(client) {
+    await client.send('Network.setCookie', {
+        name: 'admin_context_visible',
+        value: '1',
+        url: BASE_URL,
+    });
+
+    await client.navigate(await client.evaluate('location.href'));
+
     const needsToggle = await client.evaluate(`(() => {
         const button = document.querySelector('[data-admin-visibility-toggle="scripture"]');
         return button instanceof HTMLElement && button.textContent?.includes('Show controls');

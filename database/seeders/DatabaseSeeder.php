@@ -19,6 +19,9 @@ class DatabaseSeeder extends Seeder
             DevelopmentUserSeeder::class,
             ScriptureCorpusDevelopmentSeeder::class,
             BhagavadGitaDevelopmentSeeder::class,
+            CmsDevelopmentSeeder::class,
+            PublicHeaderNavigationSeeder::class,
+            PublicFooterNavigationSeeder::class,
         ]);
     }
 }

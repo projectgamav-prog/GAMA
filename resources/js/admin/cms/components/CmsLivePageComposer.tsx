@@ -178,7 +178,12 @@ function BlockEditDialog({
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button type="button" size="sm" variant="ghost">
+                <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    data-cms-live-block-edit={block.id}
+                >
                     <SquarePen className="size-4" />
                     Edit block
                 </Button>
@@ -193,6 +198,7 @@ function BlockEditDialog({
 
                 <form
                     className="space-y-5"
+                    data-cms-live-block-edit-form={block.id}
                     onSubmit={(event) => {
                         event.preventDefault();
                         form.patch(block.update_href, {
@@ -250,7 +256,11 @@ function BlockEditDialog({
                     />
 
                     <div className="flex items-center gap-3">
-                        <Button type="submit" disabled={form.processing}>
+                        <Button
+                            type="submit"
+                            disabled={form.processing}
+                            data-cms-live-block-save={block.id}
+                        >
                             <Save className="size-4" />
                             {form.processing ? 'Saving...' : 'Save'}
                         </Button>
@@ -272,7 +282,11 @@ function LiveBlockCard({
     returnTo: string;
 }) {
     return (
-        <div className="space-y-2 rounded-2xl border border-border/60 bg-background/40 p-4">
+        <div
+            className="space-y-2 rounded-2xl border border-border/60 bg-background/40 p-4"
+            data-cms-live-block={block.id}
+            data-cms-live-block-module={block.module_key}
+        >
             <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="secondary">

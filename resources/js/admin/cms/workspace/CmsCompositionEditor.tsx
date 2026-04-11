@@ -123,7 +123,11 @@ function BlockEditorCard({
     });
 
     return (
-        <Card className="shadow-none">
+        <Card
+            className="shadow-none"
+            data-cms-workspace-block={block.id}
+            data-cms-workspace-block-module={block.module_key}
+        >
             <CardHeader className="gap-3">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="space-y-2">
@@ -211,7 +215,11 @@ function BlockEditorCard({
                     />
 
                     <div className="flex flex-wrap items-center gap-3">
-                        <Button type="submit" disabled={form.processing}>
+                        <Button
+                            type="submit"
+                            disabled={form.processing}
+                            data-cms-workspace-block-save={block.id}
+                        >
                             <Save className="size-4" />
                             {form.processing ? 'Saving block...' : 'Save block'}
                         </Button>

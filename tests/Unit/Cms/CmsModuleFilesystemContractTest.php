@@ -11,7 +11,7 @@ test('cms modules keep the frozen folder structure', function () {
         'index.tsx',
     ];
 
-    foreach (['rich-text', 'button-group', 'media'] as $module) {
+    foreach (['rich-text', 'button-group', 'media', 'card-list'] as $module) {
         $modulePath = "{$modulesRoot}/{$module}";
 
         expect(is_dir($modulePath))->toBeTrue(

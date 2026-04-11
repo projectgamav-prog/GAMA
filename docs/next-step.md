@@ -39,15 +39,28 @@ Before any implementation prompt, tell Codex:
 - if the task touches CMS architecture or CMS modules, also read `cms-architecture.md`
 - if the task touches canonical admin surface/module work, also read `scripture-admin-editing.md`
 - if the task adapts outside React/components into admin or CMS modules, also read `admin-module-integration.md`
+- if the task designs or implements live structured inline editing on the real rendered surface, also read:
+  - `docs/admin/content-aware-positional-authoring.md`
+  - `docs/admin/positional-authoring-implementation-guide.md`
+- if the task affects global shell seams or page-level placement policy, also read:
+  - `docs/public-region-policy.md`
 
 ## Immediate focus
 
 ### 1. Start the next product-facing phase from the cleaned base
-The next pass can move into headers/footers or broader page structuring work, but it should preserve the now-cleaner admin/module boundary:
+The shared public frame, structured header navigation, structured footer system, live header authoring path, and declared region policy are now active, so the next pass should build on those instead of reopening shell or nav-foundation work:
 - keep the public/admin same-layout rule intact
 - keep canonical scripture pages thin and surface-driven
 - keep CMS exposure generic and supplementary on non-CMS pages
 - keep the active inline editors on the real page instead of detouring back into workspace-first habits
+- preserve the shared header/footer shell instead of reintroducing page-local public chrome
+- preserve the structured header/footer trees instead of falling back to hardcoded nav JSX
+- preserve the shared link-target contract so future buttons/footer nav/modules reuse the same target model
+- preserve the live shared header as the primary navigation authoring surface for routine nav edits
+- preserve the declared global/page region seams instead of introducing ad hoc CMS placement
+- treat canonical page sections as:
+  - canonical reading structure first
+  - supplemental regions second
 
 ### 2. Keep the active scripture editing path trustworthy while that work begins
 - continue the browser pass across the remaining grouped inline editors and the always-mounted full-edit cards that still matter
@@ -70,11 +83,21 @@ The next pass can move into headers/footers or broader page structuring work, bu
 - keep the normalized CMS page baseline stable and avoid reintroducing fresh migration drift in the page/exposed-region layer
 
 ### 4. Improve the first CMS module family carefully when it materially helps authoring
-- richer text editing than raw HTML
-- media selection/upload workflow
-- stronger button group authoring polish and validation feedback
-- richer generic destination authoring for button-driven links to CMS pages, scripture routes, and URLs
-- attach-existing-page vs create-new-page flows while configuring buttons/links
+- build on the first stable module set now in place:
+  - stronger prose/rich-text authoring beyond the new structured writing baseline only when real editing pain still remains
+  - shared-target CTA/button authoring
+  - practical media blocks
+  - grouped card/list content
+- the first real composition pass on home, `/pages/platform-guide`, and the verse supplementary region now gives a more honest priority order:
+  - keep refining rich-text authoring ergonomics without breaking the current structured body contract
+  - improve media authoring before adding many more module families
+  - keep refining shared link-target configuration, especially for deeper scripture destinations
+  - keep using current modules on real pages before expanding the module set again
+- next meaningful improvements should come from real product use:
+  - media selection/upload workflow
+  - richer destination authoring for links to CMS pages, internal routes, scripture targets, and raw URLs
+  - attach-existing-page vs create-new-page flows while configuring buttons/links
+  - stronger module-specific validation and authoring polish where real friction appears
 - keep the progressive reveal pattern consistent as more modules are added
 
 Do not overbuild category-management UI yet.
@@ -108,11 +131,15 @@ Safe direction:
 - remote/external module integration through the frozen CMS manifest contract after that
 
 ## Practical restart order
-1. Start headers/footers or page-structure work from the cleaned architecture base
+1. Start the next product-facing work from the now-shared public frame, structured header nav, and cleaned canonical page structure
 2. Keep scripture editing/browser confidence healthy with the narrow smoke layer and targeted browser checks
 3. Extend live CMS composition exposure only where the next product-facing phase needs it
-4. Improve module authoring where it helps
-5. Resume outstanding canonical polish work
+4. Reuse the shared link-target contract when new buttons/navigation/footer work appears
+5. Extend the structured navigation system outward only where a real product need now exists:
+   - richer route/scripture target selection if authoring pain appears
+   - keep move up/down simple unless a real drag/drop need emerges
+6. Improve module authoring where it helps
+7. Resume outstanding canonical polish work
 
 ## Success condition for the next phase
 When resuming, the goal is not "add lots of CMS quickly."

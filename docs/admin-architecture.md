@@ -11,6 +11,9 @@ Implementation companions:
 - `docs/scripture-admin-editing.md` for the active canonical public/admin surface system
 - `docs/admin-module-integration.md` for adapting outside React components into the admin module architecture
 - `docs/public-admin-page-authoring.md` for the locked same-layout public/admin authoring rules on eligible pages
+- `docs/admin/content-aware-positional-authoring.md` for the reusable live structured authoring pattern
+- `docs/admin/positional-authoring-implementation-guide.md` for implementation-facing positional authoring rules
+- `docs/public-region-policy.md` for declared global and page-level region seams
 
 ## 0. Admin documentation set
 Treat the admin docs as one maintained set instead of isolated notes.
@@ -23,11 +26,18 @@ Treat the admin docs as one maintained set instead of isolated notes.
   Implementation guide for adapting inside-project or outside React components into the canonical admin and CMS module systems.
 - `docs/public-admin-page-authoring.md`
   Same-layout and in-place authoring rules for public/admin page behavior.
+- `docs/admin/content-aware-positional-authoring.md`
+  Reusable product/architecture brief for live positional structured editing.
+- `docs/admin/positional-authoring-implementation-guide.md`
+  Implementation guide for item/list/tree positional authoring.
+- `docs/public-region-policy.md`
+  Declared global shell regions and page-level canonical vs supplemental seams.
 
 When touching canonical scripture admin work:
 - read `admin-architecture.md`
 - read `scripture-admin-editing.md`
 - read `admin-module-integration.md` if the task affects reusable modules or outside-component adaptation
+- read the positional authoring docs if the task affects live structured editing on the real surface
 
 ## 1. Locked architecture context
 This project is not greenfield. The admin system already has a locked direction, and Codex must work inside it rather than improvising page-specific patterns.
@@ -191,6 +201,15 @@ The public-page-first CMS rule is now locked:
 - CMS workspace pages remain supportive utilities for listing, search, diagnostics, and management rather than the primary authoring surface
 - this same-layout plus admin-augmentation behavior should stay consistent across eligible pages site-wide
 - routine live authoring controls should attach directly to the relevant layout element instead of appearing as a detached builder shell below the page
+
+The reusable positional authoring pattern is also now part of the active
+direction for structured live editing:
+- the real rendered item/list/tree can become the active editing surface
+- tiny contextual controls attach near the actual item or list position
+- inline edit and draft insertion should happen where the item really lives
+- move up/down and delete should stay local when the structured surface supports it
+- structured data contracts must survive local inline editing
+- workspace/full-edit remains supportive fallback rather than the routine path
 
 ## 9. What Codex must preserve
 - Canonical scripture pages remain thin and surface-driven.

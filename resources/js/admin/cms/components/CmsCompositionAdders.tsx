@@ -63,6 +63,8 @@ const cmsModuleCategories = Array.from(
 function categoryLabel(category: CmsModuleCategory): string {
     return category === 'actions'
         ? 'Buttons and actions'
+        : category === 'collections'
+          ? 'Cards and lists'
         : category === 'media'
           ? 'Media'
           : 'Text';

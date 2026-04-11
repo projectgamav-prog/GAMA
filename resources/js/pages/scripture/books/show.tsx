@@ -3,7 +3,6 @@ import {
     resolveBookHeaderSurfaces,
 } from '@/admin/integrations/scripture/books';
 import { BookPublicMediaSection } from '@/components/scripture/book-public-media-section';
-import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
 import { ScriptureBookChapterList } from '@/components/scripture/scripture-book-chapter-list';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { Badge } from '@/components/ui/badge';
@@ -37,8 +36,6 @@ export default function BookShow({
 
     return (
         <ScriptureLayout title={book.title} breadcrumbs={breadcrumbs}>
-            <ScriptureAdminModeBar />
-
             <ScripturePageIntroCard
                 entityMeta={{
                     ...bookEntity,

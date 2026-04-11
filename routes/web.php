@@ -11,5 +11,6 @@ Route::get('dashboard', DashboardController::class)
     ->name('dashboard');
 
 require __DIR__.'/cms.php';
+require __DIR__.'/navigation.php';
 require __DIR__.'/scripture.php';
 require __DIR__.'/settings.php';

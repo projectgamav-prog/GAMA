@@ -1,10 +1,16 @@
 import type { CmsModuleKey, CmsModulePayload } from '@/types';
 import { buttonGroupModule } from '../modules/button-group';
+import { cardListModule } from '../modules/card-list';
 import { mediaModule } from '../modules/media';
 import { richTextModule } from '../modules/rich-text';
 import type { CmsModuleManifest } from './module-types';
 
-const manifests = [richTextModule, buttonGroupModule, mediaModule] satisfies
+const manifests = [
+    richTextModule,
+    cardListModule,
+    buttonGroupModule,
+    mediaModule,
+] satisfies
     CmsModuleManifest[];
 
 const manifestMap = new Map<string, CmsModuleManifest>(

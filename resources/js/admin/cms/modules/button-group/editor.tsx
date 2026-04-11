@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { usePage } from '@inertiajs/react';
+import { LinkTargetFields } from '@/components/navigation/link-target-fields';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -11,10 +13,18 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import {
+    createDefaultLinkTarget,
+    updateLinkTargetType,
+} from '@/lib/link-targets';
+import type { SharedLinkTargetOptions } from '@/types';
+import {
+    SHARED_ROUTE_TARGET_OPTIONS,
+    SHARED_SCRIPTURE_TARGET_KIND_OPTIONS,
+} from '@/lib/link-target-options';
 import type { CmsModuleEditorProps } from '../../core/module-types';
 import {
     createDefaultButton,
-    type ButtonDestinationType,
     type ButtonItem,
     type ButtonVariant,
     getButtonGroupAlignment,
@@ -28,9 +38,15 @@ export function ButtonGroupEditor({
     idPrefix,
     errors,
 }: CmsModuleEditorProps) {
+    const page = usePage();
     const buttons = getButtonGroupButtons(value.data);
     const layout = getButtonGroupLayout(value.config);
     const alignment = getButtonGroupAlignment(value.config);
+    const sharedTargetOptions =
+        ((page.props as typeof page.props & {
+            linkTargetOptions?: SharedLinkTargetOptions | null;
+        }).linkTargetOptions as SharedLinkTargetOptions | null | undefined) ??
+        null;
     const [activeStep, setActiveStep] = useState<'buttons' | 'layout'>(
         'buttons',
     );
@@ -90,10 +106,7 @@ export function ButtonGroupEditor({
                             variant="outline"
                             size="sm"
                             onClick={() =>
-                                updateButtons([
-                                    ...buttons,
-                                    createDefaultButton(),
-                                ])
+                                updateButtons([...buttons, createDefaultButton()])
                             }
                         >
                             Add button
@@ -171,7 +184,7 @@ export function ButtonGroupEditor({
                                         Destination type
                                     </Label>
                                     <Select
-                                        value={button.destination_type}
+                                        value={button.target.type}
                                         onValueChange={(nextValue) =>
                                             updateButtons(
                                                 buttons.map(
@@ -179,8 +192,16 @@ export function ButtonGroupEditor({
                                                         buttonIndex === index
                                                             ? {
                                                                   ...entry,
-                                                                  destination_type:
-                                                                      nextValue as ButtonDestinationType,
+                                                                  target:
+                                                                      updateLinkTargetType(
+                                                                          entry.target,
+                                                                          nextValue as
+                                                                              | 'url'
+                                                                              | 'cms_page'
+                                                                              | 'route'
+                                                                              | 'scripture',
+                                                                          sharedTargetOptions,
+                                                                      ),
                                                               }
                                                             : entry,
                                                 ),
@@ -200,100 +221,75 @@ export function ButtonGroupEditor({
                                             <SelectItem value="cms_page">
                                                 CMS page
                                             </SelectItem>
-                                            <SelectItem value="scripture_route">
-                                                Scripture route
+                                            <SelectItem value="route">
+                                                Internal route
+                                            </SelectItem>
+                                            <SelectItem value="scripture">
+                                                Scripture target
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>
-                                    <InputError
-                                        message={
-                                            errors[
-                                                `data_json.buttons.${index}.destination_type`
-                                            ]
-                                        }
-                                    />
                                 </div>
                             </div>
 
-                            <div className="grid gap-2">
-                                <Label
-                                    htmlFor={`${idPrefix}-button-destination-value-${index}`}
-                                >
-                                    {button.destination_type === 'cms_page'
-                                        ? 'CMS page slug'
-                                        : button.destination_type ===
-                                            'scripture_route'
-                                          ? 'Scripture path'
-                                          : 'URL'}
-                                </Label>
-                                <Input
-                                    id={`${idPrefix}-button-destination-value-${index}`}
-                                    value={
-                                        button.destination_type === 'cms_page'
-                                            ? (button.cms_page_slug ?? '')
-                                            : button.destination_type ===
-                                                'scripture_route'
-                                              ? (button.scripture_path ?? '')
-                                              : (button.url ?? '')
-                                    }
-                                    onChange={(event) =>
-                                        updateButtons(
-                                            buttons.map(
-                                                (entry, buttonIndex) => {
-                                                    if (buttonIndex !== index) {
-                                                        return entry;
-                                                    }
-
-                                                    return button.destination_type ===
-                                                        'cms_page'
-                                                        ? {
-                                                              ...entry,
-                                                              cms_page_slug:
-                                                                  event.target
-                                                                      .value,
-                                                          }
-                                                        : button.destination_type ===
-                                                            'scripture_route'
-                                                          ? {
-                                                                ...entry,
-                                                                scripture_path:
-                                                                    event
-                                                                        .target
-                                                                        .value,
-                                                            }
-                                                          : {
-                                                                ...entry,
-                                                                url: event
-                                                                    .target
-                                                                    .value,
-                                                            };
-                                                },
-                                            ),
-                                        )
-                                    }
-                                    placeholder={
-                                        button.destination_type === 'cms_page'
-                                            ? 'about'
-                                            : button.destination_type ===
-                                                'scripture_route'
-                                              ? '/scripture/books/bhagavad-gita'
-                                              : 'https://example.com'
-                                    }
-                                />
-                                <InputError
-                                    message={
+                            <LinkTargetFields
+                                idPrefix={`${idPrefix}-button-target-${index}`}
+                                value={button.target ?? createDefaultLinkTarget()}
+                                onChange={(target) =>
+                                    updateButtons(
+                                        buttons.map((entry, buttonIndex) =>
+                                            buttonIndex === index
+                                                ? {
+                                                      ...entry,
+                                                      target,
+                                                  }
+                                                : entry,
+                                        ),
+                                    )
+                                }
+                                errors={{
+                                    url: errors[
+                                        `data_json.buttons.${index}.target.value.url`
+                                    ],
+                                    slug: errors[
+                                        `data_json.buttons.${index}.target.value.slug`
+                                    ],
+                                    key: errors[
+                                        `data_json.buttons.${index}.target.value.key`
+                                    ],
+                                    kind: errors[
+                                        `data_json.buttons.${index}.target.value.kind`
+                                    ],
+                                    book_slug:
                                         errors[
-                                            button.destination_type ===
-                                            'cms_page'
-                                                ? `data_json.buttons.${index}.cms_page_slug`
-                                                : button.destination_type ===
-                                                    'scripture_route'
-                                                  ? `data_json.buttons.${index}.scripture_path`
-                                                  : `data_json.buttons.${index}.url`
-                                        ]
-                                    }
-                                />
-                            </div>
+                                            `data_json.buttons.${index}.target.value.book_slug`
+                                        ],
+                                    book_section_slug:
+                                        errors[
+                                            `data_json.buttons.${index}.target.value.book_section_slug`
+                                        ],
+                                    chapter_slug:
+                                        errors[
+                                            `data_json.buttons.${index}.target.value.chapter_slug`
+                                        ],
+                                    chapter_section_slug:
+                                        errors[
+                                            `data_json.buttons.${index}.target.value.chapter_section_slug`
+                                        ],
+                                    verse_slug:
+                                        errors[
+                                            `data_json.buttons.${index}.target.value.verse_slug`
+                                        ],
+                                    entry_slug:
+                                        errors[
+                                            `data_json.buttons.${index}.target.value.entry_slug`
+                                        ],
+                                }}
+                                routeOptions={SHARED_ROUTE_TARGET_OPTIONS}
+                                scriptureTargetKinds={
+                                    SHARED_SCRIPTURE_TARGET_KIND_OPTIONS
+                                }
+                            />
 
                             <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
                                 <div className="grid gap-2">
@@ -362,6 +358,17 @@ export function ButtonGroupEditor({
                                                                   open_in_new_tab:
                                                                       checked ===
                                                                       true,
+                                                                  target: {
+                                                                      ...entry.target,
+                                                                      behavior: {
+                                                                          ...entry
+                                                                              .target
+                                                                              .behavior,
+                                                                          new_tab:
+                                                                              checked ===
+                                                                              true,
+                                                                      },
+                                                                  },
                                                               }
                                                             : entry,
                                                 ),

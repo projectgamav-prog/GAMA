@@ -44,8 +44,16 @@ test('live container create can redirect back to public page', function () {
                 'buttons' => [
                     [
                         'label' => 'Read more',
-                        'destination_type' => 'url',
-                        'url' => 'https://example.com',
+                        'target' => [
+                            'type' => 'url',
+                            'value' => [
+                                'url' => 'https://example.com',
+                            ],
+                            'behavior' => [
+                                'new_tab' => false,
+                            ],
+                        ],
+                        'variant' => 'default',
                     ],
                 ],
             ],
@@ -88,6 +96,48 @@ test('live block update can redirect back to public page', function () {
             'return_to' => route('pages.show', $this->pageRecord, false),
         ])
         ->assertRedirect(route('pages.show', $this->pageRecord, false));
+});
+
+test('live block create accepts card list payloads and redirects back to public page', function () {
+    $this->actingAs($this->editor)
+        ->post(route('cms.pages.containers.blocks.store', [
+            'page' => $this->pageRecord,
+            'pageContainer' => $this->container,
+        ], false), [
+            'insertion_mode' => 'after',
+            'relative_block_id' => $this->block->id,
+            'module_key' => 'card_list',
+            'data_json' => [
+                'title' => 'Reading paths',
+                'items' => [
+                    [
+                        'title' => 'Browse books',
+                        'body' => 'Start from the main library.',
+                        'cta_label' => 'Open library',
+                        'target' => [
+                            'type' => 'route',
+                            'value' => [
+                                'key' => 'scripture.books.index',
+                            ],
+                            'behavior' => [
+                                'new_tab' => false,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'config_json' => [
+                'layout' => 'cards',
+                'columns' => 'two',
+            ],
+            'return_to' => route('pages.show', $this->pageRecord, false),
+        ])
+        ->assertRedirect(route('pages.show', $this->pageRecord, false));
+
+    $createdBlock = $this->container->fresh()->pageBlocks()->where('module_key', 'card_list')->first();
+
+    expect($createdBlock)->not->toBeNull();
+    expect($createdBlock?->data_json['items'][0]['target']['type'] ?? null)->toBe('route');
 });
 
 test('live block delete can redirect back to public page', function () {

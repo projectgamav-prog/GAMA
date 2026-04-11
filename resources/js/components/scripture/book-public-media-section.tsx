@@ -92,8 +92,8 @@ export function BookPublicMediaSection({ book, admin, isAdmin }: Props) {
 
     return (
         <ScriptureSection
-            title="Book Media"
-            description="Published book-level media rendered from registered Book media slots."
+            title="Supplementary Book Media"
+            description="Published media attached to the book as supplemental material around the canonical chapter structure."
             entityMeta={{
                 entityType: 'book',
                 entityId: book.id,

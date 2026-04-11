@@ -1,6 +1,5 @@
 import { AdminModuleHostGroup } from '@/admin/core/AdminModuleHostGroup';
 import { resolveChapterHeaderSurfaces } from '@/admin/integrations/scripture/chapters';
-import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
 import { ScriptureChapterVerseList } from '@/components/scripture/scripture-chapter-verse-list';
 import { ScriptureIntroBlock } from '@/components/scripture/scripture-intro-block';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
@@ -79,8 +78,6 @@ export default function ChapterShow({
 
     return (
         <ScriptureLayout title={chapterTitle} breadcrumbs={breadcrumbs}>
-            <ScriptureAdminModeBar />
-
             <ScripturePageIntroCard
                 entityMeta={{
                     ...chapterEntity,

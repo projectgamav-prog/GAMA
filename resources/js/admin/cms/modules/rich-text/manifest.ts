@@ -3,11 +3,16 @@ import {
     type CmsModulePayload,
 } from '../../core/module-types';
 import { richTextDefaultConfig, richTextDefaultData } from './defaults';
+import { parseRichTextDocument } from './document';
 import { RichTextEditor } from './editor';
 import { RichTextRenderer } from './renderer';
 import {
     getRichTextAlign,
-    getRichTextHtml,
+    getRichTextBody,
+    getRichTextBlocks,
+    getRichTextEyebrow,
+    getRichTextLead,
+    getRichTextTitle,
     getRichTextWidth,
 } from './types';
 
@@ -15,9 +20,20 @@ const validateRichText = (
     value: CmsModulePayload,
 ): Record<string, string | undefined> => {
     const errors: Record<string, string | undefined> = {};
+    const body = getRichTextBody(value.data);
+    const blocks = getRichTextBlocks(value.data);
+    const normalizedBlocks =
+        blocks.length > 0 ? blocks : parseRichTextDocument(body);
 
-    if (getRichTextHtml(value.data).trim() === '') {
-        errors['data_json.html'] = 'Rich text content is required.';
+    if (
+        getRichTextEyebrow(value.data).trim() === '' &&
+        getRichTextTitle(value.data).trim() === '' &&
+        getRichTextLead(value.data).trim() === '' &&
+        body.trim() === '' &&
+        normalizedBlocks.length === 0
+    ) {
+        errors['data_json.body'] =
+            'Add at least a title, lead, or body for this prose section.';
     }
 
     if (! ['left', 'center', 'right'].includes(getRichTextAlign(value.config))) {

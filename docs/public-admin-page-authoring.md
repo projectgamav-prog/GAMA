@@ -3,6 +3,11 @@ Same-layout authoring rules for CMS and future eligible live pages
 
 Use this document when work touches live authoring, in-place composition controls, or the public/admin relationship on content-managed pages.
 
+Related companion docs:
+- `docs/admin/content-aware-positional-authoring.md`
+- `docs/admin/positional-authoring-implementation-guide.md`
+- `docs/public-region-policy.md`
+
 ## 1. Core rule
 Public users and admins must use the same core page layout.
 
@@ -81,6 +86,7 @@ This rule applies to CMS pages now and should guide future eligible live pages.
 - non-CMS pages may declare shared CMS regions that resolve supplementary CMS containers and blocks without turning those pages into CMS-owned routes
 - canonical scripture structure remains protected
 - universal content composition may appear on scripture-related pages only as augmentation, never as canonical schema mutation
+- structured lists and trees may also adopt the same live-surface editing pattern through tiny positional controls and local draft insertion where that fits the surface truthfully
 
 ## 7. Preservation rules
 Keep these rules locked unless the architecture is being deliberately revised.

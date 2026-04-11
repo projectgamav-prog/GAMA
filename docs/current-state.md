@@ -44,6 +44,9 @@ After completing a task:
 - The CMS module contract and module folder shape are now being treated as stable foundation seams for future external React/TSX module integration.
 - `docs/cms-architecture.md` now exists as the focused CMS architecture brief that complements the broader project architecture doc.
 - `docs/public-admin-page-authoring.md` now exists as the focused same-layout live authoring brief for public/admin page behavior.
+- `docs/admin/content-aware-positional-authoring.md` now exists as the reusable architecture brief for live structured positional editing on real surfaces.
+- `docs/admin/positional-authoring-implementation-guide.md` now exists as the practical implementation guide for inline item/list/tree positional authoring.
+- `docs/public-region-policy.md` now exists as the declared global/page region policy for shell seams and canonical vs supplemental placement.
 - `docs/scripture-admin-editing.md` now reflects the active canonical surface/module system instead of the retired public scripture block-authoring model.
 - `docs/admin-module-integration.md` now documents the practical procedure for adapting outside React components into the canonical admin module system and the CMS module registry safely.
 
@@ -52,6 +55,32 @@ After completing a task:
 - Chapter list: `scripture.books.show`
 - Verse list: `scripture.chapters.show`
 - Verse detail: `scripture.chapters.verses.show`
+- Public pages now share one global site frame through the shared public site layout:
+  - shared header with site identity, public navigation, and the scripture admin visibility toggle when available
+  - shared footer with simple structured public links/info
+  - scripture pages, the homepage, and public CMS pages now mount into the same shell instead of carrying duplicated page-specific headers
+- The shared header navigation is now structured and data-driven:
+  - navigation items live in `navigation_items`
+  - the public header reads a shared tree from Inertia props instead of hardcoded JSX links
+  - mobile navigation opens from the right and supports deeper child panels further right
+  - authorized editors can now edit the real shared header in place when admin visibility is enabled:
+    - tiny contextual controls appear next to the real nav items
+    - labels can be edited inline in the live header
+    - top-level items and child items can be added locally in the actual list position
+    - move up/down and delete now work from the live header itself
+    - structured link targets remain intact through a compact inline target editor
+  - the navigation workspace remains available as support/fallback tooling, but the live shared header is now the active authoring path for routine nav edits
+  - that live header model is now documented as a reusable admin/CMS authoring pattern rather than a one-off header implementation
+- The shared footer is now part of the same structured global navigation system:
+  - footer link groups now come from `navigation_items` through the `public_footer` menu key
+  - header and footer now share the same typed link-target contract
+  - footer rendering is no longer leftover hardcoded JSX links
+  - footer editing currently stays in the shared navigation workspace rather than duplicating a second live positional editor prematurely
+- A reusable link-target contract now exists for navigation and future action modules:
+  - `url`
+  - `cms_page`
+  - `route`
+  - `scripture`
 - Local development browse state is back to the expected multi-book corpus baseline after `migrate:fresh --seed`; the development seed now imports all enabled scripture books before layering Bhagavad Gita-specific editorial fixtures.
 
 ### Canonical scripture admin state
@@ -134,10 +163,22 @@ After completing a task:
   - `rich_text`
   - `button_group`
   - `media`
-- `button_group` now supports generic destination modes:
+  - `card_list`
+- `button_group` now uses the shared structured link-target contract:
   - `url`
   - `cms_page`
-  - `scripture_route`
+  - `route`
+  - `scripture`
+- `card_list` now also uses the shared structured link-target contract for optional per-card destinations instead of inventing a second link model.
+- Shared link-target authoring is now faster across navigation and CMS modules:
+  - pasted URLs or internal site paths can now be translated into the structured target model directly
+  - shared picker data now exists for CMS pages, routes, books, dictionary entries, topics, and characters
+  - button-group, card-list, header navigation, and footer navigation now all benefit from the same shared target options instead of leaning on manual slug entry as often
+- The first stable CMS module set is now strong enough for real declared supplemental regions:
+  - `rich_text` now supports eyebrow/title/lead plus structured body writing for stronger prose sections
+  - `button_group` stays the structured CTA/action module on the shared target contract
+  - `media` remains the practical image/video URL block for controlled early CMS use
+  - `card_list` now provides repeatable grouped cards/list content for highlights, resource paths, and simple structured collections
 - CMS module folders now follow a predictable portable shape under `resources/js/admin/cms/modules/<module>/`:
   - `manifest.ts`
   - `renderer.tsx`
@@ -167,6 +208,21 @@ After completing a task:
 - The first non-CMS proof targets are now active:
   - home page exposes a shared CMS region
   - verse detail exposes a supplementary CMS region below the canonical verse flow
+- The declared supplemental regions now have practical seeded development content to exercise the first CMS module set:
+  - the home page supplementary region is now composed as a real supporting content flow instead of a small demo fragment:
+    - orientation prose
+    - CTA/button group
+    - grouped highlight cards
+    - supporting media
+    - a closing next-step CTA section
+  - a published development CMS page at `/pages/platform-guide` now reads like a real guide page instead of a module demo:
+    - hero prose + actions
+    - structured content-layer explanation
+    - supporting media section
+    - workflow prose
+    - page-pattern card list
+    - closing CTA section
+  - the Bhagavad Gita verse-detail supplementary region for chapter 2 section 1 verse 1 now has seeded reflection, CTA, and related-path card content so scripture supplemental CMS usage can be evaluated on a real page
 - Verse detail CMS activation is now understood and stable:
   - the shared exposed-region resolver does return the supplementary verse region and admin bootstrap payload
   - admin capability reaches verse detail through the normal shared admin context
@@ -238,10 +294,26 @@ But the CMS workflow is still intentionally narrow:
 - verse detail is only a first experiment mount; persisted universal region ownership outside CMS pages is not built yet
 
 ### CMS module UX
-- Rich text works through a simple HTML-based editor.
+- Rich text now supports eyebrow/title/lead plus structured writing inside the same module, while still staying intentionally lighter than a full WYSIWYG.
 - Button group works with multi-button config, alignment, layout options, generic destination typing, and progressive button-vs-layout steps.
 - Media works with image/video URL fields plus width/aspect settings.
+- Card list now supports a repeatable grouped card/list structure with per-item optional structured link targets.
+- Rich-text authoring now feels closer to real writing:
+  - write/preview modes now exist in the editor
+  - quick insert helpers now exist for headings, bullets, and quotes
+  - authors no longer have to write raw HTML for normal prose sections
+- Shared link-target editing now feels less technical:
+  - common internal targets can be picked from shared lists instead of typed manually
+  - pasted internal paths can be resolved into the shared target contract directly
+- The refreshed CMS browser smoke now proves both:
+  - rich-text editing through the real CMS workspace editor
+  - button/link editing through the real CMS workspace editor
 - The CMS module contract and folder shape are now frozen enough for future portable-module work, but external module loading itself is still not built.
+- Real composition usage now gives a clearer read on the first module set:
+  - `rich_text` is already strong for section framing and guide-style prose when paired with eyebrow/title/lead
+  - `button_group` is strong for next-step actions once the target is known
+  - `card_list` is strong for lightweight structured highlights and related-path sections
+  - `media` is usable in real page composition, but its URL-first editing flow still feels more technical than the other modules
 
 But richer authoring is still postponed:
 - no rich text WYSIWYG yet
@@ -252,6 +324,11 @@ But richer authoring is still postponed:
 
 ### CMS next capability gaps
 - The public CMS shell is real, but broader public discovery/navigation is still not built.
+- The global navigation system is now active for the shared header, but it is still intentionally narrow:
+  - route/scripture target pickers are still basic and slug-driven
+  - navigation ordering uses move up/down rather than drag/drop
+  - desktop live header authoring is now the strong path, while mobile preserves browsing behavior rather than adding the same editing affordances there
+  - footer authoring is real through the shared navigation workspace, but it does not yet have the same live positional editing layer as the header
 - External or remote CMS module registration is still not built yet.
 - CMS module categories are manifest-ready, but category-management UI is still postponed.
 - The old public `scripture.books.overview` path and watch-overview dropdown behavior have been retired from the active scripture browsing experience.
@@ -284,6 +361,18 @@ But richer authoring is still postponed:
 - Intro presentation is more consistent across canonical cards.
 - Verse detail is cleaner than before because the supplementary CMS region is now the only live composition path on that page; the older verse-owned notes remain visible without competing live authoring controls.
 - Book, chapter, and verse public scripture pages are also cleaner because the older owner-attached public add/edit block controls and watch-overview UI are being removed from the active browsing path.
+- The four main scripture pages now read with a clearer structure inside the shared site frame:
+  - books index: library intro + available books
+  - book page: canonical book intro + supplementary media + chapter list
+  - chapter page: canonical chapter intro + grouped verse list
+  - verse detail: canonical verse intro + study companion + translations + commentaries + supplementary CMS region
+- The old page-level scripture admin mode banner is gone from those pages; editor-mode visibility now lives in the shared header toggle instead of taking a full content band above each canonical page.
+- Book media now reads as supplemental book material rather than as a canonical or overview-video feature, and the verse CMS region now presents as supplementary content instead of implementation-facing “universal region” copy.
+- The shared public header now behaves like a real site navigation system:
+  - top-level items can be direct links or parent groups
+  - parent items may also keep an overview target
+  - nested navigation works on desktop and in the right-side mobile drawer
+  - for authorized editors with admin visibility enabled, that same header now becomes the active navigation authoring surface instead of forcing routine edits through the workspace
 
 ### CMS page UX
 - The CMS page flow is no longer just a record shell. It is now a real composition system that exists both in the workspace and, in a first narrow form, on the live published CMS page itself for permitted users.
@@ -294,6 +383,11 @@ But richer authoring is still postponed:
 - The CMS builder is now operational for core page/container/block CRUD and movement, but it is still foundation-first rather than feature-complete.
 - The CMS workspace still exists for identity management, listing, diagnostics, and support editing, but it is no longer treated as the preferred authoring surface in architecture or workspace copy.
 - CMS linking is now expected to happen through generic CMS modules, especially button destinations, instead of per-entity scripture schema linkage.
+- The first real page-composition pass now confirms that the current module set can carry meaningful pages, but it also surfaced the next authoring friction points:
+  - rich text is much more usable now, but it still stops short of a fuller editorial writing surface
+  - media is useful in page layout, but its authoring flow is the least polished
+  - link-target configuration is much faster now, but deeper scripture targets still become more field-heavy than route/cms-page linking
+  - positional live editing works best once containers already exist; adding and shaping larger multi-section pages still benefits from another polish pass
 
 ## Important architecture reminders
 
@@ -316,15 +410,15 @@ But richer authoring is still postponed:
 Do not drift into fake abstractions detached from either the canonical schema or the CMS data model.
 
 ## Immediate next priority when resuming
-1. Move into the next product-facing phase from a cleaner base:
-   - header/footer work
-   - broader page structuring
-   - later CMS layout/content improvements
+1. Use the real composition pass as the basis for the next CMS improvements:
+   - improve the first module set based on authoring friction instead of adding many new modules
+   - keep building inside declared supplemental regions instead of improvising new seams
+   - continue using the shared public frame instead of reintroducing page-specific shells
 2. Keep the active scripture admin path trustworthy while that phase begins:
    - extend browser validation across the remaining grouped/full-edit canonical surfaces as needed
    - preserve the new narrow smoke layer for the active inline editors
    - keep row/page semantics and same-page behavior honest
-3. Extend the live CMS interaction model only after the next product-facing structure work is ready:
+3. Extend the live CMS interaction model only where the real composition pass showed clear need:
    - keep published CMS pages interactive for permitted users
    - preserve the locked same-layout public-page-first authoring rule as live composition expands
    - preserve the stable `manifest.ts` / `renderer.tsx` / `editor.tsx` / `types.ts` / `defaults.ts` / `index.tsx` contract

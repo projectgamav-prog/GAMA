@@ -4,9 +4,13 @@ export type CmsContainerType = 'card' | 'section';
 
 export type CmsInsertionMode = 'start' | 'before' | 'after' | 'end';
 
-export type CmsModuleCategory = 'text' | 'actions' | 'media';
+export type CmsModuleCategory = 'text' | 'actions' | 'media' | 'collections';
 
-export type CmsModuleKey = 'rich_text' | 'button_group' | 'media';
+export type CmsModuleKey =
+    | 'rich_text'
+    | 'button_group'
+    | 'media'
+    | 'card_list';
 
 export type CmsModulePayload = {
     data: Record<string, unknown>;

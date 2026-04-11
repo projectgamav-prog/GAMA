@@ -3,6 +3,8 @@
 namespace App\Http\Middleware;
 
 use App\Support\AdminContext\AdminContext;
+use App\Support\Navigation\LinkTargetRegistry;
+use App\Support\Navigation\SiteNavigationData;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -36,6 +38,8 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $canAccessAdminContext = AdminContext::canAccess($request->user());
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -43,10 +47,20 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'adminContext' => [
-                'canAccess' => AdminContext::canAccess($request->user()),
+                'canAccess' => $canAccessAdminContext,
                 'isVisible' => AdminContext::isVisible($request),
                 'visibilityUrl' => AdminContext::visibilityUrl($request->user()),
             ],
+            'siteNavigation' => [
+                'header' => SiteNavigationData::headerItems(),
+                'footer' => SiteNavigationData::footerItems(),
+                'headerAdmin' => $canAccessAdminContext
+                    ? SiteNavigationData::headerAuthoringData()
+                    : null,
+            ],
+            'linkTargetOptions' => $canAccessAdminContext
+                ? LinkTargetRegistry::sharedOptions()
+                : null,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

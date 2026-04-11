@@ -1,6 +1,5 @@
 import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import { resolveBooksCollectionSurface } from '@/admin/integrations/sections';
-import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
 import { ScriptureBookLibraryGrid } from '@/components/scripture/scripture-book-library-grid';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
@@ -28,8 +27,6 @@ export default function BooksIndex({ books, isAdmin, admin }: BooksIndexProps) {
 
     return (
         <ScriptureLayout title="Books" breadcrumbs={breadcrumbs}>
-            <ScriptureAdminModeBar />
-
             <ScripturePageIntroCard
                 badges={
                     <>
@@ -40,7 +37,7 @@ export default function BooksIndex({ books, isAdmin, admin }: BooksIndexProps) {
                     </>
                 }
                 title="Scripture Library"
-                description="Browse the available books and enter each reading journey from its canonical book page."
+                description="Browse the available books and enter each reading path from its canonical book page."
             >
                 {libraryCollectionSurface && (
                     <AdminModuleHost
@@ -52,7 +49,7 @@ export default function BooksIndex({ books, isAdmin, admin }: BooksIndexProps) {
 
             <ScriptureSection
                 title="Available Books"
-                description="Choose a book to open its canonical structure, sections, and chapters."
+                description="Choose a book to open its canonical structure, then continue into sections and chapters."
             >
                 <ScriptureBookLibraryGrid
                     books={books}

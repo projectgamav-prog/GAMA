@@ -5,6 +5,11 @@ admin surface system.
 
 This guide is practical on purpose. It is not a theory brief.
 
+Read alongside:
+- `docs/admin-architecture.md`
+- `docs/admin/content-aware-positional-authoring.md` when the component edits a real list/tree on the live surface
+- `docs/admin/positional-authoring-implementation-guide.md` when the component needs local item insertion/reorder/delete behavior
+
 ## 1. Two module systems
 
 The project now has two distinct module systems.
@@ -112,6 +117,12 @@ Preferred boundary:
 - integrations/builders shape metadata
 - readers validate metadata
 - modules render and submit
+
+If the adapted component is becoming a positional live editor:
+- keep the rendered item/list/tree as the main editing surface
+- attach tiny local controls near the real item position
+- keep draft insertion local to the truthful list seam
+- preserve structured payload/config contracts instead of flattening them for inline convenience
 
 ## 6. Surface qualification expectations
 

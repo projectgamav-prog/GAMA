@@ -2,6 +2,8 @@
 
 namespace App\Support\Cms;
 
+use App\Support\Navigation\LinkTarget;
+
 class CmsModuleRegistry
 {
     /**
@@ -9,7 +11,7 @@ class CmsModuleRegistry
      */
     public static function keys(): array
     {
-        return ['rich_text', 'button_group', 'media'];
+        return ['rich_text', 'button_group', 'media', 'card_list'];
     }
 
     /**
@@ -20,7 +22,15 @@ class CmsModuleRegistry
         return match ($moduleKey) {
             'rich_text' => [
                 'data' => [
-                    'html' => '<p>New rich text block.</p>',
+                    'eyebrow' => '',
+                    'title' => '',
+                    'lead' => '',
+                    'body' => 'New rich text block.',
+                    'blocks' => [[
+                        'type' => 'paragraph',
+                        'text' => 'New rich text block.',
+                    ]],
+                    'html' => '',
                 ],
                 'config' => [
                     'align' => 'left',
@@ -31,7 +41,15 @@ class CmsModuleRegistry
                 'data' => [
                     'buttons' => [[
                         'label' => 'New button',
-                        'href' => '#',
+                        'target' => [
+                            'type' => 'url',
+                            'value' => [
+                                'url' => '',
+                            ],
+                            'behavior' => [
+                                'new_tab' => false,
+                            ],
+                        ],
                         'variant' => 'default',
                         'open_in_new_tab' => false,
                     ]],
@@ -51,6 +69,32 @@ class CmsModuleRegistry
                 'config' => [
                     'aspect_ratio' => 'auto',
                     'width' => 'wide',
+                ],
+            ],
+            'card_list' => [
+                'data' => [
+                    'eyebrow' => '',
+                    'title' => 'Guided cards',
+                    'intro' => '',
+                    'items' => [[
+                        'eyebrow' => '',
+                        'title' => 'New card',
+                        'body' => '',
+                        'cta_label' => 'Learn more',
+                        'target' => [
+                            'type' => 'url',
+                            'value' => [
+                                'url' => '',
+                            ],
+                            'behavior' => [
+                                'new_tab' => false,
+                            ],
+                        ],
+                    ]],
+                ],
+                'config' => [
+                    'layout' => 'cards',
+                    'columns' => 'two',
                 ],
             ],
             default => [
@@ -102,6 +146,7 @@ class CmsModuleRegistry
             'rich_text' => self::validateRichText($payload['data'], $payload['config']),
             'button_group' => self::validateButtonGroup($payload['data'], $payload['config']),
             'media' => self::validateMedia($payload['data'], $payload['config']),
+            'card_list' => self::validateCardList($payload['data'], $payload['config']),
             default => [],
         };
     }
@@ -114,10 +159,15 @@ class CmsModuleRegistry
     private static function validateRichText(array $data, array $config): array
     {
         $errors = [];
+        $eyebrow = trim((string) ($data['eyebrow'] ?? ''));
+        $title = trim((string) ($data['title'] ?? ''));
+        $lead = trim((string) ($data['lead'] ?? ''));
+        $body = trim((string) ($data['body'] ?? ''));
+        $blocks = is_array($data['blocks'] ?? null) ? $data['blocks'] : [];
         $html = trim((string) ($data['html'] ?? ''));
 
-        if ($html === '') {
-            $errors['data_json.html'] = 'Rich text content is required.';
+        if ($eyebrow === '' && $title === '' && $lead === '' && $body === '' && $blocks === [] && $html === '') {
+            $errors['data_json.body'] = 'Add at least a title, lead, or body for this prose section.';
         }
 
         if (! in_array($config['align'] ?? null, ['left', 'center', 'right'], true)) {
@@ -155,15 +205,20 @@ class CmsModuleRegistry
             }
 
             $label = trim((string) ($button['label'] ?? ''));
-            $href = trim((string) ($button['href'] ?? ''));
             $variant = $button['variant'] ?? null;
+            $target = self::normalizeLinkTargetPayload($button);
 
             if ($label === '') {
                 $errors["data_json.buttons.{$index}.label"] = 'Button label is required.';
             }
 
-            if ($href === '') {
-                $errors["data_json.buttons.{$index}.href"] = 'Button destination is required.';
+            if ($target === null) {
+                $errors["data_json.buttons.{$index}.target.type"] = 'Choose a valid destination type.';
+            } else {
+                foreach (LinkTarget::validate($target) as $message) {
+                    $errors["data_json.buttons.{$index}.target.value"] = $message;
+                    break;
+                }
             }
 
             if (! in_array($variant, ['default', 'secondary', 'outline', 'ghost'], true)) {
@@ -210,5 +265,84 @@ class CmsModuleRegistry
         }
 
         return $errors;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @param  array<string, mixed>  $config
+     * @return array<string, string>
+     */
+    private static function validateCardList(array $data, array $config): array
+    {
+        $errors = [];
+        $items = $data['items'] ?? null;
+
+        if (! is_array($items) || $items === []) {
+            $errors['data_json.items'] = 'Add at least one card.';
+
+            return $errors;
+        }
+
+        foreach ($items as $index => $item) {
+            if (! is_array($item)) {
+                $errors["data_json.items.{$index}"] = 'Each card must be a valid card object.';
+
+                continue;
+            }
+
+            $title = trim((string) ($item['title'] ?? ''));
+
+            if ($title === '') {
+                $errors["data_json.items.{$index}.title"] = 'Card title is required.';
+            }
+
+            $target = self::normalizeLinkTargetPayload($item);
+
+            if ($target !== null) {
+                foreach (LinkTarget::validate($target) as $message) {
+                    $errors["data_json.items.{$index}.target.value"] = $message;
+                    break;
+                }
+            }
+        }
+
+        if (! in_array($config['layout'] ?? null, ['cards', 'list'], true)) {
+            $errors['config_json.layout'] = 'Choose a valid card-list layout.';
+        }
+
+        if (! in_array($config['columns'] ?? null, ['one', 'two', 'three'], true)) {
+            $errors['config_json.columns'] = 'Choose a valid card-list column count.';
+        }
+
+        return $errors;
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>|null
+     */
+    private static function normalizeLinkTargetPayload(array $payload): ?array
+    {
+        $target = $payload['target'] ?? null;
+
+        if (is_array($target)) {
+            return LinkTarget::normalize($target);
+        }
+
+        $legacyHref = trim((string) ($payload['href'] ?? $payload['url'] ?? ''));
+
+        if ($legacyHref === '') {
+            return null;
+        }
+
+        return LinkTarget::normalize([
+            'type' => 'url',
+            'value' => [
+                'url' => $legacyHref,
+            ],
+            'behavior' => [
+                'new_tab' => (bool) ($payload['open_in_new_tab'] ?? false),
+            ],
+        ]);
     }
 }

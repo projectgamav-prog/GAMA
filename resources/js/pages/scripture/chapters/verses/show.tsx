@@ -14,7 +14,6 @@ import {
     resolveVerseHeaderSurfaces,
     resolveVerseRelationSurfaces,
 } from '@/admin/integrations/scripture/verses';
-import { ScriptureAdminModeBar } from '@/components/scripture/scripture-admin-mode-bar';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScriptureIntroBlock } from '@/components/scripture/scripture-intro-block';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
@@ -182,8 +181,6 @@ export default function VerseShow({
             title={`${verseTitle} - ${chapterTitle}`}
             breadcrumbs={breadcrumbs}
         >
-            <ScriptureAdminModeBar />
-
             <ScripturePageIntroCard
                 entityMeta={{
                     ...verseEntity,
@@ -966,8 +963,8 @@ export default function VerseShow({
                         region: 'universal_content_region',
                         capabilityHint: 'cms',
                     }}
-                    title="Universal Content Region"
-                    description="Supplementary CMS content for verse detail. This stays separate from canonical verse structure and existing verse-owned editorial blocks."
+                    title="Supplementary Content"
+                    description="Additional CMS-managed content for verse detail. This stays separate from the canonical verse structure and its protected schema relationships."
                 >
                     <CmsExposedRegion region={universalCmsRegion} />
                 </ScriptureSection>
