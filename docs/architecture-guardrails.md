@@ -41,3 +41,11 @@
 - Admin attachment boundary: owned by surfaces and modules.
 - Payload assembly boundary: owned by builders and mappers, not thick
   controllers.
+
+## Architectural Enforcement Rules
+
+- CMS must not persist or mutate canonical identity or canonical hierarchy.
+- Page files must not become permanent homes for editor workflows.
+- Registries must not contain business-rule switchboards.
+- Canonical mutations must go through schema-specific workflows, not generic CMS
+  composition paths.

@@ -271,3 +271,70 @@ When new capabilities are added, the preferred move is:
 5. distribute definitions rather than deepening switchboards
 
 That is the governing thesis of the project.
+
+
+
+## Architectural Enforcement Rules
+
+Architectural rules are not only conceptual; they must be enforceable in code structure.
+
+### Canonical Protection Enforcement
+
+The CMS must not be capable of:
+
+- defining canonical entities (books, chapters, verses)
+- modifying canonical hierarchy relationships
+- redefining canonical identity or routing
+- persisting canonical data
+
+Enforcement strategy:
+
+- canonical schema must be accessed only through canonical models and controllers
+- CMS block schemas must not include canonical identity fields
+- CMS queries must reference canonical data only through controlled read interfaces
+- canonical mutations must go through schema-specific workflows, not generic CMS editors
+
+Any feature that allows CMS to mutate canonical truth is a violation.
+
+---
+
+### Editing System Enforcement
+
+Editing behavior must not be implemented directly in page components.
+
+Enforcement strategy:
+
+- all editing behavior must be attached through module system
+- pages may expose surfaces only
+- page-level editing logic must be treated as temporary and refactored into modules
+
+---
+
+### Registry Control Enforcement
+
+Central registries must not become multi-purpose control systems.
+
+Enforcement strategy:
+
+- registries may aggregate definitions
+- registries must not contain logic branches or validation switchboards
+- new features must add new definition units, not extend central conditionals
+
+---
+
+### Page Thinness Enforcement
+
+Pages must remain orchestration layers only.
+
+Allowed in pages:
+
+- data loading
+- surface exposure
+- layout composition
+
+Not allowed in pages:
+
+- payload building logic
+- business rules
+- editor workflows
+- registry logic

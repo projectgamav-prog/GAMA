@@ -16,7 +16,6 @@ The active scope is:
 
 - [app/Http/Controllers/Scripture/BookController.php](</c:/Users/SHREENATHJI/Documents/malay/gama/app/Http/Controllers/Scripture/BookController.php:23>)
 - [app/Http/Controllers/Scripture/ChapterController.php](</c:/Users/SHREENATHJI/Documents/malay/gama/app/Http/Controllers/Scripture/ChapterController.php:28>)
-- [app/Http/Controllers/Scripture/VerseController.php](</c:/Users/SHREENATHJI/Documents/malay/gama/app/Http/Controllers/Scripture/VerseController.php:27>)
 
 Expected new support layers may live under a focused namespace such as:
 

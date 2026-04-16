@@ -143,3 +143,46 @@ Do:
 - distribute definitions
 - keep lookup simple
 - preserve explicit architectural boundaries
+
+
+
+
+### Forbidden Registry Pattern
+
+A registry must never become a central switchboard that:
+
+- contains conditional logic per entity/module
+- performs validation branching
+- normalizes payloads based on type
+- owns business rules
+
+Example anti-pattern:
+
+- large match/switch statements inside a registry
+- registry knowing how each module/entity behaves
+
+---
+
+### Correct Registry Pattern
+
+A registry should:
+
+- collect distributed definitions
+- provide lookup and iteration
+- remain declarative
+
+Behavior must live in:
+
+- module definition classes
+- entity-specific builders
+- validators attached to definitions
+
+---
+
+### Migration Rule
+
+When a registry grows beyond simple definition aggregation:
+
+- split definitions into per-entity/per-module classes
+- move behavior out of registry into those classes
+- keep registry as a thin composition layer

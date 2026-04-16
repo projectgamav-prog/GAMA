@@ -118,3 +118,70 @@ Do:
 - keep builder scope narrow
 - keep mapper scope stable
 - keep controllers readable
+
+
+
+### Payload Layer Contract
+
+The system must follow a strict layering model:
+
+Controller → Builder → Mapper
+
+---
+
+### Controller Responsibilities
+
+Controllers may:
+
+- load models
+- coordinate calls to builders
+- return response
+
+Controllers must not:
+
+- build nested arrays manually
+- perform formatting logic
+- construct deep admin payloads
+
+---
+
+### Builder Responsibilities
+
+Builders may:
+
+- assemble structured payloads
+- combine multiple sources of data
+- coordinate mapping
+
+Builders must not:
+
+- query database directly unless explicitly scoped
+- contain UI logic
+- contain route logic
+
+---
+
+### Mapper Responsibilities
+
+Mappers may:
+
+- convert models to arrays
+- normalize output format
+
+Mappers must not:
+
+- orchestrate multiple entities
+- perform business logic
+
+---
+
+### Anti-pattern
+
+A file that:
+
+- queries
+- builds payload
+- formats output
+- embeds admin logic
+
+is violating SRP and must be split.
