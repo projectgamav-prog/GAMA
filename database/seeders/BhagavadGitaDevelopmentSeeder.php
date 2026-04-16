@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Book;
 use App\Models\Character;
+use App\Models\Media;
 use App\Models\Topic;
 use App\Support\Scripture\ScriptureJsonImporter;
 use Illuminate\Database\Seeder;
@@ -169,6 +170,33 @@ class BhagavadGitaDevelopmentSeeder extends Seeder
                 'sort_order' => 1,
                 'meta_json' => [
                     'note' => 'Development cross-link from character to speech verse.',
+                ],
+            ],
+        );
+
+        $heroMedia = Media::query()->updateOrCreate(
+            ['url' => 'https://example.test/assets/bhagavad-gita-hero.jpg'],
+            [
+                'media_type' => 'image',
+                'title' => 'Bhagavad Gita Hero Illustration',
+                'alt_text' => 'Illustrated Bhagavad Gita hero artwork',
+                'caption' => 'Development hero media for the Bhagavad Gita public book page.',
+                'sort_order' => 1,
+            ],
+        );
+
+        $book->mediaAssignments()->updateOrCreate(
+            [
+                'media_id' => $heroMedia->id,
+                'role' => 'hero_media',
+            ],
+            [
+                'title_override' => 'Bhagavad Gita hero media',
+                'caption_override' => 'Seeded hero media assignment for live public/admin smoke coverage.',
+                'sort_order' => 1,
+                'status' => 'published',
+                'meta_json' => [
+                    'seeded_for_smoke' => true,
                 ],
             ],
         );

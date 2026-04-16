@@ -172,9 +172,9 @@ async function clickButtonWithText(client, text, rootSelector = 'document') {
         const root = ${rootSelector === 'document' ? 'document' : `document.querySelector(${JSON.stringify(rootSelector)})`};
         if (!root) return false;
         const button = [...root.querySelectorAll('button, a')]
-            .find((candidate) => candidate.textContent?.trim() === ${JSON.stringify(text)});
+            .find((candidate) => candidate.textContent?.trim()?.includes(${JSON.stringify(text)}));
         if (!button) return false;
-        button.click();
+        button.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, composed: true }));
         return true;
     })()`);
 
@@ -187,7 +187,7 @@ async function clickSelector(client, selector) {
     const clicked = await client.evaluate(`(() => {
         const element = document.querySelector(${JSON.stringify(selector)});
         if (!(element instanceof HTMLElement)) return false;
-        element.click();
+        element.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, composed: true }));
         return true;
     })()`);
 
@@ -199,9 +199,9 @@ async function clickSelector(client, selector) {
 async function clickDesktopTriggerWithText(client, text) {
     const clicked = await client.evaluate(`(() => {
         const trigger = [...document.querySelectorAll('[data-site-nav-trigger^="desktop-"]')]
-            .find((candidate) => candidate.textContent?.trim() === ${JSON.stringify(text)});
+            .find((candidate) => candidate.textContent?.trim()?.includes(${JSON.stringify(text)}));
         if (!(trigger instanceof HTMLElement)) return false;
-        trigger.click();
+        trigger.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, composed: true }));
         return true;
     })()`);
 
@@ -225,11 +225,24 @@ async function main() {
             mobile: false,
         });
 
-        await client.navigate(`${BASE_URL}/books`);
+        await client.navigate(BASE_URL);
         await client.waitFor(
-            'document.body.innerText.includes("Books") && Boolean(document.querySelector(\'[data-site-nav-trigger^="desktop-"]\'))',
+            'document.body.innerText.includes("Scripture Platform") && Boolean(document.querySelector(\'[data-site-nav-trigger^="desktop-"]\'))',
             10000,
         );
+        await client.waitFor(
+            `(() => ![...document.querySelectorAll('[data-site-nav-dropdown]')]
+                .some((element) => getComputedStyle(element).display !== 'none'))()`,
+            10000,
+        );
+        await clickDesktopTriggerWithText(client, 'Scripture');
+        await client.waitFor(
+            `(() => [...document.querySelectorAll('[data-site-nav-dropdown]')]
+                .some((element) => getComputedStyle(element).display !== 'none'))()`,
+            10000,
+        );
+        await clickButtonWithText(client, 'Books', '[data-site-nav-dropdown]');
+        await client.waitFor('location.pathname === "/books"', 10000);
         await client.waitFor(
             `(() => ![...document.querySelectorAll('[data-site-nav-dropdown]')]
                 .some((element) => getComputedStyle(element).display !== 'none'))()`,

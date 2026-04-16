@@ -196,9 +196,9 @@ async function clickButtonWithText(client, text, rootSelector = null) {
         const root = ${scopedRoot};
         if (!root) return false;
         const button = [...root.querySelectorAll('button, a')]
-            .find((candidate) => candidate.textContent?.trim() === \`${targetText}\`);
+            .find((candidate) => candidate.textContent?.trim()?.includes(\`${targetText}\`));
         if (!button) return false;
-        button.click();
+        button.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, composed: true }));
         return true;
     })()`);
 
@@ -240,7 +240,7 @@ async function clickSelector(client, selector) {
         if (!(element instanceof HTMLElement)) {
             return false;
         }
-        element.click();
+        element.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, composed: true }));
         return true;
     })()`);
 
@@ -262,14 +262,6 @@ async function getFieldValue(client, selector) {
 }
 
 async function toggleScriptureAdminControls(client) {
-    await client.send('Network.setCookie', {
-        name: 'admin_context_visible',
-        value: '1',
-        url: BASE_URL,
-    });
-
-    await client.navigate(await client.evaluate('location.href'));
-
     const needsToggle = await client.evaluate(`(() => {
         const button = document.querySelector('[data-admin-visibility-toggle="scripture"]');
         return button instanceof HTMLElement && button.textContent?.includes('Show controls');
@@ -301,7 +293,16 @@ async function login(client) {
 
     await setFieldValue(client, '#email', LOGIN_EMAIL);
     await setFieldValue(client, '#password', LOGIN_PASSWORD);
-    await clickButtonWithText(client, 'Log in');
+    await client.evaluate(`(() => {
+        const form = document.querySelector('form');
+        if (!(form instanceof HTMLFormElement)) {
+            return false;
+        }
+
+        form.requestSubmit();
+
+        return true;
+    })()`);
     await client.waitFor('location.pathname !== "/login"', 15000);
 }
 
@@ -546,7 +547,7 @@ async function smokeMediaSlotEditor(client) {
     })()`);
 
     if (!label) {
-        return { skipped: true, reason: 'No active media-slot surface was visible on the book page.' };
+        throw new Error('No active media-slot surface was visible on the book page.');
     }
 
     await clickButtonWithText(client, label);
@@ -557,7 +558,7 @@ async function smokeMediaSlotEditor(client) {
     })()`);
 
     if (!assignmentId) {
-        return { skipped: true, reason: 'Media surface was available, but no persisted assignment card was present to edit.' };
+        throw new Error('Media surface was available, but no persisted assignment card was present to edit.');
     }
 
     const editableCardSelector = `#book_media_title_${assignmentId}`;
@@ -581,8 +582,6 @@ async function smokeMediaSlotEditor(client) {
         document.querySelector(${JSON.stringify(editableCardSelector)})?.value === ${JSON.stringify(original ?? '')}`,
         15000,
     );
-
-    return { skipped: false };
 }
 
 async function main() {
@@ -600,11 +599,7 @@ async function main() {
         await smokeChapterRowIdentity(client);
         await smokeVerseRowIdentity(client);
         await smokeBookIntro(client);
-        const mediaResult = await smokeMediaSlotEditor(client);
-
-        if (mediaResult.skipped) {
-            console.log(`SMOKE WARNING: ${mediaResult.reason}`);
-        }
+        await smokeMediaSlotEditor(client);
 
         console.log('Scripture admin inline smoke passed.');
     } finally {

@@ -101,6 +101,10 @@ function DesktopNavigationItem({
     const active = isNavigationItemActive(item, currentUrl);
     const [open, setOpen] = useState(false);
 
+    useEffect(() => {
+        setOpen(false);
+    }, [currentUrl]);
+
     if (item.children.length === 0) {
         return (
             <Button
@@ -157,6 +161,10 @@ function DesktopNavigationItem({
 
 function DesktopDropdownChild({ item }: { item: SiteNavigationItem }) {
     const [open, setOpen] = useState(false);
+
+    useEffect(() => {
+        setOpen(false);
+    }, [item.id]);
 
     if (item.children.length === 0) {
         return (
@@ -354,6 +362,10 @@ function NavigationItemAuthoring({
         target: item.target,
     });
     const errors = form.errors as Record<string, string | undefined>;
+
+    useEffect(() => {
+        setChildrenOpen(false);
+    }, [currentUrl]);
 
     const beginEdit = () => {
         form.clearErrors();

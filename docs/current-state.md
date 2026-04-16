@@ -30,6 +30,25 @@ After completing a task:
 
 ## Working
 
+### Architecture documentation
+- A new architecture foundation set now exists in `docs/`:
+  - `project-architecture-thesis.md`
+  - `cms-architecture.md`
+  - `admin-surface-design.md`
+  - `payload-architecture.md`
+  - `registry-architecture.md`
+  - `refactor-roadmap.md`
+  - `current-phase.md`
+  - `architecture-guardrails.md`
+  - `anti-patterns.md`
+- These documents now define the locked architecture direction for:
+  - canonical scripture versus CMS separation
+  - hybrid admin editing
+  - admin surfaces and module attachment
+  - controller/builder/mapper payload boundaries
+  - registry use versus central switchboards
+  - phased safe refactor sequencing
+
 ### Architecture
 - Pages are thin render shells.
 - Canonical scripture admin still attaches through semantic surfaces and module qualification.
@@ -410,6 +429,11 @@ But richer authoring is still postponed:
 Do not drift into fake abstractions detached from either the canonical schema or the CMS data model.
 
 ## Immediate next priority when resuming
+0. Read the new architecture foundation docs before starting major refactor work:
+   - `project-architecture-thesis.md`
+   - `current-phase.md`
+   - `architecture-guardrails.md`
+   - `refactor-roadmap.md`
 1. Use the real composition pass as the basis for the next CMS improvements:
    - improve the first module set based on authoring friction instead of adding many new modules
    - keep building inside declared supplemental regions instead of improvising new seams
