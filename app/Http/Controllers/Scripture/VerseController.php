@@ -7,20 +7,17 @@ use App\Models\Book;
 use App\Models\BookSection;
 use App\Models\Chapter;
 use App\Models\ChapterSection;
-use App\Models\CommentarySource;
 use App\Models\ContentBlock;
-use App\Models\TranslationSource;
 use App\Models\Verse;
 use App\Support\AdminContext\AdminContext;
 use App\Support\Cms\Regions\CmsExposedRegionRegistry;
 use App\Support\Cms\Regions\CmsExposedRegionResolver;
-use App\Support\Scripture\Admin\PrimaryPublishedEditableContentBlock;
 use App\Support\Scripture\Admin\Registry\AdminEntityRegistry;
-use App\Support\Scripture\Admin\VerseRelationAdminData;
 use App\Support\Scripture\Admin\VerseAdminRouteContext;
+use App\Support\Scripture\PageData\VersePageAdminDataBuilder;
+use App\Support\Scripture\PageData\VerseShowPageDataBuilder;
 use App\Support\Scripture\PublicScriptureData;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -40,6 +37,8 @@ class VerseController extends Controller
         AdminEntityRegistry $adminEntityRegistry,
         CmsExposedRegionRegistry $regionRegistry,
         CmsExposedRegionResolver $regionResolver,
+        VerseShowPageDataBuilder $verseShowPageDataBuilder,
+        VersePageAdminDataBuilder $versePageAdminDataBuilder,
     ): Response {
         $verse->load([
             'translations',
@@ -54,10 +53,6 @@ class VerseController extends Controller
         $chapterSectionVerses = $chapterSection->verses()
             ->inCanonicalOrder()
             ->get();
-
-        $currentVerseIndex = $chapterSectionVerses->search(
-            fn (Verse $candidate): bool => (int) $candidate->getKey() === (int) $verse->getKey(),
-        );
 
         $contentBlocks = $verse->contentBlocks()
             ->published()
@@ -74,10 +69,21 @@ class VerseController extends Controller
             $verse,
         );
         $adminEntityDefinition = $adminEntityRegistry->definition('verse');
-        $primaryIntroBlock = PrimaryPublishedEditableContentBlock::resolve(
+        $primaryIntroBlock = $verseShowPageDataBuilder->primaryIntroBlock(
             $contentBlocks,
-            fn (ContentBlock $block): bool => $adminRouteContext->isEditableIntroBlock($block),
+            $adminRouteContext,
         );
+
+        $adjacentVerses = $verseShowPageDataBuilder->adjacentVerses(
+            $book,
+            $bookSection,
+            $chapter,
+            $chapterSection,
+            $chapterSectionVerses,
+            $verse,
+            $publicScriptureData,
+        );
+
         return Inertia::render('scripture/chapters/verses/show', [
             'book' => $publicScriptureData->book($book),
             'book_section' => $publicScriptureData->bookSection($book, $bookSection),
@@ -88,30 +94,13 @@ class VerseController extends Controller
                 $chapter,
                 $chapterSection,
             ),
-            'verse' => [
-                ...$publicScriptureData->verse($verse),
-                'intro_block' => $primaryIntroBlock
-                    ? $publicScriptureData->contentBlock($primaryIntroBlock)
-                    : null,
-            ],
-            'previous_verse' => $currentVerseIndex === false
-                ? null
-                : $publicScriptureData->adjacentVerse(
-                    $book,
-                    $bookSection,
-                    $chapter,
-                    $chapterSection,
-                    $chapterSectionVerses->get($currentVerseIndex - 1),
-                ),
-            'next_verse' => $currentVerseIndex === false
-                ? null
-                : $publicScriptureData->adjacentVerse(
-                    $book,
-                    $bookSection,
-                    $chapter,
-                    $chapterSection,
-                    $chapterSectionVerses->get($currentVerseIndex + 1),
-                ),
+            'verse' => $verseShowPageDataBuilder->versePayload(
+                $verse,
+                $primaryIntroBlock,
+                $publicScriptureData,
+            ),
+            'previous_verse' => $adjacentVerses['previous_verse'],
+            'next_verse' => $adjacentVerses['next_verse'],
             'translations' => $publicScriptureData->translations($verse->translations),
             'commentaries' => $publicScriptureData->commentaries($verse->commentaries),
             'verse_meta' => $publicScriptureData->verseMeta($verse->verseMeta),
@@ -133,7 +122,7 @@ class VerseController extends Controller
             ], $request->user()),
             'isAdmin' => $isAdmin,
             'admin' => $isAdmin
-                ? $this->verseAdminPayload(
+                ? $versePageAdminDataBuilder->adminPayload(
                     $verse,
                     $adminRouteContext,
                     $primaryIntroBlock,
@@ -142,80 +131,5 @@ class VerseController extends Controller
                 )
                 : null,
         ]);
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function verseAdminPayload(
-        Verse $verse,
-        VerseAdminRouteContext $adminRouteContext,
-        ?ContentBlock $primaryIntroBlock,
-        PublicScriptureData $publicScriptureData,
-        \App\Support\Scripture\Admin\Registry\AdminEntityDefinition $adminEntityDefinition,
-    ): array {
-        $translationSources = TranslationSource::query()
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->get();
-        $commentarySources = CommentarySource::query()
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->get();
-
-        return [
-            'identity_update_href' => $adminRouteContext->identityUpdateHref(),
-            'meta_update_href' => $adminRouteContext->metaUpdateHref(),
-            'full_edit_href' => $adminRouteContext->fullEditHref(),
-            'destroy_href' => $adminRouteContext->destroyHref(),
-            'translations' => [
-                'store_href' => $adminRouteContext->translationStoreHref(),
-                'next_sort_order' => VerseRelationAdminData::nextTranslationSortOrder(
-                    $verse->translations,
-                ),
-                'rows' => collect($verse->translations)
-                    ->map(
-                        fn (\App\Models\VerseTranslation $translation) => VerseRelationAdminData::translation(
-                            $translation,
-                            $adminRouteContext->translationUpdateHref($translation),
-                            $adminRouteContext->translationDestroyHref($translation),
-                        ),
-                    )
-                    ->values()
-                    ->all(),
-                'sources' => VerseRelationAdminData::translationSources($translationSources),
-                'fields' => VerseRelationAdminData::translationFields($adminEntityDefinition),
-            ],
-            'commentaries' => [
-                'store_href' => $adminRouteContext->commentaryStoreHref(),
-                'next_sort_order' => VerseRelationAdminData::nextCommentarySortOrder(
-                    $verse->commentaries,
-                ),
-                'rows' => collect($verse->commentaries)
-                    ->map(
-                        fn (\App\Models\VerseCommentary $commentary) => VerseRelationAdminData::commentary(
-                            $commentary,
-                            $adminRouteContext->commentaryUpdateHref($commentary),
-                            $adminRouteContext->commentaryDestroyHref($commentary),
-                        ),
-                    )
-                    ->values()
-                    ->all(),
-                'sources' => VerseRelationAdminData::commentarySources($commentarySources),
-                'fields' => VerseRelationAdminData::commentaryFields($adminEntityDefinition),
-            ],
-            'intro_store_href' => $adminRouteContext->contentBlockStoreHref(),
-            'primary_intro_block' => $primaryIntroBlock
-                ? $publicScriptureData->contentBlock($primaryIntroBlock)
-                : null,
-            'primary_intro_update_href' => $primaryIntroBlock
-                ? $adminRouteContext->contentBlockUpdateHref($primaryIntroBlock)
-                : null,
-            'primary_intro_destroy_href' => $primaryIntroBlock
-                ? $adminRouteContext->contentBlockDestroyHref($primaryIntroBlock)
-                : null,
-            'intro_block_types' => $adminRouteContext->contentBlockTypes(),
-            'intro_default_region' => $adminRouteContext->defaultIntroBlockRegion(),
-        ];
     }
 }

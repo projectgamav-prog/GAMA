@@ -33,6 +33,7 @@
 - Module responsibility: attach reusable editing behavior.
 - CMS responsibility: compose supplemental and generic page content.
 - Canonical responsibility: preserve protected scripture truth.
+- Cleanup responsibility: remove dead code safely inside the touched scope.
 
 ## Boundary Rules
 
@@ -49,3 +50,8 @@
 - Registries must not contain business-rule switchboards.
 - Canonical mutations must go through schema-specific workflows, not generic CMS
   composition paths.
+- Refactor batches should remove obsolete imports, unused helpers, abandoned
+  branches, stale comments, and duplicate replaced paths inside the touched
+  scope.
+- Refactor cleanup must not expand into unrelated systems or leave accidental
+  parallel implementations behind.

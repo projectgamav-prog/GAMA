@@ -785,7 +785,7 @@ test('authorized editors can manage book media assignments and access canonical 
         ->assertInertia(fn (Assert $page) => $page
             ->component('scripture/books/full-edit')
             ->where('admin_entity.primary_table', 'books')
-            ->has('available_media', 2)
+            ->has('available_media', 3)
             ->has('admin_media_assignments', 2)
             ->where('admin_media_assignments.0.role', 'hero_media')
             ->where('admin_media_assignments.0.title_override', 'Updated hero slot')

@@ -133,7 +133,11 @@ test('books page lists available public scripture books', function () {
             ->where('books.1.href', route('scripture.books.show', $ramcharitmanas))
             ->where('books.2.slug', 'bhagavad-gita')
             ->where('books.2.number', '3')
-            ->where('books.2.media_slots.hero_media', null)
+            ->where('books.2.media_slots.hero_media.title', 'Bhagavad Gita hero media')
+            ->where(
+                'books.2.media_slots.hero_media.media.url',
+                'https://example.test/assets/bhagavad-gita-hero.jpg',
+            )
             ->where('books.2.media_slots.supporting_media', [])
             ->where(
                 'books.2.href',
@@ -151,7 +155,11 @@ test('book page is displayed for scripture browsing', function () {
             ->component('scripture/books/show')
             ->where('book.number', '1')
             ->where('book.title', 'Bhagavad Gita')
-            ->where('book.media_slots.hero_media', null)
+            ->where('book.media_slots.hero_media.title', 'Bhagavad Gita hero media')
+            ->where(
+                'book.media_slots.hero_media.media.url',
+                'https://example.test/assets/bhagavad-gita-hero.jpg',
+            )
             ->where('book.media_slots.supporting_media', [])
             ->has('book_sections', 1)
             ->where(

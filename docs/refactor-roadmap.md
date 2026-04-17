@@ -25,6 +25,7 @@ into focused support builders while preserving response shape.
 - accidental response shape drift
 - moving query decisions into builders
 - turning extraction into one new mega service
+- leaving replaced controller payload paths or dead helper code behind
 
 ## Phase 2 - Structural Registry Cleanup
 
@@ -109,6 +110,8 @@ stabilizes the codebase.
 
 - Extract before redesign.
 - Keep one stable payload contract per batch where possible.
+- Remove dead code inside the touched scope as part of each batch, but do not
+  widen cleanup into unrelated systems.
 - Do not combine registry breakup and page thinning in one batch.
 - Do not combine CMS backend registry redesign and CMS UI decomposition in one
   batch.
@@ -123,3 +126,5 @@ stabilizes the codebase.
 - Never turn canonical specialness into generic CMS structure.
 - Never replace several focused support classes with one large new abstraction
   layer.
+- Never leave accidental parallel old/new implementations behind after a
+  behavior-preserving refactor.

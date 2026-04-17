@@ -132,3 +132,21 @@ Bad abstraction here would:
 
 The project should prefer focused concrete support classes when they express
 real responsibilities clearly.
+
+## Dead Architecture Left Behind
+
+### Why Dangerous Here
+
+Keeping obsolete imports, unused helpers, abandoned branches, stale comments,
+or parallel old/new paths after a refactor makes the codebase teach the wrong
+architecture.
+
+In this project that is especially dangerous because contributors are already
+working across protected canonical flows, CMS composition, and module-driven
+admin seams. Dead structure makes future batches drift back toward the wrong
+pattern.
+
+### Rule
+
+Cleanup is encouraged, but only inside the touched scope. It must not become a
+reason to broaden a batch into unrelated systems.

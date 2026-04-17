@@ -19,6 +19,12 @@
    real architectural boundary.
 10. Canonical scripture pages remain intentional exceptions. Do not flatten
     them into generic CMS patterns.
+11. Remove dead code within the touched scope. Clean up obsolete imports,
+    unused helpers, abandoned branches, stale comments, and duplicate paths
+    that the refactor replaces.
+12. Do not broaden cleanup into unrelated systems, and do not leave parallel
+    old/new implementations behind unless they are intentionally transitional
+    and clearly documented.
 
 ## Default Decision Rule
 

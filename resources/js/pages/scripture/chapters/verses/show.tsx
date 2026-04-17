@@ -1,38 +1,25 @@
-import { Link } from '@inertiajs/react';
-import {
-    Headphones,
-    Languages,
-    MessageSquareQuote,
-    Sparkles,
-    Tag,
-    Users,
-} from 'lucide-react';
-import { CmsExposedRegion } from '@/admin/cms/components/CmsExposedRegion';
-import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import { AdminModuleHostGroup } from '@/admin/core/AdminModuleHostGroup';
 import {
     resolveVerseHeaderSurfaces,
     resolveVerseRelationSurfaces,
 } from '@/admin/integrations/scripture/verses';
-import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScriptureIntroBlock } from '@/components/scripture/scripture-intro-block';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { ScriptureReadingNavigationActions } from '@/components/scripture/scripture-reading-navigation-actions';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
+import { VerseCharactersSection } from '@/components/scripture/verse/VerseCharactersSection';
+import { VerseCommentariesSection } from '@/components/scripture/verse/VerseCommentariesSection';
+import { VerseDictionaryTermsSection } from '@/components/scripture/verse/VerseDictionaryTermsSection';
+import { VerseRecitationsSection } from '@/components/scripture/verse/VerseRecitationsSection';
+import { VerseStudyNotesSection } from '@/components/scripture/verse/VerseStudyNotesSection';
+import { VerseSupplementaryCmsSection } from '@/components/scripture/verse/VerseSupplementaryCmsSection';
+import { VerseTopicsSection } from '@/components/scripture/verse/VerseTopicsSection';
+import { VerseTranslationsSection } from '@/components/scripture/verse/VerseTranslationsSection';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useVisibleAdminControls } from '@/hooks/use-admin-context';
 import ScriptureLayout from '@/layouts/scripture-layout';
 import { chapterLabel, sectionLabel, verseLabel } from '@/lib/scripture';
-import { cn } from '@/lib/utils';
 import type { BreadcrumbItem, VerseShowProps } from '@/types';
 
 const getStringList = (values: unknown[] | null): string[] => {
@@ -160,22 +147,6 @@ export default function VerseShow({
         topics.length > 0 ||
         characters.length > 0 ||
         verseMetaSurface !== null;
-    const formatDuration = (durationSeconds: number | null): string | null => {
-        if (durationSeconds === null || durationSeconds < 0) {
-            return null;
-        }
-
-        const hours = Math.floor(durationSeconds / 3600);
-        const minutes = Math.floor((durationSeconds % 3600) / 60);
-        const seconds = durationSeconds % 60;
-
-        if (hours > 0) {
-            return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        }
-
-        return `${minutes}:${String(seconds).padStart(2, '0')}`;
-    };
-
     return (
         <ScriptureLayout
             title={`${verseTitle} - ${chapterTitle}`}
@@ -264,712 +235,69 @@ export default function VerseShow({
                 >
                     <div className="grid gap-4 xl:grid-cols-2">
                         {(hasVerseMeta || verseMetaSurface) && (
-                            <ScriptureEntityRegion
-                                meta={{
-                                    ...verseEntity,
-                                    region: 'verse_notes',
-                                    capabilityHint: 'relationships',
-                                }}
-                                asChild
-                            >
-                                <Card>
-                                    <CardHeader className="gap-3">
-                                        <CardTitle className="flex items-center gap-2 text-xl">
-                                            <Sparkles className="size-5" />
-                                            Study Notes
-                                        </CardTitle>
-                                        <CardDescription>
-                                            Compact verse-level study metadata
-                                            and editorial cues.
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="space-y-5">
-                                        {verseMetaSurface && (
-                                            <AdminModuleHost
-                                                surface={verseMetaSurface}
-                                                className="flex flex-wrap items-center gap-1.5"
-                                            />
-                                        )}
-
-                                        {verse_meta?.summary_short && (
-                                            <div className="rounded-xl bg-muted/30 px-4 py-4">
-                                                <p className="text-sm leading-7">
-                                                    {verse_meta.summary_short}
-                                                </p>
-                                            </div>
-                                        )}
-
-                                        {metaBadges.length > 0 && (
-                                            <div className="space-y-2">
-                                                <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-                                                    Verse Metadata
-                                                </p>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {metaBadges.map((item) => (
-                                                        <Badge
-                                                            key={item}
-                                                            variant="outline"
-                                                        >
-                                                            {item}
-                                                        </Badge>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {keywords.length > 0 && (
-                                            <div className="space-y-2">
-                                                <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-                                                    Keywords
-                                                </p>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {keywords.map(
-                                                        (keyword) => (
-                                                            <Badge
-                                                                key={keyword}
-                                                                variant="secondary"
-                                                            >
-                                                                {keyword}
-                                                            </Badge>
-                                                        ),
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {studyFlags.length > 0 && (
-                                            <div className="space-y-2">
-                                                <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-                                                    Study Flags
-                                                </p>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {studyFlags.map((flag) => (
-                                                        <Badge
-                                                            key={flag}
-                                                            variant="outline"
-                                                        >
-                                                            {flag}
-                                                        </Badge>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </CardContent>
-                                </Card>
-                            </ScriptureEntityRegion>
+                            <VerseStudyNotesSection
+                                entityMeta={verseEntity}
+                                verseMeta={verse_meta}
+                                metaBadges={metaBadges}
+                                keywords={keywords}
+                                studyFlags={studyFlags}
+                                verseMetaSurface={verseMetaSurface}
+                            />
                         )}
 
                         {dictionary_terms.length > 0 && (
-                            <ScriptureEntityRegion
-                                meta={{
-                                    ...verseEntity,
-                                    region: 'dictionary_terms',
-                                    capabilityHint: 'relationships',
-                                }}
-                                asChild
-                            >
-                                <Card>
-                                    <CardHeader className="gap-3">
-                                        <CardTitle className="flex items-center gap-2 text-xl">
-                                            <Tag className="size-5" />
-                                            Dictionary Terms
-                                        </CardTitle>
-                                        <CardDescription>
-                                            Linked study terms matched to this
-                                            verse.
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        {dictionary_terms.map((term, index) => {
-                                            const termLabel =
-                                                term.dictionary_entry
-                                                    ?.headword ??
-                                                term.matched_text ??
-                                                'Untitled term';
-                                            const matchedText =
-                                                term.matched_text &&
-                                                term.matched_text !== termLabel
-                                                    ? term.matched_text
-                                                    : null;
-
-                                            return (
-                                                <ScriptureEntityRegion
-                                                    key={term.id}
-                                                    meta={{
-                                                        entityType:
-                                                            'verse_dictionary_term',
-                                                        entityId: term.id,
-                                                        entityLabel: termLabel,
-                                                        region: 'dictionary_term',
-                                                        capabilityHint:
-                                                            'relationships',
-                                                    }}
-                                                    asChild
-                                                >
-                                                    <div
-                                                        className={cn(
-                                                            'space-y-3',
-                                                            index > 0 &&
-                                                                'border-t pt-4',
-                                                        )}
-                                                    >
-                                                        <div className="space-y-1">
-                                                            {term
-                                                                .dictionary_entry
-                                                                ?.href ? (
-                                                                <Link
-                                                                    href={
-                                                                        term
-                                                                            .dictionary_entry
-                                                                            .href
-                                                                    }
-                                                                    className="inline-flex leading-none font-medium underline-offset-4 hover:text-primary hover:underline"
-                                                                >
-                                                                    {termLabel}
-                                                                </Link>
-                                                            ) : (
-                                                                <p className="leading-none font-medium">
-                                                                    {termLabel}
-                                                                </p>
-                                                            )}
-                                                            {term
-                                                                .dictionary_entry
-                                                                ?.transliteration && (
-                                                                <p className="text-sm text-muted-foreground">
-                                                                    {
-                                                                        term
-                                                                            .dictionary_entry
-                                                                            .transliteration
-                                                                    }
-                                                                </p>
-                                                            )}
-                                                        </div>
-                                                        <div className="flex flex-wrap gap-2">
-                                                            {term.language_code && (
-                                                                <Badge variant="outline">
-                                                                    {
-                                                                        term.language_code
-                                                                    }
-                                                                </Badge>
-                                                            )}
-                                                            <Badge variant="secondary">
-                                                                {
-                                                                    term.match_type
-                                                                }
-                                                            </Badge>
-                                                        </div>
-                                                        {matchedText && (
-                                                            <p className="text-sm text-muted-foreground">
-                                                                Matched in
-                                                                verse:{' '}
-                                                                {matchedText}
-                                                            </p>
-                                                        )}
-                                                        {term.dictionary_entry
-                                                            ?.short_meaning && (
-                                                            <p className="text-sm leading-6 text-muted-foreground">
-                                                                {
-                                                                    term
-                                                                        .dictionary_entry
-                                                                        .short_meaning
-                                                                }
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                </ScriptureEntityRegion>
-                                            );
-                                        })}
-                                    </CardContent>
-                                </Card>
-                            </ScriptureEntityRegion>
+                            <VerseDictionaryTermsSection
+                                entityMeta={verseEntity}
+                                dictionaryTerms={dictionary_terms}
+                            />
                         )}
 
                         {recitations.length > 0 && (
-                            <ScriptureEntityRegion
-                                meta={{
-                                    ...verseEntity,
-                                    region: 'recitations',
-                                    capabilityHint: 'relationships',
-                                }}
-                                asChild
-                            >
-                                <Card>
-                                    <CardHeader className="gap-3">
-                                        <CardTitle className="flex items-center gap-2 text-xl">
-                                            <Headphones className="size-5" />
-                                            Recitations
-                                        </CardTitle>
-                                        <CardDescription>
-                                            Available listening variants for
-                                            this verse.
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        {recitations.map(
-                                            (recitation, index) => {
-                                                const mediaHref =
-                                                    recitation.media?.url ??
-                                                    recitation.media?.path ??
-                                                    null;
-                                                const durationLabel =
-                                                    formatDuration(
-                                                        recitation.duration_seconds,
-                                                    );
-
-                                                return (
-                                                    <ScriptureEntityRegion
-                                                        key={recitation.id}
-                                                        meta={{
-                                                            entityType:
-                                                                'verse_recitation',
-                                                            entityId:
-                                                                recitation.id,
-                                                            entityLabel:
-                                                                recitation.reciter_name,
-                                                            region: 'recitation',
-                                                            capabilityHint:
-                                                                'relationships',
-                                                        }}
-                                                        asChild
-                                                    >
-                                                        <div
-                                                            className={cn(
-                                                                'space-y-3',
-                                                                index > 0 &&
-                                                                    'border-t pt-4',
-                                                            )}
-                                                        >
-                                                            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                                                                <div className="space-y-2">
-                                                                    <div className="flex flex-wrap items-center gap-2">
-                                                                        <span className="font-medium">
-                                                                            {
-                                                                                recitation.reciter_name
-                                                                            }
-                                                                        </span>
-                                                                        {recitation.language_code && (
-                                                                            <Badge variant="outline">
-                                                                                {
-                                                                                    recitation.language_code
-                                                                                }
-                                                                            </Badge>
-                                                                        )}
-                                                                        {recitation.style && (
-                                                                            <Badge variant="secondary">
-                                                                                {
-                                                                                    recitation.style
-                                                                                }
-                                                                            </Badge>
-                                                                        )}
-                                                                        {durationLabel && (
-                                                                            <Badge variant="outline">
-                                                                                {
-                                                                                    durationLabel
-                                                                                }
-                                                                            </Badge>
-                                                                        )}
-                                                                    </div>
-                                                                    {recitation
-                                                                        .media
-                                                                        ?.title && (
-                                                                        <p className="text-sm text-muted-foreground">
-                                                                            {
-                                                                                recitation
-                                                                                    .media
-                                                                                    .title
-                                                                            }
-                                                                        </p>
-                                                                    )}
-                                                                </div>
-                                                                {mediaHref && (
-                                                                    <Button
-                                                                        asChild
-                                                                        size="sm"
-                                                                        variant="outline"
-                                                                    >
-                                                                        <a
-                                                                            href={
-                                                                                mediaHref
-                                                                            }
-                                                                            target="_blank"
-                                                                            rel="noopener noreferrer"
-                                                                        >
-                                                                            Listen
-                                                                        </a>
-                                                                    </Button>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </ScriptureEntityRegion>
-                                                );
-                                            },
-                                        )}
-                                    </CardContent>
-                                </Card>
-                            </ScriptureEntityRegion>
+                            <VerseRecitationsSection
+                                entityMeta={verseEntity}
+                                recitations={recitations}
+                            />
                         )}
 
                         {topics.length > 0 && (
-                            <ScriptureEntityRegion
-                                meta={{
-                                    ...verseEntity,
-                                    region: 'related_topics',
-                                    capabilityHint: 'relationships',
-                                }}
-                                asChild
-                            >
-                                <Card>
-                                    <CardHeader className="gap-3">
-                                        <CardTitle className="flex items-center gap-2 text-xl">
-                                            <Tag className="size-5" />
-                                            Related Topics
-                                        </CardTitle>
-                                        <CardDescription>
-                                            Editorial topic links associated
-                                            with this verse.
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        {topics.map((assignment, index) => (
-                                            <ScriptureEntityRegion
-                                                key={assignment.id}
-                                                meta={{
-                                                    entityType:
-                                                        'verse_topic_assignment',
-                                                    entityId: assignment.id,
-                                                    entityLabel:
-                                                        assignment.topic?.name ??
-                                                        'Untitled topic',
-                                                    region: 'topic_assignment',
-                                                    capabilityHint:
-                                                        'relationships',
-                                                }}
-                                                asChild
-                                            >
-                                                <div
-                                                    className={cn(
-                                                        'space-y-2',
-                                                        index > 0 &&
-                                                            'border-t pt-4',
-                                                    )}
-                                                >
-                                                    <div className="flex flex-wrap items-center gap-2">
-                                                        {assignment.topic
-                                                            ?.href ? (
-                                                            <Link
-                                                                href={
-                                                                    assignment
-                                                                        .topic
-                                                                        .href
-                                                                }
-                                                                className="font-medium underline-offset-4 hover:text-primary hover:underline"
-                                                            >
-                                                                {
-                                                                    assignment
-                                                                        .topic
-                                                                        .name
-                                                                }
-                                                            </Link>
-                                                        ) : (
-                                                            <span className="font-medium">
-                                                                {assignment
-                                                                    .topic
-                                                                    ?.name ??
-                                                                    'Untitled topic'}
-                                                            </span>
-                                                        )}
-                                                        {assignment.weight !==
-                                                            null && (
-                                                            <Badge variant="outline">
-                                                                Weight{' '}
-                                                                {
-                                                                    assignment.weight
-                                                                }
-                                                            </Badge>
-                                                        )}
-                                                    </div>
-                                                    {assignment.notes && (
-                                                        <p className="text-sm leading-6 text-muted-foreground">
-                                                            {assignment.notes}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            </ScriptureEntityRegion>
-                                        ))}
-                                    </CardContent>
-                                </Card>
-                            </ScriptureEntityRegion>
+                            <VerseTopicsSection
+                                entityMeta={verseEntity}
+                                topics={topics}
+                            />
                         )}
 
                         {characters.length > 0 && (
-                            <ScriptureEntityRegion
-                                meta={{
-                                    ...verseEntity,
-                                    region: 'related_characters',
-                                    capabilityHint: 'relationships',
-                                }}
-                                asChild
-                            >
-                                <Card>
-                                    <CardHeader className="gap-3">
-                                        <CardTitle className="flex items-center gap-2 text-xl">
-                                            <Users className="size-5" />
-                                            Related Characters
-                                        </CardTitle>
-                                        <CardDescription>
-                                            Character associations attached to
-                                            this verse.
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        {characters.map((assignment, index) => (
-                                            <ScriptureEntityRegion
-                                                key={assignment.id}
-                                                meta={{
-                                                    entityType:
-                                                        'verse_character_assignment',
-                                                    entityId: assignment.id,
-                                                    entityLabel:
-                                                        assignment.character
-                                                            ?.name ??
-                                                        'Untitled character',
-                                                    region: 'character_assignment',
-                                                    capabilityHint:
-                                                        'relationships',
-                                                }}
-                                                asChild
-                                            >
-                                                <div
-                                                    className={cn(
-                                                        'space-y-2',
-                                                        index > 0 &&
-                                                            'border-t pt-4',
-                                                    )}
-                                                >
-                                                    <div className="flex flex-wrap items-center gap-2">
-                                                        {assignment.character
-                                                            ?.href ? (
-                                                            <Link
-                                                                href={
-                                                                    assignment
-                                                                        .character
-                                                                        .href
-                                                                }
-                                                                className="font-medium underline-offset-4 hover:text-primary hover:underline"
-                                                            >
-                                                                {
-                                                                    assignment
-                                                                        .character
-                                                                        .name
-                                                                }
-                                                            </Link>
-                                                        ) : (
-                                                            <span className="font-medium">
-                                                                {assignment
-                                                                    .character
-                                                                    ?.name ??
-                                                                    'Untitled character'}
-                                                            </span>
-                                                        )}
-                                                        {assignment.weight !==
-                                                            null && (
-                                                            <Badge variant="outline">
-                                                                Weight{' '}
-                                                                {
-                                                                    assignment.weight
-                                                                }
-                                                            </Badge>
-                                                        )}
-                                                    </div>
-                                                    {assignment.notes && (
-                                                        <p className="text-sm leading-6 text-muted-foreground">
-                                                            {assignment.notes}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            </ScriptureEntityRegion>
-                                        ))}
-                                    </CardContent>
-                                </Card>
-                            </ScriptureEntityRegion>
+                            <VerseCharactersSection
+                                entityMeta={verseEntity}
+                                characters={characters}
+                            />
                         )}
                     </div>
                 </ScriptureSection>
             )}
 
             {(translations.length > 0 || translationsSurface) && (
-                <ScriptureSection
-                    entityMeta={{
-                        ...verseEntity,
-                        region: 'translations',
-                        capabilityHint: 'translation',
-                    }}
-                    title="Translations"
-                    description="Supporting translations for this verse, kept separate from the canonical text above."
-                    icon={Languages}
-                    action={
-                        <Badge variant="outline">
-                            {translations.length} translation
-                            {translations.length === 1 ? '' : 's'}
-                        </Badge>
-                    }
-                >
-                    <div className="space-y-4">
-                        {translationsSurface && (
-                            <AdminModuleHost
-                                surface={translationsSurface}
-                                className="flex flex-wrap items-start gap-1.5"
-                            />
-                        )}
-
-                        {translations.length === 0 && translationsSurface && (
-                            <div className="rounded-2xl border border-dashed border-border/80 bg-muted/20 px-5 py-5 text-sm leading-6 text-muted-foreground sm:px-6 sm:py-6">
-                                No translations have been added yet.
-                            </div>
-                        )}
-
-                        {translations.map((translation) => (
-                            <ScriptureEntityRegion
-                                key={translation.id}
-                                meta={{
-                                    entityType: 'verse_translation',
-                                    entityId: translation.id,
-                                    entityLabel: translation.source_name,
-                                    region: 'translation_card',
-                                    capabilityHint: 'translation',
-                                }}
-                                asChild
-                            >
-                                <Card className="overflow-hidden">
-                                    <CardHeader className="gap-3 border-b bg-muted/20">
-                                        <div className="flex flex-wrap items-center gap-2">
-                                            <Badge variant="outline">
-                                                {translation.language_code}
-                                            </Badge>
-                                            <Badge variant="secondary">
-                                                {translation.source_name}
-                                            </Badge>
-                                        </div>
-                                        <CardTitle className="text-xl">
-                                            {translation.source_name}
-                                        </CardTitle>
-                                        <CardDescription>
-                                            Source key: {translation.source_key}
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="pt-6">
-                                        <p className="leading-8">
-                                            {translation.text}
-                                        </p>
-                                    </CardContent>
-                                </Card>
-                            </ScriptureEntityRegion>
-                        ))}
-                    </div>
-                </ScriptureSection>
+                <VerseTranslationsSection
+                    entityMeta={verseEntity}
+                    translations={translations}
+                    translationsSurface={translationsSurface}
+                />
             )}
 
             {(commentaries.length > 0 || commentariesSurface) && (
-                <ScriptureSection
-                    entityMeta={{
-                        ...verseEntity,
-                        region: 'commentaries',
-                        capabilityHint: 'commentary',
-                    }}
-                    title="Commentaries"
-                    description="Editorial commentary and source material attached directly to this verse."
-                    icon={MessageSquareQuote}
-                    action={
-                        <Badge variant="outline">
-                            {commentaries.length} commentary
-                            {commentaries.length === 1 ? '' : 's'}
-                        </Badge>
-                    }
-                >
-                    <div className="space-y-4">
-                        {commentariesSurface && (
-                            <AdminModuleHost
-                                surface={commentariesSurface}
-                                className="flex flex-wrap items-start gap-1.5"
-                            />
-                        )}
-
-                        {commentaries.length === 0 && commentariesSurface && (
-                            <div className="rounded-2xl border border-dashed border-border/80 bg-muted/20 px-5 py-5 text-sm leading-6 text-muted-foreground sm:px-6 sm:py-6">
-                                No commentaries have been added yet.
-                            </div>
-                        )}
-
-                        {commentaries.map((commentary) => (
-                            <ScriptureEntityRegion
-                                key={commentary.id}
-                                meta={{
-                                    entityType: 'verse_commentary',
-                                    entityId: commentary.id,
-                                    entityLabel:
-                                        commentary.title ??
-                                        commentary.source_name,
-                                    region: 'commentary_card',
-                                    capabilityHint: 'commentary',
-                                }}
-                                asChild
-                            >
-                                <Card className="overflow-hidden">
-                                    <CardHeader className="gap-3 border-b bg-muted/20">
-                                        <div className="flex flex-wrap items-center gap-2">
-                                            <Badge variant="outline">
-                                                {commentary.language_code}
-                                            </Badge>
-                                            <Badge variant="secondary">
-                                                {commentary.author_name ??
-                                                    commentary.source_name}
-                                            </Badge>
-                                        </div>
-                                        <CardTitle className="text-xl">
-                                            {commentary.title ??
-                                                commentary.source_name}
-                                        </CardTitle>
-                                        <CardDescription>
-                                            <span>{commentary.source_name}</span>
-                                            {commentary.source_key && (
-                                                <span>
-                                                    {' '}
-                                                    - Source key:{' '}
-                                                    {commentary.source_key}
-                                                </span>
-                                            )}
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4 pt-6">
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <MessageSquareQuote className="size-4" />
-                                            <span>Commentary</span>
-                                        </div>
-                                        <p className="leading-8">
-                                            {commentary.body}
-                                        </p>
-                                    </CardContent>
-                                </Card>
-                            </ScriptureEntityRegion>
-                        ))}
-                    </div>
-                </ScriptureSection>
+                <VerseCommentariesSection
+                    entityMeta={verseEntity}
+                    commentaries={commentaries}
+                    commentariesSurface={commentariesSurface}
+                />
             )}
 
             {shouldShowUniversalCmsRegion && universalCmsRegion && (
-                <ScriptureSection
-                    entityMeta={{
-                        ...verseEntity,
-                        region: 'universal_content_region',
-                        capabilityHint: 'cms',
-                    }}
-                    title="Supplementary Content"
-                    description="Additional CMS-managed content for verse detail. This stays separate from the canonical verse structure and its protected schema relationships."
-                >
-                    <CmsExposedRegion region={universalCmsRegion} />
-                </ScriptureSection>
+                <VerseSupplementaryCmsSection
+                    entityMeta={verseEntity}
+                    region={universalCmsRegion}
+                />
             )}
-
         </ScriptureLayout>
     );
 }
