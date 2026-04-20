@@ -2,18 +2,12 @@ import { useForm } from '@inertiajs/react';
 import { useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import InputError from '@/components/input-error';
+import { MediaAssignmentMetaFields } from '@/components/scripture/media-assignments/MediaAssignmentMetaFields';
+import { MediaAssignmentOverrideFields } from '@/components/scripture/media-assignments/MediaAssignmentOverrideFields';
+import { MediaAssignmentSelectFields } from '@/components/scripture/media-assignments/MediaAssignmentSelectFields';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { BookAdminSourceLabel } from '@/components/scripture/book-admin-source-label';
 import {
     getDefaultBookMediaSlotRole,
@@ -120,172 +114,98 @@ export function CreateBookMediaAssignmentCard({
                     </div>
                 ) : (
                     <>
-                        <div className="grid gap-4 md:grid-cols-2">
-                            <div className="grid gap-2">
-                                <BookAdminSourceLabel
-                                    field={mediaField}
-                                    htmlFor="new_media_id"
-                                />
-                                <Select
-                                    value={form.data.media_id}
-                                    onValueChange={(value) =>
-                                        form.setData('media_id', value)
-                                    }
-                                >
-                                    <SelectTrigger
-                                        id="new_media_id"
-                                        className="w-full"
-                                    >
-                                        <SelectValue placeholder="Choose media" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {availableMedia.map((media) => (
-                                            <SelectItem
-                                                key={media.id}
-                                                value={String(media.id)}
-                                            >
-                                                {media.title ??
-                                                    `Media ${media.id}`}{' '}
-                                                ({media.media_type})
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <InputError message={form.errors.media_id} />
-                            </div>
-
-                            <div className="grid gap-2">
-                                <BookAdminSourceLabel
-                                    field={roleField}
-                                    htmlFor="new_media_role"
-                                />
-                                <Select
-                                    value={form.data.role}
-                                    onValueChange={(value) =>
-                                        form.setData('role', value)
-                                    }
-                                >
-                                    <SelectTrigger
-                                        id="new_media_role"
-                                        className="w-full"
-                                    >
-                                        <SelectValue placeholder="Choose slot" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {slotOptions.map((option) => (
-                                            <SelectItem
-                                                key={option.role}
-                                                value={option.role}
-                                            >
-                                                {option.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <InputError message={form.errors.role} />
-                            </div>
-                        </div>
+                        <MediaAssignmentSelectFields
+                            mediaField={mediaField}
+                            mediaHtmlFor="new_media_id"
+                            mediaValue={form.data.media_id}
+                            onMediaChange={(value) =>
+                                form.setData('media_id', value)
+                            }
+                            mediaError={form.errors.media_id}
+                            availableMedia={availableMedia}
+                            roleField={roleField}
+                            roleHtmlFor="new_media_role"
+                            roleValue={form.data.role}
+                            onRoleChange={(value) => form.setData('role', value)}
+                            roleError={form.errors.role}
+                            slotOptions={slotOptions}
+                        />
 
                         <MediaSlotPurposeCard role={form.data.role} />
 
                         <div className="grid gap-4 md:grid-cols-2">
-                            <div className="grid gap-2">
-                                <BookAdminSourceLabel
-                                    field={titleField}
-                                    htmlFor="new_media_title_override"
-                                />
-                                <Input
-                                    id="new_media_title_override"
-                                    value={form.data.title_override}
-                                    onChange={(event) =>
-                                        form.setData(
-                                            'title_override',
-                                            event.target.value,
-                                        )
-                                    }
-                                />
-                                <InputError
-                                    message={form.errors.title_override}
-                                />
-                            </div>
-
-                            <div className="grid gap-2">
-                                <BookAdminSourceLabel
-                                    field={sortOrderField}
-                                    htmlFor="new_media_sort_order"
-                                />
-                                <Input
-                                    id="new_media_sort_order"
-                                    type="number"
-                                    min={0}
-                                    value={form.data.sort_order}
-                                    onChange={(event) =>
-                                        form.setData(
-                                            'sort_order',
-                                            event.target.value,
-                                        )
-                                    }
-                                />
-                                <InputError message={form.errors.sort_order} />
-                            </div>
-                        </div>
-
-                        <div className="grid gap-2">
-                            <BookAdminSourceLabel
-                                field={captionField}
-                                htmlFor="new_media_caption_override"
-                            />
-                            <Textarea
-                                id="new_media_caption_override"
-                                value={form.data.caption_override}
-                                onChange={(event) =>
-                                    form.setData(
-                                        'caption_override',
-                                        event.target.value,
-                                    )
+                            <MediaAssignmentOverrideFields
+                                mode="title"
+                                titleField={titleField}
+                                titleHtmlFor="new_media_title_override"
+                                titleValue={form.data.title_override}
+                                onTitleChange={(value) =>
+                                    form.setData('title_override', value)
                                 }
-                                rows={4}
+                                titleError={form.errors.title_override}
+                                captionField={captionField}
+                                captionHtmlFor="new_media_caption_override"
+                                captionValue={form.data.caption_override}
+                                onCaptionChange={(value) =>
+                                    form.setData('caption_override', value)
+                                }
+                                captionError={form.errors.caption_override}
                             />
-                            <InputError
-                                message={form.errors.caption_override}
+
+                            <MediaAssignmentMetaFields
+                                mode="sort"
+                                sortOrderField={sortOrderField}
+                                sortOrderHtmlFor="new_media_sort_order"
+                                sortOrderValue={form.data.sort_order}
+                                onSortOrderChange={(value) =>
+                                    form.setData('sort_order', value)
+                                }
+                                sortOrderError={form.errors.sort_order}
+                                statusField={statusField}
+                                statusHtmlFor="new_media_status"
+                                statusValue={form.data.status}
+                                onStatusChange={(value) =>
+                                    form.setData('status', value)
+                                }
+                                statusError={form.errors.status}
                             />
                         </div>
 
-                        <div className="grid gap-2">
-                            <BookAdminSourceLabel
-                                field={statusField}
-                                htmlFor="new_media_status"
-                            />
-                            <Select
-                                value={form.data.status}
-                                onValueChange={(value) =>
-                                    form.setData(
-                                        'status',
-                                        value as 'draft' | 'published',
-                                    )
-                                }
-                            >
-                                <SelectTrigger
-                                    id="new_media_status"
-                                    className="w-full"
-                                >
-                                    <SelectValue placeholder="Choose status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {(statusField.options ?? []).map(
-                                        (option) => (
-                                            <SelectItem
-                                                key={option}
-                                                value={option}
-                                            >
-                                                {option}
-                                            </SelectItem>
-                                        ),
-                                    )}
-                                </SelectContent>
-                            </Select>
-                            <InputError message={form.errors.status} />
-                        </div>
+                        <MediaAssignmentOverrideFields
+                            mode="caption"
+                            titleField={titleField}
+                            titleHtmlFor="new_media_title_override"
+                            titleValue={form.data.title_override}
+                            onTitleChange={(value) =>
+                                form.setData('title_override', value)
+                            }
+                            titleError={form.errors.title_override}
+                            captionField={captionField}
+                            captionHtmlFor="new_media_caption_override"
+                            captionValue={form.data.caption_override}
+                            onCaptionChange={(value) =>
+                                form.setData('caption_override', value)
+                            }
+                            captionError={form.errors.caption_override}
+                        />
+
+                        <MediaAssignmentMetaFields
+                            mode="status"
+                            sortOrderField={sortOrderField}
+                            sortOrderHtmlFor="new_media_sort_order"
+                            sortOrderValue={form.data.sort_order}
+                            onSortOrderChange={(value) =>
+                                form.setData('sort_order', value)
+                            }
+                            sortOrderError={form.errors.sort_order}
+                            statusField={statusField}
+                            statusHtmlFor="new_media_status"
+                            statusValue={form.data.status}
+                            onStatusChange={(value) =>
+                                form.setData('status', value)
+                            }
+                            statusError={form.errors.status}
+                        />
 
                         <Button
                             type="button"
@@ -377,156 +297,94 @@ export function BookMediaAssignmentEditorCard({
                     </div>
                 )}
 
-                <div className="grid gap-4 md:grid-cols-2">
-                    <div className="grid gap-2">
-                        <BookAdminSourceLabel
-                            field={mediaField}
-                            htmlFor={`media_id_${assignment.id}`}
-                        />
-                        <Select
-                            value={form.data.media_id}
-                            onValueChange={(value) =>
-                                form.setData('media_id', value)
-                            }
-                        >
-                            <SelectTrigger
-                                id={`media_id_${assignment.id}`}
-                                className="w-full"
-                            >
-                                <SelectValue placeholder="Choose media" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {availableMedia.map((media) => (
-                                    <SelectItem
-                                        key={media.id}
-                                        value={String(media.id)}
-                                    >
-                                        {media.title ?? `Media ${media.id}`} (
-                                        {media.media_type})
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <InputError message={form.errors.media_id} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <BookAdminSourceLabel
-                            field={roleField}
-                            htmlFor={`media_role_${assignment.id}`}
-                        />
-                        <Select
-                            value={form.data.role}
-                            onValueChange={(value) =>
-                                form.setData('role', value)
-                            }
-                        >
-                            <SelectTrigger
-                                id={`media_role_${assignment.id}`}
-                                className="w-full"
-                            >
-                                <SelectValue placeholder="Choose slot" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {slotOptions.map((option) => (
-                                    <SelectItem
-                                        key={option.role}
-                                        value={option.role}
-                                    >
-                                        {option.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <InputError message={form.errors.role} />
-                    </div>
-                </div>
+                <MediaAssignmentSelectFields
+                    mediaField={mediaField}
+                    mediaHtmlFor={`media_id_${assignment.id}`}
+                    mediaValue={form.data.media_id}
+                    onMediaChange={(value) => form.setData('media_id', value)}
+                    mediaError={form.errors.media_id}
+                    availableMedia={availableMedia}
+                    roleField={roleField}
+                    roleHtmlFor={`media_role_${assignment.id}`}
+                    roleValue={form.data.role}
+                    onRoleChange={(value) => form.setData('role', value)}
+                    roleError={form.errors.role}
+                    slotOptions={slotOptions}
+                />
 
                 <MediaSlotPurposeCard role={form.data.role} />
 
                 <div className="grid gap-4 md:grid-cols-2">
-                    <div className="grid gap-2">
-                        <BookAdminSourceLabel
-                            field={titleField}
-                            htmlFor={`media_title_override_${assignment.id}`}
-                        />
-                        <Input
-                            id={`media_title_override_${assignment.id}`}
-                            value={form.data.title_override}
-                            onChange={(event) =>
-                                form.setData(
-                                    'title_override',
-                                    event.target.value,
-                                )
-                            }
-                        />
-                        <InputError message={form.errors.title_override} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <BookAdminSourceLabel
-                            field={sortOrderField}
-                            htmlFor={`media_sort_order_${assignment.id}`}
-                        />
-                        <Input
-                            id={`media_sort_order_${assignment.id}`}
-                            type="number"
-                            min={0}
-                            value={form.data.sort_order}
-                            onChange={(event) =>
-                                form.setData('sort_order', event.target.value)
-                            }
-                        />
-                        <InputError message={form.errors.sort_order} />
-                    </div>
-                </div>
-
-                <div className="grid gap-2">
-                    <BookAdminSourceLabel
-                        field={captionField}
-                        htmlFor={`media_caption_override_${assignment.id}`}
-                    />
-                    <Textarea
-                        id={`media_caption_override_${assignment.id}`}
-                        value={form.data.caption_override}
-                        onChange={(event) =>
-                            form.setData('caption_override', event.target.value)
+                    <MediaAssignmentOverrideFields
+                        mode="title"
+                        titleField={titleField}
+                        titleHtmlFor={`media_title_override_${assignment.id}`}
+                        titleValue={form.data.title_override}
+                        onTitleChange={(value) =>
+                            form.setData('title_override', value)
                         }
-                        rows={4}
+                        titleError={form.errors.title_override}
+                        captionField={captionField}
+                        captionHtmlFor={`media_caption_override_${assignment.id}`}
+                        captionValue={form.data.caption_override}
+                        onCaptionChange={(value) =>
+                            form.setData('caption_override', value)
+                        }
+                        captionError={form.errors.caption_override}
                     />
-                    <InputError message={form.errors.caption_override} />
+
+                    <MediaAssignmentMetaFields
+                        mode="sort"
+                        sortOrderField={sortOrderField}
+                        sortOrderHtmlFor={`media_sort_order_${assignment.id}`}
+                        sortOrderValue={form.data.sort_order}
+                        onSortOrderChange={(value) =>
+                            form.setData('sort_order', value)
+                        }
+                        sortOrderError={form.errors.sort_order}
+                        statusField={statusField}
+                        statusHtmlFor={`media_status_${assignment.id}`}
+                        statusValue={form.data.status}
+                        onStatusChange={(value) =>
+                            form.setData('status', value)
+                        }
+                        statusError={form.errors.status}
+                    />
                 </div>
 
-                <div className="grid gap-2">
-                    <BookAdminSourceLabel
-                        field={statusField}
-                        htmlFor={`media_status_${assignment.id}`}
-                    />
-                    <Select
-                        value={form.data.status}
-                        onValueChange={(value) =>
-                            form.setData(
-                                'status',
-                                value as 'draft' | 'published',
-                            )
-                        }
-                    >
-                        <SelectTrigger
-                            id={`media_status_${assignment.id}`}
-                            className="w-full"
-                        >
-                            <SelectValue placeholder="Choose status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {(statusField.options ?? []).map((option) => (
-                                <SelectItem key={option} value={option}>
-                                    {option}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <InputError message={form.errors.status} />
-                </div>
+                <MediaAssignmentOverrideFields
+                    mode="caption"
+                    titleField={titleField}
+                    titleHtmlFor={`media_title_override_${assignment.id}`}
+                    titleValue={form.data.title_override}
+                    onTitleChange={(value) =>
+                        form.setData('title_override', value)
+                    }
+                    titleError={form.errors.title_override}
+                    captionField={captionField}
+                    captionHtmlFor={`media_caption_override_${assignment.id}`}
+                    captionValue={form.data.caption_override}
+                    onCaptionChange={(value) =>
+                        form.setData('caption_override', value)
+                    }
+                    captionError={form.errors.caption_override}
+                />
+
+                <MediaAssignmentMetaFields
+                    mode="status"
+                    sortOrderField={sortOrderField}
+                    sortOrderHtmlFor={`media_sort_order_${assignment.id}`}
+                    sortOrderValue={form.data.sort_order}
+                    onSortOrderChange={(value) =>
+                        form.setData('sort_order', value)
+                    }
+                    sortOrderError={form.errors.sort_order}
+                    statusField={statusField}
+                    statusHtmlFor={`media_status_${assignment.id}`}
+                    statusValue={form.data.status}
+                    onStatusChange={(value) => form.setData('status', value)}
+                    statusError={form.errors.status}
+                />
 
                 <Button
                     type="button"
