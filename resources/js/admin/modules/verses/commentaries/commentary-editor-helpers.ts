@@ -2,6 +2,10 @@ import { useForm } from '@inertiajs/react';
 import type {
     ScriptureCommentarySourceOption,
 } from '@/types';
+import {
+    formatVerseRelationSourceOptionLabel,
+    VERSE_RELATION_NONE_VALUE,
+} from '../verse-relation-editor-shared';
 
 export type CommentaryFormData = {
     source_key: string;
@@ -16,7 +20,7 @@ export type CommentaryFormData = {
 
 export type CommentaryForm = ReturnType<typeof useForm<CommentaryFormData>>;
 
-export const NONE_VALUE = '__none__';
+export const NONE_VALUE = VERSE_RELATION_NONE_VALUE;
 
 const COMMENTARY_FIELD_COPY = {
     source_key: {
@@ -58,9 +62,7 @@ const COMMENTARY_FIELD_COPY = {
 export function selectSourceOptionLabel(
     source: ScriptureCommentarySourceOption,
 ): string {
-    return source.short_name
-        ? `${source.name} (${source.short_name})`
-        : source.name;
+    return formatVerseRelationSourceOptionLabel(source);
 }
 
 export function getFieldCopy<Key extends keyof typeof COMMENTARY_FIELD_COPY>(

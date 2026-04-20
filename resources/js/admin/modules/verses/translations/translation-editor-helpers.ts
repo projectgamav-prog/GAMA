@@ -1,5 +1,9 @@
 import { useForm } from '@inertiajs/react';
 import type { ScriptureTranslationSourceOption } from '@/types';
+import {
+    formatVerseRelationSourceOptionLabel,
+    VERSE_RELATION_NONE_VALUE,
+} from '../verse-relation-editor-shared';
 
 export type TranslationFormData = {
     source_key: string;
@@ -12,7 +16,7 @@ export type TranslationFormData = {
 
 export type TranslationForm = ReturnType<typeof useForm<TranslationFormData>>;
 
-export const NONE_VALUE = '__none__';
+export const NONE_VALUE = VERSE_RELATION_NONE_VALUE;
 
 const TRANSLATION_FIELD_COPY = {
     source_key: {
@@ -46,9 +50,7 @@ const TRANSLATION_FIELD_COPY = {
 export function selectSourceOptionLabel(
     source: ScriptureTranslationSourceOption,
 ): string {
-    return source.short_name
-        ? `${source.name} (${source.short_name})`
-        : source.name;
+    return formatVerseRelationSourceOptionLabel(source);
 }
 
 export function getFieldCopy<Key extends keyof typeof TRANSLATION_FIELD_COPY>(

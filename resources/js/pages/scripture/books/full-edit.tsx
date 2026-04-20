@@ -1,5 +1,4 @@
-import { Link, useForm } from '@inertiajs/react';
-import { useEffect } from 'react';
+import { Link } from '@inertiajs/react';
 import { ShieldAlert, SquareArrowOutUpRight } from 'lucide-react';
 import {
     CreateBookContentBlockCard,
@@ -10,99 +9,23 @@ import {
     CreateBookMediaAssignmentCard,
     BookMediaAssignmentEditorCard,
 } from '@/components/scripture/book-admin-media-assignment-cards';
+import { BookDescriptionEditorCard } from '@/components/scripture/book/BookDescriptionEditorCard';
+import { BookEditLayersSection } from '@/components/scripture/book/BookEditLayersSection';
+import { BookRegisteredRegionContractSection } from '@/components/scripture/book/BookRegisteredRegionContractSection';
 import { ScriptureAdminMethodFamilyGrid } from '@/components/scripture/scripture-admin-method-family-grid';
-import { BookAdminSourceLabel } from '@/components/scripture/book-admin-source-label';
 import { ScriptureAdminFieldMeta } from '@/components/scripture/scripture-admin-field-meta';
 import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
-import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { useScriptureAdminTargetNavigation } from '@/hooks/use-scripture-admin-target-navigation';
-import { scriptureAdminStartCase } from '@/lib/scripture-admin-field-display';
 import { getBookMediaSlotOptions } from '@/lib/book-media-slot-meta';
 import ScriptureLayout from '@/layouts/scripture-layout';
 import type {
     BookFullEditProps,
     BreadcrumbItem,
-    ScriptureRegisteredAdminField,
-    ScriptureRegisteredAdminRegion,
 } from '@/types';
-
-type BookDetailsFormData = {
-    description: string;
-};
-
-function BookDescriptionEditorCard({
-    bookDescription,
-    updateHref,
-    field,
-}: {
-    bookDescription: string | null | undefined;
-    updateHref: string;
-    field: ScriptureRegisteredAdminField;
-}) {
-    const form = useForm<BookDetailsFormData>({
-        description: bookDescription ?? '',
-    });
-
-    useEffect(() => {
-        form.setData({
-            description: bookDescription ?? '',
-        });
-        form.clearErrors();
-    }, [bookDescription, form]);
-
-    return (
-        <Card>
-            <CardHeader className="gap-3">
-                <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant="outline">Editorial</Badge>
-                    <Badge variant="secondary">Contextual + full</Badge>
-                </div>
-                <CardTitle>Public Description</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-5">
-                <div className="grid gap-2">
-                    <BookAdminSourceLabel
-                        field={field}
-                        htmlFor="book_full_description"
-                    />
-                    <Textarea
-                        id="book_full_description"
-                        value={form.data.description}
-                        onChange={(event) =>
-                            form.setData('description', event.target.value)
-                        }
-                        rows={8}
-                        placeholder="Editorial introduction for the public book surfaces."
-                    />
-                    <InputError message={form.errors.description} />
-                </div>
-
-                <div className="flex items-center gap-3">
-                    <Button
-                        type="button"
-                        onClick={() =>
-                            form.patch(updateHref, {
-                                preserveScroll: true,
-                            })
-                        }
-                        disabled={form.processing}
-                    >
-                        Save description
-                    </Button>
-                    {form.recentlySuccessful && (
-                        <p className="text-sm text-muted-foreground">Saved.</p>
-                    )}
-                </div>
-            </CardContent>
-        </Card>
-    );
-}
 
 export default function BookFullEdit({
     book,
@@ -119,6 +42,17 @@ export default function BookFullEdit({
 }: BookFullEditProps) {
     const fields = admin_entity.fields;
     const registeredFields = Object.values(fields);
+    const registeredFieldCountByMode = {
+        contextual: registeredFields.filter((field) =>
+            field.edit_modes.includes('contextual'),
+        ).length,
+        full: registeredFields.filter((field) =>
+            field.edit_modes.includes('full'),
+        ).length,
+        canonical: registeredFields.filter((field) =>
+            field.edit_modes.includes('canonical'),
+        ).length,
+    };
     const mediaSlotGuide = getBookMediaSlotOptions(
         fields.media_assignment_role.options,
     );
@@ -196,55 +130,10 @@ export default function BookFullEdit({
                 </div>
             </ScripturePageIntroCard>
 
-            <ScriptureSection
-                title="Edit Layers"
-                description="Book is the reference entity for contextual, full editorial, and canonical protected separation."
-            >
-                <div className="grid gap-4 lg:grid-cols-3">
-                    {(['contextual', 'full', 'canonical'] as const).map(
-                        (modeKey) => {
-                            const mode = admin_entity.edit_modes[modeKey];
-                            const fieldCount = registeredFields.filter(
-                                (field) => field.edit_modes.includes(modeKey),
-                            ).length;
-                            const regionCount = admin_entity.regions.filter(
-                                (region) =>
-                                    region.supported_modes.includes(modeKey),
-                            ).length;
-                            const methodCount =
-                                admin_entity.methods_by_mode[modeKey].length;
-
-                            return (
-                                <Card key={mode.key}>
-                                    <CardHeader className="gap-3">
-                                        <div className="flex flex-wrap items-center gap-2">
-                                            <Badge variant="outline">
-                                                {mode.status}
-                                            </Badge>
-                                        </div>
-                                        <CardTitle>{mode.label}</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="space-y-3 text-sm leading-6 text-muted-foreground">
-                                        <p>{mode.description}</p>
-                                        {mode.warning && <p>{mode.warning}</p>}
-                                        <div className="flex flex-wrap gap-2 pt-1">
-                                            <Badge variant="outline">
-                                                {fieldCount} fields
-                                            </Badge>
-                                            <Badge variant="outline">
-                                                {regionCount} regions
-                                            </Badge>
-                                            <Badge variant="outline">
-                                                {methodCount} methods
-                                            </Badge>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            );
-                        },
-                    )}
-                </div>
-            </ScriptureSection>
+            <BookEditLayersSection
+                adminEntity={admin_entity}
+                registeredFieldCountByMode={registeredFieldCountByMode}
+            />
 
             <ScriptureSection
                 title="Shared Method Layer"
@@ -443,133 +332,7 @@ export default function BookFullEdit({
                 </div>
             </ScriptureSection>
 
-            <ScriptureSection
-                title="Registered Region Contract"
-                description="These regions define what each edit layer can touch, what surface each region serves, and where Book content is allowed to live."
-            >
-                <div className="space-y-4">
-                    {admin_entity.regions.map(
-                        (region: ScriptureRegisteredAdminRegion) => (
-                            <Card key={region.key}>
-                                <CardHeader className="gap-3">
-                                    <div className="flex flex-wrap items-center gap-2">
-                                        <Badge
-                                            variant="outline"
-                                            className="font-mono text-[11px]"
-                                        >
-                                            {region.key}
-                                        </Badge>
-                                        <Badge variant="outline">
-                                            {region.surface}
-                                        </Badge>
-                                    </div>
-                                    <CardTitle>{region.label}</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <p className="text-sm leading-6 text-muted-foreground">
-                                        {region.description}
-                                    </p>
-                                    <div className="flex flex-wrap gap-2">
-                                        {region.supported_modes.map((mode) => (
-                                            <Badge
-                                                key={mode}
-                                                variant="secondary"
-                                            >
-                                                {
-                                                    admin_entity.edit_modes[
-                                                        mode
-                                                    ].label
-                                                }
-                                            </Badge>
-                                        ))}
-                                        {region.method_families.map(
-                                            (family) => (
-                                                <Badge
-                                                    key={`${region.key}-${family}`}
-                                                    variant="outline"
-                                                >
-                                                    {scriptureAdminStartCase(
-                                                        family,
-                                                    )}
-                                                </Badge>
-                                            ),
-                                        )}
-                                    </div>
-                                    {region.help_text && (
-                                        <p className="text-sm leading-6 text-muted-foreground">
-                                            {region.help_text}
-                                        </p>
-                                    )}
-                                    <div className="grid gap-4 lg:grid-cols-3">
-                                        <div className="space-y-3">
-                                            <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-                                                Contextual
-                                            </p>
-                                            {region.contextual_fields.length >
-                                            0 ? (
-                                                region.contextual_fields.map(
-                                                    (field) => (
-                                                        <ScriptureAdminFieldMeta
-                                                            key={`${region.key}-${field.key}-contextual`}
-                                                            field={field}
-                                                        />
-                                                    ),
-                                                )
-                                            ) : (
-                                                <p className="text-sm text-muted-foreground">
-                                                    This region is not editable
-                                                    in contextual mode.
-                                                </p>
-                                            )}
-                                        </div>
-                                        <div className="space-y-3">
-                                            <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-                                                Full editorial
-                                            </p>
-                                            {region.full_fields.length > 0 ? (
-                                                region.full_fields.map(
-                                                    (field) => (
-                                                        <ScriptureAdminFieldMeta
-                                                            key={`${region.key}-${field.key}-full`}
-                                                            field={field}
-                                                        />
-                                                    ),
-                                                )
-                                            ) : (
-                                                <p className="text-sm text-muted-foreground">
-                                                    This region is not editable
-                                                    in full editorial mode.
-                                                </p>
-                                            )}
-                                        </div>
-                                        <div className="space-y-3">
-                                            <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-                                                Canonical protected
-                                            </p>
-                                            {region.canonical_fields.length >
-                                            0 ? (
-                                                region.canonical_fields.map(
-                                                    (field) => (
-                                                        <ScriptureAdminFieldMeta
-                                                            key={`${region.key}-${field.key}-canonical`}
-                                                            field={field}
-                                                        />
-                                                    ),
-                                                )
-                                            ) : (
-                                                <p className="text-sm text-muted-foreground">
-                                                    This region is not editable
-                                                    in canonical mode.
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ),
-                    )}
-                </div>
-            </ScriptureSection>
+            <BookRegisteredRegionContractSection adminEntity={admin_entity} />
         </ScriptureLayout>
     );
 }

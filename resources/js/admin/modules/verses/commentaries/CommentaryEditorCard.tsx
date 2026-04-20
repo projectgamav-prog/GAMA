@@ -7,12 +7,15 @@ import type {
 } from '@/types';
 import type { VerseCommentariesContractMetadata } from '@/admin/surfaces/core/contract-readers';
 import { VerseRelationSourceSummary } from '../VerseRelationSourceSummary';
+import { VerseRelationSourceSelectField } from '../VerseRelationSourceSelectField';
 import {
+    applySourceToForm,
     type CommentaryFormData,
+    getFieldCopy,
     NONE_VALUE,
+    selectSourceOptionLabel,
 } from './commentary-editor-helpers';
 import { CommentarySourceDetailsFields } from './CommentarySourceDetailsFields';
-import { CommentarySourceSelectField } from './CommentarySourceSelectField';
 
 type Props = {
     metadata: VerseCommentariesContractMetadata;
@@ -55,10 +58,22 @@ export function CommentaryEditorCard({ metadata, row, onSuccess }: Props) {
                 </p>
             </CardHeader>
             <CardContent className="space-y-5">
-                <CommentarySourceSelectField
-                    metadata={metadata}
-                    form={form}
+                <VerseRelationSourceSelectField
+                    field={metadata.fields.commentary_source_id}
                     htmlFor={`commentary_source_id_${row.id}`}
+                    value={form.data.commentary_source_id}
+                    error={form.errors.commentary_source_id}
+                    labelOverride={getFieldCopy('commentary_source_id').label}
+                    helperTextOverride={
+                        getFieldCopy('commentary_source_id').helpText
+                    }
+                    sourceOptions={metadata.sourceOptions}
+                    noneLabel="Not linked to a saved source"
+                    placeholder="Choose a source"
+                    onValueChange={(value) =>
+                        applySourceToForm(form, metadata.sourceOptions, value)
+                    }
+                    optionLabel={selectSourceOptionLabel}
                 />
 
                 <VerseRelationSourceSummary

@@ -1,6 +1,3 @@
-import { Link } from '@inertiajs/react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { defineAdminModule } from '@/admin/core/module-registry';
 import type { AdminModuleComponentProps } from '@/admin/core/module-types';
 import {
@@ -12,6 +9,7 @@ import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation
 import type {
     ScriptureAdminVerseCommentary,
 } from '@/types';
+import { VerseRelationEditorShell } from './VerseRelationEditorShell';
 import { CommentaryEditorCard } from './commentaries/CommentaryEditorCard';
 import { CreateCommentaryCard } from './commentaries/CreateCommentaryCard';
 
@@ -42,63 +40,30 @@ function VerseCommentariesEditor(props: AdminModuleComponentProps) {
     }
 
     return (
-        <div className="basis-full pt-2">
-            <div className="space-y-4 rounded-2xl border border-border/70 bg-background/95 px-4 py-4 shadow-sm sm:px-5">
-                <div className="space-y-3">
-                    <div className="flex flex-wrap items-center gap-2">
-                        <Badge variant="outline">
-                            {metadata.rows.length}{' '}
-                            {metadata.rows.length === 1
-                                ? 'commentary'
-                                : 'commentaries'}
-                        </Badge>
-                        <Badge variant="outline">
-                            {metadata.sourceOptions.length} saved source
-                            {metadata.sourceOptions.length === 1 ? '' : 's'}
-                        </Badge>
-                    </div>
-                    <div className="space-y-1">
-                        <h3 className="text-base font-semibold">
-                            Verse commentaries
-                        </h3>
-                        <p className="text-sm leading-6 text-muted-foreground">
-                            Add, update, and organize the commentary shown
-                            with this verse. Choose a saved source to prefill
-                            details when it helps.
-                        </p>
-                    </div>
-                </div>
+        <VerseRelationEditorShell
+            count={metadata.rows.length}
+            countLabelSingular="commentary"
+            countLabelPlural="commentaries"
+            sourceCount={metadata.sourceOptions.length}
+            title="Verse commentaries"
+            description="Add, update, and organize the commentary shown with this verse. Choose a saved source to prefill details when it helps."
+            fullEditHref={fullEditHref}
+            onClose={props.activation.deactivate}
+        >
+            <CreateCommentaryCard
+                metadata={metadata}
+                onSuccess={handleMutationSuccess}
+            />
 
-                <div className="flex flex-wrap gap-2 border-t pt-4">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={props.activation.deactivate}
-                    >
-                        Close
-                    </Button>
-                    {fullEditHref && (
-                        <Button asChild variant="outline">
-                            <Link href={fullEditHref}>Open full edit</Link>
-                        </Button>
-                    )}
-                </div>
-
-                <CreateCommentaryCard
+            {metadata.rows.map((row) => (
+                <CommentaryEditorCard
+                    key={row.id}
                     metadata={metadata}
+                    row={row}
                     onSuccess={handleMutationSuccess}
                 />
-
-                {metadata.rows.map((row) => (
-                    <CommentaryEditorCard
-                        key={row.id}
-                        metadata={metadata}
-                        row={row}
-                        onSuccess={handleMutationSuccess}
-                    />
-                ))}
-            </div>
-        </div>
+            ))}
+        </VerseRelationEditorShell>
     );
 }
 

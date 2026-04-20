@@ -2,6 +2,9 @@ import { useForm } from '@inertiajs/react';
 import { useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import InputError from '@/components/input-error';
+import { ContentBlockCoreFields } from '@/components/scripture/content-blocks/ContentBlockCoreFields';
+import { ContentBlockImageFields } from '@/components/scripture/content-blocks/ContentBlockImageFields';
+import { ContentBlockMetaFields } from '@/components/scripture/content-blocks/ContentBlockMetaFields';
 import { ScriptureAdminSourceLabel } from '@/components/scripture/scripture-admin-source-label';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,7 +17,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import {
     getScriptureAdminTargetItemAttribute,
     getScriptureAdminTargetItemId,
@@ -83,6 +85,10 @@ function blockDataValue(
     const value = block.data_json?.[key];
 
     return typeof value === 'string' ? value : '';
+}
+
+function isImageBlockType(blockType: string): boolean {
+    return blockType === 'image';
 }
 
 function ContentBlockTypeField({
@@ -202,7 +208,7 @@ export function CreateScriptureAdminContentBlockCard({
         sort_order: String(nextSortOrder),
         status: 'draft',
     });
-    const showsImageFields = form.data.block_type === 'image';
+    const showsImageFields = isImageBlockType(form.data.block_type);
 
     useEffect(() => {
         if (form.isDirty || form.processing) {
@@ -263,122 +269,52 @@ export function CreateScriptureAdminContentBlockCard({
                     />
                 </div>
 
-                <div className="grid gap-2">
-                    <ScriptureAdminSourceLabel
-                        field={titleField}
-                        htmlFor="new_content_block_title"
-                    />
-                    <Input
-                        id="new_content_block_title"
-                        value={form.data.title}
-                        onChange={(event) =>
-                            form.setData('title', event.target.value)
-                        }
-                    />
-                    <InputError message={form.errors.title} />
-                </div>
+                <ContentBlockCoreFields
+                    titleField={titleField}
+                    titleHtmlFor="new_content_block_title"
+                    titleValue={form.data.title}
+                    onTitleChange={(value) => form.setData('title', value)}
+                    titleError={form.errors.title}
+                    bodyField={bodyField}
+                    bodyHtmlFor="new_content_block_body"
+                    bodyValue={form.data.body}
+                    onBodyChange={(value) => form.setData('body', value)}
+                    bodyError={form.errors.body}
+                />
 
-                <div className="grid gap-2">
-                    <ScriptureAdminSourceLabel
-                        field={bodyField}
-                        htmlFor="new_content_block_body"
-                    />
-                    <Textarea
-                        id="new_content_block_body"
-                        value={form.data.body}
-                        onChange={(event) =>
-                            form.setData('body', event.target.value)
+                {showsImageFields && (
+                    <ContentBlockImageFields
+                        mediaUrlField={mediaUrlField}
+                        mediaUrlHtmlFor="new_content_block_media_url"
+                        mediaUrlValue={form.data.media_url}
+                        onMediaUrlChange={(value) =>
+                            form.setData('media_url', value)
                         }
-                        rows={6}
+                        mediaUrlError={form.errors.media_url}
+                        altTextField={altTextField}
+                        altTextHtmlFor="new_content_block_alt_text"
+                        altTextValue={form.data.alt_text}
+                        onAltTextChange={(value) =>
+                            form.setData('alt_text', value)
+                        }
+                        altTextError={form.errors.alt_text}
                     />
-                    <InputError message={form.errors.body} />
-                </div>
-
-                {showsImageFields && mediaUrlField && (
-                    <div className="grid gap-2">
-                        <ScriptureAdminSourceLabel
-                            field={mediaUrlField}
-                            htmlFor="new_content_block_media_url"
-                        />
-                        <Input
-                            id="new_content_block_media_url"
-                            value={form.data.media_url}
-                            onChange={(event) =>
-                                form.setData('media_url', event.target.value)
-                            }
-                            placeholder="https://example.test/image.jpg"
-                        />
-                        <InputError message={form.errors.media_url} />
-                    </div>
                 )}
 
-                {showsImageFields && altTextField && (
-                    <div className="grid gap-2">
-                        <ScriptureAdminSourceLabel
-                            field={altTextField}
-                            htmlFor="new_content_block_alt_text"
-                        />
-                        <Input
-                            id="new_content_block_alt_text"
-                            value={form.data.alt_text}
-                            onChange={(event) =>
-                                form.setData('alt_text', event.target.value)
-                            }
-                            placeholder="Helpful description for the image"
-                        />
-                        <InputError message={form.errors.alt_text} />
-                    </div>
-                )}
-
-                <div className="grid gap-4 md:grid-cols-2">
-                    <div className="grid gap-2">
-                        <ScriptureAdminSourceLabel
-                            field={sortOrderField}
-                            htmlFor="new_content_block_sort_order"
-                        />
-                        <Input
-                            id="new_content_block_sort_order"
-                            type="number"
-                            min={0}
-                            value={form.data.sort_order}
-                            onChange={(event) =>
-                                form.setData('sort_order', event.target.value)
-                            }
-                        />
-                        <InputError message={form.errors.sort_order} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <ScriptureAdminSourceLabel
-                            field={statusField}
-                            htmlFor="new_content_block_status"
-                        />
-                        <Select
-                            value={form.data.status}
-                            onValueChange={(value) =>
-                                form.setData(
-                                    'status',
-                                    value as 'draft' | 'published',
-                                )
-                            }
-                        >
-                            <SelectTrigger
-                                id="new_content_block_status"
-                                className="w-full"
-                            >
-                                <SelectValue placeholder="Choose status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {(statusField.options ?? []).map((option) => (
-                                    <SelectItem key={option} value={option}>
-                                        {scriptureAdminStartCase(option)}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <InputError message={form.errors.status} />
-                    </div>
-                </div>
+                <ContentBlockMetaFields
+                    sortOrderField={sortOrderField}
+                    sortOrderHtmlFor="new_content_block_sort_order"
+                    sortOrderValue={form.data.sort_order}
+                    onSortOrderChange={(value) =>
+                        form.setData('sort_order', value)
+                    }
+                    sortOrderError={form.errors.sort_order}
+                    statusField={statusField}
+                    statusHtmlFor="new_content_block_status"
+                    statusValue={form.data.status}
+                    onStatusChange={(value) => form.setData('status', value)}
+                    statusError={form.errors.status}
+                />
 
                 <Button
                     type="button"
@@ -436,7 +372,7 @@ export function ScriptureAdminContentBlockEditorCard({
         sort_order: String(block.sort_order),
         status: block.status,
     });
-    const showsImageFields = form.data.block_type === 'image';
+    const showsImageFields = isImageBlockType(form.data.block_type);
 
     useEffect(() => {
         form.setData({
@@ -505,122 +441,52 @@ export function ScriptureAdminContentBlockEditorCard({
                     />
                 </div>
 
-                <div className="grid gap-2">
-                    <ScriptureAdminSourceLabel
-                        field={titleField}
-                        htmlFor={`content_block_title_${block.id}`}
-                    />
-                    <Input
-                        id={`content_block_title_${block.id}`}
-                        value={form.data.title}
-                        onChange={(event) =>
-                            form.setData('title', event.target.value)
-                        }
-                    />
-                    <InputError message={form.errors.title} />
-                </div>
+                <ContentBlockCoreFields
+                    titleField={titleField}
+                    titleHtmlFor={`content_block_title_${block.id}`}
+                    titleValue={form.data.title}
+                    onTitleChange={(value) => form.setData('title', value)}
+                    titleError={form.errors.title}
+                    bodyField={bodyField}
+                    bodyHtmlFor={`content_block_body_${block.id}`}
+                    bodyValue={form.data.body}
+                    onBodyChange={(value) => form.setData('body', value)}
+                    bodyError={form.errors.body}
+                />
 
-                <div className="grid gap-2">
-                    <ScriptureAdminSourceLabel
-                        field={bodyField}
-                        htmlFor={`content_block_body_${block.id}`}
-                    />
-                    <Textarea
-                        id={`content_block_body_${block.id}`}
-                        value={form.data.body}
-                        onChange={(event) =>
-                            form.setData('body', event.target.value)
+                {showsImageFields && (
+                    <ContentBlockImageFields
+                        mediaUrlField={mediaUrlField}
+                        mediaUrlHtmlFor={`content_block_media_url_${block.id}`}
+                        mediaUrlValue={form.data.media_url}
+                        onMediaUrlChange={(value) =>
+                            form.setData('media_url', value)
                         }
-                        rows={6}
+                        mediaUrlError={form.errors.media_url}
+                        altTextField={altTextField}
+                        altTextHtmlFor={`content_block_alt_text_${block.id}`}
+                        altTextValue={form.data.alt_text}
+                        onAltTextChange={(value) =>
+                            form.setData('alt_text', value)
+                        }
+                        altTextError={form.errors.alt_text}
                     />
-                    <InputError message={form.errors.body} />
-                </div>
-
-                {showsImageFields && mediaUrlField && (
-                    <div className="grid gap-2">
-                        <ScriptureAdminSourceLabel
-                            field={mediaUrlField}
-                            htmlFor={`content_block_media_url_${block.id}`}
-                        />
-                        <Input
-                            id={`content_block_media_url_${block.id}`}
-                            value={form.data.media_url}
-                            onChange={(event) =>
-                                form.setData('media_url', event.target.value)
-                            }
-                            placeholder="https://example.test/image.jpg"
-                        />
-                        <InputError message={form.errors.media_url} />
-                    </div>
                 )}
 
-                {showsImageFields && altTextField && (
-                    <div className="grid gap-2">
-                        <ScriptureAdminSourceLabel
-                            field={altTextField}
-                            htmlFor={`content_block_alt_text_${block.id}`}
-                        />
-                        <Input
-                            id={`content_block_alt_text_${block.id}`}
-                            value={form.data.alt_text}
-                            onChange={(event) =>
-                                form.setData('alt_text', event.target.value)
-                            }
-                            placeholder="Helpful description for the image"
-                        />
-                        <InputError message={form.errors.alt_text} />
-                    </div>
-                )}
-
-                <div className="grid gap-4 md:grid-cols-2">
-                    <div className="grid gap-2">
-                        <ScriptureAdminSourceLabel
-                            field={sortOrderField}
-                            htmlFor={`content_block_sort_order_${block.id}`}
-                        />
-                        <Input
-                            id={`content_block_sort_order_${block.id}`}
-                            type="number"
-                            min={0}
-                            value={form.data.sort_order}
-                            onChange={(event) =>
-                                form.setData('sort_order', event.target.value)
-                            }
-                        />
-                        <InputError message={form.errors.sort_order} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <ScriptureAdminSourceLabel
-                            field={statusField}
-                            htmlFor={`content_block_status_${block.id}`}
-                        />
-                        <Select
-                            value={form.data.status}
-                            onValueChange={(value) =>
-                                form.setData(
-                                    'status',
-                                    value as 'draft' | 'published',
-                                )
-                            }
-                        >
-                            <SelectTrigger
-                                id={`content_block_status_${block.id}`}
-                                className="w-full"
-                            >
-                                <SelectValue placeholder="Choose status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {(statusField.options ?? []).map((option) => (
-                                    <SelectItem key={option} value={option}>
-                                        {scriptureAdminStartCase(option)}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <InputError message={form.errors.status} />
-                    </div>
-                </div>
+                <ContentBlockMetaFields
+                    sortOrderField={sortOrderField}
+                    sortOrderHtmlFor={`content_block_sort_order_${block.id}`}
+                    sortOrderValue={form.data.sort_order}
+                    onSortOrderChange={(value) =>
+                        form.setData('sort_order', value)
+                    }
+                    sortOrderError={form.errors.sort_order}
+                    statusField={statusField}
+                    statusHtmlFor={`content_block_status_${block.id}`}
+                    statusValue={form.data.status}
+                    onStatusChange={(value) => form.setData('status', value)}
+                    statusError={form.errors.status}
+                />
 
                 <Button
                     type="button"

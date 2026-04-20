@@ -5,12 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { VerseTranslationsContractMetadata } from '@/admin/surfaces/core/contract-readers';
 import type { ScriptureAdminVerseTranslation } from '@/types';
 import { VerseRelationSourceSummary } from '../VerseRelationSourceSummary';
+import { VerseRelationSourceSelectField } from '../VerseRelationSourceSelectField';
 import {
+    applySourceToForm,
+    getFieldCopy,
     type TranslationFormData,
     NONE_VALUE,
+    selectSourceOptionLabel,
 } from './translation-editor-helpers';
 import { TranslationSourceDetailsFields } from './TranslationSourceDetailsFields';
-import { TranslationSourceSelectField } from './TranslationSourceSelectField';
 
 type Props = {
     metadata: VerseTranslationsContractMetadata;
@@ -49,10 +52,22 @@ export function TranslationEditorCard({ metadata, row, onSuccess }: Props) {
                 </p>
             </CardHeader>
             <CardContent className="space-y-5">
-                <TranslationSourceSelectField
-                    metadata={metadata}
-                    form={form}
+                <VerseRelationSourceSelectField
+                    field={metadata.fields.translation_source_id}
                     htmlFor={`translation_source_id_${row.id}`}
+                    value={form.data.translation_source_id}
+                    error={form.errors.translation_source_id}
+                    labelOverride={getFieldCopy('translation_source_id').label}
+                    helperTextOverride={
+                        getFieldCopy('translation_source_id').helpText
+                    }
+                    sourceOptions={metadata.sourceOptions}
+                    noneLabel="Not linked to a saved source"
+                    placeholder="Choose a source"
+                    onValueChange={(value) =>
+                        applySourceToForm(form, metadata.sourceOptions, value)
+                    }
+                    optionLabel={selectSourceOptionLabel}
                 />
 
                 <VerseRelationSourceSummary

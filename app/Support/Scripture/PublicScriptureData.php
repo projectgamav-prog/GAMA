@@ -20,6 +20,7 @@ use App\Models\VerseDictionaryAssignment;
 use App\Models\VerseMeta;
 use App\Models\VerseRecitation;
 use App\Models\VerseTranslation;
+use App\Support\Scripture\PublicData\RelatedVersePayloadBuilder;
 
 /**
  * Maps canonical scripture models into the stable public Inertia payload shape.
@@ -350,48 +351,16 @@ class PublicScriptureData
      */
     public function dictionaryEntryRelatedVerses(iterable $assignments): array
     {
-        $relatedVerses = [];
-        $seenVerseIds = [];
-
-        foreach ($assignments as $assignment) {
-            if (! $assignment instanceof VerseDictionaryAssignment) {
-                continue;
-            }
-
-            $verse = $assignment->verse;
-            $chapterSection = $verse?->chapterSection;
-            $chapter = $chapterSection?->chapter;
-            $bookSection = $chapter?->bookSection;
-            $book = $bookSection?->book;
-
-            if (! $verse instanceof Verse
-                || ! $chapterSection instanceof ChapterSection
-                || ! $chapter instanceof Chapter
-                || ! $bookSection instanceof BookSection
-                || ! $book instanceof Book) {
-                continue;
-            }
-
-            $verseId = (int) $verse->getKey();
-
-            if (isset($seenVerseIds[$verseId])) {
-                continue;
-            }
-
-            $seenVerseIds[$verseId] = true;
-
-            $relatedVerses[] = [
-                ...$this->relatedVersePayload(
-                    $book,
-                    $bookSection,
-                    $chapter,
-                    $chapterSection,
-                    $verse,
-                ),
-            ];
-        }
-
-        return $relatedVerses;
+        return $this->relatedVersePayloadBuilder()->fromDictionaryAssignments(
+            $assignments,
+            fn (
+                Book $book,
+                BookSection $bookSection,
+                Chapter $chapter,
+                ChapterSection $chapterSection,
+                Verse $verse,
+            ): string => $this->verseHref($book, $bookSection, $chapter, $chapterSection, $verse),
+        );
     }
 
     /**
@@ -400,33 +369,16 @@ class PublicScriptureData
      */
     public function topicRelatedVerses(iterable $assignments): array
     {
-        return collect($assignments)
-            ->map(function (TopicVerseAssignment $assignment): ?array {
-                $verse = $assignment->verse;
-                $chapterSection = $verse?->chapterSection;
-                $chapter = $chapterSection?->chapter;
-                $bookSection = $chapter?->bookSection;
-                $book = $bookSection?->book;
-
-                if (! $verse instanceof Verse
-                    || ! $chapterSection instanceof ChapterSection
-                    || ! $chapter instanceof Chapter
-                    || ! $bookSection instanceof BookSection
-                    || ! $book instanceof Book) {
-                    return null;
-                }
-
-                return $this->relatedVersePayload(
-                    $book,
-                    $bookSection,
-                    $chapter,
-                    $chapterSection,
-                    $verse,
-                );
-            })
-            ->filter()
-            ->values()
-            ->all();
+        return $this->relatedVersePayloadBuilder()->fromTopicAssignments(
+            $assignments,
+            fn (
+                Book $book,
+                BookSection $bookSection,
+                Chapter $chapter,
+                ChapterSection $chapterSection,
+                Verse $verse,
+            ): string => $this->verseHref($book, $bookSection, $chapter, $chapterSection, $verse),
+        );
     }
 
     /**
@@ -435,33 +387,16 @@ class PublicScriptureData
      */
     public function characterRelatedVerses(iterable $assignments): array
     {
-        return collect($assignments)
-            ->map(function (CharacterVerseAssignment $assignment): ?array {
-                $verse = $assignment->verse;
-                $chapterSection = $verse?->chapterSection;
-                $chapter = $chapterSection?->chapter;
-                $bookSection = $chapter?->bookSection;
-                $book = $bookSection?->book;
-
-                if (! $verse instanceof Verse
-                    || ! $chapterSection instanceof ChapterSection
-                    || ! $chapter instanceof Chapter
-                    || ! $bookSection instanceof BookSection
-                    || ! $book instanceof Book) {
-                    return null;
-                }
-
-                return $this->relatedVersePayload(
-                    $book,
-                    $bookSection,
-                    $chapter,
-                    $chapterSection,
-                    $verse,
-                );
-            })
-            ->filter()
-            ->values()
-            ->all();
+        return $this->relatedVersePayloadBuilder()->fromCharacterAssignments(
+            $assignments,
+            fn (
+                Book $book,
+                BookSection $bookSection,
+                Chapter $chapter,
+                ChapterSection $chapterSection,
+                Verse $verse,
+            ): string => $this->verseHref($book, $bookSection, $chapter, $chapterSection, $verse),
+        );
     }
 
     /**
@@ -785,30 +720,8 @@ class PublicScriptureData
         ]);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    private function relatedVersePayload(
-        Book $book,
-        BookSection $bookSection,
-        Chapter $chapter,
-        ChapterSection $chapterSection,
-        Verse $verse,
-    ): array {
-        return [
-            'id' => $verse->id,
-            'slug' => $verse->slug,
-            'number' => $verse->number,
-            'chapter_slug' => $chapter->slug,
-            'chapter_number' => $chapter->number,
-            'book_slug' => $book->slug,
-            'href' => $this->verseHref(
-                $book,
-                $bookSection,
-                $chapter,
-                $chapterSection,
-                $verse,
-            ),
-        ];
+    private function relatedVersePayloadBuilder(): RelatedVersePayloadBuilder
+    {
+        return new RelatedVersePayloadBuilder();
     }
 }
