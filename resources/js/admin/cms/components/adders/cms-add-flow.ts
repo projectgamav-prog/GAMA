@@ -2,9 +2,12 @@ import type {
     CmsContainerType,
     CmsInsertionMode,
     CmsModuleKey,
-    CmsModulePayload,
 } from '@/types';
 import { defaultCmsModuleValue } from '../../core/module-registry';
+import {
+    defaultModuleKey,
+    modulePayloadFromForm,
+} from '../../core/cms-module-form-helpers';
 
 export type CmsFormRecord = Record<string, any>;
 
@@ -28,14 +31,7 @@ export type BlockFormData = {
     config_json: CmsFormRecord;
 };
 
-export const defaultModuleKey: CmsModuleKey = 'rich_text';
-
-export const modulePayloadFromForm = (
-    form: Pick<BlockFormData, 'data_json' | 'config_json'>,
-): CmsModulePayload => ({
-    data: form.data_json,
-    config: form.config_json,
-});
+export { defaultModuleKey, modulePayloadFromForm };
 
 export function buildContainerInsertFormData({
     insertionMode,

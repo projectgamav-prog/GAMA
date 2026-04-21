@@ -21,6 +21,7 @@ import {
     languageLabel,
     sectionLabel,
 } from '@/lib/scripture';
+import { cn } from '@/lib/utils';
 import type {
     ScriptureChapter,
     ScriptureChapterAdmin,

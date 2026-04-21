@@ -1,9 +1,14 @@
-import { cmsModules } from '../../core/module-registry';
 import type {
     CmsContainerType,
     CmsInsertionMode,
     CmsModuleKey,
 } from '@/types';
+import {
+    defaultModuleKey,
+    modulePayloadFromForm,
+    resolveCmsContainerType as resolveContainerType,
+    resolveModuleKey,
+} from '../../core/cms-module-form-helpers';
 
 export type CmsFormRecord = Record<string, any>;
 
@@ -20,22 +25,4 @@ export type ContainerUpdateFormData = {
     container_type: CmsContainerType;
 };
 
-export const defaultModuleKey: CmsModuleKey = 'rich_text';
-
-const moduleKeys = new Set<CmsModuleKey>(cmsModules.map((module) => module.key));
-
-export const resolveModuleKey = (moduleKey: string): CmsModuleKey =>
-    moduleKeys.has(moduleKey as CmsModuleKey)
-        ? (moduleKey as CmsModuleKey)
-        : defaultModuleKey;
-
-export const resolveContainerType = (
-    containerType: string,
-): CmsContainerType => (containerType === 'section' ? 'section' : 'card');
-
-export const modulePayloadFromForm = (
-    form: Pick<BlockFormData, 'data_json' | 'config_json'>,
-) => ({
-    data: form.data_json,
-    config: form.config_json,
-});
+export { defaultModuleKey, modulePayloadFromForm, resolveContainerType, resolveModuleKey };

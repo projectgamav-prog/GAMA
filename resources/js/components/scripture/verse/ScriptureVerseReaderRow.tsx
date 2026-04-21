@@ -1,11 +1,8 @@
 import { Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { ScriptureChapterVerseRowAdmin } from '@/components/scripture/scripture-chapter-verse-row-admin';
-import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScriptureIntroDropdown } from '@/components/scripture/scripture-intro-dropdown';
 import { languageLabel, verseLabel } from '@/lib/scripture';
-import { resolveScriptureNavigationAction } from '@/lib/scripture-navigation-actions';
-import { cn } from '@/lib/utils';
 import type {
     ScriptureChapterVerseSharedAdmin,
     ScriptureReaderLanguage,
@@ -17,19 +14,25 @@ const LOCAL_ACTION_BUTTON_CLASS_NAME =
 
 type Props = {
     verse: ScriptureReaderVerse;
-    readerLanguage: ScriptureReaderLanguage;
-    sharedAdmin: ScriptureChapterVerseSharedAdmin | null;
+    index: number;
+    language: ScriptureReaderLanguage;
+    hasReaderLanguages: boolean;
+    sectionTitle: string;
+    returnToHref: string;
+    showAdminControls: boolean;
+    verseAdminShared?: ScriptureChapterVerseSharedAdmin | null;
 };
 
 export function ScriptureVerseReaderRow({
     verse,
-    readerLanguage,
-    sharedAdmin,
+    language,
+    hasReaderLanguages,
+    sectionTitle,
+    returnToHref,
+    showAdminControls,
+    verseAdminShared = null,
 }: Props) {
-    const verseDetailAction = resolveScriptureNavigationAction(verse.actions.show);
-    const verseMediaAction = verse.actions.media
-        ? resolveScriptureNavigationAction(verse.actions.media)
-        : null;
+    const translationText = verse.translations[language];
 
     return (
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)]">
@@ -37,93 +40,69 @@ export function ScriptureVerseReaderRow({
                 <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="space-y-1">
                         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
-                            {verseLabel(verse.verse_number)}
+                            {verseLabel(verse.number)}
                         </p>
                         <p className="text-base leading-relaxed text-foreground">
-                            {verse.sanskrit_text}
+                            {verse.text}
                         </p>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
                         <ScriptureChapterVerseRowAdmin
                             verse={verse}
-                            sharedAdmin={sharedAdmin}
+                            sectionTitle={sectionTitle}
+                            showAdminControls={showAdminControls}
+                            returnToHref={returnToHref}
+                            sharedAdmin={verseAdminShared}
                         />
 
                         <ScriptureIntroDropdown
-                            introduction={verse.introduction}
-                            triggerLabel="Verse intro"
-                            align="end"
+                            block={verse.intro_block ?? null}
+                            buttonLabel="Verse intro"
+                            contentLabel="Verse intro"
                         />
 
-                        {verseDetailAction ? (
+                        {verse.explanation_href ? (
                             <Button
                                 asChild
                                 size="sm"
                                 variant="outline"
                                 className={LOCAL_ACTION_BUTTON_CLASS_NAME}
                             >
-                                <Link href={verseDetailAction.href}>Open verse</Link>
+                                <Link href={verse.explanation_href}>Open verse</Link>
                             </Button>
                         ) : null}
 
-                        {verseMediaAction ? (
+                        {verse.video_href ? (
                             <Button
                                 asChild
                                 size="sm"
                                 variant="outline"
                                 className={LOCAL_ACTION_BUTTON_CLASS_NAME}
                             >
-                                <Link href={verseMediaAction.href}>Media</Link>
+                                <Link href={verse.video_href}>Media</Link>
                             </Button>
                         ) : null}
                     </div>
                 </div>
-
-                <ScriptureEntityRegion
-                    value={verse.admin?.regions?.description ?? null}
-                    emptyLabel="No public verse description."
-                />
             </div>
 
             <div className="rounded-xl border border-border/70 bg-muted/10 p-3">
                 <div className="mb-2 flex items-center justify-between gap-2">
                     <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
-                        {languageLabel(readerLanguage)} translation
+                        {languageLabel(language)} translation
                     </p>
                 </div>
 
-                {verse.translations.length > 0 ? (
-                    <div className="space-y-2">
-                        {verse.translations.map((translation) => (
-                            <div
-                                key={translation.id}
-                                className={cn(
-                                    'rounded-lg border border-border/60 bg-background/90 px-3 py-2 text-sm leading-relaxed text-foreground shadow-sm',
-                                    translation.language === readerLanguage
-                                        ? 'border-amber-500/40 bg-amber-50/50'
-                                        : null,
-                                )}
-                            >
-                                <div className="mb-1 flex items-center justify-between gap-2">
-                                    <span className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-                                        {translation.label}
-                                    </span>
-
-                                    {translation.language === readerLanguage ? (
-                                        <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-amber-700">
-                                            Selected
-                                        </span>
-                                    ) : null}
-                                </div>
-
-                                <p>{translation.text}</p>
-                            </div>
-                        ))}
+                {translationText ? (
+                    <div className="rounded-lg border border-border/60 bg-background/90 px-3 py-2 text-sm leading-relaxed text-foreground shadow-sm">
+                        <p>{translationText}</p>
                     </div>
                 ) : (
                     <p className="text-sm text-muted-foreground">
-                        No published translations yet.
+                        {hasReaderLanguages
+                            ? `No ${languageLabel(language).toLowerCase()} translation available for this verse yet.`
+                            : 'No supporting translations are available for this verse yet.'}
                     </p>
                 )}
             </div>

@@ -1,26 +1,20 @@
-import { Link } from '@inertiajs/react';
-import { BookOpenText } from 'lucide-react';
 import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import {
     resolveBookChapterGroupsSurface,
     resolveBookSectionActionsSurface,
     resolveBookSectionChapterGroupSurface,
 } from '@/admin/integrations/sections';
-import { ScriptureBookChapterRowAdmin } from '@/components/scripture/scripture-book-chapter-row-admin';
-import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
-import { ScriptureIntroDropdown } from '@/components/scripture/scripture-intro-dropdown';
+import { ScriptureBookChapterListRow } from '@/components/scripture/chapter/ScriptureBookChapterListRow';
 import {
     SCRIPTURE_INLINE_ADMIN_PANEL_CLASS_NAME,
     ScriptureSectionGroupWrapper,
 } from '@/components/scripture/scripture-section-group-wrapper';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
 import {
-    chapterLabel,
     hidesSingleGenericSection,
     sectionAnchorId,
     sectionLabel,
 } from '@/lib/scripture';
-import { resolveScriptureNavigationAction } from '@/lib/scripture-navigation-actions';
 import type {
     ScriptureBook,
     ScriptureBookAdmin,
@@ -125,77 +119,15 @@ export function ScriptureBookChapterList({
                             panelClassName={panelClassName}
                         >
                             <div className="grid gap-3 md:grid-cols-2">
-                                {section.chapters.map((chapter) => {
-                                    const chapterAction =
-                                        resolveScriptureNavigationAction({
-                                            actionKey: 'open_chapter',
-                                            href: chapter.href,
-                                        });
-
-                                    if (chapterAction === null) {
-                                        return null;
-                                    }
-
-                                    return (
-                                        <ScriptureEntityRegion
-                                            key={chapter.id}
-                                            meta={{
-                                                entityType: 'chapter',
-                                                entityId: chapter.id,
-                                                entityLabel: chapterLabel(
-                                                    chapter.number,
-                                                    chapter.title,
-                                                ),
-                                                region: 'chapter_list_row',
-                                                capabilityHint: 'navigation',
-                                            }}
-                                        >
-                                            <div className="space-y-3 rounded-lg border p-4 transition-colors hover:border-primary">
-                                                <Link
-                                                    href={chapterAction.href}
-                                                    className="group block"
-                                                >
-                                                    <div className="flex items-start gap-3">
-                                                        <div className="rounded-md bg-primary/10 p-2 text-primary">
-                                                            <BookOpenText className="size-4" />
-                                                        </div>
-                                                        <div className="space-y-1">
-                                                            <p className="font-medium group-hover:text-primary">
-                                                                {chapterLabel(
-                                                                    chapter.number,
-                                                                    chapter.title,
-                                                                )}
-                                                            </p>
-                                                            <p className="text-sm text-muted-foreground">
-                                                                {
-                                                                    chapterAction.label
-                                                                }
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </Link>
-
-                                                <ScriptureBookChapterRowAdmin
-                                                    chapter={chapter}
-                                                    showAdminControls={
-                                                        showAdminControls
-                                                    }
-                                                    returnToHref={book.href}
-                                                    panelClassName={
-                                                        panelClassName
-                                                    }
-                                                />
-
-                                                <ScriptureIntroDropdown
-                                                    block={
-                                                        chapter.intro_block ??
-                                                        null
-                                                    }
-                                                />
-                                            </div>
-                                        </ScriptureEntityRegion>
-                                    );
-                                })}
+                                {section.chapters.map((chapter) => (
+                                    <ScriptureBookChapterListRow
+                                        key={chapter.id}
+                                        chapter={chapter}
+                                        showAdminControls={showAdminControls}
+                                        returnToHref={book.href}
+                                        panelClassName={panelClassName}
+                                    />
+                                ))}
                             </div>
                         </ScriptureSectionGroupWrapper>
                     );

@@ -1,5 +1,5 @@
 import InputError from '@/components/input-error';
-import { BookAdminSourceLabel } from '@/components/scripture/book-admin-source-label';
+import { ScriptureAdminSourceLabel } from '@/components/scripture/scripture-admin-source-label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import type { ScriptureRegisteredAdminField } from '@/types';
@@ -35,7 +35,7 @@ export function MediaAssignmentOverrideFields({
         <>
             {(mode === 'all' || mode === 'title') && (
                 <div className="grid gap-2">
-                    <BookAdminSourceLabel
+                    <ScriptureAdminSourceLabel
                         field={titleField}
                         htmlFor={titleHtmlFor}
                     />
@@ -50,7 +50,7 @@ export function MediaAssignmentOverrideFields({
 
             {(mode === 'all' || mode === 'caption') && (
                 <div className="grid gap-2">
-                    <BookAdminSourceLabel
+                    <ScriptureAdminSourceLabel
                         field={captionField}
                         htmlFor={captionHtmlFor}
                     />

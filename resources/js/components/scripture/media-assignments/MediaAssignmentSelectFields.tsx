@@ -1,5 +1,5 @@
 import InputError from '@/components/input-error';
-import { BookAdminSourceLabel } from '@/components/scripture/book-admin-source-label';
+import { ScriptureAdminSourceLabel } from '@/components/scripture/scripture-admin-source-label';
 import {
     Select,
     SelectContent,
@@ -49,7 +49,10 @@ export function MediaAssignmentSelectFields({
     return (
         <div className="grid gap-4 md:grid-cols-2">
             <div className="grid gap-2">
-                <BookAdminSourceLabel field={mediaField} htmlFor={mediaHtmlFor} />
+                <ScriptureAdminSourceLabel
+                    field={mediaField}
+                    htmlFor={mediaHtmlFor}
+                />
                 <Select value={mediaValue} onValueChange={onMediaChange}>
                     <SelectTrigger id={mediaHtmlFor} className="w-full">
                         <SelectValue placeholder="Choose media" />
@@ -66,7 +69,10 @@ export function MediaAssignmentSelectFields({
             </div>
 
             <div className="grid gap-2">
-                <BookAdminSourceLabel field={roleField} htmlFor={roleHtmlFor} />
+                <ScriptureAdminSourceLabel
+                    field={roleField}
+                    htmlFor={roleHtmlFor}
+                />
                 <Select value={roleValue} onValueChange={onRoleChange}>
                     <SelectTrigger id={roleHtmlFor} className="w-full">
                         <SelectValue placeholder="Choose slot" />

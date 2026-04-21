@@ -1,5 +1,5 @@
 import InputError from '@/components/input-error';
-import { BookAdminSourceLabel } from '@/components/scripture/book-admin-source-label';
+import { ScriptureAdminSourceLabel } from '@/components/scripture/scripture-admin-source-label';
 import { Input } from '@/components/ui/input';
 import {
     Select,
@@ -41,7 +41,7 @@ export function MediaAssignmentMetaFields({
         <>
             {(mode === 'all' || mode === 'sort') && (
                 <div className="grid gap-2">
-                    <BookAdminSourceLabel
+                    <ScriptureAdminSourceLabel
                         field={sortOrderField}
                         htmlFor={sortOrderHtmlFor}
                     />
@@ -60,7 +60,7 @@ export function MediaAssignmentMetaFields({
 
             {(mode === 'all' || mode === 'status') && (
                 <div className="grid gap-2">
-                    <BookAdminSourceLabel
+                    <ScriptureAdminSourceLabel
                         field={statusField}
                         htmlFor={statusHtmlFor}
                     />

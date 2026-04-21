@@ -1,7 +1,7 @@
 import { useForm } from '@inertiajs/react';
 import { useEffect } from 'react';
-import { BookAdminSourceLabel } from '@/components/scripture/book-admin-source-label';
 import InputError from '@/components/input-error';
+import { ScriptureAdminSourceLabel } from '@/components/scripture/scripture-admin-source-label';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -45,7 +45,7 @@ export function BookDescriptionEditorCard({
             </CardHeader>
             <CardContent className="space-y-5">
                 <div className="grid gap-2">
-                    <BookAdminSourceLabel
+                    <ScriptureAdminSourceLabel
                         field={field}
                         htmlFor="book_full_description"
                     />
