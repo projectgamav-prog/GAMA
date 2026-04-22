@@ -49,6 +49,24 @@ After completing a task:
   - registry use versus central switchboards
   - phased safe refactor sequencing
 
+### Cleanup wave status
+- The broad cleanup/refactor wave is now largely complete.
+- The project is now operating from a cleaned architecture-first base rather
+  than from an active broad refactor stream.
+- Several cleanup families are now considered stable enough to leave alone by
+  default:
+  - verse relation editor family
+  - CMS helper cluster around shared module-form primitives
+  - CMS composition shells already cleaned in this wave
+  - shared scripture browse/display family
+  - shared scripture admin/editor source-label/meta display family
+- Remaining cleanup is now selective only:
+  - reopen only when a narrow, behavior-preserving seam is clearly justified
+  - do not resume broad cleanup for purity
+  - treat `resources/js/pages/scripture/chapters/full-edit.tsx` and
+    `resources/js/pages/scripture/chapters/verses/full-edit.tsx` as
+    reassess-later pressure points, not automatic next tasks
+
 ### Architecture
 - Pages are thin render shells.
 - Canonical scripture admin still attaches through semantic surfaces and module qualification.
@@ -111,6 +129,26 @@ After completing a task:
 - Canonical scripture pages no longer carry book-specific CMS page bridge fields or overview-page linkage logic.
 - The active edit-existing-content path has now been tightened across the book schema:
   - open-on-demand inline editors for books, sections, chapters, chapter sections, verses, verse meta, and verse relation editors still hydrate through activation/remount correctly
+  - the first focused book-media authoring pattern now spans both the public
+    book media surface and the protected book full-edit media section:
+    - admins can attach hero/supporting media directly near the public book
+      media section instead of jumping straight to full edit for the common
+      case
+    - existing book media assignments can be replaced or removed inline on that
+      same public surface
+    - the protected full-edit media cards now reuse the same media-record
+      selection confidence pattern:
+      - clearer picker labels
+      - selected-record summary
+      - inline media preview
+      - quick attach / replace / remove actions where the narrow contracts fit
+    - full edit remains the advanced path for title/caption overrides, publish
+      state, sort order, and other slot behavior
+    - those inline media actions now use focused action contracts instead of
+      depending on full-record assignment form payloads:
+      - attach sends only the media id and slot role
+      - replace sends only the media id
+      - remove stays a simple delete
   - grouped inline identity editing is now context-aware where it stays active on list pages:
     - chapter identity editing from the book page chapter list now mounts as a chapter-row editor instead of borrowing chapter-page semantics
     - the chapter-row save path now returns to the book page instead of detouring into the chapter page route
@@ -193,6 +231,18 @@ After completing a task:
   - pasted URLs or internal site paths can now be translated into the structured target model directly
   - shared picker data now exists for CMS pages, routes, books, dictionary entries, topics, and characters
   - button-group, card-list, header navigation, and footer navigation now all benefit from the same shared target options instead of leaning on manual slug entry as often
+  - the shared target editor now also owns the common destination-type step for the main CMS CTA/list modules instead of leaving that choice duplicated at each module call site
+  - destination summaries are now more human-readable across route, CMS page, and scripture targets instead of leaning only on raw href strings
+- `button_group` authoring now has a cleaner common-vs-advanced CTA flow:
+  - labels and destinations stay in the first editing step
+  - per-button rows now support duplicate and move up/down for faster CTA-set shaping
+  - structured destination details can stay collapsed until needed when the common paste/pick flow is enough
+  - style and new-tab behavior now live behind an explicit advanced reveal instead of crowding the common path
+- `card_list` authoring now follows the same cleaned product-facing pattern:
+  - common card content stays focused on title, body, CTA label, and destination
+  - per-card rows now support duplicate and move up/down for faster repeated-item editing
+  - structured destination details can stay collapsed until needed
+  - optional eyebrow polish now sits behind an explicit advanced reveal instead of competing with the common path
 - The first stable CMS module set is now strong enough for real declared supplemental regions:
   - `rich_text` now supports eyebrow/title/lead plus structured body writing for stronger prose sections
   - `button_group` stays the structured CTA/action module on the shared target contract
@@ -363,7 +413,9 @@ But richer authoring is still postponed:
 - Verse detail now has one clearer live authoring path, but broader non-CMS region rollout and richer same-page editing depth are still future work.
 
 ### Remaining canonical polish
-- The broader delete-heavy browser pass for some canonical structural/intro/media surfaces is still worth finishing.
+- This area is now watch closely / selective reassessment work, not the main
+  active stream.
+- The broader delete-heavy browser pass for some canonical structural/intro/media surfaces is still worth finishing when it protects the active editing path.
 - Translation/commentary Full Edit still needs another usefulness review.
 - The later detail-page intro-dropdown phase for canonical detail tops is still not built.
 - Book/chapter full-edit owner-attached content-block management still exists as a transitional admin fallback, but the older public live add/edit block path is now being retired from the active scripture browsing experience.
@@ -380,6 +432,11 @@ But richer authoring is still postponed:
 - Intro presentation is more consistent across canonical cards.
 - Verse detail is cleaner than before because the supplementary CMS region is now the only live composition path on that page; the older verse-owned notes remain visible without competing live authoring controls.
 - Book, chapter, and verse public scripture pages are also cleaner because the older owner-attached public add/edit block controls and watch-overview UI are being removed from the active browsing path.
+- Book media authoring is now more consistent with the locked hybrid admin direction:
+  - the public book media section now supports direct attach/replace/remove actions inline for the common media-assignment path
+  - the protected book full-edit media section now reuses the same picker-confidence and quick-action pattern instead of forcing authors into a lower-confidence select-only flow
+  - full edit is now more clearly reserved for advanced slot metadata and override work instead of being the first stop for basic media changes
+  - the common inline media actions now speak smaller contracts than the advanced full-edit workflow, which makes the hybrid split more truthful
 - The four main scripture pages now read with a clearer structure inside the shared site frame:
   - books index: library intro + available books
   - book page: canonical book intro + supplementary media + chapter list
@@ -402,6 +459,19 @@ But richer authoring is still postponed:
 - The CMS builder is now operational for core page/container/block CRUD and movement, but it is still foundation-first rather than feature-complete.
 - The CMS workspace still exists for identity management, listing, diagnostics, and support editing, but it is no longer treated as the preferred authoring surface in architecture or workspace copy.
 - CMS linking is now expected to happen through generic CMS modules, especially button destinations, instead of per-entity scripture schema linkage.
+- Button-group authoring now feels more like a real CTA-editing flow than a raw config form:
+  - editors get a quick per-button summary of the current destination before opening deeper fields
+  - common label and destination editing stays visible without mixing in style/config controls too early
+  - advanced style and new-tab options stay available without dominating the routine path
+- Card-list authoring now uses the same common-vs-advanced discipline:
+  - editors can shape repeated cards with title/body/CTA/destination first
+  - per-card summaries now make the current destination easier to scan before opening deeper fields
+  - duplicate and reorder actions reduce repeated-item authoring friction
+  - optional eyebrow display polish stays secondary instead of crowding the main content path
+- Shared link-target authoring now feels more consistent across `button_group` and `card_list`:
+  - destination type selection now lives in the shared target editor instead of being duplicated differently in each module
+  - compact details now reveals the same summary-first target flow in both modules
+  - scripture-based targets read with clearer human-facing summaries before authors open the full structured fields
 - The first real page-composition pass now confirms that the current module set can carry meaningful pages, but it also surfaced the next authoring friction points:
   - rich text is much more usable now, but it still stops short of a fuller editorial writing surface
   - media is useful in page layout, but its authoring flow is the least polished
@@ -434,19 +504,27 @@ Do not drift into fake abstractions detached from either the canonical schema or
    - `current-phase.md`
    - `architecture-guardrails.md`
    - `refactor-roadmap.md`
-1. Use the real composition pass as the basis for the next CMS improvements:
+1. Start from the cleaned base instead of reopening broad cleanup:
+   - treat the broad cleanup wave as largely complete
+   - reopen only selective reassessment seams when they are clearly justified
+   - do not resume broad refactor work by default
+2. Use the real composition pass as the basis for the next CMS improvements:
    - improve the first module set based on authoring friction instead of adding many new modules
    - keep building inside declared supplemental regions instead of improvising new seams
    - continue using the shared public frame instead of reintroducing page-specific shells
-2. Keep the active scripture admin path trustworthy while that phase begins:
+3. Keep the active scripture admin path trustworthy while that phase begins:
    - extend browser validation across the remaining grouped/full-edit canonical surfaces as needed
    - preserve the new narrow smoke layer for the active inline editors
    - keep row/page semantics and same-page behavior honest
-3. Extend the live CMS interaction model only where the real composition pass showed clear need:
+4. Treat the remaining larger canonical full-edit files as watch / reassess later only:
+   - `resources/js/pages/scripture/chapters/full-edit.tsx`
+   - `resources/js/pages/scripture/chapters/verses/full-edit.tsx`
+   - do not treat them as automatic next tasks
+5. Extend the live CMS interaction model only where the real composition pass showed clear need:
    - keep published CMS pages interactive for permitted users
    - preserve the locked same-layout public-page-first authoring rule as live composition expands
    - preserve the stable `manifest.ts` / `renderer.tsx` / `editor.tsx` / `types.ts` / `defaults.ts` / `index.tsx` contract
-4. Keep the restored scripture browse baseline trustworthy:
+6. Keep the restored scripture browse baseline trustworthy:
    - preserve the full enabled-corpus development seed baseline
    - avoid narrowing local browse state back to a Bhagavad Gita-only dataset unless a task explicitly needs a narrow test seeder
    - continue phasing out overlapping live canonical block controls only where a clear CMS/exposed-region replacement already exists

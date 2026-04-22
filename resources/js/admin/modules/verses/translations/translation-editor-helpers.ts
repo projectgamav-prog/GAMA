@@ -2,6 +2,7 @@ import { useForm } from '@inertiajs/react';
 import type { ScriptureTranslationSourceOption } from '@/types';
 import {
     formatVerseRelationSourceOptionLabel,
+    resolveVerseRelationSourcePrefill,
     VERSE_RELATION_NONE_VALUE,
 } from '../verse-relation-editor-shared';
 
@@ -65,24 +66,23 @@ export function applySourceToForm(
     value: string,
 ) {
     form.setData('translation_source_id', value);
-
-    if (value === NONE_VALUE) {
-        return;
-    }
-
-    const selectedSource = sourceOptions.find(
-        (candidate) => String(candidate.id) === value,
+    const prefill = resolveVerseRelationSourcePrefill(
+        value,
+        sourceOptions,
+        form.data,
+        (selectedSource, currentData) => ({
+            language_code:
+                selectedSource.language_code ?? currentData.language_code,
+        }),
     );
 
-    if (!selectedSource) {
+    if (!prefill) {
         return;
     }
 
     form.setData({
         ...form.data,
         translation_source_id: value,
-        source_key: selectedSource.slug,
-        source_name: selectedSource.name,
-        language_code: selectedSource.language_code ?? form.data.language_code,
+        ...prefill,
     });
 }

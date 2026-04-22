@@ -1,7 +1,11 @@
 import { useForm } from '@inertiajs/react';
 import { useEffect } from 'react';
-import { Plus } from 'lucide-react';
-import InputError from '@/components/input-error';
+import { Plus, Trash2 } from 'lucide-react';
+import {
+    findAvailableMedia,
+    MediaPreviewCard,
+    MediaSelectionSummary,
+} from '@/components/scripture/media-assignments/MediaPickerDisplay';
 import { MediaAssignmentMetaFields } from '@/components/scripture/media-assignments/MediaAssignmentMetaFields';
 import { MediaAssignmentOverrideFields } from '@/components/scripture/media-assignments/MediaAssignmentOverrideFields';
 import { MediaAssignmentSelectFields } from '@/components/scripture/media-assignments/MediaAssignmentSelectFields';
@@ -38,7 +42,54 @@ type SharedProps = {
     availableMedia: ScriptureAdminMediaSummary[];
 };
 
-function MediaSlotPurposeCard({ role }: { role: string }) {
+function buildCreateMediaAssignmentData(
+    availableMedia: ScriptureAdminMediaSummary[],
+    role: string,
+    nextSortOrder: number,
+): MediaAssignmentFormData {
+    return {
+        media_id: availableMedia[0] ? String(availableMedia[0].id) : '',
+        role,
+        title_override: '',
+        caption_override: '',
+        sort_order: String(nextSortOrder),
+        status: 'draft',
+    };
+}
+
+function buildExistingMediaAssignmentData(
+    assignment: ScriptureAdminMediaAssignment,
+): MediaAssignmentFormData {
+    return {
+        media_id: String(assignment.media_id),
+        role: assignment.role,
+        title_override: assignment.title_override ?? '',
+        caption_override: assignment.caption_override ?? '',
+        sort_order: String(assignment.sort_order),
+        status: assignment.status,
+    };
+}
+
+function toInlineAttachPayload(data: MediaAssignmentFormData) {
+    return {
+        media_id: Number(data.media_id),
+        role: data.role,
+    };
+}
+
+function toInlineReplacePayload(data: MediaAssignmentFormData) {
+    return {
+        media_id: Number(data.media_id),
+    };
+}
+
+function MediaSlotPurposeCard({
+    role,
+    compact = false,
+}: {
+    role: string;
+    compact?: boolean;
+}) {
     const slot = getBookMediaSlotMeta(role);
 
     return (
@@ -50,13 +101,16 @@ function MediaSlotPurposeCard({ role }: { role: string }) {
                 </Badge>
             </div>
             <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                {slot.description}
+                {compact
+                    ? slot.description
+                    : `${slot.description} Quick attach and replace keep advanced slot settings unchanged. Use the advanced save path below when updating overrides, publish state, or sort order.`}
             </p>
         </div>
     );
 }
 
 export function CreateBookMediaAssignmentCard({
+    attachHref,
     storeHref,
     nextSortOrder,
     mediaField,
@@ -67,32 +121,39 @@ export function CreateBookMediaAssignmentCard({
     statusField,
     availableMedia,
 }: SharedProps & {
+    attachHref?: string;
     storeHref: string;
     nextSortOrder: number;
 }) {
     const slotOptions = getBookMediaSlotOptions(roleField.options);
     const defaultRole = getDefaultBookMediaSlotRole(roleField.options);
 
-    const form = useForm<MediaAssignmentFormData>({
-        media_id: availableMedia[0] ? String(availableMedia[0].id) : '',
-        role: defaultRole,
-        title_override: '',
-        caption_override: '',
-        sort_order: String(nextSortOrder),
-        status: 'draft',
-    });
+    const form = useForm<MediaAssignmentFormData>(
+        buildCreateMediaAssignmentData(
+            availableMedia,
+            defaultRole,
+            nextSortOrder,
+        ),
+    );
+    const selectedMedia = findAvailableMedia(availableMedia, form.data.media_id);
+    const quickAttachIgnoresAdvancedValues =
+        form.data.title_override.trim() !== ''
+        || form.data.caption_override.trim() !== ''
+        || form.data.sort_order !== String(nextSortOrder)
+        || form.data.status !== 'draft';
 
     useEffect(() => {
         if (form.isDirty || form.processing) {
             return;
         }
 
-        form.setData((data) => ({
-            ...data,
-            media_id: availableMedia[0] ? String(availableMedia[0].id) : '',
-            role: defaultRole,
-            sort_order: String(nextSortOrder),
-        }));
+        form.setData(
+            buildCreateMediaAssignmentData(
+                availableMedia,
+                defaultRole,
+                nextSortOrder,
+            ),
+        );
         form.clearErrors();
     }, [availableMedia, defaultRole, form, nextSortOrder]);
 
@@ -121,6 +182,7 @@ export function CreateBookMediaAssignmentCard({
                                 form.setData('media_id', value)
                             }
                             mediaError={form.errors.media_id}
+                            mediaHelpText="Pick an existing media record. Labels include type and source cues so the library is easier to scan."
                             availableMedia={availableMedia}
                             roleField={roleField}
                             roleHtmlFor="new_media_role"
@@ -128,6 +190,16 @@ export function CreateBookMediaAssignmentCard({
                             onRoleChange={(value) => form.setData('role', value)}
                             roleError={form.errors.role}
                             slotOptions={slotOptions}
+                        />
+
+                        <MediaSelectionSummary
+                            media={selectedMedia}
+                            label="Choose a media record to preview it before attaching."
+                        />
+
+                        <MediaPreviewCard
+                            media={selectedMedia}
+                            fallbackLabel={getBookMediaSlotMeta(form.data.role).label}
                         />
 
                         <MediaSlotPurposeCard role={form.data.role} />
@@ -206,25 +278,49 @@ export function CreateBookMediaAssignmentCard({
                             statusError={form.errors.status}
                         />
 
-                        <Button
-                            type="button"
-                            onClick={() => {
-                                form.transform((data) => ({
-                                    ...data,
-                                    media_id: Number(data.media_id),
-                                    sort_order: Number(data.sort_order),
-                                }));
+                        <div className="flex flex-wrap gap-2">
+                            {attachHref && (
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => {
+                                        form.transform(toInlineAttachPayload);
+                                        form.post(attachHref, {
+                                            preserveScroll: true,
+                                            preserveState: false,
+                                        });
+                                    }}
+                                    disabled={
+                                        form.processing
+                                        || !form.data.media_id
+                                        || quickAttachIgnoresAdvancedValues
+                                    }
+                                >
+                                    <Plus className="size-4" />
+                                    Quick attach draft
+                                </Button>
+                            )}
 
-                                form.post(storeHref, {
-                                    preserveScroll: true,
-                                    preserveState: false,
-                                });
-                            }}
-                            disabled={form.processing}
-                        >
-                            <Plus className="size-4" />
-                            Add media slot
-                        </Button>
+                            <Button
+                                type="button"
+                                onClick={() => {
+                                    form.transform((data) => ({
+                                        ...data,
+                                        media_id: Number(data.media_id),
+                                        sort_order: Number(data.sort_order),
+                                    }));
+
+                                    form.post(storeHref, {
+                                        preserveScroll: true,
+                                        preserveState: false,
+                                    });
+                                }}
+                                disabled={form.processing}
+                            >
+                                <Plus className="size-4" />
+                                Add with advanced fields
+                            </Button>
+                        </div>
                     </>
                 )}
             </CardContent>
@@ -247,24 +343,22 @@ export function BookMediaAssignmentEditorCard({
     const slotOptions = getBookMediaSlotOptions(roleField.options);
     const assignmentSlot = getBookMediaSlotMeta(assignment.role);
 
-    const form = useForm<MediaAssignmentFormData>({
-        media_id: String(assignment.media_id),
-        role: assignment.role,
-        title_override: assignment.title_override ?? '',
-        caption_override: assignment.caption_override ?? '',
-        sort_order: String(assignment.sort_order),
-        status: assignment.status,
-    });
+    const form = useForm<MediaAssignmentFormData>(
+        buildExistingMediaAssignmentData(assignment),
+    );
+    const selectedMedia =
+        findAvailableMedia(availableMedia, form.data.media_id) ?? assignment.media;
+    const quickReplaceKeepsAdvancedValues =
+        form.data.role === assignment.role
+        && form.data.title_override === (assignment.title_override ?? '')
+        && form.data.caption_override === (assignment.caption_override ?? '')
+        && form.data.sort_order === String(assignment.sort_order)
+        && form.data.status === assignment.status;
+    const selectedMediaChanged =
+        form.data.media_id !== String(assignment.media_id);
 
     useEffect(() => {
-        form.setData({
-            media_id: String(assignment.media_id),
-            role: assignment.role,
-            title_override: assignment.title_override ?? '',
-            caption_override: assignment.caption_override ?? '',
-            sort_order: String(assignment.sort_order),
-            status: assignment.status,
-        });
+        form.setData(buildExistingMediaAssignmentData(assignment));
         form.clearErrors();
     }, [assignment, form]);
 
@@ -288,20 +382,13 @@ export function BookMediaAssignmentEditorCard({
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-5">
-                {assignment.media && (
-                    <div className="rounded-xl border border-border/70 bg-muted/20 px-4 py-4 text-sm leading-6 text-muted-foreground">
-                        {assignment.media.url ??
-                            assignment.media.path ??
-                            'No media location recorded.'}
-                    </div>
-                )}
-
                 <MediaAssignmentSelectFields
                     mediaField={mediaField}
                     mediaHtmlFor={`media_id_${assignment.id}`}
                     mediaValue={form.data.media_id}
                     onMediaChange={(value) => form.setData('media_id', value)}
                     mediaError={form.errors.media_id}
+                    mediaHelpText="Replace the current media record here without losing your slot overrides. Use the quick replace action below for the common case."
                     availableMedia={availableMedia}
                     roleField={roleField}
                     roleHtmlFor={`media_role_${assignment.id}`}
@@ -311,7 +398,19 @@ export function BookMediaAssignmentEditorCard({
                     slotOptions={slotOptions}
                 />
 
-                <MediaSlotPurposeCard role={form.data.role} />
+                <MediaSelectionSummary
+                    media={selectedMedia}
+                    label="Choose a media record to preview it before saving."
+                />
+
+                <MediaPreviewCard
+                    media={selectedMedia}
+                    title={form.data.title_override || undefined}
+                    caption={form.data.caption_override || undefined}
+                    fallbackLabel={getBookMediaSlotMeta(form.data.role).label}
+                />
+
+                <MediaSlotPurposeCard role={form.data.role} compact />
 
                 <div className="grid gap-4 md:grid-cols-2">
                     <MediaAssignmentOverrideFields
@@ -385,23 +484,62 @@ export function BookMediaAssignmentEditorCard({
                     statusError={form.errors.status}
                 />
 
-                <Button
-                    type="button"
-                    onClick={() => {
-                        form.transform((data) => ({
-                            ...data,
-                            media_id: Number(data.media_id),
-                            sort_order: Number(data.sort_order),
-                        }));
+                <div className="flex flex-wrap gap-2">
+                    {assignment.replace_media_href && (
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                                form.transform(toInlineReplacePayload);
+                                form.patch(assignment.replace_media_href!, {
+                                    preserveScroll: true,
+                                });
+                            }}
+                            disabled={
+                                form.processing
+                                || !form.data.media_id
+                                || !selectedMediaChanged
+                                || !quickReplaceKeepsAdvancedValues
+                            }
+                        >
+                            Replace media only
+                        </Button>
+                    )}
 
-                        form.patch(assignment.update_href, {
-                            preserveScroll: true,
-                        });
-                    }}
-                    disabled={form.processing}
-                >
-                    Save media slot
-                </Button>
+                    <Button
+                        type="button"
+                        onClick={() => {
+                            form.transform((data) => ({
+                                ...data,
+                                media_id: Number(data.media_id),
+                                sort_order: Number(data.sort_order),
+                            }));
+
+                            form.patch(assignment.update_href, {
+                                preserveScroll: true,
+                            });
+                        }}
+                        disabled={form.processing}
+                    >
+                        Save advanced fields
+                    </Button>
+
+                    {assignment.destroy_href && (
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            onClick={() =>
+                                form.delete(assignment.destroy_href!, {
+                                    preserveScroll: true,
+                                })
+                            }
+                            disabled={form.processing}
+                        >
+                            <Trash2 className="size-4" />
+                            Remove
+                        </Button>
+                    )}
+                </div>
             </CardContent>
         </Card>
     );

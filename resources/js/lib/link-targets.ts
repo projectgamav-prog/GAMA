@@ -129,6 +129,45 @@ export function resolveLinkTargetHref(target: LinkTarget | null): string | null 
     return resolveScriptureTargetHref(target.value);
 }
 
+export function describeLinkTarget(
+    target: LinkTarget | null,
+    options?: SharedLinkTargetOptions | null,
+): string | null {
+    if (!target) {
+        return null;
+    }
+
+    if (target.type === 'url') {
+        return target.value.url;
+    }
+
+    if (target.type === 'cms_page') {
+        if (!target.value.slug) {
+            return null;
+        }
+
+        const pageTitle = options?.cms_pages.find(
+            (page) => page.slug === target.value.slug,
+        )?.title;
+
+        return pageTitle
+            ? `CMS page: ${pageTitle}`
+            : `CMS page: ${target.value.slug}`;
+    }
+
+    if (target.type === 'route') {
+        if (!target.value.key) {
+            return null;
+        }
+
+        const routeLabel = options?.route_options[target.value.key] ?? target.value.key;
+
+        return `Internal route: ${routeLabel}`;
+    }
+
+    return describeScriptureTarget(target.value, options);
+}
+
 export function getLinkTargetNewTab(target: LinkTarget | null): boolean {
     return Boolean(target?.behavior?.new_tab);
 }
@@ -433,6 +472,97 @@ function resolveScriptureTargetHref(
         default:
             return null;
     }
+}
+
+function describeScriptureTarget(
+    value: Extract<LinkTarget, { type: 'scripture' }>['value'],
+    options?: SharedLinkTargetOptions | null,
+): string | null {
+    switch (value.kind) {
+        case 'book': {
+            if (!value.book_slug) {
+                return null;
+            }
+
+            const title = options?.books.find(
+                (book) => book.slug === value.book_slug,
+            )?.title;
+
+            return title ? `Book: ${title}` : `Book: ${value.book_slug}`;
+        }
+        case 'chapter':
+            return describeStructuredScripturePath(
+                'Chapter',
+                options?.books.find((book) => book.slug === value.book_slug)?.title ??
+                    value.book_slug,
+                value.book_section_slug,
+                value.chapter_slug,
+            );
+        case 'verse':
+            return describeStructuredScripturePath(
+                'Verse',
+                options?.books.find((book) => book.slug === value.book_slug)?.title ??
+                    value.book_slug,
+                value.book_section_slug,
+                value.chapter_slug,
+                value.chapter_section_slug,
+                value.verse_slug,
+            );
+        case 'dictionary_entry': {
+            if (!value.entry_slug) {
+                return null;
+            }
+
+            const title = options?.dictionary_entries.find(
+                (entry) => entry.slug === value.entry_slug,
+            )?.title;
+
+            return title
+                ? `Dictionary entry: ${title}`
+                : `Dictionary entry: ${value.entry_slug}`;
+        }
+        case 'topic': {
+            if (!value.entry_slug) {
+                return null;
+            }
+
+            const title = options?.topics.find(
+                (entry) => entry.slug === value.entry_slug,
+            )?.title;
+
+            return title ? `Topic: ${title}` : `Topic: ${value.entry_slug}`;
+        }
+        case 'character': {
+            if (!value.entry_slug) {
+                return null;
+            }
+
+            const title = options?.characters.find(
+                (entry) => entry.slug === value.entry_slug,
+            )?.title;
+
+            return title
+                ? `Character: ${title}`
+                : `Character: ${value.entry_slug}`;
+        }
+        default:
+            return null;
+    }
+}
+
+function describeStructuredScripturePath(
+    label: string,
+    ...parts: Array<string | null | undefined>
+): string | null {
+    const cleaned = parts
+        .map((part) => (typeof part === 'string' ? part.trim() : ''))
+        .filter((part) => part !== '');
+
+    if (cleaned.length === 0) {
+        return null;
+    }
+
+    return `${label}: ${cleaned.join(' / ')}`;
 }
 
 function normalizeString(value: unknown): string | null {

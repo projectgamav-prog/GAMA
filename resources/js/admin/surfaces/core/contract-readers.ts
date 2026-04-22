@@ -73,7 +73,7 @@ export type StructuredMetaContractMetadata<TValue, TOptions = unknown> = {
 
 export type MediaSlotsContractMetadata = {
     entityLabel: string;
-    storeHref: string;
+    attachHref: string;
     fullEditHref: string;
     assignments: ScriptureAdminMediaAssignment[];
     availableMedia: ScriptureAdminMediaSummary[];
@@ -206,7 +206,7 @@ export function getMediaSlotsContractMetadata(
         'media_slots',
         (metadata) =>
             typeof metadata.entityLabel === 'string' &&
-            typeof metadata.storeHref === 'string' &&
+            typeof metadata.attachHref === 'string' &&
             typeof metadata.fullEditHref === 'string' &&
             Array.isArray(metadata.assignments) &&
             Array.isArray(metadata.availableMedia) &&

@@ -4,6 +4,7 @@ import type {
 } from '@/types';
 import {
     formatVerseRelationSourceOptionLabel,
+    resolveVerseRelationSourcePrefill,
     VERSE_RELATION_NONE_VALUE,
 } from '../verse-relation-editor-shared';
 
@@ -77,25 +78,24 @@ export function applySourceToForm(
     value: string,
 ) {
     form.setData('commentary_source_id', value);
-
-    if (value === NONE_VALUE) {
-        return;
-    }
-
-    const selectedSource = sourceOptions.find(
-        (candidate) => String(candidate.id) === value,
+    const prefill = resolveVerseRelationSourcePrefill(
+        value,
+        sourceOptions,
+        form.data,
+        (selectedSource, currentData) => ({
+            author_name: selectedSource.author_name ?? currentData.author_name,
+            language_code:
+                selectedSource.language_code ?? currentData.language_code,
+        }),
     );
 
-    if (!selectedSource) {
+    if (!prefill) {
         return;
     }
 
     form.setData({
         ...form.data,
         commentary_source_id: value,
-        source_key: selectedSource.slug,
-        source_name: selectedSource.name,
-        author_name: selectedSource.author_name ?? form.data.author_name,
-        language_code: selectedSource.language_code ?? form.data.language_code,
+        ...prefill,
     });
 }

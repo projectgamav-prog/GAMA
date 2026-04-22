@@ -60,6 +60,7 @@ class BookFullEditController extends Controller
                 ->toArray(),
             'admin_details_update_href' => $adminRouteContext->detailsUpdateHref(),
             'admin_content_block_store_href' => $adminRouteContext->contentBlockStoreHref(),
+            'admin_media_assignment_attach_href' => $adminRouteContext->mediaAssignmentAttachHref(),
             'admin_media_assignment_store_href' => $adminRouteContext->mediaAssignmentStoreHref(),
             'next_content_block_sort_order' => $nextContentBlockSortOrder,
             'next_media_assignment_sort_order' => $nextMediaAssignmentSortOrder,
@@ -85,7 +86,9 @@ class BookFullEditController extends Controller
                     'caption_override' => $mediaAssignment->caption_override,
                     'sort_order' => $mediaAssignment->sort_order,
                     'status' => $mediaAssignment->status,
+                    'replace_media_href' => $adminRouteContext->mediaAssignmentReplaceMediaHref($mediaAssignment),
                     'update_href' => $adminRouteContext->mediaAssignmentUpdateHref($mediaAssignment),
+                    'destroy_href' => $adminRouteContext->mediaAssignmentDestroyHref($mediaAssignment),
                     'media' => $mediaAssignment->media
                         ? [
                             'id' => $mediaAssignment->media->id,

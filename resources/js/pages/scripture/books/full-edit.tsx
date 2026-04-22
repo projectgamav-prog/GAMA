@@ -32,6 +32,7 @@ export default function BookFullEdit({
     admin_entity,
     admin_details_update_href,
     admin_content_block_store_href,
+    admin_media_assignment_attach_href,
     admin_media_assignment_store_href,
     next_content_block_sort_order,
     next_media_assignment_sort_order,
@@ -303,6 +304,7 @@ export default function BookFullEdit({
                     </div>
 
                     <CreateBookMediaAssignmentCard
+                        attachHref={admin_media_assignment_attach_href}
                         storeHref={admin_media_assignment_store_href}
                         nextSortOrder={next_media_assignment_sort_order}
                         mediaField={fields.media_assignment_media_id}

@@ -301,6 +301,10 @@ test('authorized editors receive registered book admin props on book detail and 
             ->where('admin.details_update_href', $this->detailsUpdateRoute)
             ->where('admin.full_edit_href', $this->fullEditRoute)
             ->where('admin.canonical_edit_href', $this->canonicalEditRoute)
+            ->where(
+                'admin.media_assignment_attach_href',
+                route('scripture.books.admin.media-assignments.attach', $this->book),
+            )
             ->where('admin.media_assignment_store_href', $this->mediaAssignmentStoreRoute),
         );
 });
@@ -746,38 +750,51 @@ test('authorized editors can manage book media assignments and access canonical 
 
     $fullEditRoute = route('scripture.books.admin.full-edit', $book);
     $canonicalEditRoute = route('scripture.books.admin.canonical-edit', $book);
+    $attachRoute = route('scripture.books.admin.media-assignments.attach', $book);
     $storeRoute = route('scripture.books.admin.media-assignments.store', $book);
+    $replaceRoute = route('scripture.books.admin.media-assignments.replace-media', [
+        'book' => $book,
+        'mediaAssignment' => $existingAssignment,
+    ]);
+    $destroyRoute = route('scripture.books.admin.media-assignments.destroy', [
+        'book' => $book,
+        'mediaAssignment' => $existingAssignment,
+    ]);
 
     $this->actingAs($editor)
-        ->from($fullEditRoute)
-        ->post($storeRoute, [
+        ->from(route('scripture.books.show', $book))
+        ->post($attachRoute, [
             'media_id' => $mediaTwo->id,
             'role' => 'supporting_media',
-            'title_override' => 'Fresh supporting slot',
-            'caption_override' => 'Fresh supporting caption',
-            'sort_order' => 2,
-            'status' => 'draft',
         ])
-        ->assertRedirect($fullEditRoute);
+        ->assertRedirect(route('scripture.books.show', $book));
 
     $newAssignment = $book->mediaAssignments()
-        ->where('title_override', 'Fresh supporting slot')
+        ->where('role', 'supporting_media')
         ->firstOrFail();
 
     $this->actingAs($editor)
-        ->from($fullEditRoute)
-        ->patch(route('scripture.books.admin.media-assignments.update', [
-            'book' => $book,
-            'mediaAssignment' => $existingAssignment,
-        ]), [
+        ->from(route('scripture.books.show', $book))
+        ->patch($replaceRoute, [
             'media_id' => $mediaTwo->id,
-            'role' => 'hero_media',
-            'title_override' => 'Updated hero slot',
-            'caption_override' => 'Updated hero caption',
-            'sort_order' => 1,
-            'status' => 'published',
         ])
-        ->assertRedirect($fullEditRoute);
+        ->assertRedirect(route('scripture.books.show', $book));
+
+    $existingAssignment->refresh();
+
+    expect($existingAssignment->media_id)->toBe($mediaTwo->id);
+    expect($existingAssignment->title_override)->toBe('Existing hero slot');
+    expect($existingAssignment->caption_override)->toBe('Existing hero caption');
+    expect($existingAssignment->status)->toBe('published');
+    expect($existingAssignment->sort_order)->toBe(1);
+    expect($existingAssignment->meta_json)->toBe(['keep' => true]);
+
+    $this->actingAs($editor)
+        ->from(route('scripture.books.show', $book))
+        ->delete($destroyRoute)
+        ->assertRedirect(route('scripture.books.show', $book));
+
+    $book->refresh();
 
     $this->actingAs($editor)
         ->get($fullEditRoute)
@@ -786,11 +803,9 @@ test('authorized editors can manage book media assignments and access canonical 
             ->component('scripture/books/full-edit')
             ->where('admin_entity.primary_table', 'books')
             ->has('available_media', 3)
-            ->has('admin_media_assignments', 2)
-            ->where('admin_media_assignments.0.role', 'hero_media')
-            ->where('admin_media_assignments.0.title_override', 'Updated hero slot')
-            ->where('admin_media_assignments.1.role', 'supporting_media')
-            ->where('admin_media_assignments.1.status', 'draft'),
+            ->has('admin_media_assignments', 1)
+            ->where('admin_media_assignments.0.role', 'supporting_media')
+            ->where('admin_media_assignments.0.status', 'draft'),
         );
 
     $this->actingAs($editor)
@@ -808,6 +823,22 @@ test('authorized editors can manage book media assignments and access canonical 
         );
 
     expect($newAssignment->status)->toBe('draft');
-    expect(MediaAssignment::query()->findOrFail($existingAssignment->id)->meta_json)
-        ->toBe(['keep' => true]);
+    expect($newAssignment->title_override)->toBeNull();
+    expect($newAssignment->caption_override)->toBeNull();
+    expect(MediaAssignment::query()->findOrFail($newAssignment->id)->sort_order)
+        ->toBe(2);
+    expect(MediaAssignment::query()->findOrFail($newAssignment->id)->media_id)
+        ->toBe($mediaTwo->id);
+    expect(MediaAssignment::query()->findOrFail($newAssignment->id)->meta_json)
+        ->toBeNull();
+    expect(MediaAssignment::query()->find($existingAssignment->id))
+        ->toBeNull();
+    expect($existingAssignment->fresh())
+        ->toBeNull();
+    expect($book->mediaAssignments()->count())
+        ->toBe(1);
+    expect($book->mediaAssignments()->firstOrFail()->title_override)
+        ->toBeNull();
+    expect($book->mediaAssignments()->firstOrFail()->caption_override)
+        ->toBeNull();
 });

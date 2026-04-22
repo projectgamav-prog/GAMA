@@ -131,9 +131,21 @@ class BookAdminRouteContext
         return route('scripture.books.admin.media-assignments.store', $this->routeParameters());
     }
 
+    public function mediaAssignmentAttachHref(): string
+    {
+        return route('scripture.books.admin.media-assignments.attach', $this->routeParameters());
+    }
+
     public function mediaAssignmentUpdateHref(MediaAssignment $mediaAssignment): string
     {
         return route('scripture.books.admin.media-assignments.update', $this->routeParameters([
+            'mediaAssignment' => $mediaAssignment,
+        ]));
+    }
+
+    public function mediaAssignmentReplaceMediaHref(MediaAssignment $mediaAssignment): string
+    {
+        return route('scripture.books.admin.media-assignments.replace-media', $this->routeParameters([
             'mediaAssignment' => $mediaAssignment,
         ]));
     }

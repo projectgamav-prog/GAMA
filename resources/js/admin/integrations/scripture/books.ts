@@ -112,7 +112,8 @@ export function resolveBookMediaSurface({
 }) {
     if (
         !enabled ||
-        !admin?.media_assignment_store_href ||
+        (!admin?.media_assignment_attach_href &&
+            !admin?.media_assignment_store_href) ||
         !admin.media_assignments ||
         !admin.available_media ||
         admin.next_media_assignment_sort_order === undefined
@@ -122,7 +123,9 @@ export function resolveBookMediaSurface({
 
     return createBookMediaSlotsSurface({
         book,
-        storeHref: admin.media_assignment_store_href,
+        attachHref:
+            admin.media_assignment_attach_href ??
+            admin.media_assignment_store_href!,
         fullEditHref: admin.full_edit_href,
         assignments: admin.media_assignments,
         availableMedia: admin.available_media,

@@ -45,6 +45,15 @@ Before any implementation prompt, tell Codex:
 - if the task affects global shell seams or page-level placement policy, also read:
   - `docs/public-region-policy.md`
 
+Also tell Codex:
+
+- the broad cleanup/refactor wave is largely complete
+- do not resume broad cleanup by default
+- reopen cleanup only when a narrow seam is clearly justified
+- treat `resources/js/pages/scripture/chapters/full-edit.tsx` and
+  `resources/js/pages/scripture/chapters/verses/full-edit.tsx` as
+  reassess-later pressure points, not automatic next tasks
+
 ## Immediate focus
 
 ### 1. Start the next product-facing phase from the cleaned base
@@ -62,6 +71,9 @@ The shared public frame, structured header navigation, structured footer system,
   - canonical reading structure first
   - supplemental regions second
 
+Do not restart broad cleanup here. The goal is to use the cleaned base for
+product-facing progress.
+
 ### 2. Keep the active scripture editing path trustworthy while that work begins
 - continue the browser pass across the remaining grouped inline editors and the always-mounted full-edit cards that still matter
 - use the same end-to-end standard that exposed the earlier dummy-editor bug:
@@ -75,7 +87,12 @@ The shared public frame, structured header navigation, structured footer system,
 - keep ignoring retired public scripture block-authoring paths while auditing edit behavior
 - leave canonical full-edit and protected schema editing intact where no safe replacement exists yet
 
-### 3. Extend live CMS interaction only after the next structural phase is ready
+Reassess-later pressure points only:
+- `resources/js/pages/scripture/chapters/full-edit.tsx`
+- `resources/js/pages/scripture/chapters/verses/full-edit.tsx`
+- revisit them only if a narrow, behavior-preserving seam becomes clearly worth taking
+
+### 3. Extend live CMS interaction only where real product-facing need is now clear
 - preserve the locked same-layout rule so admins compose on the real page layout with augmentation controls instead of a separate builder shell
 - preserve the in-place attachment rule so controls stay on the actual container/block area instead of drifting into detached shells
 - preserve the compact-controls rule so live add/edit affordances stay small by default and only expand after click
@@ -98,6 +115,10 @@ The shared public frame, structured header navigation, structured footer system,
   - richer destination authoring for links to CMS pages, internal routes, scripture targets, and raw URLs
   - attach-existing-page vs create-new-page flows while configuring buttons/links
   - stronger module-specific validation and authoring polish where real friction appears
+- when later media authoring work expands, build from the now-proven inline
+  book-media pattern instead of inventing a separate media editing path
+- keep the newer focused inline media contracts for common actions instead of
+  falling back to full-record assignment payloads on every surface
 - keep the progressive reveal pattern consistent as more modules are added
 
 Do not overbuild category-management UI yet.
@@ -139,7 +160,7 @@ Safe direction:
    - richer route/scripture target selection if authoring pain appears
    - keep move up/down simple unless a real drag/drop need emerges
 6. Improve module authoring where it helps
-7. Resume outstanding canonical polish work
+7. Reassess canonical polish only when a narrow, clearly justified seam or validation need appears
 
 ## Success condition for the next phase
 When resuming, the goal is not "add lots of CMS quickly."

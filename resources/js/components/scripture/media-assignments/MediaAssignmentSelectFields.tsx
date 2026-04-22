@@ -1,4 +1,5 @@
 import InputError from '@/components/input-error';
+import { resolveMediaPickerLabel } from '@/components/scripture/media-assignments/MediaPickerDisplay';
 import { ScriptureAdminSourceLabel } from '@/components/scripture/scripture-admin-source-label';
 import {
     Select,
@@ -23,6 +24,7 @@ type Props = {
     mediaValue: string;
     onMediaChange: (value: string) => void;
     mediaError?: string;
+    mediaHelpText?: string;
     availableMedia: ScriptureAdminMediaSummary[];
     roleField: ScriptureRegisteredAdminField;
     roleHtmlFor: string;
@@ -38,6 +40,7 @@ export function MediaAssignmentSelectFields({
     mediaValue,
     onMediaChange,
     mediaError,
+    mediaHelpText,
     availableMedia,
     roleField,
     roleHtmlFor,
@@ -60,11 +63,16 @@ export function MediaAssignmentSelectFields({
                     <SelectContent>
                         {availableMedia.map((media) => (
                             <SelectItem key={media.id} value={String(media.id)}>
-                                {media.title ?? `Media ${media.id}`} ({media.media_type})
+                                {resolveMediaPickerLabel(media)}
                             </SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
+                {mediaHelpText && (
+                    <p className="text-xs leading-5 text-muted-foreground">
+                        {mediaHelpText}
+                    </p>
+                )}
                 <InputError message={mediaError} />
             </div>
 

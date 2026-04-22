@@ -181,9 +181,19 @@ Route::prefix('books')
                 )->name('content-blocks.destroy');
 
                 Route::post(
+                    'media-assignments/attach',
+                    [BookAdminMediaAssignmentController::class, 'attach'],
+                )->name('media-assignments.attach');
+
+                Route::post(
                     'media-assignments',
                     [BookAdminMediaAssignmentController::class, 'store'],
                 )->name('media-assignments.store');
+
+                Route::patch(
+                    'media-assignments/{mediaAssignment}/replace-media',
+                    [BookAdminMediaAssignmentController::class, 'replaceMedia'],
+                )->name('media-assignments.replace-media');
 
                 Route::patch(
                     'media-assignments/{mediaAssignment}',

@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/select';
 import type {
     LinkTarget,
+    LinkTargetType,
     RouteTargetKey,
     SharedLinkTargetOptions,
     ScriptureTargetKind,
@@ -23,8 +24,10 @@ import {
 } from '@/lib/link-target-options';
 import {
     createDefaultLinkTarget,
+    describeLinkTarget,
     parseLinkTargetInput,
     resolveLinkTargetHref,
+    updateLinkTargetType,
 } from '@/lib/link-targets';
 
 type Props = {
@@ -32,6 +35,8 @@ type Props = {
     onChange: (next: LinkTarget) => void;
     idPrefix: string;
     errors?: Record<string, string | undefined>;
+    compactDetails?: boolean;
+    showTypeSelector?: boolean;
     cmsPages?: Array<{
         slug: string;
         title: string;
@@ -65,6 +70,8 @@ export function LinkTargetFields({
     onChange,
     idPrefix,
     errors = {},
+    compactDetails = false,
+    showTypeSelector = false,
     cmsPages,
     routeOptions,
     scriptureTargetKinds,
@@ -114,10 +121,20 @@ export function LinkTargetFields({
     const [quickTargetFeedback, setQuickTargetFeedback] = useState<string | null>(
         null,
     );
+    const [showsDetails, setShowsDetails] = useState(false);
+    const hasDetailErrors = Object.values(errors).some(Boolean);
+    const resolvedHref = resolveLinkTargetHref(target);
+    const resolvedSummary = describeLinkTarget(target, effectiveOptions);
 
     useEffect(() => {
         setQuickTargetInput(resolveLinkTargetHref(target) ?? '');
     }, [target]);
+
+    useEffect(() => {
+        if (hasDetailErrors) {
+            setShowsDetails(true);
+        }
+    }, [hasDetailErrors]);
 
     const applyQuickTarget = () => {
         const parsed = parseLinkTargetInput(quickTargetInput);
@@ -140,6 +157,23 @@ export function LinkTargetFields({
                     : 'Resolved as a scripture destination.',
         );
     };
+
+    const handleTypeChange = (nextType: LinkTargetType) => {
+        onChange(updateLinkTargetType(target, nextType, effectiveOptions));
+
+        if (compactDetails) {
+            setShowsDetails(true);
+        }
+    };
+
+    const typeHint =
+        target.type === 'url'
+            ? 'Use this for direct URLs or pasted links that should stay as raw destinations.'
+            : target.type === 'cms_page'
+              ? 'Choose a CMS page when this should follow an existing published page record.'
+              : target.type === 'route'
+                ? 'Use shared internal routes for stable site destinations like Home or Books.'
+                : 'Choose a scripture level first, then fill the remaining path only as deeply as needed.';
 
     const handleScriptureKindChange = (nextKind: ScriptureTargetKind) => {
         if (nextKind === 'book') {
@@ -203,46 +237,8 @@ export function LinkTargetFields({
         });
     };
 
-    return (
-        <div className="space-y-4">
-            <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
-                <div className="grid gap-2">
-                    <Label htmlFor={`${idPrefix}-quick-target`}>
-                        Paste a URL or site path
-                    </Label>
-                    <div className="flex flex-wrap gap-2">
-                        <Input
-                            id={`${idPrefix}-quick-target`}
-                            data-link-target-quick-input={idPrefix}
-                            value={quickTargetInput}
-                            onChange={(event) => {
-                                setQuickTargetInput(event.target.value);
-                                setQuickTargetFeedback(null);
-                            }}
-                            placeholder="/pages/platform-guide or /books/bhagavad-gita"
-                        />
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={applyQuickTarget}
-                            data-link-target-quick-apply={idPrefix}
-                        >
-                            Apply
-                        </Button>
-                    </div>
-                    <p className="text-xs leading-5 text-muted-foreground">
-                        This keeps the structured target model intact, but it
-                        lets you paste common destinations instead of rebuilding
-                        them field by field.
-                    </p>
-                    {quickTargetFeedback ? (
-                        <p className="text-xs text-muted-foreground">
-                            {quickTargetFeedback}
-                        </p>
-                    ) : null}
-                </div>
-            </div>
-
+    const detailsContent = (
+        <>
             {target.type === 'url' && (
                 <div className="grid gap-2">
                     <Label htmlFor={`${idPrefix}-url`}>URL</Label>
@@ -631,6 +627,122 @@ export function LinkTargetFields({
                         </p>
                     </div>
                 </div>
+            )}
+        </>
+    );
+
+    return (
+        <div className="space-y-4">
+            {showTypeSelector ? (
+                <div className="rounded-2xl border border-border/70 bg-background px-4 py-4">
+                    <div className="grid gap-2">
+                        <Label htmlFor={`${idPrefix}-target-type`}>
+                            Destination type
+                        </Label>
+                        <Select
+                            value={target.type}
+                            onValueChange={(nextValue) =>
+                                handleTypeChange(nextValue as LinkTargetType)
+                            }
+                        >
+                            <SelectTrigger
+                                id={`${idPrefix}-target-type`}
+                                className="w-full"
+                            >
+                                <SelectValue placeholder="Choose destination type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="url">
+                                    External or direct URL
+                                </SelectItem>
+                                <SelectItem value="cms_page">
+                                    CMS page
+                                </SelectItem>
+                                <SelectItem value="route">
+                                    Internal route
+                                </SelectItem>
+                                <SelectItem value="scripture">
+                                    Scripture target
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <p className="text-xs leading-5 text-muted-foreground">
+                            {typeHint}
+                        </p>
+                    </div>
+                </div>
+            ) : null}
+
+            <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
+                <div className="grid gap-2">
+                    <Label htmlFor={`${idPrefix}-quick-target`}>
+                        Paste a URL or site path
+                    </Label>
+                    <div className="flex flex-wrap gap-2">
+                        <Input
+                            id={`${idPrefix}-quick-target`}
+                            data-link-target-quick-input={idPrefix}
+                            value={quickTargetInput}
+                            onChange={(event) => {
+                                setQuickTargetInput(event.target.value);
+                                setQuickTargetFeedback(null);
+                            }}
+                            placeholder="/pages/platform-guide or /books/bhagavad-gita"
+                        />
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={applyQuickTarget}
+                            data-link-target-quick-apply={idPrefix}
+                        >
+                            Apply
+                        </Button>
+                    </div>
+                    <p className="text-xs leading-5 text-muted-foreground">
+                        This keeps the structured target model intact, but it
+                        lets you paste common destinations instead of rebuilding
+                        them field by field.
+                    </p>
+                    {quickTargetFeedback ? (
+                        <p className="text-xs text-muted-foreground">
+                            {quickTargetFeedback}
+                        </p>
+                    ) : null}
+                </div>
+            </div>
+
+            {compactDetails ? (
+                <div className="space-y-3 rounded-2xl border border-border/70 bg-background px-4 py-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="space-y-1">
+                            <p className="text-sm font-medium text-foreground">
+                                Structured destination details
+                            </p>
+                            <p className="text-xs leading-5 text-muted-foreground">
+                                {resolvedSummary
+                                    ? `Current target: ${resolvedSummary}`
+                                    : 'No resolved destination yet. Paste a path above for the fastest path, or open the structured fields below.'}
+                            </p>
+                            {resolvedSummary && resolvedHref && resolvedSummary !== resolvedHref ? (
+                                <p className="text-xs leading-5 text-muted-foreground">
+                                    {resolvedHref}
+                                </p>
+                            ) : null}
+                        </div>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setShowsDetails((current) => !current)}
+                        >
+                            {showsDetails ? 'Hide details' : 'Edit details'}
+                        </Button>
+                    </div>
+
+                    {showsDetails && detailsContent}
+                </div>
+            ) : (
+                detailsContent
             )}
         </div>
     );

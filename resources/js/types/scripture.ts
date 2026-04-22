@@ -126,6 +126,7 @@ export type ScriptureBookAdmin = {
     canonical_edit_href: string;
     destroy_href: string;
     book_section_store_href: string;
+    media_assignment_attach_href?: string;
     media_assignment_store_href?: string;
     media_assignments?: ScriptureAdminMediaAssignment[];
     available_media?: ScriptureAdminMediaSummary[];
@@ -197,6 +198,7 @@ export type ScriptureAdminMediaAssignment = {
     caption_override: string | null;
     sort_order: number;
     status: 'draft' | 'published';
+    replace_media_href?: string;
     update_href: string;
     destroy_href?: string | null;
     media: ScriptureAdminMediaSummary | null;
@@ -775,6 +777,7 @@ export type BookFullEditProps = {
     admin_entity: ScriptureRegisteredAdminEntity;
     admin_details_update_href: string;
     admin_content_block_store_href: string;
+    admin_media_assignment_attach_href: string;
     admin_media_assignment_store_href: string;
     next_content_block_sort_order: number;
     next_media_assignment_sort_order: number;

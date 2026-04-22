@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { usePage } from '@inertiajs/react';
+import { Copy, MoveDown, MoveUp, Sparkles } from 'lucide-react';
 import { LinkTargetFields } from '@/components/navigation/link-target-fields';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -15,7 +16,7 @@ import {
 } from '@/components/ui/select';
 import {
     createDefaultLinkTarget,
-    updateLinkTargetType,
+    describeLinkTarget,
 } from '@/lib/link-targets';
 import type { SharedLinkTargetOptions } from '@/types';
 import {
@@ -30,6 +31,7 @@ import {
     getButtonGroupAlignment,
     getButtonGroupButtons,
     getButtonGroupLayout,
+    resolveButtonHref,
 } from './types';
 
 export function ButtonGroupEditor({
@@ -50,6 +52,7 @@ export function ButtonGroupEditor({
     const [activeStep, setActiveStep] = useState<'buttons' | 'layout'>(
         'buttons',
     );
+    const [openAdvancedButtons, setOpenAdvancedButtons] = useState<number[]>([]);
 
     const updateButtons = (nextButtons: ButtonItem[]) =>
         onChange({
@@ -59,6 +62,48 @@ export function ButtonGroupEditor({
                 buttons: nextButtons,
             },
         });
+
+    const toggleAdvancedButton = (index: number) =>
+        setOpenAdvancedButtons((current) =>
+            current.includes(index)
+                ? current.filter((entry) => entry !== index)
+                : [...current, index],
+        );
+
+    const duplicateButton = (index: number) => {
+        const button = buttons[index];
+
+        if (!button) {
+            return;
+        }
+
+        updateButtons([
+            ...buttons.slice(0, index + 1),
+            {
+                ...button,
+                target: {
+                    ...button.target,
+                    value: { ...button.target.value },
+                    behavior: { ...button.target.behavior },
+                },
+            },
+            ...buttons.slice(index + 1),
+        ]);
+    };
+
+    const moveButton = (index: number, direction: -1 | 1) => {
+        const nextIndex = index + direction;
+
+        if (nextIndex < 0 || nextIndex >= buttons.length) {
+            return;
+        }
+
+        const nextButtons = [...buttons];
+        const [movedButton] = nextButtons.splice(index, 1);
+
+        nextButtons.splice(nextIndex, 0, movedButton);
+        updateButtons(nextButtons);
+    };
 
     return (
         <div className="space-y-5">
@@ -120,27 +165,98 @@ export function ButtonGroupEditor({
                             key={`button-${index}`}
                             className="space-y-4 rounded-2xl border border-border/70 bg-muted/20 p-4"
                         >
-                            <div className="flex items-center justify-between gap-3">
-                                <p className="text-sm font-medium text-foreground">
-                                    Button {index + 1}
+                            <div className="space-y-3">
+                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                    <div>
+                                        <p className="text-sm font-medium text-foreground">
+                                            Button {index + 1}
+                                        </p>
+                                        <p className="text-xs leading-5 text-muted-foreground">
+                                            {button.label.trim() || 'Untitled button'}
+                                        </p>
+                                    </div>
+
+                                    <div className="flex flex-wrap gap-2">
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => moveButton(index, -1)}
+                                            disabled={index === 0}
+                                        >
+                                            <MoveUp className="size-4" />
+                                            Up
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => moveButton(index, 1)}
+                                            disabled={index === buttons.length - 1}
+                                        >
+                                            <MoveDown className="size-4" />
+                                            Down
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => duplicateButton(index)}
+                                        >
+                                            <Copy className="size-4" />
+                                            Duplicate
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            disabled={buttons.length === 1}
+                                            onClick={() =>
+                                                updateButtons(
+                                                    buttons.filter(
+                                                        (_, buttonIndex) =>
+                                                            buttonIndex !== index,
+                                                    ),
+                                                )
+                                            }
+                                        >
+                                            Remove
+                                        </Button>
+                                    </div>
+                                </div>
+
+                            <div className="rounded-xl border border-border/70 bg-background px-4 py-3">
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <span className="rounded-full border border-border/70 px-2 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                                        {button.target.type}
+                                        </span>
+                                        <span className="rounded-full border border-border/70 px-2 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                                            {button.variant}
+                                        </span>
+                                        {button.open_in_new_tab && (
+                                            <span className="rounded-full border border-border/70 px-2 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                                                New tab
+                                            </span>
+                                        )}
+                                </div>
+                                <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                                    {describeLinkTarget(
+                                        button.target,
+                                        sharedTargetOptions,
+                                    ) ??
+                                        'No destination resolved yet. Paste a path or open the structured details below.'}
                                 </p>
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    disabled={buttons.length === 1}
-                                    onClick={() =>
-                                        updateButtons(
-                                            buttons.filter(
-                                                (_, buttonIndex) =>
-                                                    buttonIndex !== index,
-                                            ),
-                                        )
-                                    }
-                                >
-                                    Remove
-                                </Button>
+                                {describeLinkTarget(
+                                    button.target,
+                                    sharedTargetOptions,
+                                ) !== resolveButtonHref(button) &&
+                                resolveButtonHref(button) ? (
+                                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                                        {resolveButtonHref(button)}
+                                    </p>
+                                ) : null}
                             </div>
+                        </div>
 
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="grid gap-2">
@@ -177,58 +293,15 @@ export function ButtonGroupEditor({
                                     />
                                 </div>
 
-                                <div className="grid gap-2">
-                                    <Label
-                                        htmlFor={`${idPrefix}-button-destination-type-${index}`}
-                                    >
-                                        Destination type
-                                    </Label>
-                                    <Select
-                                        value={button.target.type}
-                                        onValueChange={(nextValue) =>
-                                            updateButtons(
-                                                buttons.map(
-                                                    (entry, buttonIndex) =>
-                                                        buttonIndex === index
-                                                            ? {
-                                                                  ...entry,
-                                                                  target:
-                                                                      updateLinkTargetType(
-                                                                          entry.target,
-                                                                          nextValue as
-                                                                              | 'url'
-                                                                              | 'cms_page'
-                                                                              | 'route'
-                                                                              | 'scripture',
-                                                                          sharedTargetOptions,
-                                                                      ),
-                                                              }
-                                                            : entry,
-                                                ),
-                                            )
-                                        }
-                                    >
-                                        <SelectTrigger
-                                            id={`${idPrefix}-button-destination-type-${index}`}
-                                            className="w-full"
-                                        >
-                                            <SelectValue placeholder="Choose destination type" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="url">
-                                                External or direct URL
-                                            </SelectItem>
-                                            <SelectItem value="cms_page">
-                                                CMS page
-                                            </SelectItem>
-                                            <SelectItem value="route">
-                                                Internal route
-                                            </SelectItem>
-                                            <SelectItem value="scripture">
-                                                Scripture target
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                <div className="rounded-2xl border border-dashed border-border/70 bg-background/60 px-4 py-4">
+                                    <p className="text-sm font-medium text-foreground">
+                                        Destination
+                                    </p>
+                                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                                        Choose the destination type here, then
+                                        paste a path or open the structured
+                                        details below.
+                                    </p>
                                 </div>
                             </div>
 
@@ -289,94 +362,124 @@ export function ButtonGroupEditor({
                                 scriptureTargetKinds={
                                     SHARED_SCRIPTURE_TARGET_KIND_OPTIONS
                                 }
+                                showTypeSelector
+                                compactDetails
                             />
 
-                            <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
-                                <div className="grid gap-2">
-                                    <Label
-                                        htmlFor={`${idPrefix}-button-variant-${index}`}
+                            <div className="rounded-2xl border border-border/70 bg-background px-4 py-4">
+                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                    <div>
+                                        <p className="text-sm font-medium text-foreground">
+                                            Advanced button options
+                                        </p>
+                                        <p className="text-xs leading-5 text-muted-foreground">
+                                            Use these only when the button needs
+                                            styling or new-tab behavior beyond
+                                            the common CTA flow.
+                                        </p>
+                                    </div>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => toggleAdvancedButton(index)}
                                     >
-                                        Style
-                                    </Label>
-                                    <Select
-                                        value={button.variant}
-                                        onValueChange={(nextValue) =>
-                                            updateButtons(
-                                                buttons.map(
-                                                    (entry, buttonIndex) =>
-                                                        buttonIndex === index
-                                                            ? {
-                                                                  ...entry,
-                                                                  variant:
-                                                                      nextValue as ButtonVariant,
-                                                              }
-                                                            : entry,
-                                                ),
-                                            )
-                                        }
-                                    >
-                                        <SelectTrigger
-                                            id={`${idPrefix}-button-variant-${index}`}
-                                            className="w-full"
-                                        >
-                                            <SelectValue placeholder="Choose style" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="default">
-                                                Default
-                                            </SelectItem>
-                                            <SelectItem value="secondary">
-                                                Secondary
-                                            </SelectItem>
-                                            <SelectItem value="outline">
-                                                Outline
-                                            </SelectItem>
-                                            <SelectItem value="ghost">
-                                                Ghost
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <InputError
-                                        message={
-                                            errors[
-                                                `data_json.buttons.${index}.variant`
-                                            ]
-                                        }
-                                    />
+                                        <Sparkles className="size-4" />
+                                        {openAdvancedButtons.includes(index)
+                                            ? 'Hide advanced'
+                                            : 'Edit advanced'}
+                                    </Button>
                                 </div>
 
-                                <label className="flex items-center gap-3 rounded-xl border border-border/70 px-4 py-2 text-sm text-foreground">
-                                    <Checkbox
-                                        checked={button.open_in_new_tab}
-                                        onCheckedChange={(checked) =>
-                                            updateButtons(
-                                                buttons.map(
-                                                    (entry, buttonIndex) =>
-                                                        buttonIndex === index
-                                                            ? {
-                                                                  ...entry,
-                                                                  open_in_new_tab:
-                                                                      checked ===
-                                                                      true,
-                                                                  target: {
-                                                                      ...entry.target,
-                                                                      behavior: {
-                                                                          ...entry
-                                                                              .target
-                                                                              .behavior,
-                                                                          new_tab:
+                                {openAdvancedButtons.includes(index) && (
+                                    <div className="mt-4 grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
+                                        <div className="grid gap-2">
+                                            <Label
+                                                htmlFor={`${idPrefix}-button-variant-${index}`}
+                                            >
+                                                Style
+                                            </Label>
+                                            <Select
+                                                value={button.variant}
+                                                onValueChange={(nextValue) =>
+                                                    updateButtons(
+                                                        buttons.map(
+                                                            (entry, buttonIndex) =>
+                                                                buttonIndex === index
+                                                                    ? {
+                                                                          ...entry,
+                                                                          variant:
+                                                                              nextValue as ButtonVariant,
+                                                                      }
+                                                                    : entry,
+                                                        ),
+                                                    )
+                                                }
+                                            >
+                                                <SelectTrigger
+                                                    id={`${idPrefix}-button-variant-${index}`}
+                                                    className="w-full"
+                                                >
+                                                    <SelectValue placeholder="Choose style" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="default">
+                                                        Default
+                                                    </SelectItem>
+                                                    <SelectItem value="secondary">
+                                                        Secondary
+                                                    </SelectItem>
+                                                    <SelectItem value="outline">
+                                                        Outline
+                                                    </SelectItem>
+                                                    <SelectItem value="ghost">
+                                                        Ghost
+                                                    </SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            <InputError
+                                                message={
+                                                    errors[
+                                                        `data_json.buttons.${index}.variant`
+                                                    ]
+                                                }
+                                            />
+                                        </div>
+
+                                        <label className="flex items-center gap-3 rounded-xl border border-border/70 px-4 py-2 text-sm text-foreground">
+                                            <Checkbox
+                                                checked={button.open_in_new_tab}
+                                                onCheckedChange={(checked) =>
+                                                    updateButtons(
+                                                        buttons.map(
+                                                            (entry, buttonIndex) =>
+                                                                buttonIndex === index
+                                                                    ? {
+                                                                          ...entry,
+                                                                          open_in_new_tab:
                                                                               checked ===
                                                                               true,
-                                                                      },
-                                                                  },
-                                                              }
-                                                            : entry,
-                                                ),
-                                            )
-                                        }
-                                    />
-                                    Open in new tab
-                                </label>
+                                                                          target: {
+                                                                              ...entry.target,
+                                                                              behavior: {
+                                                                                  ...entry
+                                                                                      .target
+                                                                                      .behavior,
+                                                                                  new_tab:
+                                                                                      checked ===
+                                                                                      true,
+                                                                              },
+                                                                          },
+                                                                      }
+                                                                    : entry,
+                                                        ),
+                                                    )
+                                                }
+                                            />
+                                            Open in new tab
+                                        </label>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))}

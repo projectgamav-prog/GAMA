@@ -42,7 +42,7 @@ type BookActionsSurfaceArgs = {
 
 type BookMediaSlotsSurfaceArgs = {
     book: ScriptureBook;
-    storeHref: string;
+    attachHref: string;
     fullEditHref: string;
     assignments: ScriptureAdminMediaAssignment[];
     availableMedia: ScriptureAdminMediaSummary[];
@@ -123,7 +123,7 @@ export function createBookActionsSurface({
 
 export function createBookMediaSlotsSurface({
     book,
-    storeHref,
+    attachHref,
     fullEditHref,
     assignments,
     availableMedia,
@@ -138,7 +138,7 @@ export function createBookMediaSlotsSurface({
         capabilities: ['edit', 'full_edit', 'manage_media'],
         metadata: {
             entityLabel: book.title,
-            storeHref,
+            attachHref,
             fullEditHref,
             assignments,
             availableMedia,

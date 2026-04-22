@@ -54,6 +54,7 @@ class BookShowPageDataBuilder
 
         return [
             ...$payload,
+            'media_assignment_attach_href' => $adminRouteContext->mediaAssignmentAttachHref(),
             'media_assignment_store_href' => $adminRouteContext->mediaAssignmentStoreHref(),
             'media_assignments' => $mediaAssignments
                 ->map(fn (MediaAssignment $mediaAssignment) => [
@@ -64,6 +65,7 @@ class BookShowPageDataBuilder
                     'caption_override' => $mediaAssignment->caption_override,
                     'sort_order' => $mediaAssignment->sort_order,
                     'status' => $mediaAssignment->status,
+                    'replace_media_href' => $adminRouteContext->mediaAssignmentReplaceMediaHref($mediaAssignment),
                     'update_href' => $adminRouteContext->mediaAssignmentUpdateHref($mediaAssignment),
                     'destroy_href' => $adminRouteContext->mediaAssignmentDestroyHref($mediaAssignment),
                     'media' => $mediaAssignment->media
