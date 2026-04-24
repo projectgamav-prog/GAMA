@@ -1,10 +1,30 @@
 # Scripture Linking System
 
-## Purpose
+## Status
 
-The Scripture Linking System provides a fast, structured, and scalable way to link any canonical entity (book, chapter, verse, etc.) within the platform.
+This document is now a **historical design note**, not the current source of
+truth for link-target authoring.
 
-It replaces manual slug/URL entry with a guided navigation system through the canonical hierarchy.
+The current repo behavior is:
+
+* one shared link-target system is used across navigation and CMS modules
+* the common path supports pasted paths/URLs, picker-driven targets, and
+  structured scripture targets
+* deeper scripture structure is still available when authors need the full
+  canonical target shape
+
+Use `docs/current-state.md` for the live authoring snapshot and
+`docs/admin-architecture.md` for the locked boundary rules.
+
+---
+
+## Historical Purpose
+
+This document captured an earlier preferred direction for structured scripture
+linking: a fast, hierarchical way to link canonical entities such as books,
+chapters, and verses.
+
+That intent is still useful, but it is no longer the whole current system truth.
 
 ---
 
@@ -24,7 +44,7 @@ Instead of typing identifiers, the user should:
 
 The system is based on the canonical hierarchy:
 
-book → book_section → chapter → chapter_section → verse
+book -> book_section -> chapter -> chapter_section -> verse
 
 Each selection step reveals only relevant children.
 
@@ -133,12 +153,13 @@ Used in:
 
 ---
 
-## Do NOT
+## Still Useful Constraints
 
-* allow free-form slug typing as primary flow
 * preload entire scripture tree
 * mix CMS structure with canonical linking
-* degrade into URL-based linking for scripture
+* do not make raw manual identifier entry the only or dominant scripture flow
+* do not reduce scripture linking to opaque URL pasting when structured targets
+  are available
 
 ---
 
@@ -160,3 +181,4 @@ Scripture linking must be:
 * progressive
 * structured
 * aligned with canonical schema
+

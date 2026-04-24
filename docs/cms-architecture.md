@@ -100,11 +100,11 @@ CMS modules are registry-driven and manifest-oriented.
 
 Current frontend registry entrypoint:
 
-- [resources/js/admin/cms/core/module-registry.tsx](</c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/cms/core/module-registry.tsx:8>)
+- `resources/js/admin/cms/core/module-registry.tsx`
 
 Current backend central registry under pressure:
 
-- [app/Support/Cms/CmsModuleRegistry.php](</c:/Users/SHREENATHJI/Documents/malay/gama/app/Support/Cms/CmsModuleRegistry.php:7>)
+- `app/Support/Cms/CmsModuleRegistry.php`
 
 Current stable module set:
 
@@ -213,3 +213,4 @@ It should not evolve toward:
 - scripture-owned internals inside CMS modules
 - page-specific CMS hacks
 - canonical truth management through CMS composition
+

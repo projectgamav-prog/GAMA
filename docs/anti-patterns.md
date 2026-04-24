@@ -23,9 +23,9 @@ every future change must touch.
 
 ### Current Examples Under Pressure
 
-- [app/Support/Scripture/Admin/Registry/AdminEntityRegistry.php](</c:/Users/SHREENATHJI/Documents/malay/gama/app/Support/Scripture/Admin/Registry/AdminEntityRegistry.php:14>)
-- [app/Http/Controllers/Scripture/ChapterController.php](</c:/Users/SHREENATHJI/Documents/malay/gama/app/Http/Controllers/Scripture/ChapterController.php:28>)
-- [resources/js/pages/scripture/chapters/verses/show.tsx](</c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/pages/scripture/chapters/verses/show.tsx:51>)
+- `app/Support/Scripture/Admin/Registry/AdminEntityRegistry.php`
+- `app/Http/Controllers/Scripture/ChapterController.php`
+- `resources/js/pages/scripture/chapters/verses/show.tsx`
 
 ## Central Registries Becoming Switchboards
 
@@ -36,8 +36,8 @@ validation, behavior branches, and policy, they block safe evolution.
 
 ### Current Examples Under Pressure
 
-- [app/Support/Cms/CmsModuleRegistry.php](</c:/Users/SHREENATHJI/Documents/malay/gama/app/Support/Cms/CmsModuleRegistry.php:7>)
-- [resources/js/admin/surfaces/core/surface-keys.ts](</c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/surfaces/core/surface-keys.ts:74>)
+- `app/Support/Cms/CmsModuleRegistry.php`
+- `resources/js/admin/surfaces/core/surface-keys.ts`
 
 ## Thick Controllers
 
@@ -55,9 +55,9 @@ controllers.
 
 ### Current Examples Under Pressure
 
-- [app/Http/Controllers/Scripture/BookController.php](</c:/Users/SHREENATHJI/Documents/malay/gama/app/Http/Controllers/Scripture/BookController.php:23>)
-- [app/Http/Controllers/Scripture/ChapterController.php](</c:/Users/SHREENATHJI/Documents/malay/gama/app/Http/Controllers/Scripture/ChapterController.php:28>)
-- [app/Http/Controllers/Scripture/VerseController.php](</c:/Users/SHREENATHJI/Documents/malay/gama/app/Http/Controllers/Scripture/VerseController.php:27>)
+- `app/Http/Controllers/Scripture/BookController.php`
+- `app/Http/Controllers/Scripture/ChapterController.php`
+- `app/Http/Controllers/Scripture/VerseController.php`
 
 ## Page-Level Business Logic
 
@@ -69,9 +69,9 @@ system.
 
 ### Current Examples Under Pressure
 
-- [resources/js/pages/scripture/chapters/verses/show.tsx](</c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/pages/scripture/chapters/verses/show.tsx:51>)
-- [resources/js/pages/scripture/books/full-edit.tsx](</c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/pages/scripture/books/full-edit.tsx:107>)
-- [resources/js/pages/scripture/chapters/verses/full-edit.tsx](</c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/pages/scripture/chapters/verses/full-edit.tsx:508>)
+- `resources/js/pages/scripture/chapters/verses/show.tsx`
+- `resources/js/pages/scripture/books/full-edit.tsx`
+- `resources/js/pages/scripture/chapters/verses/full-edit.tsx`
 
 ## Duplicated Editor Systems
 
@@ -114,15 +114,15 @@ That increases coupling and makes refactors noisy.
 
 ### Current Examples Under Pressure
 
-- [resources/js/types/scripture.ts](</c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/types/scripture.ts:1>)
-- [resources/js/admin/surfaces/sections/surface-types.ts](</c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/surfaces/sections/surface-types.ts:1>)
+- `resources/js/types/scripture.ts`
+- `resources/js/admin/surfaces/sections/surface-types.ts`
 
 ## False Abstraction
 
 ### Why Dangerous Here
 
 The project does need architecture, but not empty interface layers or
-“manager/service/factory” inflation with no real boundary value.
+"manager/service/factory" inflation with no real boundary value.
 
 Bad abstraction here would:
 
@@ -150,3 +150,4 @@ pattern.
 
 Cleanup is encouraged, but only inside the touched scope. It must not become a
 reason to broaden a batch into unrelated systems.
+

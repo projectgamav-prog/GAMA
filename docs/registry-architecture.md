@@ -63,9 +63,9 @@ file.
 
 Current examples under pressure:
 
-- [app/Support/Cms/CmsModuleRegistry.php](</c:/Users/SHREENATHJI/Documents/malay/gama/app/Support/Cms/CmsModuleRegistry.php:7>)
-- [app/Support/Scripture/Admin/Registry/AdminEntityRegistry.php](</c:/Users/SHREENATHJI/Documents/malay/gama/app/Support/Scripture/Admin/Registry/AdminEntityRegistry.php:14>)
-- [resources/js/admin/surfaces/core/surface-keys.ts](</c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/surfaces/core/surface-keys.ts:74>)
+- `app/Support/Cms/CmsModuleRegistry.php`
+- `app/Support/Scripture/Admin/Registry/AdminEntityRegistry.php`
+- `resources/js/admin/surfaces/core/surface-keys.ts`
 
 ## Distributed Definition Approach
 
@@ -186,3 +186,4 @@ When a registry grows beyond simple definition aggregation:
 - split definitions into per-entity/per-module classes
 - move behavior out of registry into those classes
 - keep registry as a thin composition layer
+

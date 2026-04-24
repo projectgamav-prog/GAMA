@@ -1,107 +1,49 @@
-# Media System (Planned Architecture)
+# Media System
 
-## Purpose
+## Status
 
-The Media System manages all visual and audio assets across the platform.
+This document is now a **light reference note**, not a planned-phase roadmap.
 
-It replaces raw URL-based media usage with a structured, reusable asset system.
+The media system already exists in the repo. The current truth is:
 
----
+- media records are real and reusable
+- book-level media authoring now supports inline attach / replace / remove for
+  common actions
+- advanced media-assignment editing still lives in Full edit where appropriate
+- the active product-facing direction is incremental improvement of picker and
+  authoring UX, not a media-system redesign
 
-## Core Goals
+Use `docs/current-state.md` for the live behavior snapshot and
+`docs/admin-architecture.md` for the architecture boundary.
 
-* allow upload of media files
-* provide a central media library
-* enable easy selection and reuse
-* support structured metadata
-* integrate with CMS modules cleanly
+## Current Direction
 
----
+Media should remain:
 
-## Phase 1 (Initial System)
+- a reusable shared resource
+- referenced by CMS modules and canonical admin flows
+- separate from page-specific ownership logic
 
-### Features
+The current repo direction is:
 
-* upload image/video
-* store in filesystem
-* create media record in database
-* select media in modules (media block)
-* basic preview
+- improve common media authoring actions inline where the surface already has
+  the right seams
+- preserve advanced assignment metadata in deeper edit flows
+- avoid inventing a second media authoring system beside the existing admin/CMS
+  architecture
 
-### Data model (conceptual)
+## Still Reasonable Future Improvements
 
-media:
+These are still valid later improvements, but they are not the current phase:
 
-* id
-* type (image/video)
-* path
-* url
-* title
-* alt_text
-* created_at
+- richer picker search/filtering
+- upload/create flow improvements
+- better media library browsing
+- stronger preview and reuse ergonomics on more surfaces
 
----
+## Keep In Mind
 
-## Phase 2 (Improvement Layer)
+- do not tightly couple media to one module family
+- do not redesign schema ownership just to improve editor UX
+- do not treat this doc as the active roadmap for current implementation work
 
-* media picker UI
-* thumbnail previews
-* search/filter
-* recently used
-* basic categorization
-
----
-
-## Phase 3 (Advanced System)
-
-* folders or collections
-* tagging system
-* media roles (hero, thumbnail, inline)
-* cropping / variants
-* responsive images
-* CDN integration
-* lazy loading strategies
-
----
-
-## UX Principles
-
-* no manual URL entry required
-* selection should feel visual
-* reuse should be easy
-* editing should not require re-upload
-
----
-
-## Integration Points
-
-* media module
-* card_list images (future)
-* header/footer (if needed)
-* CMS pages
-* scripture supplemental content
-
----
-
-## Important Constraints
-
-* do not tightly couple media to specific modules
-* media must remain a reusable global resource
-* CMS modules should reference media, not own it
-
----
-
-## Future Ideas
-
-* attach media to scripture entities
-* recitations/audio linking
-* media-based learning modules
-* video playlists
-
----
-
-## Summary
-
-Media system should evolve from:
-
-URL → Upload → Library → Structured asset ecosystem

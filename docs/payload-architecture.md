@@ -62,10 +62,10 @@ Mappers should own:
 
 Good current mapper examples:
 
-- [app/Support/Scripture/PublicScriptureData.php](</c:/Users/SHREENATHJI/Documents/malay/gama/app/Support/Scripture/PublicScriptureData.php:30>)
-- [app/Support/Cms/PublicPageData.php](</c:/Users/SHREENATHJI/Documents/malay/gama/app/Support/Cms/PublicPageData.php:9>)
-- [app/Support/Scripture/Admin/VerseRelationAdminData.php](</c:/Users/SHREENATHJI/Documents/malay/gama/app/Support/Scripture/Admin/VerseRelationAdminData.php:11>)
-- [app/Support/Scripture/Admin/RegisteredContentBlockData.php](</c:/Users/SHREENATHJI/Documents/malay/gama/app/Support/Scripture/Admin/RegisteredContentBlockData.php:7>)
+- `app/Support/Scripture/PublicScriptureData.php`
+- `app/Support/Cms/PublicPageData.php`
+- `app/Support/Scripture/Admin/VerseRelationAdminData.php`
+- `app/Support/Scripture/Admin/RegisteredContentBlockData.php`
 
 ## Separation Of Concerns
 
@@ -125,7 +125,7 @@ Do:
 
 The system must follow a strict layering model:
 
-Controller → Builder → Mapper
+Controller -> Builder -> Mapper
 
 ---
 
@@ -185,3 +185,4 @@ A file that:
 - embeds admin logic
 
 is violating SRP and must be split.
+

@@ -46,24 +46,24 @@ The active live scripture editing model is:
 ## Active infrastructure
 
 Core runtime:
-- [AdminModuleHost.tsx](/c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/core/AdminModuleHost.tsx)
-- [AdminModuleHostGroup.tsx](/c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/core/AdminModuleHostGroup.tsx)
-- [module-registry.ts](/c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/core/module-registry.ts)
-- [module-types.ts](/c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/core/module-types.ts)
-- [qualify-module.ts](/c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/core/qualify-module.ts)
-- [module-actions.ts](/c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/core/module-actions.ts)
+- `resources/js/admin/core/AdminModuleHost.tsx`
+- `resources/js/admin/core/AdminModuleHostGroup.tsx`
+- `resources/js/admin/core/module-registry.ts`
+- `resources/js/admin/core/module-types.ts`
+- `resources/js/admin/core/qualify-module.ts`
+- `resources/js/admin/core/module-actions.ts`
 
 Surface contracts and builders:
-- [surface-contracts.ts](/c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/surfaces/core/surface-contracts.ts)
-- [surface-builders.ts](/c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/surfaces/core/surface-builders.ts)
-- [surface-keys.ts](/c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/surfaces/core/surface-keys.ts)
-- [contract-readers.ts](/c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/surfaces/core/contract-readers.ts)
+- `resources/js/admin/surfaces/core/surface-contracts.ts`
+- `resources/js/admin/surfaces/core/surface-builders.ts`
+- `resources/js/admin/surfaces/core/surface-keys.ts`
+- `resources/js/admin/surfaces/core/contract-readers.ts`
 
 Canonical integrations:
-- [books.ts](/c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/integrations/scripture/books.ts)
-- [chapters.ts](/c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/integrations/scripture/chapters.ts)
-- [verses.ts](/c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/integrations/scripture/verses.ts)
-- [sections.ts](/c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/integrations/sections.ts)
+- `resources/js/admin/integrations/scripture/books.ts`
+- `resources/js/admin/integrations/scripture/chapters.ts`
+- `resources/js/admin/integrations/scripture/verses.ts`
+- `resources/js/admin/integrations/sections.ts`
 
 ## Surface contract
 
@@ -107,8 +107,8 @@ public scripture path and are no longer part of the working module registry.
 
 ## Semantics
 
-The main semantic distinction is not “which page rendered this,” but “what kind
-of editing context is this surface describing.”
+The main semantic distinction is not "which page rendered this," but "what kind
+of editing context is this surface describing."
 
 ### Page surfaces
 
@@ -259,3 +259,4 @@ Do not:
 - mount a child detail-page editor semantically unchanged inside a parent row
 - treat retired public block-authoring code as active architecture
 - let CMS supplementary regions mutate canonical scripture structure
+

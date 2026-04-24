@@ -37,10 +37,11 @@ After completing a task:
   - `admin-surface-design.md`
   - `payload-architecture.md`
   - `registry-architecture.md`
-  - `refactor-roadmap.md`
   - `current-phase.md`
   - `architecture-guardrails.md`
   - `anti-patterns.md`
+- `refactor-roadmap.md` now remains as historical context only. It is no longer
+  the active roadmap or current phase guide.
 - These documents now define the locked architecture direction for:
   - canonical scripture versus CMS separation
   - hybrid admin editing
@@ -503,7 +504,6 @@ Do not drift into fake abstractions detached from either the canonical schema or
    - `project-architecture-thesis.md`
    - `current-phase.md`
    - `architecture-guardrails.md`
-   - `refactor-roadmap.md`
 1. Start from the cleaned base instead of reopening broad cleanup:
    - treat the broad cleanup wave as largely complete
    - reopen only selective reassessment seams when they are clearly justified
@@ -535,3 +535,4 @@ Do not drift into fake abstractions detached from either the canonical schema or
 - `scripture-admin-editing.md` is the practical companion for the active canonical admin surface/module path.
 - `admin-module-integration.md` is the practical companion for future outside React/component integration into the admin module system.
 - Future Codex prompts should explicitly tell Codex to read `admin-architecture.md` first.
+

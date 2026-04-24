@@ -55,7 +55,7 @@ A surface should not define:
 
 The canonical TypeScript contract lives in:
 
-- [resources/js/admin/surfaces/core/surface-contracts.ts](</c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/surfaces/core/surface-contracts.ts:1>)
+- `resources/js/admin/surfaces/core/surface-contracts.ts`
 
 The current contract shape includes:
 
@@ -144,8 +144,8 @@ Pages should not:
 
 Good current examples:
 
-- [resources/js/pages/scripture/books/show.tsx](</c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/pages/scripture/books/show.tsx:13>)
-- [resources/js/pages/scripture/chapters/show.tsx](</c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/pages/scripture/chapters/show.tsx:17>)
+- `resources/js/pages/scripture/books/show.tsx`
+- `resources/js/pages/scripture/chapters/show.tsx`
 
 ## How Modules Attach To Surfaces
 
@@ -153,8 +153,8 @@ Modules qualify against surfaces through shared metadata-driven rules.
 
 The qualification host lives in:
 
-- [resources/js/admin/core/AdminModuleHost.tsx](</c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/core/AdminModuleHost.tsx:29>)
-- [resources/js/admin/core/qualify-module.ts](</c:/Users/SHREENATHJI/Documents/malay/gama/resources/js/admin/core/qualify-module.ts:47>)
+- `resources/js/admin/core/AdminModuleHost.tsx`
+- `resources/js/admin/core/qualify-module.ts`
 
 Qualification can depend on:
 
@@ -224,3 +224,4 @@ It should not evolve toward:
 - page-owned editor orchestration
 - a giant universal metadata bag
 - route-name-driven editor behavior
+

@@ -1,8 +1,22 @@
 # Schema System Overview
 
+## Status
+
+This document is now a **compact reference note** rather than a planning
+document.
+
+The schema boundaries it describes are still active, but the repo has moved
+past the earlier "planned" framing for media and related authoring flows.
+
+Use `docs/current-state.md` for the live implementation snapshot and
+`docs/admin-architecture.md` for the locked boundary rules.
+
+---
+
 ## Purpose
 
-This document defines all major schemas in the system, their responsibilities, and boundaries.
+This document defines the major schemas in the system, their responsibilities,
+and boundaries.
 
 ---
 
@@ -10,7 +24,7 @@ This document defines all major schemas in the system, their responsibilities, a
 
 ### Structure
 
-book → book_section → chapter → chapter_section → verse
+book -> book_section -> chapter -> chapter_section -> verse
 
 ### Purpose
 
@@ -30,7 +44,7 @@ book → book_section → chapter → chapter_section → verse
 
 ### Structure
 
-page → container → block
+page -> container -> block
 
 ### Purpose
 
@@ -73,7 +87,7 @@ navigation_items:
 
 ## 4. Media Schema
 
-### Structure (planned)
+### Structure
 
 media:
 
@@ -86,6 +100,8 @@ media:
 
 * manage reusable assets
 * support visual content
+* support the current inline-first media authoring pattern where a surface has
+  the right seams
 
 ---
 
@@ -107,10 +123,10 @@ media:
 
 ## System Relationship
 
-Canonical Schema → provides content
-CMS Schema → provides layout
-Navigation Schema → provides movement
-Media Schema → provides assets
+Canonical Schema -> provides content
+CMS Schema -> provides layout
+Navigation Schema -> provides movement
+Media Schema -> provides assets
 
 ---
 
@@ -135,3 +151,4 @@ Each system has a clear role:
 * Media = assets
 
 Separation must always be preserved.
+
