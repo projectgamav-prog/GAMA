@@ -1,0 +1,1 @@
+export { useAdminResolvedControls } from './AdminResolvedControlsProvider';

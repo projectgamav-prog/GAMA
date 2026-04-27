@@ -1,6 +1,6 @@
+import { ScriptureSection } from '@/components/scripture/scripture-section';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScriptureSection } from '@/components/scripture/scripture-section';
 import type { ScriptureRegisteredAdminEntity } from '@/types';
 
 type EditModeKey = 'contextual' | 'full' | 'canonical';
@@ -23,8 +23,9 @@ export function BookEditLayersSection({
                 {(['contextual', 'full', 'canonical'] as const).map(
                     (modeKey) => {
                         const mode = adminEntity.edit_modes[modeKey];
-                        const regionCount = adminEntity.regions.filter((region) =>
-                            region.supported_modes.includes(modeKey),
+                        const regionCount = adminEntity.regions.filter(
+                            (region) =>
+                                region.supported_modes.includes(modeKey),
                         ).length;
                         const methodCount =
                             adminEntity.methods_by_mode[modeKey].length;

@@ -1,5 +1,7 @@
 import { Link } from '@inertiajs/react';
+import { Check, ExternalLink, X } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { AdminOverlayActionButton } from '@/admin/core/AdminOverlayActionButton';
 import { Button } from '@/components/ui/button';
 
 /**
@@ -44,15 +46,17 @@ export function ScriptureInlineRegionEditor({
     processingLabel = 'Saving...',
 }: Props) {
     return (
-        <div className="rounded-2xl border border-border/70 bg-background/95 px-4 py-4 shadow-sm sm:px-5">
+        <div className="chronicle-admin-overlay-frame chronicle-admin-overlay-active px-4 py-4 sm:px-5">
             <div className="space-y-2">
-                <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+                <p className="chronicle-kicker text-[0.68rem]">
                     {mode === 'create' ? 'Creating here' : 'Editing here'}
                 </p>
                 <div className="space-y-1">
-                    <h3 className="text-base font-semibold">{title}</h3>
+                    <h3 className="font-serif text-lg font-semibold text-[color:var(--chronicle-ink)]">
+                        {title}
+                    </h3>
                     {description && (
-                        <p className="text-sm leading-6 text-muted-foreground">
+                        <p className="text-sm leading-6 text-[color:var(--chronicle-brown)]">
                             {description}
                         </p>
                     )}
@@ -61,46 +65,54 @@ export function ScriptureInlineRegionEditor({
             </div>
 
             {hasErrors ? (
-                <div className="mt-5 rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm leading-6 text-destructive">
+                <div className="mt-5 rounded-sm border border-destructive/25 bg-destructive/5 px-4 py-3 text-sm leading-6 text-destructive">
                     Fix the highlighted fields and save again. Your changes are
                     still local to this editor.
                 </div>
             ) : isDirty ? (
-                <div className="mt-5 rounded-xl border border-border/70 bg-muted/20 px-4 py-3 text-sm leading-6 text-muted-foreground">
+                <div className="mt-5 rounded-sm border border-[color:var(--chronicle-border)] bg-[rgba(173,122,44,0.08)] px-4 py-3 text-sm leading-6 text-[color:var(--chronicle-brown)]">
                     Unsaved changes are local to this region until you save.
                 </div>
             ) : null}
 
             <div className="mt-5 space-y-5">{children}</div>
 
-            <div className="mt-6 flex flex-wrap gap-2 border-t pt-4">
-                <Button
-                    type="button"
-                    variant="outline"
+            <div className="chronicle-admin-edit-footer mt-6">
+                <AdminOverlayActionButton
+                    icon={X}
                     data-scripture-editor-action="cancel"
                     onClick={onCancel}
                     disabled={processing}
                 >
                     {cancelLabel}
-                </Button>
+                </AdminOverlayActionButton>
                 {fullEditHref && (
-                    <Button asChild variant="outline">
+                    <Button
+                        asChild
+                        variant="ghost"
+                        className="chronicle-admin-action-button"
+                    >
                         <Link
                             href={fullEditHref}
                             data-scripture-editor-action="full-edit"
                         >
+                            <ExternalLink
+                                className="size-3.5"
+                                aria-hidden="true"
+                            />
                             Full edit
                         </Link>
                     </Button>
                 )}
-                <Button
-                    type="button"
+                <AdminOverlayActionButton
+                    icon={Check}
+                    tone="primary"
                     data-scripture-editor-action="save"
                     onClick={onSave}
                     disabled={processing}
                 >
                     {processing ? processingLabel : saveLabel}
-                </Button>
+                </AdminOverlayActionButton>
             </div>
         </div>
     );

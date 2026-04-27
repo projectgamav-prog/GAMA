@@ -6,6 +6,7 @@ import type {
     AdminSurfaceIdentifier,
     AdminSurfaceOwner,
     AdminSurfacePresentation,
+    AdminSurfaceQuickEdit,
     AdminSurfaceSlot,
 } from './surface-contracts';
 import type { AdminSurfaceKey } from './surface-keys';
@@ -30,6 +31,7 @@ type BuildSurfaceArgs<TMetadata> = {
     blockType?: string | null;
     owner?: AdminSurfaceOwner | null;
     presentation?: AdminSurfacePresentation | null;
+    quickEdit?: AdminSurfaceQuickEdit | null;
     label?: string | null;
     metadata?: TMetadata;
 };
@@ -83,6 +85,7 @@ export function createAdminSurface<TMetadata>({
     blockType = null,
     owner = null,
     presentation = null,
+    quickEdit = null,
     label = null,
     metadata,
 }: BuildSurfaceArgs<TMetadata>): AdminSurfaceContract<TMetadata> {
@@ -97,6 +100,7 @@ export function createAdminSurface<TMetadata>({
         owner,
         capabilities,
         presentation,
+        quickEdit,
         label,
         metadata,
     };

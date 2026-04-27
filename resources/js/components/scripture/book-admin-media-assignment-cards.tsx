@@ -1,14 +1,14 @@
 import { useForm } from '@inertiajs/react';
-import { useEffect } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
+import { useEffect } from 'react';
+import { MediaAssignmentMetaFields } from '@/components/scripture/media-assignments/MediaAssignmentMetaFields';
+import { MediaAssignmentOverrideFields } from '@/components/scripture/media-assignments/MediaAssignmentOverrideFields';
+import { MediaAssignmentSelectFields } from '@/components/scripture/media-assignments/MediaAssignmentSelectFields';
 import {
     findAvailableMedia,
     MediaPreviewCard,
     MediaSelectionSummary,
 } from '@/components/scripture/media-assignments/MediaPickerDisplay';
-import { MediaAssignmentMetaFields } from '@/components/scripture/media-assignments/MediaAssignmentMetaFields';
-import { MediaAssignmentOverrideFields } from '@/components/scripture/media-assignments/MediaAssignmentOverrideFields';
-import { MediaAssignmentSelectFields } from '@/components/scripture/media-assignments/MediaAssignmentSelectFields';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -135,12 +135,15 @@ export function CreateBookMediaAssignmentCard({
             nextSortOrder,
         ),
     );
-    const selectedMedia = findAvailableMedia(availableMedia, form.data.media_id);
+    const selectedMedia = findAvailableMedia(
+        availableMedia,
+        form.data.media_id,
+    );
     const quickAttachIgnoresAdvancedValues =
-        form.data.title_override.trim() !== ''
-        || form.data.caption_override.trim() !== ''
-        || form.data.sort_order !== String(nextSortOrder)
-        || form.data.status !== 'draft';
+        form.data.title_override.trim() !== '' ||
+        form.data.caption_override.trim() !== '' ||
+        form.data.sort_order !== String(nextSortOrder) ||
+        form.data.status !== 'draft';
 
     useEffect(() => {
         if (form.isDirty || form.processing) {
@@ -187,7 +190,9 @@ export function CreateBookMediaAssignmentCard({
                             roleField={roleField}
                             roleHtmlFor="new_media_role"
                             roleValue={form.data.role}
-                            onRoleChange={(value) => form.setData('role', value)}
+                            onRoleChange={(value) =>
+                                form.setData('role', value)
+                            }
                             roleError={form.errors.role}
                             slotOptions={slotOptions}
                         />
@@ -199,7 +204,9 @@ export function CreateBookMediaAssignmentCard({
 
                         <MediaPreviewCard
                             media={selectedMedia}
-                            fallbackLabel={getBookMediaSlotMeta(form.data.role).label}
+                            fallbackLabel={
+                                getBookMediaSlotMeta(form.data.role).label
+                            }
                         />
 
                         <MediaSlotPurposeCard role={form.data.role} />
@@ -291,9 +298,9 @@ export function CreateBookMediaAssignmentCard({
                                         });
                                     }}
                                     disabled={
-                                        form.processing
-                                        || !form.data.media_id
-                                        || quickAttachIgnoresAdvancedValues
+                                        form.processing ||
+                                        !form.data.media_id ||
+                                        quickAttachIgnoresAdvancedValues
                                     }
                                 >
                                     <Plus className="size-4" />
@@ -347,13 +354,14 @@ export function BookMediaAssignmentEditorCard({
         buildExistingMediaAssignmentData(assignment),
     );
     const selectedMedia =
-        findAvailableMedia(availableMedia, form.data.media_id) ?? assignment.media;
+        findAvailableMedia(availableMedia, form.data.media_id) ??
+        assignment.media;
     const quickReplaceKeepsAdvancedValues =
-        form.data.role === assignment.role
-        && form.data.title_override === (assignment.title_override ?? '')
-        && form.data.caption_override === (assignment.caption_override ?? '')
-        && form.data.sort_order === String(assignment.sort_order)
-        && form.data.status === assignment.status;
+        form.data.role === assignment.role &&
+        form.data.title_override === (assignment.title_override ?? '') &&
+        form.data.caption_override === (assignment.caption_override ?? '') &&
+        form.data.sort_order === String(assignment.sort_order) &&
+        form.data.status === assignment.status;
     const selectedMediaChanged =
         form.data.media_id !== String(assignment.media_id);
 
@@ -496,10 +504,10 @@ export function BookMediaAssignmentEditorCard({
                                 });
                             }}
                             disabled={
-                                form.processing
-                                || !form.data.media_id
-                                || !selectedMediaChanged
-                                || !quickReplaceKeepsAdvancedValues
+                                form.processing ||
+                                !form.data.media_id ||
+                                !selectedMediaChanged ||
+                                !quickReplaceKeepsAdvancedValues
                             }
                         >
                             Replace media only

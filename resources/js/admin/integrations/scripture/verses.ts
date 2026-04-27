@@ -13,6 +13,7 @@ import {
     createVerseIntroSurface,
     createVerseMetaSurface,
     createVerseRowActionsSurface,
+    createVerseTextFieldSurface,
     createVerseTranslationsSurface,
 } from '@/admin/surfaces/scripture/verses/surface-builders';
 import {
@@ -132,6 +133,29 @@ export function resolveVerseRowActionSurface({
         parentLabel,
         createHref: admin.nearby_create_href,
         destroyHref: admin.destroy_href,
+        fullEditHref: admin.full_edit_href,
+    });
+}
+
+export function resolveVerseTextFieldSurface({
+    verse,
+    admin,
+    enabled = true,
+}: {
+    verse: Pick<ScriptureVerse, 'id' | 'slug' | 'number' | 'text'>;
+    admin?: Pick<
+        ScriptureVerseAdmin | ScriptureReaderVerseAdmin,
+        'identity_update_href' | 'full_edit_href'
+    > | null;
+    enabled?: boolean;
+}) {
+    if (!enabled || !admin) {
+        return null;
+    }
+
+    return createVerseTextFieldSurface({
+        verse,
+        updateHref: admin.identity_update_href,
         fullEditHref: admin.full_edit_href,
     });
 }

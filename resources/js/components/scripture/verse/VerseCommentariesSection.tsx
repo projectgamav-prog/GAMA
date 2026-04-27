@@ -1,23 +1,17 @@
-import type { ComponentProps } from 'react';
 import { MessageSquareQuote } from 'lucide-react';
+import type { ComponentProps } from 'react';
 import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
-import { ScriptureSection } from '@/components/scripture/scripture-section';
-import { Badge } from '@/components/ui/badge';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { VerseSupportPanel } from '@/components/scripture/verse/VerseSupportPanel';
 import type { VerseShowProps } from '@/types';
 import type { ScriptureEntityRegionInput } from '@/types/scripture';
 
 type Props = {
-    entityMeta: ScriptureEntityRegionInput;
+    entityMeta: Omit<ScriptureEntityRegionInput, 'region' | 'capabilityHint'>;
     commentaries: VerseShowProps['commentaries'];
-    commentariesSurface: ComponentProps<typeof AdminModuleHost>['surface'];
+    commentariesSurface:
+        | ComponentProps<typeof AdminModuleHost>['surface']
+        | null;
 };
 
 export function VerseCommentariesSection({
@@ -26,32 +20,35 @@ export function VerseCommentariesSection({
     commentariesSurface,
 }: Props) {
     return (
-        <ScriptureSection
-            entityMeta={{
+        <ScriptureEntityRegion
+            meta={{
                 ...entityMeta,
                 region: 'commentaries',
                 capabilityHint: 'commentary',
             }}
-            title="Commentaries"
-            description="Editorial commentary and source material attached directly to this verse."
-            icon={MessageSquareQuote}
-            action={
-                <Badge variant="outline">
-                    {commentaries.length} commentary
-                    {commentaries.length === 1 ? '' : 's'}
-                </Badge>
-            }
+            asChild
         >
-            <div className="space-y-4">
+            <VerseSupportPanel
+                title="Commentary"
+                eyebrow="Annotations"
+                icon={MessageSquareQuote}
+                action={
+                    <span className="chronicle-link text-xs">
+                        {commentaries.length} commentary
+                        {commentaries.length === 1 ? '' : 's'}
+                    </span>
+                }
+                contentClassName="space-y-0 divide-y divide-[color:var(--chronicle-border)]"
+            >
                 {commentariesSurface && (
                     <AdminModuleHost
                         surface={commentariesSurface}
-                        className="flex flex-wrap items-start gap-1.5"
+                        className="chronicle-admin-surface mb-3 flex flex-wrap items-start gap-1.5 p-1"
                     />
                 )}
 
                 {commentaries.length === 0 && commentariesSurface && (
-                    <div className="rounded-2xl border border-dashed border-border/80 bg-muted/20 px-5 py-5 text-sm leading-6 text-muted-foreground sm:px-6 sm:py-6">
+                    <div className="rounded-sm border border-dashed border-[color:var(--chronicle-border)] bg-[rgba(173,122,44,0.06)] px-4 py-3 text-sm leading-6 text-[color:var(--chronicle-brown)]">
                         No commentaries have been added yet.
                     </div>
                 )}
@@ -69,43 +66,27 @@ export function VerseCommentariesSection({
                         }}
                         asChild
                     >
-                        <Card className="overflow-hidden">
-                            <CardHeader className="gap-3 border-b bg-muted/20">
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <Badge variant="outline">
-                                        {commentary.language_code}
-                                    </Badge>
-                                    <Badge variant="secondary">
-                                        {commentary.author_name ??
-                                            commentary.source_name}
-                                    </Badge>
-                                </div>
-                                <CardTitle className="text-xl">
-                                    {commentary.title ??
+                        <article className="space-y-3 py-4">
+                            <div>
+                                <p className="chronicle-kicker">
+                                    {commentary.source_key ||
+                                        commentary.language_code}
+                                </p>
+                                <h3 className="font-serif text-xl leading-7 text-[color:var(--chronicle-ink)]">
+                                    {commentary.title ?? commentary.source_name}
+                                </h3>
+                                <p className="text-sm text-[color:var(--chronicle-brown)]">
+                                    {commentary.author_name ??
                                         commentary.source_name}
-                                </CardTitle>
-                                <CardDescription>
-                                    <span>{commentary.source_name}</span>
-                                    {commentary.source_key && (
-                                        <span>
-                                            {' '}
-                                            - Source key:{' '}
-                                            {commentary.source_key}
-                                        </span>
-                                    )}
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4 pt-6">
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                    <MessageSquareQuote className="size-4" />
-                                    <span>Commentary</span>
-                                </div>
-                                <p className="leading-8">{commentary.body}</p>
-                            </CardContent>
-                        </Card>
+                                </p>
+                            </div>
+                            <p className="leading-7 text-[color:var(--chronicle-ink)]">
+                                {commentary.body}
+                            </p>
+                        </article>
                     </ScriptureEntityRegion>
                 ))}
-            </div>
-        </ScriptureSection>
+            </VerseSupportPanel>
+        </ScriptureEntityRegion>
     );
 }

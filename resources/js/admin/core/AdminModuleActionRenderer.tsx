@@ -1,14 +1,24 @@
-import type { AdminSurfaceContract } from '../surfaces/core/surface-contracts';
-import { MoreHorizontal } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import {
+    Edit3,
+    ExternalLink,
+    Languages,
+    MessageSquareQuote,
+    MoreHorizontal,
+    Plus,
+    Settings2,
+    Trash2,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
+import type { AdminSurfaceContract } from '../surfaces/core/surface-contracts';
 import type { AdminResolvedModuleAction } from './module-types';
+import { AdminOverlayActionButton } from './AdminOverlayActionButton';
+import { AdminOverlayControlStrip } from './AdminOverlayControlStrip';
 
 type Props = {
     surface: AdminSurfaceContract;
@@ -16,6 +26,25 @@ type Props = {
     activeActionKey: string | null;
     onAction: (action: AdminResolvedModuleAction) => void;
 };
+
+function resolveActionIcon(action: AdminResolvedModuleAction): LucideIcon {
+    switch (action.action.actionKey) {
+        case 'create_row':
+            return Plus;
+        case 'delete_entity':
+            return Trash2;
+        case 'edit_translations':
+            return Languages;
+        case 'edit_commentaries':
+            return MessageSquareQuote;
+        case 'edit_media':
+            return Settings2;
+        default:
+            return action.action.actionFamily === 'full_edit'
+                ? ExternalLink
+                : Edit3;
+    }
+}
 
 export function AdminModuleActionRenderer({
     surface,
@@ -36,70 +65,93 @@ export function AdminModuleActionRenderer({
     );
 
     return (
-        <>
+        <AdminOverlayControlStrip
+            data-admin-diagnostic-layer="old"
+            data-admin-diagnostic-label="old admin"
+        >
             {directActions.map((action) => (
-                <Button
+                <AdminOverlayActionButton
                     key={action.key}
-                    type="button"
-                    size="sm"
+                    icon={resolveActionIcon(action)}
+                    className="chronicle-admin-action-button-old"
+                    title="old admin"
+                    aria-label={`${action.label} (old admin)`}
+                    data-admin-diagnostic-layer="old"
+                    data-admin-diagnostic-label="old admin"
                     data-admin-action-key={action.key}
                     data-admin-module-key={action.module.key}
                     data-admin-entity={surface.entity}
                     data-admin-entity-id={surface.entityId}
                     data-admin-region-key={surface.regionKey ?? undefined}
-                    variant={
-                        activeActionKey === action.key
-                            ? 'secondary'
-                            : action.variant
+                    active={activeActionKey === action.key}
+                    tone={
+                        action.variant === 'destructive' ||
+                        action.action.actionFamily === 'danger'
+                            ? 'danger'
+                            : 'neutral'
                     }
-                    className={cn(
-                        'h-7 rounded-md border border-border/80 bg-background px-2.5 text-xs font-medium text-foreground shadow-sm hover:bg-background',
-                        activeActionKey === action.key &&
-                            'border-border bg-foreground text-background hover:bg-foreground/90',
-                        activeActionKey !== action.key &&
-                            action.variant === 'ghost' &&
-                            'bg-background text-foreground hover:bg-muted',
-                    )}
-                    aria-pressed={activeActionKey === action.key}
                     onClick={() => onAction(action)}
                 >
                     {action.label}
-                </Button>
+                </AdminOverlayActionButton>
             ))}
 
             {dropdownActions.length > 0 && (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button
-                            type="button"
-                            size="sm"
+                        <AdminOverlayActionButton
+                            icon={MoreHorizontal}
+                            className="chronicle-admin-action-button-old"
+                            title="old admin"
+                            aria-label="More old admin actions"
+                            data-admin-diagnostic-layer="old"
+                            data-admin-diagnostic-label="old admin"
                             data-admin-action-key="dropdown:more"
                             data-admin-entity={surface.entity}
                             data-admin-entity-id={surface.entityId}
-                            data-admin-region-key={surface.regionKey ?? undefined}
-                            variant="outline"
-                            className="h-7 rounded-md border border-border/80 bg-background px-2.5 text-xs font-medium text-foreground shadow-sm hover:bg-muted"
+                            data-admin-region-key={
+                                surface.regionKey ?? undefined
+                            }
                         >
-                            <MoreHorizontal className="size-3.5" />
                             More
-                        </Button>
+                        </AdminOverlayActionButton>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
+                    <DropdownMenuContent
+                        align="end"
+                        className="chronicle-admin-diagnostic-old-menu !border-[#050505] !bg-[#050505] !text-[#fff8eb]"
+                        data-admin-diagnostic-layer="old"
+                        data-admin-diagnostic-label="old admin"
+                    >
                         {dropdownActions.map((action) => (
                             <DropdownMenuItem
                                 key={action.key}
+                                className="chronicle-admin-diagnostic-old-menu-item gap-2 text-xs !text-[#fff8eb] focus:!bg-[#1a1a1a] focus:!text-[#fff8eb] [&_svg]:!text-[#fff8eb]"
+                                data-admin-diagnostic-layer="old"
+                                data-admin-diagnostic-label="old admin"
                                 data-admin-action-key={action.key}
                                 data-admin-entity={surface.entity}
                                 data-admin-entity-id={surface.entityId}
-                                data-admin-region-key={surface.regionKey ?? undefined}
+                                data-admin-region-key={
+                                    surface.regionKey ?? undefined
+                                }
                                 onSelect={() => onAction(action)}
                             >
+                                {(() => {
+                                    const Icon = resolveActionIcon(action);
+
+                                    return (
+                                        <Icon
+                                            className="size-3.5"
+                                            aria-hidden="true"
+                                        />
+                                    );
+                                })()}
                                 {action.label}
                             </DropdownMenuItem>
                         ))}
                     </DropdownMenuContent>
                 </DropdownMenu>
             )}
-        </>
+        </AdminOverlayControlStrip>
     );
 }

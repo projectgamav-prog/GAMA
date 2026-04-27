@@ -37,6 +37,12 @@ type VerseIdentitySurfaceArgs = {
     semanticContext?: 'page' | 'row' | null;
 };
 
+type VerseTextFieldSurfaceArgs = {
+    verse: Pick<ScriptureVerse, 'id' | 'slug' | 'number' | 'text'>;
+    updateHref: string | null;
+    fullEditHref: string | null;
+};
+
 type VerseIntroSurfaceArgs = {
     verse: ScriptureVerse;
     verseTitle: string;
@@ -102,6 +108,64 @@ export function createVerseIdentitySurface({
             returnToHref,
             editorDescription,
             semanticContext,
+        },
+    });
+}
+
+export function createVerseTextFieldSurface({
+    verse,
+    updateHref,
+    fullEditHref,
+}: VerseTextFieldSurfaceArgs): AdminSurfaceContract {
+    return createInlineEditorSurface({
+        surfaceKey: 'verse.text_field',
+        contractKey: null,
+        entity: 'verse',
+        entityId: verse.id,
+        regionKey: 'verse_text',
+        blockType: 'text_field',
+        capabilities: [
+            ...(updateHref ? (['edit'] as const) : []),
+            ...(fullEditHref ? (['full_edit'] as const) : []),
+        ],
+        presentation: {
+            placement: 'inline',
+            variant: 'compact',
+        },
+        quickEdit: updateHref
+            ? {
+                  mode: 'same_layout',
+                  contentKind: 'long_text',
+                  fields: [
+                      {
+                          name: 'text',
+                          label: 'Verse text',
+                          value: verse.text,
+                          input: 'textarea',
+                          payloadKey: 'text',
+                          placeholder: 'Enter the canonical verse text.',
+                      },
+                  ],
+                  payloadFields: [
+                      {
+                          name: 'slug',
+                          value: verse.slug,
+                      },
+                      {
+                          name: 'number',
+                          value: verse.number ?? '',
+                      },
+                  ],
+                  updateHref,
+                  method: 'patch',
+                  fullEditHref,
+              }
+            : null,
+        label: 'Verse text',
+        metadata: {
+            fieldName: 'text',
+            fieldLabel: 'Verse text',
+            fullEditHref,
         },
     });
 }

@@ -8,6 +8,7 @@ import { VERSE_TRANSLATIONS_SURFACE_KEY } from '@/admin/surfaces/core/surface-ke
 import { buildScriptureAdminSectionHref } from '@/lib/scripture-admin-navigation';
 import type {
     ScriptureAdminVerseTranslation,
+    ScriptureTranslationSourceOption,
 } from '@/types';
 import { VerseRelationEditorShell } from './VerseRelationEditorShell';
 import { CreateTranslationCard } from './translations/CreateTranslationCard';
@@ -16,10 +17,10 @@ import { TranslationEditorCard } from './translations/TranslationEditorCard';
 function resolveTranslationMetadata(
     props: AdminModuleComponentProps,
 ): VerseTranslationsContractMetadata | null {
-    const metadata =
-        getRelationRowsContractMetadata<
-            ScriptureAdminVerseTranslation
-        >(props.surface);
+    const metadata = getRelationRowsContractMetadata<
+        ScriptureAdminVerseTranslation,
+        ScriptureTranslationSourceOption
+    >(props.surface);
 
     return metadata?.relationKey === 'translations' ? metadata : null;
 }
@@ -27,13 +28,9 @@ function resolveTranslationMetadata(
 function VerseTranslationsEditor(props: AdminModuleComponentProps) {
     const metadata = resolveTranslationMetadata(props);
     const handleMutationSuccess = () => props.activation.deactivate();
-    const fullEditHref =
-        metadata?.fullEditHref
-            ? buildScriptureAdminSectionHref(
-                  metadata.fullEditHref,
-                  'translations',
-              )
-            : null;
+    const fullEditHref = metadata?.fullEditHref
+        ? buildScriptureAdminSectionHref(metadata.fullEditHref, 'translations')
+        : null;
 
     if (metadata === null || !props.activation.isActive) {
         return null;

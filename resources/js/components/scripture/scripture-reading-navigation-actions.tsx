@@ -1,9 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
-import {
-    resolveScriptureNavigationActions,
-    type ScriptureNavigationActionDefinition,
-} from '@/lib/scripture-navigation-actions';
+import { resolveScriptureNavigationActions } from '@/lib/scripture-navigation-actions';
+import type { ScriptureNavigationActionDefinition } from '@/lib/scripture-navigation-actions';
 import { ScriptureActionRow } from './scripture-action-row';
 
 type Props = {
@@ -30,7 +28,11 @@ export function ScriptureReadingNavigationActions({
                     <Button
                         key={action.key}
                         asChild
-                        variant={action.variant === 'link' ? 'outline' : action.variant}
+                        variant={
+                            action.variant === 'link'
+                                ? 'outline'
+                                : action.variant
+                        }
                     >
                         <Link href={action.href}>
                             {action.iconPosition === 'start' && (

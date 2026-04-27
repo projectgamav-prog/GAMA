@@ -1,18 +1,25 @@
+import { Link } from '@inertiajs/react';
+import { ChevronRight } from 'lucide-react';
 import { AdminModuleHostGroup } from '@/admin/core/AdminModuleHostGroup';
 import { resolveChapterHeaderSurfaces } from '@/admin/integrations/scripture/chapters';
 import { ScriptureChapterVerseList } from '@/components/scripture/scripture-chapter-verse-list';
-import { ScriptureIntroBlock } from '@/components/scripture/scripture-intro-block';
-import { ScripturePageIntroCard } from '@/components/scripture/scripture-page-intro-card';
-import { ScriptureReadingNavigationActions } from '@/components/scripture/scripture-reading-navigation-actions';
-import { Badge } from '@/components/ui/badge';
+import {
+    ChronicleEditorialGrid,
+    ChronicleOrnament,
+    ChroniclePaperPanel,
+    ChronicleSideRail,
+    ChronicleStatRow,
+} from '@/components/site/chronicle-primitives';
+import { Button } from '@/components/ui/button';
 import { useVisibleAdminControls } from '@/hooks/use-admin-context';
 import ScriptureLayout from '@/layouts/scripture-layout';
-import {
-    chapterLabel,
-    isGenericSectionLabel,
-    sectionLabel,
-} from '@/lib/scripture';
-import type { BreadcrumbItem, ChapterShowProps } from '@/types';
+import { chapterLabel } from '@/lib/scripture';
+import { UniversalSectionStack } from '@/rendering/core';
+import { buildChapterShowDescriptorModel } from '@/rendering/scripture/adapters/chapter-show-page-adapter';
+import type { ChapterShowProps } from '@/types';
+
+const ADMIN_PANEL_CLASS_NAME =
+    'chronicle-admin-surface flex flex-wrap items-center gap-1.5 p-1';
 
 export default function ChapterShow({
     book,
@@ -25,22 +32,7 @@ export default function ChapterShow({
     verse_admin_shared,
 }: ChapterShowProps) {
     const showAdminControls = useVisibleAdminControls();
-    const hidesGenericBookSection = isGenericSectionLabel(
-        book_section.slug,
-        book_section.title,
-    );
     const chapterTitle = chapterLabel(chapter.number, chapter.title);
-    const bookSectionTitle = sectionLabel(
-        book_section.number,
-        book_section.title,
-    );
-    const chapterEntity = {
-        entityType: 'chapter' as const,
-        entityId: chapter.id,
-        entityLabel: chapterTitle,
-        parentEntityType: 'book_section' as const,
-        parentEntityId: book_section.id,
-    };
     const {
         identitySurface: chapterIdentitySurface,
         introSurface: chapterIntroSurface,
@@ -51,90 +43,129 @@ export default function ChapterShow({
         admin,
         enabled: showAdminControls,
     });
-    const totalVerseCount = chapter_sections.reduce(
-        (sum, section) =>
-            sum +
-            section.cards.reduce(
-                (cardSum, card) => cardSum + card.verses.length,
-                0,
-            ),
-        0,
-    );
-
-    const breadcrumbs: BreadcrumbItem[] = [
-        {
-            title: book.title,
-            href: book.href,
-        },
-        {
-            title: bookSectionTitle,
-            href: book_section.href,
-        },
-        {
-            title: chapterTitle,
-            href: chapter.href,
-        },
-    ];
+    const pageModel = buildChapterShowDescriptorModel({
+        book,
+        bookSection: book_section,
+        chapter,
+        readerLanguages: reader_languages,
+        defaultLanguage: default_language,
+        chapterSections: chapter_sections,
+        chapterIntroSurface,
+    });
 
     return (
-        <ScriptureLayout title={chapterTitle} breadcrumbs={breadcrumbs}>
-            <ScripturePageIntroCard
-                entityMeta={{
-                    ...chapterEntity,
-                    region: 'page_intro',
-                    capabilityHint: 'intro',
-                }}
-                badges={
-                    <>
-                        <Badge variant="outline">Chapter</Badge>
-                        <Badge variant="secondary">{book.title}</Badge>
-                        {!hidesGenericBookSection && (
-                            <Badge variant="secondary">
-                                {bookSectionTitle}
-                            </Badge>
-                        )}
-                        <Badge variant="secondary">
-                            {totalVerseCount} verse
-                            {totalVerseCount === 1 ? '' : 's'}
-                        </Badge>
-                    </>
-                }
-                title={chapterTitle}
-                description="Read the chapter introduction first, then continue through the grouped verse list in canonical order."
-                contentClassName="space-y-6"
-            >
-                <AdminModuleHostGroup
-                    surfaces={[
-                        chapterIdentitySurface,
-                        chapterIntroSurface,
-                        chapterActionsSurface,
-                    ]}
-                />
+        <ScriptureLayout
+            title={pageModel.chapterTitle}
+            breadcrumbs={pageModel.breadcrumbs}
+        >
+            <ChronicleEditorialGrid>
+                <main className="space-y-5">
+                    <ChroniclePaperPanel
+                        variant="feature"
+                        className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[14rem_minmax(0,1fr)]"
+                    >
+                        <div
+                            aria-hidden="true"
+                            className="min-h-48 rounded-sm border border-[color:var(--chronicle-border)] bg-[radial-gradient(circle_at_30%_20%,rgba(173,122,44,0.24),transparent_0.5rem),radial-gradient(circle_at_68%_70%,rgba(104,69,31,0.15),transparent_0.65rem),linear-gradient(145deg,rgba(255,248,235,0.45),rgba(173,122,44,0.12))]"
+                        />
 
-                <ScriptureIntroBlock
-                    label="Chapter Introduction"
-                    block={chapter.intro_block}
-                />
+                        <div className="space-y-5">
+                            <div className="space-y-3">
+                                <p className="chronicle-kicker">
+                                    Chapter Reading
+                                </p>
+                                <h1 className="chronicle-feature-title">
+                                    {pageModel.chapterTitle}
+                                </h1>
+                                <div className="flex flex-wrap items-center gap-2 text-sm text-[color:var(--chronicle-brown)]">
+                                    <span>{book.title}</span>
+                                    {!pageModel.hidesGenericBookSection && (
+                                        <>
+                                            <span aria-hidden="true">/</span>
+                                            <span>{pageModel.bookSectionTitle}</span>
+                                        </>
+                                    )}
+                                    <span aria-hidden="true">/</span>
+                                    <span>
+                                        {pageModel.totalVerseCount} verse
+                                        {pageModel.totalVerseCount === 1 ? '' : 's'}
+                                    </span>
+                                </div>
+                                <ChronicleOrnament />
+                                <p className="max-w-3xl text-base leading-7 text-[color:var(--chronicle-ink)]">
+                                    Read the chapter introduction first, then
+                                    continue through the grouped verse list in
+                                    canonical order.
+                                </p>
+                            </div>
 
-                <ScriptureReadingNavigationActions
-                    actions={[
-                        {
-                            actionKey: 'back_to_chapter_list',
-                            href: book_section.href,
-                        },
-                    ]}
-                />
-            </ScripturePageIntroCard>
+                            <ChronicleStatRow items={pageModel.statItems} />
 
-            <ScriptureChapterVerseList
-                chapter={chapter}
-                chapterSections={chapter_sections}
-                readerLanguages={reader_languages}
-                defaultLanguage={default_language}
-                showAdminControls={showAdminControls}
-                admin={admin}
-                verseAdminShared={verse_admin_shared}
-            />
+                            <div className="space-y-4">
+                                <UniversalSectionStack
+                                    sections={pageModel.introSections}
+                                    renderContext={pageModel.mainRenderContext}
+                                />
+
+                                <div className="flex flex-wrap gap-3">
+                                    {pageModel.firstVerse?.explanation_href && (
+                                        <Button
+                                            asChild
+                                            className="chronicle-button rounded-sm px-5"
+                                        >
+                                            <Link
+                                                href={
+                                                    pageModel.firstVerse.explanation_href
+                                                }
+                                            >
+                                                Read First Verse
+                                                <ChevronRight className="size-4" />
+                                            </Link>
+                                        </Button>
+                                    )}
+                                    <Button
+                                        asChild
+                                        variant="outline"
+                                        className="chronicle-button-outline rounded-sm px-5"
+                                    >
+                                        <a href="#verse-list">
+                                            Browse Verses
+                                            <ChevronRight className="size-4" />
+                                        </a>
+                                    </Button>
+                                </div>
+                            </div>
+
+                            <AdminModuleHostGroup
+                                surfaces={[
+                                    chapterIdentitySurface,
+                                    chapterIntroSurface,
+                                    chapterActionsSurface,
+                                ]}
+                                className={ADMIN_PANEL_CLASS_NAME}
+                            />
+                        </div>
+                    </ChroniclePaperPanel>
+
+                    <ScriptureChapterVerseList
+                        chapter={chapter}
+                        chapterSections={chapter_sections}
+                        readerLanguages={reader_languages}
+                        defaultLanguage={default_language}
+                        showAdminControls={showAdminControls}
+                        admin={admin}
+                        verseAdminShared={verse_admin_shared}
+                        panelClassName={ADMIN_PANEL_CLASS_NAME}
+                    />
+                </main>
+
+                <ChronicleSideRail>
+                    <UniversalSectionStack
+                        sections={pageModel.railSections}
+                        renderContext={pageModel.railRenderContext}
+                    />
+                </ChronicleSideRail>
+            </ChronicleEditorialGrid>
         </ScriptureLayout>
     );
 }

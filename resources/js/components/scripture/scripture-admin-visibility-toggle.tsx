@@ -34,7 +34,7 @@ export function ScriptureAdminVisibilityToggle() {
             type="button"
             size="sm"
             variant={adminContext.isVisible ? 'default' : 'outline'}
-            className="h-9 rounded-full px-4"
+            className="h-8 rounded-full border-[color:var(--chronicle-border)] bg-[rgba(255,248,235,0.78)] px-3 text-xs text-[color:var(--chronicle-brown)] shadow-none hover:bg-[rgba(173,122,44,0.1)]"
             data-admin-visibility-toggle="scripture"
             onClick={toggleVisibility}
             disabled={processing}

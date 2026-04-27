@@ -5,11 +5,11 @@ import {
     resolveVerseReaderRelationSurfaces,
     resolveVerseRowActionSurface,
 } from '@/admin/integrations/scripture/verses';
+import { verseLabel } from '@/lib/scripture';
 import type {
     ScriptureChapterVerseSharedAdmin,
     ScriptureReaderVerse,
 } from '@/types';
-import { verseLabel } from '@/lib/scripture';
 
 type Props = {
     verse: ScriptureReaderVerse;
@@ -39,20 +39,17 @@ export function ScriptureChapterVerseRowAdmin({
         number: verse.number,
         text: verse.text,
     };
-    const {
-        identitySurface,
-        introSurface,
-        metaSurface,
-    } = resolveVerseHeaderSurfaces({
-        verse: verseRecord,
-        verseTitle,
-        verseMeta: verse.verse_meta ?? null,
-        characters: verse.characters ?? [],
-        admin: verse.admin,
-        context: 'chapter_page_row',
-        returnToHref,
-        enabled: showAdminControls,
-    });
+    const { identitySurface, introSurface, metaSurface } =
+        resolveVerseHeaderSurfaces({
+            verse: verseRecord,
+            verseTitle,
+            verseMeta: verse.verse_meta ?? null,
+            characters: verse.characters ?? [],
+            admin: verse.admin,
+            context: 'chapter_page_row',
+            returnToHref,
+            enabled: showAdminControls,
+        });
     const rowActionSurface = resolveVerseRowActionSurface({
         verse: verseRecord,
         verseTitle,
@@ -60,18 +57,16 @@ export function ScriptureChapterVerseRowAdmin({
         admin: verse.admin,
         enabled: showAdminControls,
     });
-    const {
-        translationsSurface,
-        commentariesSurface,
-    } = resolveVerseReaderRelationSurfaces({
-        verse: verseRecord,
-        verseTitle,
-        translationsAdmin: verse.admin.translations,
-        commentariesAdmin: verse.admin.commentaries,
-        sharedAdmin,
-        fullEditHref: verse.admin.full_edit_href,
-        enabled: showAdminControls,
-    });
+    const { translationsSurface, commentariesSurface } =
+        resolveVerseReaderRelationSurfaces({
+            verse: verseRecord,
+            verseTitle,
+            translationsAdmin: verse.admin.translations,
+            commentariesAdmin: verse.admin.commentaries,
+            sharedAdmin,
+            fullEditHref: verse.admin.full_edit_href,
+            enabled: showAdminControls,
+        });
 
     if (
         !identitySurface &&

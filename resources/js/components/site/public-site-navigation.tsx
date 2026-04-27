@@ -12,7 +12,8 @@ import {
     Trash2,
     X,
 } from 'lucide-react';
-import { useEffect, useMemo, useState, type ComponentProps } from 'react';
+import { useMemo, useState } from 'react';
+import type { ComponentProps } from 'react';
 import { LinkTargetFields } from '@/components/navigation/link-target-fields';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,7 +32,6 @@ import {
     SheetTrigger,
 } from '@/components/ui/sheet';
 import { useVisibleAdminControls } from '@/hooks/use-admin-context';
-import { createDefaultLinkTarget } from '@/lib/link-targets';
 import { createSuggestedLinkTarget } from '@/lib/link-targets';
 import { cn } from '@/lib/utils';
 import type {
@@ -79,7 +79,7 @@ export function PublicSiteNavigation({
 
 function DesktopNavigation({ items, currentUrl }: Omit<Props, 'authoring'>) {
     return (
-        <nav className="flex flex-wrap items-center gap-2">
+        <nav className="flex flex-wrap items-center gap-6">
             {items.map((item) => (
                 <DesktopNavigationItem
                     key={item.id}
@@ -101,17 +101,18 @@ function DesktopNavigationItem({
     const active = isNavigationItemActive(item, currentUrl);
     const [open, setOpen] = useState(false);
 
-    useEffect(() => {
-        setOpen(false);
-    }, [currentUrl]);
-
     if (item.children.length === 0) {
         return (
             <Button
                 asChild
                 size="sm"
                 variant={active ? 'default' : 'ghost'}
-                className="h-8 rounded-full px-3"
+                className={cn(
+                    'h-8 rounded-none border-b-2 bg-transparent px-1 font-serif text-xs tracking-[0.12em] text-[color:var(--chronicle-ink)] uppercase shadow-none hover:bg-transparent hover:text-[color:var(--chronicle-brown)]',
+                    active
+                        ? 'border-[color:var(--chronicle-gold)]'
+                        : 'border-transparent',
+                )}
             >
                 <Link href={item.href ?? '#'}>{item.label}</Link>
             </Button>
@@ -124,7 +125,12 @@ function DesktopNavigationItem({
                 type="button"
                 size="sm"
                 variant={active ? 'default' : 'ghost'}
-                className="h-8 rounded-full px-3"
+                className={cn(
+                    'h-8 rounded-none border-b-2 bg-transparent px-1 font-serif text-xs tracking-[0.12em] text-[color:var(--chronicle-ink)] uppercase shadow-none hover:bg-transparent hover:text-[color:var(--chronicle-brown)]',
+                    active
+                        ? 'border-[color:var(--chronicle-gold)]'
+                        : 'border-transparent',
+                )}
                 data-site-nav-trigger={`desktop-${item.id}`}
                 onClick={() => setOpen((current) => !current)}
             >
@@ -133,26 +139,26 @@ function DesktopNavigationItem({
 
             {open && (
                 <div
-                    className="absolute left-0 z-40 mt-2 min-w-60 rounded-2xl border border-border/70 bg-background p-2 shadow-xl"
+                    className="chronicle-paper absolute left-0 z-40 mt-2 min-w-60 rounded-sm p-2"
                     data-site-nav-dropdown={item.id}
                 >
-                {item.href && (
-                    <>
-                        <Link
-                            href={item.href}
-                            className="block rounded-xl px-3 py-2 text-sm hover:bg-accent"
-                        >
-                            Open {item.label}
-                        </Link>
-                        <div className="my-1 border-t border-border/60" />
-                    </>
-                )}
+                    {item.href && (
+                        <>
+                            <Link
+                                href={item.href}
+                                className="block rounded-sm px-3 py-2 text-sm hover:bg-[rgba(173,122,44,0.1)]"
+                            >
+                                Open {item.label}
+                            </Link>
+                            <div className="my-1 border-t border-border/60" />
+                        </>
+                    )}
 
-                <div className="space-y-1">
-                    {item.children.map((child) => (
-                        <DesktopDropdownChild key={child.id} item={child} />
-                    ))}
-                </div>
+                    <div className="space-y-1">
+                        {item.children.map((child) => (
+                            <DesktopDropdownChild key={child.id} item={child} />
+                        ))}
+                    </div>
                 </div>
             )}
         </div>
@@ -162,15 +168,11 @@ function DesktopNavigationItem({
 function DesktopDropdownChild({ item }: { item: SiteNavigationItem }) {
     const [open, setOpen] = useState(false);
 
-    useEffect(() => {
-        setOpen(false);
-    }, [item.id]);
-
     if (item.children.length === 0) {
         return (
             <Link
                 href={item.href ?? '#'}
-                className="block rounded-xl px-3 py-2 text-sm hover:bg-accent"
+                className="block rounded-sm px-3 py-2 text-sm hover:bg-[rgba(173,122,44,0.1)]"
             >
                 {item.label}
             </Link>
@@ -181,7 +183,7 @@ function DesktopDropdownChild({ item }: { item: SiteNavigationItem }) {
         <div className="group relative">
             <button
                 type="button"
-                className="flex w-full cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-sm hover:bg-accent"
+                className="flex w-full cursor-pointer items-center justify-between rounded-sm px-3 py-2 text-sm hover:bg-[rgba(173,122,44,0.1)]"
                 onClick={() => setOpen((current) => !current)}
             >
                 <span>{item.label}</span>
@@ -190,26 +192,26 @@ function DesktopDropdownChild({ item }: { item: SiteNavigationItem }) {
 
             {open && (
                 <div
-                    className="absolute left-full top-0 z-40 ml-2 min-w-56 rounded-2xl border border-border/70 bg-background p-2 shadow-xl"
+                    className="chronicle-paper absolute top-0 left-full z-40 ml-2 min-w-56 rounded-sm p-2"
                     data-site-nav-submenu={item.id}
                 >
-                {item.href && (
-                    <>
-                        <Link
-                            href={item.href}
-                            className="block rounded-xl px-3 py-2 text-sm hover:bg-accent"
-                        >
-                            Open {item.label}
-                        </Link>
-                        <div className="my-1 border-t border-border/60" />
-                    </>
-                )}
+                    {item.href && (
+                        <>
+                            <Link
+                                href={item.href}
+                                className="block rounded-sm px-3 py-2 text-sm hover:bg-[rgba(173,122,44,0.1)]"
+                            >
+                                Open {item.label}
+                            </Link>
+                            <div className="my-1 border-t border-border/60" />
+                        </>
+                    )}
 
-                <div className="space-y-1">
-                    {item.children.map((child) => (
-                        <DesktopDropdownChild key={child.id} item={child} />
-                    ))}
-                </div>
+                    <div className="space-y-1">
+                        {item.children.map((child) => (
+                            <DesktopDropdownChild key={child.id} item={child} />
+                        ))}
+                    </div>
                 </div>
             )}
         </div>
@@ -259,15 +261,8 @@ function NavigationListAuthoring({
     dataListKey: string;
     addRequestToken?: number;
 }) {
-    const [adding, setAdding] = useState(false);
-    const [draftAutoFocus, setDraftAutoFocus] = useState(false);
-
-    useEffect(() => {
-        if (addRequestToken > 0) {
-            setAdding(true);
-            setDraftAutoFocus(true);
-        }
-    }, [addRequestToken]);
+    const [adding, setAdding] = useState(addRequestToken > 0);
+    const [draftAutoFocus, setDraftAutoFocus] = useState(addRequestToken > 0);
 
     return (
         <div
@@ -317,9 +312,7 @@ function NavigationListAuthoring({
                         setDraftAutoFocus(true);
                     }}
                     data-header-nav-action={
-                        placement === 'root'
-                            ? 'add-root-item'
-                            : 'add-list-item'
+                        placement === 'root' ? 'add-root-item' : 'add-list-item'
                     }
                     data-header-nav-parent-id={
                         parentId === null ? 'root' : String(parentId)
@@ -362,10 +355,6 @@ function NavigationItemAuthoring({
         target: item.target,
     });
     const errors = form.errors as Record<string, string | undefined>;
-
-    useEffect(() => {
-        setChildrenOpen(false);
-    }, [currentUrl]);
 
     const beginEdit = () => {
         form.clearErrors();
@@ -529,7 +518,11 @@ function NavigationItemAuthoring({
                         icon={ChevronUp}
                         variant="ghost"
                         onClick={() =>
-                            router.post(item.move_up_href, {}, { preserveScroll: true })
+                            router.post(
+                                item.move_up_href,
+                                {},
+                                { preserveScroll: true },
+                            )
                         }
                         data-header-nav-action="move-up"
                         data-header-nav-item-id={String(item.id)}
@@ -539,7 +532,11 @@ function NavigationItemAuthoring({
                         icon={ChevronDown}
                         variant="ghost"
                         onClick={() =>
-                            router.post(item.move_down_href, {}, { preserveScroll: true })
+                            router.post(
+                                item.move_down_href,
+                                {},
+                                { preserveScroll: true },
+                            )
                         }
                         data-header-nav-action="move-down"
                         data-header-nav-item-id={String(item.id)}
@@ -560,8 +557,8 @@ function NavigationItemAuthoring({
                     className={cn(
                         'z-40 min-w-72 rounded-2xl border border-border/70 bg-background p-3 shadow-xl',
                         placement === 'root'
-                            ? 'absolute left-0 top-full mt-2'
-                            : 'absolute left-full top-0 ml-3',
+                            ? 'absolute top-full left-0 mt-2'
+                            : 'absolute top-0 left-full ml-3',
                     )}
                     data-header-nav-children={item.id}
                 >
@@ -577,6 +574,7 @@ function NavigationItemAuthoring({
                     ) : null}
 
                     <NavigationListAuthoring
+                        key={`${childListKey}-${childAddToken}`}
                         items={item.children}
                         currentUrl={currentUrl}
                         menuKey={menuKey}
@@ -694,15 +692,21 @@ function NavigationDraftRow({
                 'rounded-2xl border border-dashed border-border bg-background/95 p-3 shadow-sm',
                 placement === 'root' && 'min-w-60',
             )}
-            data-header-nav-draft-parent={parentId === null ? 'root' : String(parentId)}
+            data-header-nav-draft-parent={
+                parentId === null ? 'root' : String(parentId)
+            }
         >
             <div className="space-y-2">
                 <Input
                     value={form.data.label}
-                    onChange={(event) => form.setData('label', event.target.value)}
+                    onChange={(event) =>
+                        form.setData('label', event.target.value)
+                    }
                     placeholder="New navigation label"
                     autoFocus={autoFocus}
-                    data-header-nav-draft-label={parentId === null ? 'root' : String(parentId)}
+                    data-header-nav-draft-label={
+                        parentId === null ? 'root' : String(parentId)
+                    }
                 />
 
                 <div className="flex flex-wrap items-center gap-2">
@@ -710,7 +714,9 @@ function NavigationDraftRow({
                         label={showTargetEditor ? 'Hide target' : 'Edit target'}
                         icon={Link2}
                         variant="outline"
-                        onClick={() => setShowTargetEditor((current) => !current)}
+                        onClick={() =>
+                            setShowTargetEditor((current) => !current)
+                        }
                         data-header-nav-action="toggle-draft-target"
                         data-header-nav-parent-id={
                             parentId === null ? 'root' : String(parentId)
@@ -823,7 +829,8 @@ function NavigationTargetEditor({
                         key: errors['target.value.key'],
                         kind: errors['target.value.kind'],
                         book_slug: errors['target.value.book_slug'],
-                        book_section_slug: errors['target.value.book_section_slug'],
+                        book_section_slug:
+                            errors['target.value.book_section_slug'],
                         chapter_slug: errors['target.value.chapter_slug'],
                         chapter_section_slug:
                             errors['target.value.chapter_section_slug'],
@@ -901,15 +908,18 @@ function MobileNavigation({ items, currentUrl }: Omit<Props, 'authoring'>) {
                     type="button"
                     size="sm"
                     variant="outline"
-                    className="h-8 rounded-full px-3"
+                    className="chronicle-button-outline h-9 rounded-sm px-3 font-serif text-xs tracking-[0.14em] uppercase"
                     data-site-nav-trigger="mobile"
                 >
                     <Menu className="size-4" />
                     Menu
                 </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-full max-w-sm p-0">
-                <SheetHeader className="border-b px-5 py-4 text-left">
+            <SheetContent
+                side="right"
+                className="w-full max-w-sm border-[color:var(--chronicle-border)] bg-[color:var(--chronicle-paper)] p-0 text-[color:var(--chronicle-ink)]"
+            >
+                <SheetHeader className="border-b border-[color:var(--chronicle-border)] px-5 py-4 text-left">
                     <SheetTitle>Navigation</SheetTitle>
                 </SheetHeader>
 
@@ -918,8 +928,9 @@ function MobileNavigation({ items, currentUrl }: Omit<Props, 'authoring'>) {
                         <div
                             key={`panel-${panelIndex}`}
                             className={cn(
-                                'absolute inset-0 overflow-y-auto bg-background px-5 py-5 transition-transform duration-300',
-                                panelIndex > 0 && 'border-l',
+                                'absolute inset-0 overflow-y-auto bg-[color:var(--chronicle-paper)] px-5 py-5 transition-transform duration-300',
+                                panelIndex > 0 &&
+                                    'border-l border-[color:var(--chronicle-border)]',
                             )}
                             style={{
                                 transform: `translateX(${(panelIndex - depth) * 100}%)`,
@@ -931,9 +942,11 @@ function MobileNavigation({ items, currentUrl }: Omit<Props, 'authoring'>) {
                                     type="button"
                                     variant="ghost"
                                     size="sm"
-                                    className="mb-4 h-8 rounded-full px-3"
+                                    className="mb-4 h-8 rounded-sm px-3"
                                     onClick={() =>
-                                        setPath((current) => current.slice(0, -1))
+                                        setPath((current) =>
+                                            current.slice(0, -1),
+                                        )
                                     }
                                 >
                                     <ChevronLeft className="size-4" />
@@ -943,7 +956,8 @@ function MobileNavigation({ items, currentUrl }: Omit<Props, 'authoring'>) {
 
                             <div className="space-y-2">
                                 {panelItems.map((item) => {
-                                    const hasChildren = item.children.length > 0;
+                                    const hasChildren =
+                                        item.children.length > 0;
                                     const active = isNavigationItemActive(
                                         item,
                                         currentUrl,
@@ -953,14 +967,18 @@ function MobileNavigation({ items, currentUrl }: Omit<Props, 'authoring'>) {
                                     return (
                                         <div
                                             key={item.id}
-                                            className="flex items-center gap-2 rounded-2xl border border-border/70 bg-muted/20 p-2"
+                                            className="flex items-center gap-2 rounded-sm border border-[color:var(--chronicle-border)] bg-[rgba(255,248,235,0.72)] p-2"
                                             data-site-nav-item={item.id}
                                         >
                                             {canOpen ? (
                                                 <Button
                                                     asChild
-                                                    variant={active ? 'default' : 'ghost'}
-                                                    className="min-h-11 flex-1 justify-start rounded-xl px-4 text-left whitespace-normal"
+                                                    variant={
+                                                        active
+                                                            ? 'default'
+                                                            : 'ghost'
+                                                    }
+                                                    className="min-h-11 flex-1 justify-start rounded-sm px-4 text-left whitespace-normal"
                                                 >
                                                     <Link
                                                         href={item.href ?? '#'}
@@ -972,14 +990,20 @@ function MobileNavigation({ items, currentUrl }: Omit<Props, 'authoring'>) {
                                             ) : (
                                                 <Button
                                                     type="button"
-                                                    variant={active ? 'default' : 'ghost'}
-                                                    className="min-h-11 flex-1 justify-start rounded-xl px-4 text-left whitespace-normal"
+                                                    variant={
+                                                        active
+                                                            ? 'default'
+                                                            : 'ghost'
+                                                    }
+                                                    className="min-h-11 flex-1 justify-start rounded-sm px-4 text-left whitespace-normal"
                                                     onClick={() => {
                                                         if (hasChildren) {
-                                                            setPath((current) => [
-                                                                ...current,
-                                                                item,
-                                                            ]);
+                                                            setPath(
+                                                                (current) => [
+                                                                    ...current,
+                                                                    item,
+                                                                ],
+                                                            );
                                                         }
                                                     }}
                                                 >
@@ -992,14 +1016,16 @@ function MobileNavigation({ items, currentUrl }: Omit<Props, 'authoring'>) {
                                                     type="button"
                                                     variant="outline"
                                                     size="icon"
-                                                    className="size-11 rounded-xl"
+                                                    className="size-11 rounded-sm"
                                                     onClick={() =>
                                                         setPath((current) => [
                                                             ...current,
                                                             item,
                                                         ])
                                                     }
-                                                    data-site-nav-open-children={item.id}
+                                                    data-site-nav-open-children={
+                                                        item.id
+                                                    }
                                                 >
                                                     <ChevronRight className="size-4" />
                                                 </Button>

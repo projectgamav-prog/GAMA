@@ -23,7 +23,7 @@ import {
     describeLinkTarget,
 } from '@/lib/link-targets';
 import type { CmsModuleEditorProps } from '../../core/module-types';
-import type { SharedLinkTargetOptions } from '@/types';
+import type { LinkTarget, SharedLinkTargetOptions } from '@/types';
 import {
     createDefaultCardListItem,
     getCardListColumns,
@@ -46,9 +46,11 @@ export function CardListEditor({
     const layout = getCardListLayout(value.config);
     const columns = getCardListColumns(value.config);
     const sharedTargetOptions =
-        ((page.props as typeof page.props & {
-            linkTargetOptions?: SharedLinkTargetOptions | null;
-        }).linkTargetOptions as SharedLinkTargetOptions | null | undefined) ??
+        ((
+            page.props as typeof page.props & {
+                linkTargetOptions?: SharedLinkTargetOptions | null;
+            }
+        ).linkTargetOptions as SharedLinkTargetOptions | null | undefined) ??
         null;
     const [openAdvancedItems, setOpenAdvancedItems] = useState<number[]>([]);
 
@@ -79,13 +81,7 @@ export function CardListEditor({
             ...items.slice(0, index + 1),
             {
                 ...item,
-                target: item.target
-                    ? {
-                          ...item.target,
-                          value: { ...item.target.value },
-                          behavior: { ...item.target.behavior },
-                      }
-                    : null,
+                target: item.target ? cloneLinkTarget(item.target) : null,
             },
             ...items.slice(index + 1),
         ]);
@@ -333,17 +329,21 @@ export function CardListEditor({
 
                             <div className="rounded-xl border border-border/70 bg-background px-4 py-3">
                                 <div className="flex flex-wrap items-center gap-2">
-                                    <span className="rounded-full border border-border/70 px-2 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-                                        {(item.target ??
-                                            createDefaultLinkTarget('url')).type}
+                                    <span className="rounded-full border border-border/70 px-2 py-1 text-[11px] font-medium tracking-[0.12em] text-muted-foreground uppercase">
+                                        {
+                                            (
+                                                item.target ??
+                                                createDefaultLinkTarget('url')
+                                            ).type
+                                        }
                                     </span>
                                     {item.cta_label.trim() ? (
-                                        <span className="rounded-full border border-border/70 px-2 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                                        <span className="rounded-full border border-border/70 px-2 py-1 text-[11px] font-medium tracking-[0.12em] text-muted-foreground uppercase">
                                             CTA: {item.cta_label.trim()}
                                         </span>
                                     ) : null}
                                     {item.eyebrow.trim() ? (
-                                        <span className="rounded-full border border-border/70 px-2 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                                        <span className="rounded-full border border-border/70 px-2 py-1 text-[11px] font-medium tracking-[0.12em] text-muted-foreground uppercase">
                                             Eyebrow set
                                         </span>
                                     ) : null}
@@ -415,7 +415,8 @@ export function CardListEditor({
                                                     ? {
                                                           ...entry,
                                                           cta_label:
-                                                              event.target.value,
+                                                              event.target
+                                                                  .value,
                                                       }
                                                     : entry,
                                             ),
@@ -464,7 +465,9 @@ export function CardListEditor({
 
                         <LinkTargetFields
                             idPrefix={`${idPrefix}-card-list-item-target-${index}`}
-                            value={item.target ?? createDefaultLinkTarget('url')}
+                            value={
+                                item.target ?? createDefaultLinkTarget('url')
+                            }
                             onChange={(target) =>
                                 updateItems(
                                     items.map((entry, itemIndex) =>
@@ -582,4 +585,36 @@ export function CardListEditor({
             </div>
         </div>
     );
+}
+
+function cloneLinkTarget(target: LinkTarget): LinkTarget {
+    if (target.type === 'cms_page') {
+        return {
+            ...target,
+            value: { ...target.value },
+            behavior: { ...target.behavior },
+        };
+    }
+
+    if (target.type === 'route') {
+        return {
+            ...target,
+            value: { ...target.value },
+            behavior: { ...target.behavior },
+        };
+    }
+
+    if (target.type === 'scripture') {
+        return {
+            ...target,
+            value: { ...target.value },
+            behavior: { ...target.behavior },
+        };
+    }
+
+    return {
+        ...target,
+        value: { ...target.value },
+        behavior: { ...target.behavior },
+    };
 }

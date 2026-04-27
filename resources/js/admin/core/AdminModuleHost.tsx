@@ -10,6 +10,12 @@ import {
     resolveAdminModuleActions,
 } from './module-actions';
 import { AdminModuleActionRenderer } from './AdminModuleActionRenderer';
+import { getAdminQuickEditAdapter } from './AdminQuickEditRegistry';
+import {
+    shouldDeferStructuredIdentityToQuickEditFields,
+    useAdminResolvedControls,
+    useRegisterCurrentAdminControls,
+} from '@/admin/awareness/core';
 import { parseScriptureAdminNavigationTarget } from '@/lib/scripture-admin-navigation';
 import { cn } from '@/lib/utils';
 
@@ -40,16 +46,67 @@ export function AdminModuleHost({
         () => resolveAdminModuleActions(surface, qualifyingModules),
         [surface, qualifyingModules],
     );
+    const { resolvedSurfaces } = useAdminResolvedControls();
+    const defersStructuredIdentityToFieldQuickEdit = useMemo(
+        () =>
+            shouldDeferStructuredIdentityToQuickEditFields({
+                surface,
+                resolvedSurfaces,
+            }),
+        [resolvedSurfaces, surface],
+    );
+    const visibleActions = useMemo(
+        () =>
+            resolvedActions.filter(
+                (action) =>
+                    !(
+                        defersStructuredIdentityToFieldQuickEdit &&
+                        action.action.actionKey === 'edit_identity'
+                    ),
+            ),
+        [defersStructuredIdentityToFieldQuickEdit, resolvedActions],
+    );
+    const currentControlSummary = useMemo(
+        () =>
+            visibleActions.length > 0
+                ? {
+                      surface,
+                      controls: visibleActions.map((action) => ({
+                          key: action.key,
+                          label: action.label,
+                          family: action.action.actionFamily ?? null,
+                          mode:
+                              action.action.actionFamily === 'full_edit'
+                                  ? 'full_edit'
+                                  : action.openMode === 'drawer'
+                                    ? 'drawer'
+                                    : 'structured_editor',
+                          placement:
+                              action.placement === 'header'
+                                  ? 'section-header'
+                                  : action.placement === 'dropdown'
+                                    ? 'floating-chip'
+                                    : 'top-right',
+                          source: 'module_host' as const,
+                      })),
+                  }
+                : null,
+        [surface, visibleActions],
+    );
     const [activeActionKey, setActiveActionKey] = useState<string | null>(null);
+
+    useRegisterCurrentAdminControls(currentControlSummary, [
+        currentControlSummary,
+    ]);
 
     useEffect(() => {
         if (
             activeActionKey !== null &&
-            !resolvedActions.some((action) => action.key === activeActionKey)
+            !visibleActions.some((action) => action.key === activeActionKey)
         ) {
             setActiveActionKey(null);
         }
-    }, [activeActionKey, resolvedActions]);
+    }, [activeActionKey, visibleActions]);
 
     useEffect(() => {
         const target = parseScriptureAdminNavigationTarget(page.url);
@@ -57,15 +114,19 @@ export function AdminModuleHost({
         if (
             target === null ||
             target.section !== surface.regionKey ||
-            resolvedActions.length === 0
+            visibleActions.length === 0
         ) {
             return;
         }
 
-        setActiveActionKey((current) => current ?? resolvedActions[0].key);
-    }, [page.url, resolvedActions, surface.regionKey]);
+        setActiveActionKey((current) => current ?? visibleActions[0].key);
+    }, [page.url, surface.regionKey, visibleActions]);
 
     if (qualifyingModules.length === 0) {
+        return null;
+    }
+
+    if (getAdminQuickEditAdapter(surface) !== null) {
         return null;
     }
 
@@ -77,7 +138,7 @@ export function AdminModuleHost({
 
     const content = qualifyingModules.map((module) => {
         const EditorComponent = module.EditorComponent;
-        const activeAction = findModuleActionByKey(resolvedActions, activeActionKey);
+        const activeAction = findModuleActionByKey(visibleActions, activeActionKey);
         const moduleActivation =
             module.actions && module.actions.length > 0
                 ? {
@@ -88,11 +149,11 @@ export function AdminModuleHost({
                               ? activeAction
                               : null,
                       activate: (actionKey?: string) => {
-                          const targetAction = findFirstModuleAction(
-                              resolvedActions,
-                              module.key,
-                              actionKey,
-                          );
+                              const targetAction = findFirstModuleAction(
+                                  visibleActions,
+                                  module.key,
+                                  actionKey,
+                              );
 
                           if (targetAction) {
                               setActiveActionKey(targetAction.key);
@@ -126,10 +187,10 @@ export function AdminModuleHost({
     });
 
     const resolvedActionContent =
-        resolvedActions.length > 0 ? (
+        visibleActions.length > 0 ? (
             <AdminModuleActionRenderer
                 surface={surface}
-                actions={resolvedActions}
+                actions={visibleActions}
                 activeActionKey={activeActionKey}
                 onAction={handleAction}
             />

@@ -1,20 +1,14 @@
 import { Link } from '@inertiajs/react';
 import { Users } from 'lucide-react';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
+import { VerseSupportPanel } from '@/components/scripture/verse/VerseSupportPanel';
 import { Badge } from '@/components/ui/badge';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { VerseShowProps } from '@/types';
 import type { ScriptureEntityRegionInput } from '@/types/scripture';
 
 type Props = {
-    entityMeta: ScriptureEntityRegionInput;
+    entityMeta: Omit<ScriptureEntityRegionInput, 'region' | 'capabilityHint'>;
     characters: VerseShowProps['characters'];
 };
 
@@ -28,67 +22,62 @@ export function VerseCharactersSection({ entityMeta, characters }: Props) {
             }}
             asChild
         >
-            <Card>
-                <CardHeader className="gap-3">
-                    <CardTitle className="flex items-center gap-2 text-xl">
-                        <Users className="size-5" />
-                        Related Characters
-                    </CardTitle>
-                    <CardDescription>
-                        Character associations attached to this verse.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    {characters.map((assignment, index) => (
-                        <ScriptureEntityRegion
-                            key={assignment.id}
-                            meta={{
-                                entityType: 'verse_character_assignment',
-                                entityId: assignment.id,
-                                entityLabel:
-                                    assignment.character?.name ??
-                                    'Untitled character',
-                                region: 'character_assignment',
-                                capabilityHint: 'relationships',
-                            }}
-                            asChild
+            <VerseSupportPanel
+                title="Related Characters"
+                eyebrow="People"
+                icon={Users}
+                contentClassName="space-y-3"
+            >
+                {characters.map((assignment, index) => (
+                    <ScriptureEntityRegion
+                        key={assignment.id}
+                        meta={{
+                            entityType: 'verse_character_assignment',
+                            entityId: assignment.id,
+                            entityLabel:
+                                assignment.character?.name ??
+                                'Untitled character',
+                            region: 'character_assignment',
+                            capabilityHint: 'relationships',
+                        }}
+                        asChild
+                    >
+                        <div
+                            className={cn(
+                                'space-y-2',
+                                index > 0 &&
+                                    'border-t border-[color:var(--chronicle-border)] pt-3',
+                            )}
                         >
-                            <div
-                                className={cn(
-                                    'space-y-2',
-                                    index > 0 && 'border-t pt-4',
+                            <div className="flex flex-wrap items-center gap-1.5">
+                                {assignment.character?.href ? (
+                                    <Link
+                                        href={assignment.character.href}
+                                        className="font-medium text-[color:var(--chronicle-ink)] underline-offset-4 hover:text-[color:var(--chronicle-gold)] hover:underline"
+                                    >
+                                        {assignment.character.name}
+                                    </Link>
+                                ) : (
+                                    <span className="font-medium">
+                                        {assignment.character?.name ??
+                                            'Untitled character'}
+                                    </span>
                                 )}
-                            >
-                                <div className="flex flex-wrap items-center gap-2">
-                                    {assignment.character?.href ? (
-                                        <Link
-                                            href={assignment.character.href}
-                                            className="font-medium underline-offset-4 hover:text-primary hover:underline"
-                                        >
-                                            {assignment.character.name}
-                                        </Link>
-                                    ) : (
-                                        <span className="font-medium">
-                                            {assignment.character?.name ??
-                                                'Untitled character'}
-                                        </span>
-                                    )}
-                                    {assignment.weight !== null && (
-                                        <Badge variant="outline">
-                                            Weight {assignment.weight}
-                                        </Badge>
-                                    )}
-                                </div>
-                                {assignment.notes && (
-                                    <p className="text-sm leading-6 text-muted-foreground">
-                                        {assignment.notes}
-                                    </p>
+                                {assignment.weight !== null && (
+                                    <Badge variant="outline">
+                                        Weight {assignment.weight}
+                                    </Badge>
                                 )}
                             </div>
-                        </ScriptureEntityRegion>
-                    ))}
-                </CardContent>
-            </Card>
+                            {assignment.notes && (
+                                <p className="text-sm leading-6 text-[color:var(--chronicle-brown)]">
+                                    {assignment.notes}
+                                </p>
+                            )}
+                        </div>
+                    </ScriptureEntityRegion>
+                ))}
+            </VerseSupportPanel>
         </ScriptureEntityRegion>
     );
 }

@@ -1,7 +1,26 @@
 import { Link, usePage } from '@inertiajs/react';
+import {
+    BookMarked,
+    BookOpenText,
+    ChevronRight,
+    Flame,
+    Languages,
+    MessageSquareText,
+    ScrollText,
+    Search,
+    Sparkles,
+} from 'lucide-react';
 import { CmsExposedRegion } from '@/admin/cms/components/CmsExposedRegion';
+import {
+    ChronicleEditorialGrid,
+    ChroniclePaperPanel,
+    ChronicleSectionHeading,
+    ChronicleSideRail,
+} from '@/components/site/chronicle-primitives';
 import { Button } from '@/components/ui/button';
 import PublicSiteLayout from '@/layouts/public-site-layout';
+import { buildHomeRailDescriptorModel } from '@/rendering/adapters/home-page-adapter';
+import { UniversalSectionStack } from '@/rendering/core';
 import { login, register } from '@/routes';
 import { index as scriptureBooksIndex } from '@/routes/scripture/books';
 import type { CmsExposedRegion as CmsExposedRegionPayload } from '@/types';
@@ -16,6 +35,67 @@ type HomeProps = {
     cms_regions: CmsExposedRegionPayload[];
 };
 
+const libraryPreviewItems = [
+    {
+        title: 'Torah',
+        count: '5 Books',
+        description: 'Genesis to Deuteronomy',
+        icon: ScrollText,
+    },
+    {
+        title: 'Psalms',
+        count: '1 Book',
+        description: 'Songs and prayers',
+        icon: Sparkles,
+    },
+    {
+        title: 'Gospels',
+        count: '4 Books',
+        description: 'Matthew, Mark, Luke, John',
+        icon: BookOpenText,
+    },
+    {
+        title: 'Epistles',
+        count: '21 Books',
+        description: 'Letters to early churches',
+        icon: MessageSquareText,
+    },
+    {
+        title: 'Revelation',
+        count: '1 Book',
+        description: "God's eternal purpose",
+        icon: Flame,
+    },
+];
+
+const studyResources = [
+    {
+        title: 'Translations',
+        description: 'Compare versions in parallel.',
+        icon: Languages,
+    },
+    {
+        title: 'Commentaries',
+        description: 'Insights from trusted scholars.',
+        icon: MessageSquareText,
+    },
+    {
+        title: 'Dictionary',
+        description: 'Explore words and meanings.',
+        icon: Search,
+    },
+    {
+        title: 'Recitations',
+        description: 'Listen, reflect, and memorize.',
+        icon: BookMarked,
+    },
+    {
+        title: 'Related Topics',
+        description: 'Themes across Scripture.',
+        icon: Sparkles,
+    },
+];
+
 export default function Home({
     canRegister,
     featured_book,
@@ -27,164 +107,203 @@ export default function Home({
         homePrimaryRegion !== null &&
         (homePrimaryRegion.containers.length > 0 ||
             homePrimaryRegion.admin !== null);
+    const railModel = buildHomeRailDescriptorModel();
 
     return (
         <PublicSiteLayout
             title="Home"
-            backgroundClassName="bg-[radial-gradient(circle_at_top,_rgba(176,122,30,0.12),transparent_35%),linear-gradient(180deg,#fffaf3_0%,#ffffff_55%,#f6efe2_100%)] dark:bg-[radial-gradient(circle_at_top,_rgba(217,119,6,0.16),transparent_28%),linear-gradient(180deg,#120e08_0%,#0f0d0a_55%,#15110c_100%)]"
-            mainClassName="py-12"
-            contentClassName="max-w-6xl px-6 lg:px-8"
+            mainClassName="py-5 sm:py-7"
+            contentClassName="max-w-6xl"
         >
-            <div className="space-y-12">
-                <div className="grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr]">
-                    <section className="space-y-8">
-                        <div className="space-y-5">
-                            <p className="text-sm font-medium tracking-[0.24em] text-amber-800 uppercase dark:text-amber-300">
-                                Scripture Reading Platform
-                            </p>
-
-                            <div className="space-y-4">
-                                <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl">
-                                    Read scripture in a calm, canonical flow.
-                                </h1>
-
-                                <p className="max-w-2xl text-lg leading-8 text-muted-foreground">
-                                    Start with the featured book, move through
-                                    its canonical sections and chapters, and
-                                    continue into the verse reader without
-                                    losing the protected scripture hierarchy.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex flex-col gap-3 sm:flex-row">
-                            {featured_book ? (
-                                <Button asChild size="lg">
-                                    <Link href={featured_book.href}>
-                                        Start Reading
-                                    </Link>
-                                </Button>
-                            ) : (
-                                <Button size="lg" disabled>
-                                    Scripture Coming Soon
-                                </Button>
-                            )}
-
-                            <Button asChild size="lg" variant="outline">
-                                <Link href={scriptureBooksIndex()}>
-                                    Browse Scripture Library
-                                </Link>
-                            </Button>
-
-                            {!auth.user && (
-                                <Button asChild size="lg" variant="outline">
-                                    <Link href={login()}>Sign In</Link>
-                                </Button>
-                            )}
-
-                            {!auth.user && canRegister && (
-                                <Button asChild size="lg" variant="ghost">
-                                    <Link href={register()}>Register</Link>
-                                </Button>
-                            )}
-                        </div>
-
-                        <div className="grid gap-4 sm:grid-cols-3">
-                            <div className="rounded-3xl border border-border/70 bg-background/85 p-5 shadow-sm dark:border-white/10 dark:bg-white/5">
-                                <p className="text-sm font-semibold text-foreground">
-                                    1. Open the book
-                                </p>
-                                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                                    Begin from the public library and choose a
-                                    canonical book.
-                                </p>
-                            </div>
-
-                            <div className="rounded-3xl border border-border/70 bg-background/85 p-5 shadow-sm dark:border-white/10 dark:bg-white/5">
-                                <p className="text-sm font-semibold text-foreground">
-                                    2. Choose a chapter
-                                </p>
-                                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                                    Move through the protected structure without
-                                    skipping sections or chapter context.
-                                </p>
-                            </div>
-
-                            <div className="rounded-3xl border border-border/70 bg-background/85 p-5 shadow-sm dark:border-white/10 dark:bg-white/5">
-                                <p className="text-sm font-semibold text-foreground">
-                                    3. Read the verses
-                                </p>
-                                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                                    Continue into the verse reader and detail
-                                    page with the same public layout.
-                                </p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <aside className="rounded-[2rem] border border-amber-200/80 bg-white/90 p-7 shadow-[0_24px_80px_-40px_rgba(120,79,21,0.45)] backdrop-blur dark:border-amber-500/20 dark:bg-white/5 dark:shadow-[0_24px_80px_-40px_rgba(0,0,0,0.75)]">
-                            <p className="text-sm font-semibold tracking-[0.22em] text-amber-800 uppercase dark:text-amber-300">
-                                Featured Scripture
-                            </p>
-
-                            {featured_book ? (
-                                <div className="mt-5 space-y-5">
-                                    <div className="space-y-3">
-                                        <h2 className="text-3xl font-semibold tracking-tight">
-                                            {featured_book.title}
-                                        </h2>
-
-                                        <p className="text-sm leading-7 text-muted-foreground">
-                                            {featured_book.description ??
-                                                'Begin with the current featured scripture and continue into chapters and verse reading.'}
-                                        </p>
+            <div className="space-y-5">
+                <ChronicleEditorialGrid>
+                    <div className="space-y-5">
+                        <ChroniclePaperPanel
+                            variant="feature"
+                            className="grid min-h-[23rem] items-center gap-6 p-6 sm:p-8 lg:grid-cols-[0.95fr_1.05fr]"
+                        >
+                            <div className="space-y-6">
+                                <div className="space-y-3">
+                                    <p className="chronicle-kicker">
+                                        Featured Reading
+                                    </p>
+                                    <h2 className="chronicle-feature-title max-w-xl">
+                                        Blessed Are the Peacemakers
+                                    </h2>
+                                    <div className="flex items-center gap-3 text-sm text-[color:var(--chronicle-brown)]">
+                                        <span className="h-px w-16 bg-[color:var(--chronicle-rule)]" />
+                                        <span>Matthew 5:9</span>
                                     </div>
+                                </div>
 
-                                    <div className="rounded-2xl bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950 dark:bg-amber-500/12 dark:text-amber-100">
-                                        Public path: home to book to chapter to
-                                        verse.
-                                    </div>
+                                <p className="max-w-md text-base leading-7 text-[color:var(--chronicle-ink)]">
+                                    They shall be called sons of God. Discover
+                                    the heart of Jesus in this teaching on
+                                    peace, righteousness, and the Kingdom that
+                                    transforms the world.
+                                </p>
 
-                                    <Button asChild className="w-full">
-                                        <Link href={featured_book.href}>
-                                            Explore {featured_book.title}
+                                <div className="flex flex-wrap gap-3">
+                                    <Button
+                                        asChild
+                                        className="chronicle-button rounded-sm px-6"
+                                    >
+                                        <Link
+                                            href={
+                                                featured_book?.href ??
+                                                scriptureBooksIndex()
+                                            }
+                                        >
+                                            Read Chapter
+                                            <ChevronRight className="size-4" />
+                                        </Link>
+                                    </Button>
+                                    <Button
+                                        asChild
+                                        variant="outline"
+                                        className="chronicle-button-outline rounded-sm px-6"
+                                    >
+                                        <Link href={scriptureBooksIndex()}>
+                                            View in Context
                                         </Link>
                                     </Button>
                                 </div>
-                            ) : (
-                                <div className="mt-5 space-y-4">
-                                    <h2 className="text-2xl font-semibold tracking-tight">
-                                        Scripture is being prepared
-                                    </h2>
+                            </div>
 
-                                    <p className="text-sm leading-7 text-muted-foreground">
-                                        The public reading path is ready. Once a
-                                        book is available, this homepage will
-                                        link directly into scripture browsing.
-                                    </p>
-                                </div>
+                            <div
+                                aria-hidden="true"
+                                className="min-h-56 rounded-sm border border-[color:var(--chronicle-border)] bg-[radial-gradient(circle_at_72%_24%,rgba(173,122,44,0.28),transparent_0.55rem),radial-gradient(circle_at_44%_72%,rgba(104,69,31,0.18),transparent_0.45rem),radial-gradient(circle_at_70%_70%,rgba(104,69,31,0.12),transparent_5rem),linear-gradient(135deg,rgba(255,248,235,0.25),rgba(173,122,44,0.12))] opacity-90"
+                            />
+                        </ChroniclePaperPanel>
+
+                        <ChroniclePaperPanel className="space-y-5 p-5">
+                            <ChronicleSectionHeading
+                                title="Scripture Library"
+                                eyebrow="Explore the sacred texts"
+                                action={
+                                    <Link
+                                        href={scriptureBooksIndex()}
+                                        className="chronicle-link text-xs"
+                                    >
+                                        View All
+                                    </Link>
+                                }
+                            />
+
+                            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                                {libraryPreviewItems.map((item) => {
+                                    const Icon = item.icon;
+
+                                    return (
+                                        <Link
+                                            key={item.title}
+                                            href={scriptureBooksIndex()}
+                                            className="chronicle-panel flex min-h-40 flex-col items-center justify-between rounded-sm p-4 text-center transition hover:-translate-y-0.5 hover:border-[color:var(--chronicle-gold)]"
+                                        >
+                                            <Icon className="size-9 text-[color:var(--chronicle-gold)]" />
+                                            <div>
+                                                <p className="chronicle-title text-2xl leading-tight">
+                                                    {item.title}
+                                                </p>
+                                                <p className="text-sm text-[color:var(--chronicle-brown)]">
+                                                    {item.count}
+                                                </p>
+                                                <p className="mt-2 text-xs leading-5 text-[color:var(--chronicle-ink)]">
+                                                    {item.description}
+                                                </p>
+                                            </div>
+                                            <span className="chronicle-link text-[0.65rem]">
+                                                Explore
+                                            </span>
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+                        </ChroniclePaperPanel>
+
+                        <ChroniclePaperPanel className="space-y-5 p-5">
+                            <ChronicleSectionHeading
+                                title="Study Resources"
+                                eyebrow="Dig deeper with trusted tools"
+                                action={
+                                    <Link
+                                        href={scriptureBooksIndex()}
+                                        className="chronicle-link text-xs"
+                                    >
+                                        View All
+                                    </Link>
+                                }
+                            />
+                            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                                {studyResources.map((item) => {
+                                    const Icon = item.icon;
+
+                                    return (
+                                        <div
+                                            key={item.title}
+                                            className="chronicle-panel rounded-sm p-4 text-center"
+                                        >
+                                            <Icon className="mx-auto size-8 text-[color:var(--chronicle-gold)]" />
+                                            <p className="chronicle-title mt-3 text-xl">
+                                                {item.title}
+                                            </p>
+                                            <p className="mt-1 text-xs leading-5 text-[color:var(--chronicle-ink)]">
+                                                {item.description}
+                                            </p>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </ChroniclePaperPanel>
+                    </div>
+
+                    <ChronicleSideRail>
+                        <UniversalSectionStack
+                            sections={railModel.sections}
+                            renderContext={railModel.renderContext}
+                        />
+                    </ChronicleSideRail>
+                </ChronicleEditorialGrid>
+
+                {!auth.user && (
+                    <ChroniclePaperPanel className="grid gap-4 p-5 sm:grid-cols-[1fr_auto] sm:items-center">
+                        <div>
+                            <p className="chronicle-title text-3xl">
+                                Build a life in the Word
+                            </p>
+                            <p className="text-sm text-[color:var(--chronicle-brown)]">
+                                Create a free account to save notes, track your
+                                progress, and personalize your study experience.
+                            </p>
+                        </div>
+                        <div className="flex flex-wrap gap-3">
+                            {canRegister && (
+                                <Button
+                                    asChild
+                                    className="chronicle-button rounded-sm"
+                                >
+                                    <Link href={register()}>
+                                        Create Free Account
+                                    </Link>
+                                </Button>
                             )}
-                    </aside>
-                </div>
+                            <Button
+                                asChild
+                                variant="outline"
+                                className="chronicle-button-outline rounded-sm"
+                            >
+                                <Link href={login()}>Sign In</Link>
+                            </Button>
+                        </div>
+                    </ChroniclePaperPanel>
+                )}
 
                 {shouldShowHomePrimaryRegion && homePrimaryRegion && (
                     <section className="space-y-4">
-                        <div className="space-y-2">
-                            <p className="text-sm font-semibold tracking-[0.2em] text-muted-foreground uppercase">
-                                Supplemental Paths
-                            </p>
-                            <h2 className="text-2xl font-semibold tracking-tight">
-                                Keep going without leaving the shared frame
-                            </h2>
-                            <p className="max-w-3xl text-sm leading-7 text-muted-foreground">
-                                This declared region now carries real supporting
-                                page content: orientation, highlights, media,
-                                and next-step actions that complement the
-                                protected home experience instead of replacing
-                                it.
-                            </p>
-                        </div>
-
+                        <ChronicleSectionHeading
+                            title="Supplemental Paths"
+                            eyebrow="CMS-managed supporting content"
+                        />
                         <CmsExposedRegion region={homePrimaryRegion} />
                     </section>
                 )}

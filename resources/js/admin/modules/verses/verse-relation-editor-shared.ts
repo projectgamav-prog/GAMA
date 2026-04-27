@@ -14,6 +14,11 @@ type VerseRelationSourcePrefillBase = {
     source_name: string;
 };
 
+type VerseRelationSourcePrefillPatch<
+    TFormData extends VerseRelationSourcePrefillBase,
+> = VerseRelationSourcePrefillBase &
+    Partial<Omit<TFormData, keyof VerseRelationSourcePrefillBase>>;
+
 export function formatVerseRelationSourceOptionLabel(
     source: VerseRelationSourceOption,
 ): string {
@@ -32,8 +37,8 @@ export function resolveVerseRelationSourcePrefill<
     buildPatch?: (
         source: TSource,
         currentData: TFormData,
-    ) => Partial<TFormData>,
-): Partial<TFormData> | null {
+    ) => Partial<Omit<TFormData, keyof VerseRelationSourcePrefillBase>>,
+): VerseRelationSourcePrefillPatch<TFormData> | null {
     if (value === VERSE_RELATION_NONE_VALUE) {
         return null;
     }
@@ -46,9 +51,13 @@ export function resolveVerseRelationSourcePrefill<
         return null;
     }
 
-    return {
+    const basePatch: VerseRelationSourcePrefillBase = {
         source_key: selectedSource.slug,
         source_name: selectedSource.name,
-        ...(buildPatch ? buildPatch(selectedSource, currentData) : {}),
     };
+
+    return {
+        ...basePatch,
+        ...(buildPatch ? buildPatch(selectedSource, currentData) : {}),
+    } as VerseRelationSourcePrefillPatch<TFormData>;
 }

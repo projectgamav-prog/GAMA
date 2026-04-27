@@ -1,6 +1,6 @@
 import { useForm } from '@inertiajs/react';
-import { useEffect } from 'react';
 import { Plus } from 'lucide-react';
+import { useEffect } from 'react';
 import InputError from '@/components/input-error';
 import { ContentBlockCoreFields } from '@/components/scripture/content-blocks/ContentBlockCoreFields';
 import { ContentBlockImageFields } from '@/components/scripture/content-blocks/ContentBlockImageFields';
@@ -17,11 +17,11 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { scriptureAdminStartCase } from '@/lib/scripture-admin-field-display';
 import {
     getScriptureAdminTargetItemAttribute,
     getScriptureAdminTargetItemId,
 } from '@/lib/scripture-admin-navigation';
-import { scriptureAdminStartCase } from '@/lib/scripture-admin-field-display';
 import type {
     ScriptureAdminContentBlock,
     ScriptureProtectedAdminContentBlock,

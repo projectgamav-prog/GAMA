@@ -1,4 +1,12 @@
 import type { ReactNode } from 'react';
+import { AdminSurfaceBoundary } from '@/admin/core/AdminSurfaceBoundary';
+import {
+    AdminSurfaceEmitter,
+    createEntityContextFromSurface,
+    createSurfaceContextFromContract,
+} from '@/admin/awareness/core';
+import type { AdminOrderingContext } from '@/admin/awareness/core';
+import type { AdminSurfaceContract } from '@/admin/surfaces/core/surface-contracts';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { PublicContentBlock } from '@/types/content-blocks';
@@ -6,6 +14,8 @@ import { ScriptureEntityRegion } from './scripture-entity-region';
 
 type Props = {
     block: PublicContentBlock;
+    adminSurface?: AdminSurfaceContract | null;
+    ordering?: AdminOrderingContext | null;
     headerAction?: ReactNode;
     inlineEditor?: ReactNode;
 };
@@ -25,6 +35,8 @@ const getDataValue = (
 
 export function ContentBlockRenderer({
     block,
+    adminSurface = null,
+    ordering = null,
     headerAction,
     inlineEditor,
 }: Props) {
@@ -40,11 +52,78 @@ export function ContentBlockRenderer({
         capabilityHint: 'content_block',
     };
 
-    const renderCard = (card: ReactNode) => (
-        <ScriptureEntityRegion meta={entityMeta} asChild>
-            {card}
-        </ScriptureEntityRegion>
-    );
+    const renderCard = (card: ReactNode) => {
+        if (!adminSurface) {
+            return (
+                <ScriptureEntityRegion meta={entityMeta} asChild>
+                    {card}
+                </ScriptureEntityRegion>
+            );
+        }
+
+        return (
+            <ScriptureEntityRegion meta={entityMeta}>
+                <AdminSurfaceEmitter
+                    manifestKey={`content-block:${block.id}:${adminSurface.regionKey ?? block.region}`}
+                    entity={createEntityContextFromSurface(adminSurface)}
+                    surface={createSurfaceContextFromContract(adminSurface)}
+                    block={{
+                        blockId: block.id,
+                        blockType: block.block_type,
+                        contentKind:
+                            block.block_type === 'text'
+                                ? 'content_block_text'
+                                : block.block_type === 'quote'
+                                  ? 'content_block_quote'
+                                  : block.block_type,
+                        fieldKind:
+                            block.block_type === 'image' ||
+                            block.block_type === 'video'
+                                ? 'media'
+                                : 'body',
+                    }}
+                    layout={{
+                        layoutZone:
+                            block.block_type === 'image' ||
+                            block.block_type === 'video'
+                                ? 'media'
+                                : 'block',
+                        visualRole: 'item',
+                        preferredPlacement: 'top-right',
+                    }}
+                    actionCapabilities={{
+                        canQuickEdit: Boolean(adminSurface.quickEdit),
+                        canStructuredEdit:
+                            adminSurface.capabilities.includes('edit'),
+                        canFullEdit:
+                            adminSurface.capabilities.includes('full_edit'),
+                        canManageMedia:
+                            adminSurface.capabilities.includes('manage_media'),
+                        canDelete: adminSurface.capabilities.includes('delete'),
+                        canCreateInside:
+                            adminSurface.capabilities.includes('add_block'),
+                        canReorder: ordering?.canReorder ?? false,
+                    }}
+                    ordering={ordering}
+                    quickEdit={{
+                        quickEdit: adminSurface.quickEdit ?? null,
+                        fullEditFallbackAvailable:
+                            Boolean(adminSurface.quickEdit?.fullEditHref),
+                    }}
+                />
+                <AdminSurfaceBoundary
+                    surface={adminSurface}
+                    emptyPlaceholder={
+                        <p className="text-sm leading-6 text-[color:var(--chronicle-brown)]">
+                            Add content here.
+                        </p>
+                    }
+                >
+                    {card}
+                </AdminSurfaceBoundary>
+            </ScriptureEntityRegion>
+        );
+    };
 
     if (block.block_type === 'quote') {
         return renderCard(

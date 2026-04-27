@@ -1,23 +1,17 @@
-import type { ComponentProps } from 'react';
 import { Languages } from 'lucide-react';
+import type { ComponentProps } from 'react';
 import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
-import { ScriptureSection } from '@/components/scripture/scripture-section';
-import { Badge } from '@/components/ui/badge';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { VerseSupportPanel } from '@/components/scripture/verse/VerseSupportPanel';
 import type { VerseShowProps } from '@/types';
 import type { ScriptureEntityRegionInput } from '@/types/scripture';
 
 type Props = {
-    entityMeta: ScriptureEntityRegionInput;
+    entityMeta: Omit<ScriptureEntityRegionInput, 'region' | 'capabilityHint'>;
     translations: VerseShowProps['translations'];
-    translationsSurface: ComponentProps<typeof AdminModuleHost>['surface'];
+    translationsSurface:
+        | ComponentProps<typeof AdminModuleHost>['surface']
+        | null;
 };
 
 export function VerseTranslationsSection({
@@ -26,32 +20,35 @@ export function VerseTranslationsSection({
     translationsSurface,
 }: Props) {
     return (
-        <ScriptureSection
-            entityMeta={{
+        <ScriptureEntityRegion
+            meta={{
                 ...entityMeta,
                 region: 'translations',
                 capabilityHint: 'translation',
             }}
-            title="Translations"
-            description="Supporting translations for this verse, kept separate from the canonical text above."
-            icon={Languages}
-            action={
-                <Badge variant="outline">
-                    {translations.length} translation
-                    {translations.length === 1 ? '' : 's'}
-                </Badge>
-            }
+            asChild
         >
-            <div className="space-y-4">
+            <VerseSupportPanel
+                title="Translations"
+                eyebrow="Parallel Readings"
+                icon={Languages}
+                action={
+                    <span className="chronicle-link text-xs">
+                        {translations.length} translation
+                        {translations.length === 1 ? '' : 's'}
+                    </span>
+                }
+                contentClassName="space-y-0 divide-y divide-[color:var(--chronicle-border)]"
+            >
                 {translationsSurface && (
                     <AdminModuleHost
                         surface={translationsSurface}
-                        className="flex flex-wrap items-start gap-1.5"
+                        className="chronicle-admin-surface mb-3 flex flex-wrap items-start gap-1.5 p-1"
                     />
                 )}
 
                 {translations.length === 0 && translationsSurface && (
-                    <div className="rounded-2xl border border-dashed border-border/80 bg-muted/20 px-5 py-5 text-sm leading-6 text-muted-foreground sm:px-6 sm:py-6">
+                    <div className="rounded-sm border border-dashed border-[color:var(--chronicle-border)] bg-[rgba(173,122,44,0.06)] px-4 py-3 text-sm leading-6 text-[color:var(--chronicle-brown)]">
                         No translations have been added yet.
                     </div>
                 )}
@@ -68,30 +65,25 @@ export function VerseTranslationsSection({
                         }}
                         asChild
                     >
-                        <Card className="overflow-hidden">
-                            <CardHeader className="gap-3 border-b bg-muted/20">
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <Badge variant="outline">
-                                        {translation.language_code}
-                                    </Badge>
-                                    <Badge variant="secondary">
-                                        {translation.source_name}
-                                    </Badge>
-                                </div>
-                                <CardTitle className="text-xl">
+                        <article className="grid gap-3 py-3 sm:grid-cols-[8rem_minmax(0,1fr)]">
+                            <div>
+                                <p className="chronicle-kicker">
+                                    {translation.source_key}
+                                </p>
+                                <p className="font-semibold text-[color:var(--chronicle-ink)]">
                                     {translation.source_name}
-                                </CardTitle>
-                                <CardDescription>
-                                    Source key: {translation.source_key}
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="pt-6">
-                                <p className="leading-8">{translation.text}</p>
-                            </CardContent>
-                        </Card>
+                                </p>
+                                <p className="text-xs tracking-[0.16em] text-[color:var(--chronicle-brown)] uppercase">
+                                    {translation.language_code}
+                                </p>
+                            </div>
+                            <p className="font-serif text-lg leading-8 text-[color:var(--chronicle-ink)]">
+                                {translation.text}
+                            </p>
+                        </article>
                     </ScriptureEntityRegion>
                 ))}
-            </div>
-        </ScriptureSection>
+            </VerseSupportPanel>
+        </ScriptureEntityRegion>
     );
 }

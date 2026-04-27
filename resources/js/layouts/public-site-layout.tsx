@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react';
 import type { ReactNode } from 'react';
+import { AdminAwarenessProvider } from '@/admin/awareness/core';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { PublicSiteFooter } from '@/components/site/public-site-footer';
 import { PublicSiteHeader } from '@/components/site/public-site-header';
@@ -28,34 +29,48 @@ export default function PublicSiteLayout({
     return (
         <>
             <Head title={title} />
-            <div
-                className={cn(
-                    'min-h-screen bg-background text-foreground',
-                    backgroundClassName,
-                )}
-            >
-                <div className={cn('flex min-h-screen flex-col', shellClassName)}>
-                    <PublicSiteHeader />
+            <AdminAwarenessProvider>
+                <div
+                    className={cn(
+                        'chronicle-shell min-h-screen text-[color:var(--chronicle-ink)]',
+                        backgroundClassName,
+                    )}
+                >
+                    <div
+                        className={cn(
+                            'chronicle-page-frame relative z-0 mx-auto flex min-h-screen w-full max-w-[92rem] flex-col border-x',
+                            shellClassName,
+                        )}
+                    >
+                        <PublicSiteHeader />
 
-                    <main className={cn('flex-1 py-8', mainClassName)}>
-                        <div
+                        <main
                             className={cn(
-                                'mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8',
-                                contentClassName,
+                                'flex-1 py-6 sm:py-8',
+                                mainClassName,
                             )}
                         >
-                            {breadcrumbs.length > 0 && (
-                                <div className="mb-6 text-sm text-muted-foreground">
-                                    <Breadcrumbs breadcrumbs={breadcrumbs} />
-                                </div>
-                            )}
-                            {children}
-                        </div>
-                    </main>
+                            <div
+                                className={cn(
+                                    'mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8',
+                                    contentClassName,
+                                )}
+                            >
+                                {breadcrumbs.length > 0 && (
+                                    <div className="mb-5 border-b border-[color:var(--chronicle-border)] pb-3 text-sm text-[color:var(--chronicle-brown)]">
+                                        <Breadcrumbs
+                                            breadcrumbs={breadcrumbs}
+                                        />
+                                    </div>
+                                )}
+                                {children}
+                            </div>
+                        </main>
 
-                    <PublicSiteFooter />
+                        <PublicSiteFooter />
+                    </div>
                 </div>
-            </div>
+            </AdminAwarenessProvider>
         </>
     );
 }

@@ -44,13 +44,13 @@ function hasIntroContent(surface: AdminSurfaceContract): boolean | null {
 function getIdentityLabel(surface: AdminSurfaceContract): string {
     switch (surface.entity) {
         case 'book':
-            return 'Edit Book';
+            return 'Advanced Book Identity';
         case 'chapter':
-            return 'Edit Chapter';
+            return 'Advanced Chapter Identity';
         case 'verse':
-            return 'Edit Verse';
+            return 'Advanced Verse Identity';
         default:
-            return 'Edit Identity';
+            return 'Advanced Identity';
     }
 }
 

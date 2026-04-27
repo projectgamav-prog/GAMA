@@ -1,10 +1,8 @@
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
-import {
-    getScriptureAdminSectionElementId,
-    type ScriptureAdminTargetSection,
-} from '@/lib/scripture-admin-navigation';
+import { getScriptureAdminSectionElementId } from '@/lib/scripture-admin-navigation';
+import type { ScriptureAdminTargetSection } from '@/lib/scripture-admin-navigation';
 import { cn } from '@/lib/utils';
 import type { ScriptureEntityRegionInput } from '@/types/scripture';
 
@@ -33,7 +31,7 @@ export function ScriptureSection({
 }: Props) {
     const resolvedId =
         adminTargetSection !== undefined
-            ? id ?? getScriptureAdminSectionElementId(adminTargetSection)
+            ? (id ?? getScriptureAdminSectionElementId(adminTargetSection))
             : id;
     const section = (
         <section

@@ -17,9 +17,9 @@ export default function ScriptureLayout({
         <PublicSiteLayout
             title={title}
             breadcrumbs={breadcrumbs}
-            contentClassName="max-w-5xl px-4 sm:px-6 lg:px-8"
+            contentClassName="max-w-6xl px-4 sm:px-6 lg:px-8"
         >
-            <div className="space-y-8">{children}</div>
+            <div className="space-y-6 sm:space-y-8">{children}</div>
         </PublicSiteLayout>
     );
 }

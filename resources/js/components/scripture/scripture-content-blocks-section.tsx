@@ -1,5 +1,6 @@
-import { ContentBlockRenderer } from '@/components/scripture/content-block-renderer';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
+import { UniversalSectionStack } from '@/rendering/core';
+import { createScriptureContentBlocksSection } from '@/rendering/scripture/scripture-section-descriptors';
 import type {
     ScriptureContentBlock,
     ScriptureEntityRegionInput,
@@ -24,6 +25,20 @@ export function ScriptureContentBlocksSection({
         return null;
     }
 
+    const renderContext = {
+        page: {
+            pageKey: id ?? 'scripture.content-blocks',
+            title,
+            layout: 'scripture' as const,
+        },
+    };
+    const sections = [
+        createScriptureContentBlocksSection({
+            id: `${id ?? 'scripture-content-blocks'}-content`,
+            blocks,
+        }),
+    ];
+
     return (
         <ScriptureSection
             id={id}
@@ -31,11 +46,10 @@ export function ScriptureContentBlocksSection({
             description={description}
             entityMeta={entityMeta}
         >
-            <div className="space-y-4">
-                {blocks.map((block) => (
-                    <ContentBlockRenderer key={block.id} block={block} />
-                ))}
-            </div>
+            <UniversalSectionStack
+                sections={sections}
+                renderContext={renderContext}
+            />
         </ScriptureSection>
     );
 }
