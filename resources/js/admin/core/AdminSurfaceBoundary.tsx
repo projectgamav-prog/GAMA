@@ -6,11 +6,13 @@ type Props = {
     surface?: AdminSurfaceContract | null;
     children: ReactNode;
     emptyPlaceholder?: ReactNode;
+    className?: string;
 };
 
 export function AdminSurfaceBoundary({
     surface = null,
     children,
+    className,
     emptyPlaceholder = null,
 }: Props) {
     if (!surface) {
@@ -20,6 +22,7 @@ export function AdminSurfaceBoundary({
     return (
         <AdminEditableSurface
             surface={surface}
+            className={className}
             emptyPlaceholder={emptyPlaceholder}
         >
             {children}

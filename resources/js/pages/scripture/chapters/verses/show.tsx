@@ -12,6 +12,7 @@ import { VerseDictionaryTermsSection } from '@/components/scripture/verse/VerseD
 import { VerseRecitationsSection } from '@/components/scripture/verse/VerseRecitationsSection';
 import { VerseStudyNotesSection } from '@/components/scripture/verse/VerseStudyNotesSection';
 import { VerseSupplementaryCmsSection } from '@/components/scripture/verse/VerseSupplementaryCmsSection';
+import { ScriptureVerseTextDisplay } from '@/components/scripture/verse/ScriptureVerseTextDisplay';
 import { VerseTopicsSection } from '@/components/scripture/verse/VerseTopicsSection';
 import { VerseTranslationsSection } from '@/components/scripture/verse/VerseTranslationsSection';
 import {
@@ -125,9 +126,13 @@ export default function VerseShow({
                                         {pageModel.referenceTitle}
                                     </h1>
                                     <ChronicleOrnament className="justify-center" />
-                                    <p className="chronicle-verse-title mx-auto max-w-3xl">
-                                        {verse.text}
-                                    </p>
+                                    <ScriptureVerseTextDisplay
+                                        verse={verse}
+                                        admin={admin}
+                                        showAdminControls={showAdminControls}
+                                        surfaceClassName="mx-auto max-w-3xl"
+                                        className="chronicle-verse-title text-[color:var(--chronicle-ink)]"
+                                    />
                                     <p className="font-serif text-lg text-[color:var(--chronicle-brown)] italic">
                                         From {pageModel.chapterSectionTitle}
                                     </p>

@@ -1,9 +1,8 @@
 import { Link } from '@inertiajs/react';
 import { BookOpenText, Film } from 'lucide-react';
-import { AdminFieldQuickEditSurface } from '@/admin/core/AdminFieldQuickEditSurface';
-import { resolveVerseTextFieldSurface } from '@/admin/integrations/scripture/verses';
 import { ScriptureChapterVerseRowAdmin } from '@/components/scripture/scripture-chapter-verse-row-admin';
 import { ScriptureIntroDropdown } from '@/components/scripture/scripture-intro-dropdown';
+import { ScriptureVerseTextDisplay } from '@/components/scripture/verse/ScriptureVerseTextDisplay';
 import { Button } from '@/components/ui/button';
 import { languageLabel, verseLabel } from '@/lib/scripture';
 import type {
@@ -36,11 +35,6 @@ export function ScriptureVerseReaderRow({
     verseAdminShared = null,
 }: Props) {
     const translationText = verse.translations[language];
-    const verseTextSurface = resolveVerseTextFieldSurface({
-        verse,
-        admin: verse.admin ?? null,
-        enabled: showAdminControls,
-    });
 
     return (
         <article className="grid gap-4 px-4 py-4 sm:px-5 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,22rem)]">
@@ -50,28 +44,12 @@ export function ScriptureVerseReaderRow({
                         {verseLabel(verse.number)}
                     </p>
                     <div className="space-y-3">
-                        <AdminFieldQuickEditSurface
-                            surface={verseTextSurface}
-                            manifestKey={`verse-text:${verse.id}`}
-                            block={{
-                                blockType: 'text_field',
-                                contentKind: 'long_text',
-                                fieldKind: 'text',
-                            }}
-                            layout={{
-                                layoutZone: 'inline_prose',
-                                visualRole: 'field',
-                                preferredPlacement: 'top-right',
-                            }}
-                            schemaConstraints={{
-                                quickEditAllowedFields: ['text'],
-                                structuredOnlyFields: ['slug', 'number'],
-                            }}
-                        >
-                            <p className="font-serif text-lg leading-8 text-[color:var(--chronicle-ink)]">
-                                {verse.text}
-                            </p>
-                        </AdminFieldQuickEditSurface>
+                        <ScriptureVerseTextDisplay
+                            verse={verse}
+                            admin={verse.admin ?? null}
+                            showAdminControls={showAdminControls}
+                            className="text-[color:var(--chronicle-ink)]"
+                        />
 
                         <div className="flex flex-wrap items-center gap-2">
                             <ScriptureChapterVerseRowAdmin

@@ -16,6 +16,7 @@ type Props = {
     surface?: AdminSurfaceContract | null;
     children: ReactNode;
     emptyPlaceholder?: ReactNode;
+    className?: string;
     manifestKey?: string;
     block?: AdminBlockContext | null;
     layout?: AdminLayoutPositionContext | null;
@@ -56,6 +57,7 @@ function defaultSchemaConstraints(
 export function AdminFieldQuickEditSurface({
     surface = null,
     children,
+    className,
     emptyPlaceholder = null,
     manifestKey,
     block = null,
@@ -102,6 +104,7 @@ export function AdminFieldQuickEditSurface({
             />
             <AdminSurfaceBoundary
                 surface={surface}
+                className={className}
                 emptyPlaceholder={emptyPlaceholder}
             >
                 {children}

@@ -3,6 +3,7 @@ import { ExternalLink, Pencil } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import type {
     AdminQuickEditField,
     AdminQuickEditMethod,
@@ -28,6 +29,7 @@ type Props = {
     surface: AdminSurfaceContract;
     children: ReactNode;
     emptyPlaceholder?: ReactNode;
+    className?: string;
 };
 
 const valuesFromFields = (
@@ -171,6 +173,7 @@ function LocalControlStrip({
 export function AdminEditableSurface({
     surface,
     children,
+    className,
     emptyPlaceholder = null,
 }: Props) {
     const [isEditing, setIsEditing] = useState(false);
@@ -256,6 +259,7 @@ export function AdminEditableSurface({
     if (quickEdit.mode !== 'same_layout' || !adapter || !quickEdit.updateHref) {
         return (
             <AdminOverlayFrame
+                className={className}
                 controls={
                     fullEditHref ? (
                         <AdminOverlayControlStrip
@@ -303,7 +307,7 @@ export function AdminEditableSurface({
         );
 
         return (
-            <AdminOverlayFrame controls={controls}>
+            <AdminOverlayFrame className={className} controls={controls}>
                 {children || emptyPlaceholder}
             </AdminOverlayFrame>
         );
@@ -312,7 +316,7 @@ export function AdminEditableSurface({
     return (
         <AdminOverlayFrame
             active
-            className="chronicle-admin-same-place-edit-frame"
+            className={cn('chronicle-admin-same-place-edit-frame', className)}
         >
             <div className="chronicle-admin-same-place-edit-fields">
                 {quickEdit.fields.map((field) => (
