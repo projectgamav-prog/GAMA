@@ -1,8 +1,8 @@
 # Legacy Admin Removal
 
-The visible legacy admin module layer is now deprecated on public scripture
-surfaces. The active public-page admin direction is the Super Conscious Admin
-Layer:
+The visible legacy admin module layer is now deprecated and quarantined on
+public scripture surfaces. The active public-page admin direction is the Super
+Conscious Admin Layer:
 
 - schema-aware field quick edit
 - awareness-owned field icon controls
@@ -12,7 +12,7 @@ Layer:
 
 ## Disabled Visible Layer
 
-The old public-page module UI is no longer rendered by default:
+The old public-page module UI is no longer rendered:
 
 - `AdminModuleHost`
 - `AdminModuleHostGroup` through `AdminModuleHost`
@@ -21,8 +21,14 @@ The old public-page module UI is no longer rendered by default:
 - fallback local `AdminEditableSurface` controls when awareness ownership is not
   ready
 
-These pieces are not deleted yet because their contracts, routes, and write
-endpoints still help bridge existing data and protected maintenance tooling.
+`AdminModuleHost` and `AdminModuleHostGroup` are now explicit no-op
+compatibility shims. They return `null` immediately and intentionally do not
+import the old module registry, action resolver, action renderer, inline editor
+panels, or current-control comparison hooks.
+
+Some old module files are not deleted yet because their contracts, routes, and
+write endpoints still help bridge existing data and protected maintenance
+tooling.
 
 The current frontend audit still finds imports/usages of the legacy host in
 some reusable scripture support components:
@@ -34,11 +40,10 @@ some reusable scripture support components:
 - protected full-edit pages
 - book public media fallback components
 
-These are classified as legacy visible UI traces that are disabled by the
-global `ENABLE_LEGACY_ADMIN_MODULE_UI = false` gate in `AdminModuleHost`. They
-may remain temporarily where they describe old structured-editor seams or
-backend service dependencies, but they must not render visible public controls
-in normal admin mode.
+These are classified as legacy visible UI traces. They may remain temporarily
+where they describe old structured-editor seams or backend service
+dependencies, but they now flow into no-op host shims and must not render
+visible public controls in normal admin mode.
 
 The book library grid no longer imports or renders `AdminModuleHost` for the old
 book-card intro surface. Book card title and description now use the Conscious
@@ -73,3 +78,7 @@ Visible public scripture admin controls should now come from:
 Those systems should migrate through awareness contracts, schema metadata,
 resolver rules, and layout anchors instead of reviving page-local module
 launchers.
+
+See `docs/admin/legacy-frontend-admin-quarantine.md` for the current file
+classification, quarantine boundary, CMS separation note, and future deletion
+checklist.

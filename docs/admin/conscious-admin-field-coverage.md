@@ -70,8 +70,10 @@ Presentation-only or computed labels must remain outside schema quick edit:
 ## Known Gaps
 
 - Some public scripture renderers still import legacy `AdminModuleHost`, but the
-  host is globally disabled for public visible UI and returns `null` unless the
-  compile-time legacy gate is changed.
+  host is now a quarantined no-op compatibility shim. It returns `null`
+  immediately and does not import legacy module/action/rendering machinery.
+  Those imports should still be removed later through reusable Conscious
+  renderer coverage, not page-specific controls.
 - Content block title/body fields have frontend renderer coverage but need a
   parent-aware Conscious backend route/action before they should be considered
   ready in the public three-dot menu.

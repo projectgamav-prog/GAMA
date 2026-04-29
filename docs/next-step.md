@@ -86,8 +86,8 @@ The shared public frame, structured header navigation, structured footer system,
 - continue with awareness/resolver/overlay ownership work before any visible
   control replacement
 - do not revive the old visible `AdminModuleHost` public-page layer; it is now
-  deprecated/disabled, and future visible admin controls should come from the
-  conscious schema-aware layer
+  a quarantined no-op compatibility shim, and future visible admin controls
+  should come from the conscious schema-aware layer
 - keep backend write endpoints that conscious quick edit or Conscious Full Edit
   still use, but treat them as service endpoints rather than the old UI
   architecture
@@ -111,8 +111,12 @@ The shared public frame, structured header navigation, structured footer system,
   control as a bug; missing controls should usually be fixed by reusable
   renderer coverage, not URL/page-specific controls
 - continue legacy purge work by removing or replacing remaining
-  `AdminModuleHost` imports only through reusable Conscious renderers or
-  structured-service migrations, not by re-enabling old visible controls
+  `AdminModuleHost` / `AdminModuleHostGroup` imports only through reusable
+  Conscious renderers or structured-service migrations, not by re-enabling old
+  visible controls
+- use `docs/admin/legacy-frontend-admin-quarantine.md` as the guardrail for
+  old frontend admin files; CMS admin is separate and should not be removed as
+  part of scripture legacy module cleanup
 - keep CMS exposure generic and supplementary on non-CMS pages
 - keep the active inline editors on the real page instead of detouring back into workspace-first habits
 - preserve the shared header/footer shell instead of reintroducing page-local public chrome

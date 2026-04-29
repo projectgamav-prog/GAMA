@@ -362,8 +362,19 @@ After completing a task:
       `ScriptureBookDescriptionDisplay` and emit `books.description`
       schema-aware surfaces
     - remaining public scripture `AdminModuleHost` imports are documented as
-      legacy visible UI traces that remain inert behind the disabled global
-      legacy gate
+      legacy visible UI traces
+- Conscious Admin Legacy Frontend Quarantine Phase 1 has converted
+  `AdminModuleHost` and `AdminModuleHostGroup` into explicit no-op
+  compatibility shims:
+    - the shims return `null` immediately
+    - they no longer import the legacy module registry, module-action resolver,
+      action renderer, inline editor panels, quick-edit adapter checks, or
+      current-control comparison hooks
+    - old black/fallback module controls and inline structured panels cannot
+      render through the public-page host path
+    - `docs/admin/legacy-frontend-admin-quarantine.md` now records active
+      Conscious Admin files, quarantined legacy UI files, CMS separation, kept
+      backend/service seams, guardrails, and the future deletion checklist
 - Full route pages have not been migrated to `UniversalPageRenderer` yet, so the
   current public visuals and behavior are intentionally preserved.
 - Canonical scripture admin still attaches through semantic surfaces and module qualification.

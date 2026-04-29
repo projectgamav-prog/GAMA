@@ -25,9 +25,9 @@ current phase is:
 Super Conscious Admin Layer now includes the first Conscious Full Edit
 foundation:
 
-- the visible legacy `AdminModuleHost` public-page UI is deprecated and disabled
-  by default so old black module launchers no longer compete with conscious
-  schema-aware controls
+- the visible legacy `AdminModuleHost` public-page UI is quarantined as a no-op
+  compatibility shim so old black module launchers and inline structured panels
+  cannot render through the public-page host path
 - awareness-owned schema field Full Edit controls should prefer the new
   `/admin/schema/{schemaFamily}/{entityType}/{id}/full-edit` route where a
   supported schema entity exists
@@ -68,6 +68,9 @@ foundation:
 - the reusable book library card renderer now emits Conscious schema-aware
   surfaces for stored book title and description values instead of relying on
   the disabled legacy module host intro surface
+- `docs/admin/legacy-frontend-admin-quarantine.md` now classifies active
+  Conscious Admin, quarantined legacy visible UI, CMS admin, transitional
+  write/metadata seams, and future deletion steps
 - Conscious Full Edit saves still use the old route-specific update endpoints
   until the next migration slice
 - create/reorder/delete/manage controls remain outside awareness ownership for
