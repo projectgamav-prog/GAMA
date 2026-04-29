@@ -1,6 +1,3 @@
-import { AdminModuleHostGroup } from '@/admin/core/AdminModuleHostGroup';
-import { resolveChapterHeaderSurfaces } from '@/admin/integrations/scripture/chapters';
-import { chapterLabel } from '@/lib/scripture';
 import type { ScriptureChapter } from '@/types';
 
 type Props = {
@@ -10,44 +7,11 @@ type Props = {
     panelClassName?: string;
 };
 
-export function ScriptureBookChapterRowAdmin({
-    chapter,
-    showAdminControls,
-    returnToHref = null,
-    panelClassName = 'flex flex-wrap items-center gap-1.5',
-}: Props) {
-    if (!showAdminControls || !chapter.admin) {
-        return null;
-    }
-
-    const chapterTitle = chapterLabel(chapter.number, chapter.title);
-    const {
-        identitySurface,
-        introSurface,
-        actionsSurface,
-    } = resolveChapterHeaderSurfaces({
-        chapter,
-        chapterTitle,
-        admin: chapter.admin,
-        context: 'book_page_row',
-        returnToHref,
-        enabled: showAdminControls,
-    });
-
-    if (!identitySurface && !introSurface && !actionsSurface) {
-        return null;
-    }
-
-    return (
-        <div
-            data-scripture-admin-scope="chapter-row"
-            data-entity-id={chapter.id}
-            data-entity-slug={chapter.slug}
-        >
-            <AdminModuleHostGroup
-                surfaces={[identitySurface, introSurface, actionsSurface]}
-                className={panelClassName}
-            />
-        </div>
-    );
+/**
+ * @deprecated Legacy row-level module launchers are removed from public
+ * scripture rows. Chapter title controls now come from schema-aware field
+ * surfaces inside `ScriptureChapterTitleDisplay`.
+ */
+export function ScriptureBookChapterRowAdmin(_props: Props) {
+    return null;
 }

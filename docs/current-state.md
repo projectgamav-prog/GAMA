@@ -375,6 +375,20 @@ After completing a task:
     - `docs/admin/legacy-frontend-admin-quarantine.md` now records active
       Conscious Admin files, quarantined legacy UI files, CMS separation, kept
       backend/service seams, guardrails, and the future deletion checklist
+- Conscious Admin Black Screen Recovery + Legacy Frontend Admin Eradication
+  Phase 2 has removed old host imports from public scripture pages and reusable
+  scripture renderers:
+    - public scripture code no longer imports or renders
+      `AdminModuleHost` / `AdminModuleHostGroup`
+    - old scripture integration files no longer export legacy module arrays
+      backed by old module imports
+    - the legacy module registry is now an empty compatibility registry instead
+      of a graph that imports every old module definition
+    - old book/chapter/verse route-specific Full Edit controllers now redirect
+      to Conscious Full Edit for `scripture.book`, `scripture.chapter`, and
+      `scripture.verse`
+    - backend write endpoints remain intentionally in place as transitional
+      service endpoints
 - Full route pages have not been migrated to `UniversalPageRenderer` yet, so the
   current public visuals and behavior are intentionally preserved.
 - Canonical scripture admin still attaches through semantic surfaces and module qualification.

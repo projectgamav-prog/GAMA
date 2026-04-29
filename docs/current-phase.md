@@ -71,6 +71,11 @@ foundation:
 - `docs/admin/legacy-frontend-admin-quarantine.md` now classifies active
   Conscious Admin, quarantined legacy visible UI, CMS admin, transitional
   write/metadata seams, and future deletion steps
+- public scripture pages and reusable scripture renderers no longer import or
+  render `AdminModuleHost` / `AdminModuleHostGroup`; remaining legacy module UI
+  files are source-tree quarantine only
+- old route-specific book/chapter/verse Full Edit GET routes now redirect to
+  Conscious Full Edit instead of rendering deprecated page-specific React forms
 - Conscious Full Edit saves still use the old route-specific update endpoints
   until the next migration slice
 - create/reorder/delete/manage controls remain outside awareness ownership for

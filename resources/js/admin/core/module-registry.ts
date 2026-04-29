@@ -1,9 +1,4 @@
 import type { AdminModuleDefinition } from './module-types';
-import { entityActionAdminModules } from '@/admin/integrations/entity-actions';
-import { bookAdminModules } from '@/admin/integrations/scripture/books';
-import { chapterAdminModules } from '@/admin/integrations/scripture/chapters';
-import { sectionAdminModules } from '@/admin/integrations/sections';
-import { verseAdminModules } from '@/admin/integrations/scripture/verses';
 
 /**
  * Small helper for future module definitions so module files can export typed
@@ -33,18 +28,11 @@ export function defineAdminModuleRegistry(
 }
 
 /**
- * Central registry for reusable admin editor modules.
- *
- * Pages and shared admin surfaces should mount the host and let the registry
- * plus qualification rules attach the right module automatically.
+ * @deprecated The legacy visible public-page module registry is quarantined.
+ * Keep this empty compatibility registry only so old module files can retain
+ * local typed definitions while Conscious Admin replaces the UI path.
  */
-export const adminModuleRegistry = defineAdminModuleRegistry([
-    ...bookAdminModules,
-    ...chapterAdminModules,
-    ...verseAdminModules,
-    ...sectionAdminModules,
-    ...entityActionAdminModules,
-]);
+export const adminModuleRegistry = defineAdminModuleRegistry([]);
 
 export function getRegisteredAdminModules(): readonly AdminModuleDefinition[] {
     return adminModuleRegistry;

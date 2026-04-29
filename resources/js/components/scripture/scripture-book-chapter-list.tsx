@@ -1,10 +1,3 @@
-import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
-import { AdminModuleHostGroup } from '@/admin/core/AdminModuleHostGroup';
-import {
-    resolveBookChapterGroupsSurface,
-    resolveBookSectionActionsSurface,
-    resolveBookSectionChapterGroupSurface,
-} from '@/admin/integrations/sections';
 import { ScriptureBookChapterListRow } from '@/components/scripture/chapter/ScriptureBookChapterListRow';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScriptureIntroDropdown } from '@/components/scripture/scripture-intro-dropdown';
@@ -47,13 +40,10 @@ export function ScriptureBookChapterList({
     admin,
     panelClassName = DEFAULT_PANEL_CLASS_NAME,
 }: Props) {
+    void admin;
+    void panelClassName;
+
     const hidesGenericSingleSection = hidesSingleGenericSection(bookSections);
-    const chapterGroupsSurface = resolveBookChapterGroupsSurface({
-        book,
-        bookSections,
-        admin,
-        enabled: showAdminControls,
-    });
     const chapterCount = bookSections.reduce(
         (total, section) => total + section.chapters.length,
         0,
@@ -85,14 +75,6 @@ export function ScriptureBookChapterList({
                         </span>
                     }
                 />
-
-                {chapterGroupsSurface && (
-                    <AdminModuleHost
-                        surface={chapterGroupsSurface}
-                        className={panelClassName}
-                    />
-                )}
-
                 <div className="space-y-4">
                     {bookSections.map((section, index) => {
                         const storedSectionTitle = section.title?.trim() ?? '';
@@ -106,19 +88,6 @@ export function ScriptureBookChapterList({
                             : section.number
                               ? `Section ${section.number}`
                               : null;
-                        const sectionGroupSurface =
-                            resolveBookSectionChapterGroupSurface({
-                                bookSection: section,
-                                title: sectionTitle,
-                                enabled: showAdminControls,
-                            });
-                        const sectionActionsSurface =
-                            resolveBookSectionActionsSurface({
-                                bookSection: section,
-                                title: sectionTitle,
-                                enabled: showAdminControls,
-                            });
-
                         return (
                             <ScriptureEntityRegion
                                 key={section.id}
@@ -168,13 +137,6 @@ export function ScriptureBookChapterList({
                                                     : 's'}
                                             </p>
                                         </div>
-                                        <AdminModuleHostGroup
-                                            surfaces={[
-                                                sectionGroupSurface,
-                                                sectionActionsSurface,
-                                            ]}
-                                            className={panelClassName}
-                                        />
                                     </div>
 
                                     <ScriptureIntroDropdown

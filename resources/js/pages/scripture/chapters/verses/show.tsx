@@ -1,10 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { AdminModuleHostGroup } from '@/admin/core/AdminModuleHostGroup';
-import {
-    resolveVerseHeaderSurfaces,
-    resolveVerseRelationSurfaces,
-} from '@/admin/integrations/scripture/verses';
+import { resolveVerseHeaderSurfaces } from '@/admin/integrations/scripture/verses';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { VerseCharactersSection } from '@/components/scripture/verse/VerseCharactersSection';
 import { VerseCommentariesSection } from '@/components/scripture/verse/VerseCommentariesSection';
@@ -31,9 +27,6 @@ import {
 } from '@/rendering/scripture/adapters/verse-show-page-adapter';
 import type { VerseShowProps } from '@/types';
 
-const ADMIN_PANEL_CLASS_NAME =
-    'chronicle-admin-surface flex flex-wrap items-center gap-1.5 p-1';
-
 export default function VerseShow({
     book,
     book_section,
@@ -55,7 +48,6 @@ export default function VerseShow({
     const showAdminControls = useVisibleAdminControls();
     const verseTitle = verseLabel(verse.number);
     const {
-        identitySurface: verseIdentitySurface,
         introSurface: verseIntroSurface,
         metaSurface: verseMetaSurface,
     } = resolveVerseHeaderSurfaces({
@@ -84,16 +76,6 @@ export default function VerseShow({
         verseIntroSurface,
         verseMetaSurface,
     });
-    const { translationsSurface, commentariesSurface } =
-        resolveVerseRelationSurfaces({
-            verse,
-            verseTitle: pageModel.verseTitle,
-            translationsAdmin: admin?.translations,
-            commentariesAdmin: admin?.commentaries,
-            fullEditHref: admin?.full_edit_href ?? null,
-            enabled: showAdminControls,
-        });
-
     return (
         <ScriptureLayout
             title={`${pageModel.verseTitle} - ${pageModel.chapterTitle}`}
@@ -137,15 +119,6 @@ export default function VerseShow({
                                         From {pageModel.chapterSectionTitle}
                                     </p>
                                 </div>
-
-                                <AdminModuleHostGroup
-                                    surfaces={[
-                                        verseIdentitySurface,
-                                        verseIntroSurface,
-                                    ]}
-                                    className={`${ADMIN_PANEL_CLASS_NAME} justify-center`}
-                                />
-
                                 <UniversalSectionStack
                                     sections={pageModel.introSections}
                                     renderContext={pageModel.mainRenderContext}
@@ -185,19 +158,19 @@ export default function VerseShow({
                         </ChroniclePaperPanel>
                     </ScriptureEntityRegion>
 
-                    {(translations.length > 0 || translationsSurface) && (
+                    {translations.length > 0 && (
                         <VerseTranslationsSection
                             entityMeta={pageModel.supportEntity}
                             translations={translations}
-                            translationsSurface={translationsSurface}
+                            translationsSurface={null}
                         />
                     )}
 
-                    {(commentaries.length > 0 || commentariesSurface) && (
+                    {commentaries.length > 0 && (
                         <VerseCommentariesSection
                             entityMeta={pageModel.supportEntity}
                             commentaries={commentaries}
-                            commentariesSurface={commentariesSurface}
+                            commentariesSurface={null}
                         />
                     )}
 

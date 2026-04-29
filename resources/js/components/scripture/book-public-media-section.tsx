@@ -1,6 +1,3 @@
-import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
-import { resolveBookMediaSurface } from '@/admin/integrations/scripture/books';
-import { SCRIPTURE_INLINE_ADMIN_PANEL_CLASS_NAME } from '@/components/scripture/scripture-section-group-wrapper';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,8 +14,6 @@ type Props = {
     isAdmin: boolean;
     admin?: ScriptureBookAdmin | null;
 };
-
-const PANEL_CLASS_NAME = SCRIPTURE_INLINE_ADMIN_PANEL_CLASS_NAME;
 
 function BookMediaSlotCard({ slot }: { slot: ScriptureBookMediaSlot }) {
     const mediaUrl = slot.media.url ?? slot.media.path;
@@ -78,15 +73,13 @@ function BookMediaSlotCard({ slot }: { slot: ScriptureBookMediaSlot }) {
 }
 
 export function BookPublicMediaSection({ book, admin, isAdmin }: Props) {
+    void admin;
+    void isAdmin;
+
     const { hero_media, supporting_media } = book.media_slots;
     const hasMedia = hero_media !== null || supporting_media.length > 0;
-    const mediaSurface = resolveBookMediaSurface({
-        book,
-        admin,
-        enabled: isAdmin,
-    });
 
-    if (!hasMedia && !mediaSurface) {
+    if (!hasMedia) {
         return null;
     }
 
@@ -103,21 +96,6 @@ export function BookPublicMediaSection({ book, admin, isAdmin }: Props) {
             }}
         >
             <div className="space-y-4">
-                {mediaSurface && (
-                    <AdminModuleHost
-                        surface={mediaSurface}
-                        className={PANEL_CLASS_NAME}
-                    />
-                )}
-
-                {!hasMedia && mediaSurface && (
-                    <div className="rounded-2xl border border-dashed border-border/80 bg-muted/20 px-5 py-5 text-sm leading-6 text-muted-foreground sm:px-6 sm:py-6">
-                        No published media slots are assigned to this book yet.
-                        The semantic media surface still stays available for
-                        admins because this book can manage media assignments.
-                    </div>
-                )}
-
                 {hero_media && <BookMediaSlotCard slot={hero_media} />}
                 {supporting_media.map((slot, index) => (
                     <BookMediaSlotCard

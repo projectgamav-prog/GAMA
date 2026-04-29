@@ -1,12 +1,5 @@
 import { Languages } from 'lucide-react';
 import { useState } from 'react';
-import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
-import { AdminModuleHostGroup } from '@/admin/core/AdminModuleHostGroup';
-import {
-    resolveChapterSectionActionsSurface,
-    resolveChapterSectionVerseGroupSurface,
-    resolveChapterVerseGroupsSurface,
-} from '@/admin/integrations/sections';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScriptureIntroDropdown } from '@/components/scripture/scripture-intro-dropdown';
 import { SCRIPTURE_INLINE_ADMIN_PANEL_CLASS_NAME } from '@/components/scripture/scripture-section-group-wrapper';
@@ -128,6 +121,9 @@ export function ScriptureChapterVerseList({
     verseAdminShared = null,
     panelClassName = DEFAULT_PANEL_CLASS_NAME,
 }: Props) {
+    void admin;
+    void panelClassName;
+
     const [language, setLanguage] = useState<ScriptureReaderLanguage>(
         defaultLanguage ?? readerLanguages[0] ?? 'en',
     );
@@ -135,18 +131,6 @@ export function ScriptureChapterVerseList({
     const showsLanguageToggle = readerLanguages.length > 1;
     const hidesGenericChapterSection =
         hidesSingleGenericSection(chapterSections);
-    const chapterVerseGroupsSurface = resolveChapterVerseGroupsSurface({
-        chapter,
-        chapterSections: chapterSections.map((section) => ({
-            ...section,
-            verses_count: section.cards.reduce(
-                (sum, card) => sum + card.verses.length,
-                0,
-            ),
-        })),
-        admin,
-        enabled: showAdminControls,
-    });
     const totalCardCount = chapterSections.reduce(
         (sum, section) => sum + section.cards.length,
         0,
@@ -196,14 +180,6 @@ export function ScriptureChapterVerseList({
                         </div>
                     }
                 />
-
-                {chapterVerseGroupsSurface && (
-                    <AdminModuleHost
-                        surface={chapterVerseGroupsSurface}
-                        className={panelClassName}
-                    />
-                )}
-
                 <ChroniclePaperPanel
                     variant="panel"
                     className="px-4 py-3 sm:px-5"
@@ -280,24 +256,6 @@ export function ScriptureChapterVerseList({
                             : section.number
                               ? `Section ${section.number}`
                               : 'Passage Section';
-                        const sectionGroupSurface =
-                            resolveChapterSectionVerseGroupSurface({
-                                chapterSection: section,
-                                title: sectionTitle,
-                                primaryCount: section.cards.length,
-                                primaryLabel: 'cards',
-                                secondaryCount: verseCount,
-                                secondaryLabel: 'verses',
-                                openHref: null,
-                                enabled: showAdminControls,
-                            });
-                        const sectionActionsSurface =
-                            resolveChapterSectionActionsSurface({
-                                chapterSection: section,
-                                title: sectionTitle,
-                                enabled: showAdminControls,
-                            });
-
                         return (
                             <ScriptureEntityRegion
                                 key={section.id}
@@ -347,13 +305,6 @@ export function ScriptureChapterVerseList({
                                                 {verseCount === 1 ? '' : 's'}
                                             </p>
                                         </div>
-                                        <AdminModuleHostGroup
-                                            surfaces={[
-                                                sectionGroupSurface,
-                                                sectionActionsSurface,
-                                            ]}
-                                            className={panelClassName}
-                                        />
                                     </div>
 
                                     <ScriptureIntroDropdown

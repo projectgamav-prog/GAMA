@@ -1,7 +1,5 @@
 import { Link } from '@inertiajs/react';
 import { ChevronRight } from 'lucide-react';
-import { AdminModuleHostGroup } from '@/admin/core/AdminModuleHostGroup';
-import { resolveBookHeaderSurfaces } from '@/admin/integrations/scripture/books';
 import { BookPublicMediaSection } from '@/components/scripture/book-public-media-section';
 import { ScriptureBookChapterList } from '@/components/scripture/scripture-book-chapter-list';
 import {
@@ -31,12 +29,6 @@ export default function BookShow({
     book_sections,
 }: BookShowProps) {
     const showAdminControls = useVisibleAdminControls();
-    const { identitySurface, introSurface, actionsSurface } =
-        resolveBookHeaderSurfaces({
-            book,
-            admin,
-            enabled: showAdminControls,
-        });
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: book.title,
@@ -113,15 +105,6 @@ export default function BookShow({
                                     </a>
                                 </Button>
                             </div>
-
-                            <AdminModuleHostGroup
-                                surfaces={[
-                                    identitySurface,
-                                    introSurface,
-                                    actionsSurface,
-                                ]}
-                                className={ADMIN_PANEL_CLASS_NAME}
-                            />
                         </div>
                     </ChroniclePaperPanel>
 

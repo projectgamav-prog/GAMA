@@ -42,6 +42,15 @@ control registration, or inline editor panels.
 This means the old public-page module UI cannot render even if a reusable
 scripture renderer still imports the host temporarily.
 
+Phase 2 also removed `AdminModuleHost` / `AdminModuleHostGroup` imports and JSX
+from public scripture pages and reusable scripture renderers. The only remaining
+mentions of those names are the no-op shim files themselves.
+
+The legacy `resources/js/admin/core/module-registry.ts` file is also now an
+empty compatibility registry. It no longer imports scripture integrations or
+legacy module definitions, so importing a leftover module definition cannot pull
+the old public UI graph back into active chunks.
+
 ## Legacy Files Still Present
 
 The following frontend files remain for migration context, old protected
@@ -66,6 +75,10 @@ removed:
 These are not the active public scripture admin UI. New public-page controls
 must not be added through these files.
 
+Scripture integration files may still build surface contracts for Conscious
+renderers, but their legacy module-registration exports are empty and should not
+be used for visible controls.
+
 ## CMS Admin Is Separate
 
 The CMS admin system is not part of this purge:
@@ -89,6 +102,20 @@ These areas can remain while Conscious Admin migrates safely:
 Keeping a backend endpoint does not mean the old visible React module UI is
 active. Treat retained endpoints as service/write seams until Conscious backend
 services replace them.
+
+## Old Full Edit Route Safety
+
+The old route-specific full-edit controllers now redirect to Conscious Full
+Edit where the schema/entity mapping is known:
+
+- `BookFullEditController` -> `admin.schema.full-edit` for `scripture.book`
+- `ChapterFullEditController` -> `admin.schema.full-edit` for
+  `scripture.chapter`
+- `VerseFullEditController` -> `admin.schema.full-edit` for `scripture.verse`
+
+The old React full-edit pages may remain in the source tree during the
+transition, but the old GET routes no longer render them as the primary full
+edit path.
 
 ## Guardrail
 

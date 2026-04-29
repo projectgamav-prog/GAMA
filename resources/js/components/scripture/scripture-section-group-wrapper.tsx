@@ -1,6 +1,4 @@
 import type { ReactNode } from 'react';
-import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
-import { AdminModuleHostGroup } from '@/admin/core/AdminModuleHostGroup';
 import type { AdminSurfaceContract } from '@/admin/surfaces/core/surface-contracts';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScriptureIntroDropdown } from '@/components/scripture/scripture-intro-dropdown';
@@ -41,7 +39,9 @@ export function ScriptureSectionGroupWrapper({
     children,
     className,
 }: Props) {
-    const headerSurfaces = adminSurfaces.length > 0 ? adminSurfaces : [adminSurface];
+    void adminSurface;
+    void adminSurfaces;
+    void panelClassName;
 
     return (
         <ScriptureEntityRegion meta={entityMeta} asChild>
@@ -56,19 +56,6 @@ export function ScriptureSectionGroupWrapper({
                                 </div>
                             )}
                         </div>
-                        {adminSurfaces.length > 0 ? (
-                            <AdminModuleHostGroup
-                                surfaces={headerSurfaces}
-                                className={panelClassName}
-                            />
-                        ) : (
-                            adminSurface && (
-                                <AdminModuleHost
-                                    surface={adminSurface}
-                                    className={panelClassName}
-                                />
-                            )
-                        )}
                     </div>
 
                     <ScriptureIntroDropdown

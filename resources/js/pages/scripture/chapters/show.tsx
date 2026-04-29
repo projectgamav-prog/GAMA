@@ -1,6 +1,5 @@
 import { Link } from '@inertiajs/react';
 import { ChevronRight } from 'lucide-react';
-import { AdminModuleHostGroup } from '@/admin/core/AdminModuleHostGroup';
 import { resolveChapterHeaderSurfaces } from '@/admin/integrations/scripture/chapters';
 import { ScriptureChapterVerseList } from '@/components/scripture/scripture-chapter-verse-list';
 import { ScriptureChapterTitleDisplay } from '@/components/scripture/ScriptureSchemaFieldDisplays';
@@ -35,9 +34,7 @@ export default function ChapterShow({
     const showAdminControls = useVisibleAdminControls();
     const chapterTitle = chapterLabel(chapter.number, chapter.title);
     const {
-        identitySurface: chapterIdentitySurface,
         introSurface: chapterIntroSurface,
-        actionsSurface: chapterActionsSurface,
     } = resolveChapterHeaderSurfaces({
         chapter,
         chapterTitle,
@@ -142,15 +139,6 @@ export default function ChapterShow({
                                     </Button>
                                 </div>
                             </div>
-
-                            <AdminModuleHostGroup
-                                surfaces={[
-                                    chapterIdentitySurface,
-                                    chapterIntroSurface,
-                                    chapterActionsSurface,
-                                ]}
-                                className={ADMIN_PANEL_CLASS_NAME}
-                            />
                         </div>
                     </ChroniclePaperPanel>
 

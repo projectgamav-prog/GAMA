@@ -1,6 +1,3 @@
-import { bookIdentityEditorModule } from '@/admin/modules/books/BookIdentityEditor';
-import { bookIntroEditorModule } from '@/admin/modules/books/BookIntroEditor';
-import { mediaSlotsEditorModule } from '@/admin/modules/books/MediaSlotsEditor';
 import type { AdminSurfacePresentation } from '@/admin/surfaces/core/surface-contracts';
 import {
     createBookActionsSurface,
@@ -14,17 +11,7 @@ import type {
     ScriptureBookCardAdmin,
 } from '@/types';
 
-export {
-    bookIdentityEditorModule,
-    bookIntroEditorModule,
-    mediaSlotsEditorModule,
-};
-
-export const bookAdminModules = [
-    bookIdentityEditorModule,
-    bookIntroEditorModule,
-    mediaSlotsEditorModule,
-] as const;
+export const bookAdminModules = [] as const;
 
 function canResolveBookIdentitySurface(
     admin: ScriptureBookAdmin | ScriptureBookCardAdmin | null | undefined,

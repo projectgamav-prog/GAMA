@@ -1,6 +1,5 @@
 import { Sparkles } from 'lucide-react';
-import type { ComponentProps } from 'react';
-import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
+import type { AdminSurfaceContract } from '@/admin/surfaces/core/surface-contracts';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { VerseSupportPanel } from '@/components/scripture/verse/VerseSupportPanel';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +12,7 @@ type Props = {
     metaBadges: string[];
     keywords: string[];
     studyFlags: string[];
-    verseMetaSurface: ComponentProps<typeof AdminModuleHost>['surface'] | null;
+    verseMetaSurface: AdminSurfaceContract | null;
 };
 
 export function VerseStudyNotesSection({
@@ -24,6 +23,8 @@ export function VerseStudyNotesSection({
     studyFlags,
     verseMetaSurface,
 }: Props) {
+    void verseMetaSurface;
+
     return (
         <ScriptureEntityRegion
             meta={{
@@ -39,13 +40,6 @@ export function VerseStudyNotesSection({
                 icon={Sparkles}
                 contentClassName="space-y-3"
             >
-                {verseMetaSurface && (
-                    <AdminModuleHost
-                        surface={verseMetaSurface}
-                        className="chronicle-admin-surface flex flex-wrap items-center gap-1.5 p-1"
-                    />
-                )}
-
                 {verseMeta?.summary_short && (
                     <div className="rounded-sm border border-[color:var(--chronicle-border)] bg-[rgba(173,122,44,0.06)] px-3 py-3">
                         <p className="text-sm leading-7">

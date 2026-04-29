@@ -1,5 +1,3 @@
-import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
-import { resolveVerseRelationSurfaces } from '@/admin/integrations/scripture/verses';
 import { ScriptureSection } from '@/components/scripture/scripture-section';
 import {
     CreateVerseContentBlockCard,
@@ -44,14 +42,6 @@ export default function VerseFullEdit({
         chapter_section.title,
     );
     const verseTitle = verseLabel(verse.number);
-    const { translationsSurface, commentariesSurface } =
-        resolveVerseRelationSurfaces({
-            verse,
-            verseTitle,
-            translationsAdmin: admin_translations,
-            commentariesAdmin: admin_commentaries,
-            fullEditHref: null,
-        });
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: book.title,
@@ -121,12 +111,7 @@ export default function VerseFullEdit({
                     </Badge>
                 }
             >
-                {translationsSurface && (
-                    <AdminModuleHost
-                        surface={translationsSurface}
-                        className="flex flex-wrap items-start gap-1.5"
-                    />
-                )}
+                <></>
             </ScriptureSection>
 
             <ScriptureSection
@@ -142,12 +127,7 @@ export default function VerseFullEdit({
                     </Badge>
                 }
             >
-                {commentariesSurface && (
-                    <AdminModuleHost
-                        surface={commentariesSurface}
-                        className="flex flex-wrap items-start gap-1.5"
-                    />
-                )}
+                <></>
             </ScriptureSection>
 
             <ScriptureSection

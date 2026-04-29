@@ -40,14 +40,18 @@ some reusable scripture support components:
 - protected full-edit pages
 - book public media fallback components
 
-These are classified as legacy visible UI traces. They may remain temporarily
-where they describe old structured-editor seams or backend service
-dependencies, but they now flow into no-op host shims and must not render
-visible public controls in normal admin mode.
+Phase 2 removed these host imports and JSX from public scripture pages and
+reusable scripture renderers. Any remaining old structured-editor seams or
+backend service dependencies are documented as legacy source files only; they
+must not render visible public controls in normal admin mode.
 
 The book library grid no longer imports or renders `AdminModuleHost` for the old
 book-card intro surface. Book card title and description now use the Conscious
 schema field display path instead.
+
+The old book, chapter, and verse route-specific Full Edit controllers now
+redirect to Conscious Full Edit for their mapped schema entities instead of
+rendering the deprecated React full-edit pages.
 
 ## Endpoints Kept
 

@@ -110,13 +110,16 @@ The shared public frame, structured header navigation, structured footer system,
 - use `docs/admin/conscious-admin-field-coverage.md` before treating a missing
   control as a bug; missing controls should usually be fixed by reusable
   renderer coverage, not URL/page-specific controls
-- continue legacy purge work by removing or replacing remaining
-  `AdminModuleHost` / `AdminModuleHostGroup` imports only through reusable
-  Conscious renderers or structured-service migrations, not by re-enabling old
-  visible controls
+- keep legacy purge moving by deleting or relocating old source-tree module UI
+  files only after their service/write dependencies are replaced; public
+  scripture pages and reusable renderers should stay free of
+  `AdminModuleHost` / `AdminModuleHostGroup` imports
 - use `docs/admin/legacy-frontend-admin-quarantine.md` as the guardrail for
   old frontend admin files; CMS admin is separate and should not be removed as
   part of scripture legacy module cleanup
+- old book/chapter/verse route-specific Full Edit GET routes now redirect to
+  Conscious Full Edit; do not reintroduce old page-specific full-edit React
+  pages as primary admin surfaces
 - keep CMS exposure generic and supplementary on non-CMS pages
 - keep the active inline editors on the real page instead of detouring back into workspace-first habits
 - preserve the shared header/footer shell instead of reintroducing page-local public chrome

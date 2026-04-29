@@ -1,7 +1,5 @@
 import { Link } from '@inertiajs/react';
 import { ChevronRight } from 'lucide-react';
-import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
-import { resolveBooksCollectionSurface } from '@/admin/integrations/sections';
 import { ScriptureBookLibraryGrid } from '@/components/scripture/scripture-book-library-grid';
 import {
     ChronicleEditorialGrid,
@@ -16,9 +14,6 @@ import { buildBooksIndexDescriptorModel } from '@/rendering/adapters/books-index
 import { UniversalSectionStack } from '@/rendering/core';
 import type { BooksIndexProps, BreadcrumbItem } from '@/types';
 
-const CARD_PANEL_CLASS_NAME =
-    'chronicle-admin-surface flex flex-wrap gap-1.5 p-1';
-
 export default function BooksIndex({ books, admin }: BooksIndexProps) {
     const showAdminControls = useVisibleAdminControls();
     const breadcrumbs: BreadcrumbItem[] = [
@@ -27,11 +22,7 @@ export default function BooksIndex({ books, admin }: BooksIndexProps) {
             href: '/books',
         },
     ];
-    const libraryCollectionSurface = resolveBooksCollectionSurface({
-        bookCount: books.length,
-        admin,
-        enabled: showAdminControls,
-    });
+    void admin;
     const pageModel = buildBooksIndexDescriptorModel({ books, breadcrumbs });
 
     return (
@@ -47,12 +38,6 @@ export default function BooksIndex({ books, admin }: BooksIndexProps) {
                         reading.
                     </p>
                 </div>
-                {libraryCollectionSurface && (
-                    <AdminModuleHost
-                        surface={libraryCollectionSurface}
-                        className={CARD_PANEL_CLASS_NAME}
-                    />
-                )}
             </ChroniclePaperPanel>
 
             <ChronicleEditorialGrid>
@@ -116,7 +101,6 @@ export default function BooksIndex({ books, admin }: BooksIndexProps) {
                                 <ScriptureBookLibraryGrid
                                     books={group.books}
                                     showAdminControls={showAdminControls}
-                                    panelClassName={CARD_PANEL_CLASS_NAME}
                                 />
                             </ChroniclePaperPanel>
                         );

@@ -1,12 +1,3 @@
-import { verseCommentariesEditorModule } from '@/admin/modules/verses/VerseCommentariesEditor';
-import { verseIntroEditorModule } from '@/admin/modules/verses/VerseIntroEditor';
-import { verseIdentityEditorModule } from '@/admin/modules/verses/VerseIdentityEditor';
-import { verseMetaEditorModule } from '@/admin/modules/verses/VerseMetaEditor';
-import {
-    verseFullEditLauncherModule,
-    verseNearbyCreateModule,
-} from '@/admin/modules/verses/VerseRowActions';
-import { verseTranslationsEditorModule } from '@/admin/modules/verses/VerseTranslationsEditor';
 import {
     createVerseCommentariesSurface,
     createVerseIdentitySurface,
@@ -31,25 +22,7 @@ import type {
     ScriptureVerseTranslationsAdmin,
 } from '@/types';
 
-export {
-    verseCommentariesEditorModule,
-    verseFullEditLauncherModule,
-    verseIntroEditorModule,
-    verseIdentityEditorModule,
-    verseMetaEditorModule,
-    verseNearbyCreateModule,
-    verseTranslationsEditorModule,
-};
-
-export const verseAdminModules = [
-    verseCommentariesEditorModule,
-    verseFullEditLauncherModule,
-    verseIntroEditorModule,
-    verseIdentityEditorModule,
-    verseMetaEditorModule,
-    verseNearbyCreateModule,
-    verseTranslationsEditorModule,
-] as const;
+export const verseAdminModules = [] as const;
 
 export function resolveVerseHeaderSurfaces({
     verse,

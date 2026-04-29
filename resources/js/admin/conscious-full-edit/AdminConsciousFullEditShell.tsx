@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { ArrowLeft, ExternalLink, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AdminConsciousFullEditSection } from './AdminConsciousFullEditSection';
 import type {
@@ -57,7 +57,6 @@ export function AdminConsciousFullEditShell({
     label,
     description,
     public_href,
-    old_full_edit_href,
     fields,
 }: ConsciousFullEditProps) {
     const groupedFields = groupFields(fields);
@@ -92,17 +91,6 @@ export function AdminConsciousFullEditShell({
                                         aria-hidden="true"
                                     />
                                     Public page
-                                </Link>
-                            </Button>
-                        )}
-                        {old_full_edit_href && (
-                            <Button asChild variant="ghost" size="sm">
-                                <Link href={old_full_edit_href}>
-                                    <ExternalLink
-                                        className="size-3.5"
-                                        aria-hidden="true"
-                                    />
-                                    Deprecated full edit
                                 </Link>
                             </Button>
                         )}

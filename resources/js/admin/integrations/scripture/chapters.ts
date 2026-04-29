@@ -1,5 +1,3 @@
-import { chapterIdentityEditorModule } from '@/admin/modules/chapters/ChapterIdentityEditor';
-import { chapterIntroEditorModule } from '@/admin/modules/chapters/ChapterIntroEditor';
 import {
     createChapterActionsSurface,
     createChapterIdentitySurface,
@@ -15,15 +13,7 @@ import type {
     ScriptureChapterRowAdmin,
 } from '@/types';
 
-export {
-    chapterIdentityEditorModule,
-    chapterIntroEditorModule,
-};
-
-export const chapterAdminModules = [
-    chapterIdentityEditorModule,
-    chapterIntroEditorModule,
-] as const;
+export const chapterAdminModules = [] as const;
 
 export function resolveChapterHeaderSurfaces({
     chapter,
