@@ -100,6 +100,16 @@ The old React full-edit pages may remain in the source tree during the
 transition, but the old GET routes no longer render them as the primary full
 edit path.
 
+Phase 2B removed the old book/chapter/verse route-specific Full Edit React pages
+after their GET controllers were redirected to Conscious Full Edit. The
+book canonical edit page remains because it is still rendered by the protected
+canonical edit controller.
+
+Old editor/card components used only by the removed Full Edit pages were also
+deleted. This includes old content-block/media editor cards, old row-admin
+shims, old verse identity/meta cards, and old inline admin sheet/region editor
+components.
+
 ## Guardrail
 
 Public scripture pages and reusable scripture renderers must not introduce new

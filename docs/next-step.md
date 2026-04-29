@@ -123,6 +123,11 @@ The shared public frame, structured header navigation, structured footer system,
 - old book/chapter/verse route-specific Full Edit GET routes now redirect to
   Conscious Full Edit; do not reintroduce old page-specific full-edit React
   pages as primary admin surfaces
+- old book/chapter/verse Full Edit React pages and their private editor/card
+  components have been deleted; keep future Full Edit work in the Conscious
+  schema-aware shell
+- protected canonical edit remains legacy until a Conscious protected-canonical
+  workflow exists; do not delete its backend/frontend path blindly
 - keep CMS exposure generic and supplementary on non-CMS pages
 - keep the active inline editors on the real page instead of detouring back into workspace-first habits
 - preserve the shared header/footer shell instead of reintroducing page-local public chrome

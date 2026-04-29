@@ -45,6 +45,10 @@ renderers are not old scripture admin. They remain active and separate.
 These files still build admin surface contracts used by intro/header descriptor
 flows. They must not render controls or import legacy module UI.
 
+Phase 2B retained the chapter and verse integration helpers because current
+chapter/verse pages still pass intro surfaces into universal intro descriptor
+flows. They are transitional metadata helpers, not visible admin UI.
+
 ### `legacy_visible_admin_ui`
 
 Removed in this phase:
@@ -62,6 +66,16 @@ Removed in this phase:
 - `resources/js/admin/integrations/sections.ts`
 - `resources/js/admin/integrations/scripture/books.ts`
 
+Removed in Phase 2B:
+
+- `resources/js/pages/scripture/books/full-edit.tsx`
+- `resources/js/pages/scripture/chapters/full-edit.tsx`
+- `resources/js/pages/scripture/chapters/verses/full-edit.tsx`
+- old content-block/media/editor card components used only by those pages
+- old row-admin no-op components
+- old inline admin sheet/region editor components
+- old awareness current-control comparison provider/hooks/types
+
 ### `dead_safe_to_remove`
 
 The removed files above had no live public/CMS/Conscious imports after the
@@ -70,9 +84,8 @@ removed.
 
 ### `uncertain_needs_review`
 
-- old route-specific full-edit React pages under `resources/js/pages/scripture`
-  may remain until all route references and protected maintenance flows are
-  retired.
+- `resources/js/pages/scripture/books/canonical-edit.tsx` remains a protected
+  legacy workflow because `BookCanonicalEditController` still renders it.
 - some backend route-specific write endpoints remain as transitional service
   endpoints. Do not delete them until Conscious backend services fully replace
   them.

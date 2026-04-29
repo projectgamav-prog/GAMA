@@ -18,9 +18,7 @@ import { AdminSurfaceActionMenu } from './AdminSurfaceActionMenu';
 import { resolveAdminControlZone } from './AdminControlPlacementResolver';
 import {
     resolveAdminEditableSurfaceOwnershipGate,
-    useAdminControlComparison,
     useAdminResolvedControls,
-    useRegisterCurrentAdminControls,
 } from '@/admin/awareness/core';
 import type { AdminResolvedControl } from '@/admin/awareness/core';
 import {
@@ -155,56 +153,14 @@ export function AdminEditableSurface({
           })
         : 'top-right';
     const { resolvedSurfaces } = useAdminResolvedControls();
-    const { comparisons } = useAdminControlComparison();
     const ownershipGate = useMemo(
         () =>
             resolveAdminEditableSurfaceOwnershipGate({
                 surface,
                 resolvedSurfaces,
-                comparisons,
             }),
-        [comparisons, resolvedSurfaces, surface],
+        [resolvedSurfaces, surface],
     );
-    const currentControlSummary = useMemo(() => {
-        if (!quickEdit) {
-            return null;
-        }
-
-        const controls = [];
-
-        if (quickEdit.mode === 'same_layout' && adapter && quickEdit.updateHref) {
-            controls.push({
-                key: 'editable-surface:quick-edit',
-                label: 'Edit',
-                family: 'edit',
-                mode: 'quick_edit',
-                placement: 'top-right',
-                source: 'editable_surface' as const,
-            });
-        }
-
-        if (fullEditHref) {
-            controls.push({
-                key: 'editable-surface:full-edit',
-                label: 'Full edit',
-                family: 'navigate',
-                mode: 'full_edit',
-                placement: 'top-right',
-                source: 'editable_surface' as const,
-            });
-        }
-
-        return controls.length > 0
-            ? {
-                  surface,
-                  controls,
-              }
-            : null;
-    }, [adapter, fullEditHref, quickEdit, surface]);
-
-    useRegisterCurrentAdminControls(currentControlSummary, [
-        currentControlSummary,
-    ]);
 
     useEffect(() => {
         if (isEditing) {

@@ -3,8 +3,7 @@ import type { AdminSurfaceContract } from '@/admin/surfaces/core/surface-contrac
 import {
     surfaceContractSignature,
     surfaceManifestSignature,
-} from './control-comparison-helpers';
-import type { AdminControlComparisonResult } from './control-comparison-types';
+} from './control-resolution-helpers';
 import type { AdminResolvedSurfaceControls } from './control-ownership-types';
 import type { AdminResolvedControl } from './control-resolution-types';
 
@@ -12,7 +11,6 @@ export type AdminEditableSurfaceOwnershipGateResult = {
     canUseAwarenessControls: boolean;
     controls: readonly AdminResolvedControl[];
     resolvedSurface: AdminResolvedSurfaceControls | null;
-    comparison: AdminControlComparisonResult | null;
     reasons: readonly string[];
 };
 
@@ -39,25 +37,16 @@ function findResolvedSurface(
 }
 
 export function resolveAdminEditableSurfaceOwnershipGate({
-    comparisons,
     resolvedSurfaces,
     surface,
 }: {
     surface: AdminSurfaceContract;
     resolvedSurfaces: readonly AdminResolvedSurfaceControls[];
-    comparisons: readonly AdminControlComparisonResult[];
 }): AdminEditableSurfaceOwnershipGateResult {
     const reasons: string[] = [];
     const quickEdit = surface.quickEdit ?? null;
     const adapter = getAdminQuickEditAdapter(surface);
     const resolvedSurface = findResolvedSurface(surface, resolvedSurfaces);
-    const comparison =
-        resolvedSurface === null
-            ? null
-            : comparisons.find(
-                  (candidate) =>
-                      candidate.surfaceId === resolvedSurface.surfaceId,
-              ) ?? null;
     const controls =
         resolvedSurface?.controls.filter((control) => isAllowedControl(control)) ??
         [];
@@ -117,15 +106,10 @@ export function resolveAdminEditableSurfaceOwnershipGate({
         reasons.push('At least one resolver control is missing mode.');
     }
 
-    if (comparison && !comparison.readiness.ready) {
-        reasons.push(...comparison.readiness.reasons);
-    }
-
     return {
         canUseAwarenessControls: reasons.length === 0,
         controls,
         resolvedSurface,
-        comparison,
         reasons: [...new Set(reasons)],
     };
 }

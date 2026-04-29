@@ -1,6 +1,5 @@
 import { Link } from '@inertiajs/react';
 import { BookOpenText, ChevronRight } from 'lucide-react';
-import { ScriptureBookChapterRowAdmin } from '@/components/scripture/scripture-book-chapter-row-admin';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScriptureIntroDropdown } from '@/components/scripture/scripture-intro-dropdown';
 import { ScriptureChapterTitleDisplay } from '@/components/scripture/ScriptureSchemaFieldDisplays';
@@ -21,6 +20,8 @@ export function ScriptureBookChapterListRow({
     returnToHref,
     panelClassName,
 }: Props) {
+    void panelClassName;
+
     const chapterAction = resolveScriptureNavigationAction({
         actionKey: 'open_chapter',
         href: chapter.href,
@@ -66,14 +67,6 @@ export function ScriptureBookChapterListRow({
                         </div>
                     </div>
                 </Link>
-
-                <ScriptureBookChapterRowAdmin
-                    chapter={chapter}
-                    showAdminControls={showAdminControls}
-                    returnToHref={returnToHref}
-                    panelClassName={panelClassName}
-                />
-
                 <ScriptureIntroDropdown block={chapter.intro_block ?? null} />
             </article>
         </ScriptureEntityRegion>

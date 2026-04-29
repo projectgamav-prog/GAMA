@@ -4,6 +4,7 @@ import type {
     AdminQuickEditContext,
     AdminResolvedControlMode,
 } from './awareness-types';
+import type { AdminSurfaceContract } from '@/admin/surfaces/core/surface-contracts';
 
 const metadataString = (
     metadata: unknown,
@@ -17,6 +18,34 @@ const metadataString = (
 
     return typeof value === 'string' && value.length > 0 ? value : null;
 };
+
+export function surfaceContractSignature(
+    surface: AdminSurfaceContract,
+): string {
+    const owner = surface.owner
+        ? `${surface.owner.entity}:${surface.owner.entityId}`
+        : `${surface.entity}:${surface.entityId}`;
+
+    return [
+        surface.surfaceKey ?? 'surface',
+        surface.contractKey ?? 'contract',
+        surface.regionKey ?? 'region',
+        owner,
+    ].join(':');
+}
+
+export function surfaceManifestSignature(
+    entry: AdminControlResolutionInput,
+): string {
+    return entry.surface?.surface
+        ? surfaceContractSignature(entry.surface.surface)
+        : [
+              entry.surface?.surfaceKey ?? 'surface',
+              entry.surface?.contractKey ?? 'contract',
+              entry.surface?.regionKey ?? 'region',
+              `${entry.entity.entityType}:${entry.entity.entityId}`,
+          ].join(':');
+}
 
 export function actionCapabilitiesFromSurface(
     input: AdminControlResolutionInput,

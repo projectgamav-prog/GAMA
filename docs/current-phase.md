@@ -82,6 +82,10 @@ foundation:
 - the future Super Conscious backend organization is documented, with new write
   capability expected to move through schema field/action registries and
   services rather than page-specific controllers
+- old book/chapter/verse Full Edit React pages and their private editor/card
+  components are removed; Conscious Full Edit is the active Full Edit frontend
+- the old awareness comparison layer for old-vs-new visible-control handoff is
+  removed; resolver/ownership diagnostics remain the active awareness path
 - Conscious Full Edit saves still use the old route-specific update endpoints
   until the next migration slice
 - create/reorder/delete/manage controls remain outside awareness ownership for

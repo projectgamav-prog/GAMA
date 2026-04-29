@@ -47,6 +47,11 @@ The old book, chapter, and verse route-specific Full Edit controllers now
 redirect to Conscious Full Edit for their mapped schema entities instead of
 rendering the deprecated React full-edit pages.
 
+The deprecated book/chapter/verse Full Edit React pages and the editor/card
+components used only by those pages have now been removed. The protected book
+canonical edit page remains until a Conscious protected-canonical workflow
+replaces it.
+
 ## Endpoints Kept
 
 Backend update endpoints remain in place when the conscious admin layer still

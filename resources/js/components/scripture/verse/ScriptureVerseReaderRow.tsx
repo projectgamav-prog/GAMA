@@ -1,6 +1,5 @@
 import { Link } from '@inertiajs/react';
 import { BookOpenText, Film } from 'lucide-react';
-import { ScriptureChapterVerseRowAdmin } from '@/components/scripture/scripture-chapter-verse-row-admin';
 import { ScriptureIntroDropdown } from '@/components/scripture/scripture-intro-dropdown';
 import { ScriptureVerseTextDisplay } from '@/components/scripture/verse/ScriptureVerseTextDisplay';
 import { Button } from '@/components/ui/button';
@@ -34,6 +33,10 @@ export function ScriptureVerseReaderRow({
     showAdminControls,
     verseAdminShared = null,
 }: Props) {
+    void sectionTitle;
+    void returnToHref;
+    void verseAdminShared;
+
     const translationText = verse.translations[language];
 
     return (
@@ -52,14 +55,6 @@ export function ScriptureVerseReaderRow({
                         />
 
                         <div className="flex flex-wrap items-center gap-2">
-                            <ScriptureChapterVerseRowAdmin
-                                verse={verse}
-                                sectionTitle={sectionTitle}
-                                showAdminControls={showAdminControls}
-                                returnToHref={returnToHref}
-                                sharedAdmin={verseAdminShared}
-                            />
-
                             <ScriptureIntroDropdown
                                 block={verse.intro_block ?? null}
                                 buttonLabel="Verse intro"

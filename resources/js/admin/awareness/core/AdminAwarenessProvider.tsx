@@ -1,6 +1,5 @@
 import { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
-import { AdminControlComparisonProvider } from './AdminControlComparisonProvider';
 import type { AdminControlResolutionInput } from './control-resolution-types';
 import { AdminOrderingManifestProvider } from './AdminOrderingManifestProvider';
 import { AdminResolvedControlsProvider } from './AdminResolvedControlsProvider';
@@ -24,9 +23,7 @@ export function AdminAwarenessProvider({
             <AdminOrderingManifestProvider>
                 <AdminSurfaceManifestProvider>
                     <AdminResolvedControlsProvider>
-                        <AdminControlComparisonProvider>
-                            {children}
-                        </AdminControlComparisonProvider>
+                        {children}
                     </AdminResolvedControlsProvider>
                 </AdminSurfaceManifestProvider>
             </AdminOrderingManifestProvider>

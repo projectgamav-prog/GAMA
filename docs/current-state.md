@@ -400,6 +400,16 @@ After completing a task:
       and backend leftovers
     - `docs/admin/super-conscious-backend-organization.md` defines the target
       backend structure and writing-capacity roadmap
+- Super Conscious Admin Cleanup Phase 2B removed the dead old route-specific
+  Full Edit frontend:
+    - old book/chapter/verse Full Edit React pages were deleted because their
+      GET controllers redirect to Conscious Full Edit
+    - old editor/card components used only by those pages were deleted
+    - old current-visible-control comparison/shadow handoff files were deleted
+      now that the old visible module layer is gone
+    - `resources/js/pages/scripture/books/canonical-edit.tsx` remains as a
+      protected legacy workflow until a Conscious protected-canonical workflow
+      replaces it
 - Full route pages have not been migrated to `UniversalPageRenderer` yet, so the
   current public visuals and behavior are intentionally preserved.
 - Canonical scripture admin still attaches through semantic surfaces and module qualification.

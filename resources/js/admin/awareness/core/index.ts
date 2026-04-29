@@ -31,7 +31,6 @@ export {
     resolveEditMode,
 } from './control-resolution-helpers';
 export { resolveControlPriority } from './control-resolution-priority';
-export type * from './control-comparison-types';
 export type * from './control-ownership-types';
 export type * from './control-resolution-types';
 export {
@@ -56,10 +55,6 @@ export {
     type AdminAwarenessProviderValue,
 } from './AdminAwarenessProvider';
 export {
-    AdminControlComparisonProvider,
-    type AdminControlComparisonContextValue,
-} from './AdminControlComparisonProvider';
-export {
     AdminOrderingManifestProvider,
     type AdminOrderingManifestContextValue,
 } from './AdminOrderingManifestProvider';
@@ -75,12 +70,10 @@ export {
     type AdminSurfaceManifestRegistration,
 } from './AdminSurfaceManifestProvider';
 export { AdminSurfaceEmitter } from './AdminSurfaceEmitter';
-export { useAdminControlComparison } from './useAdminControlComparison';
 export { useAdminOrderingManifest } from './useAdminOrderingManifest';
 export { useAdminPositionContext } from './useAdminPositionContext';
 export { useAdminResolvedControls } from './useAdminResolvedControls';
 export { useRegisterAdminAddAnchor } from './useRegisterAdminAddAnchor';
-export { useRegisterCurrentAdminControls } from './useRegisterCurrentAdminControls';
 export {
     useRegisterAdminOrderGroup,
     useRegisterAdminOrderItem,
