@@ -74,10 +74,10 @@ route-specific endpoints until later phases.
 
 | Route name | Method/path | Controller | Classification | Notes |
 | --- | --- | --- | --- | --- |
-| `scripture.books.admin.full-edit` | `GET books/{book}/admin/full-edit` | `BookFullEditController@show` | legacy UI only | New controls should use Conscious Full Edit. Keep as deprecated fallback link only. |
+| `scripture.books.admin.full-edit` | `GET books/{book}/admin/full-edit` | `BookFullEditController@show` | old_full_edit_redirect_only | Redirects to Conscious Full Edit for `scripture.book`. |
 | `scripture.books.admin.canonical-edit` | `GET books/{book}/admin/canonical-edit` | `BookCanonicalEditController@show` | replace soon | Canonical identity behavior should become a protected Conscious Admin workflow. |
-| `scripture.chapters.admin.full-edit` | `GET .../chapters/{chapter}/admin/full-edit` | `ChapterFullEditController@show` | legacy UI only | Deprecated fallback from Conscious shell. |
-| `scripture.chapters.verses.admin.full-edit` | `GET .../verses/{verse}/admin/full-edit` | `VerseFullEditController@show` | legacy UI only | Deprecated fallback from Conscious shell. |
+| `scripture.chapters.admin.full-edit` | `GET .../chapters/{chapter}/admin/full-edit` | `ChapterFullEditController@show` | old_full_edit_redirect_only | Redirects to Conscious Full Edit for `scripture.chapter`. |
+| `scripture.chapters.verses.admin.full-edit` | `GET .../verses/{verse}/admin/full-edit` | `VerseFullEditController@show` | old_full_edit_redirect_only | Redirects to Conscious Full Edit for `scripture.verse`. |
 | `scripture.characters.admin.full-edit` | `GET characters/{character}/admin/full-edit` | `PostponedAdminSurfaceController` | unknown | Postponed proof surface. No active Conscious schema module yet. |
 | `scripture.topics.admin.full-edit` | `GET topics/{topic}/admin/full-edit` | `PostponedAdminSurfaceController` | unknown | Postponed proof surface. No active Conscious schema module yet. |
 

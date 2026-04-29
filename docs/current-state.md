@@ -389,6 +389,17 @@ After completing a task:
       `scripture.verse`
     - backend write endpoints remain intentionally in place as transitional
       service endpoints
+- Super Conscious Admin Total Cleanup + Backend Organization Audit has removed
+  the dead old frontend module UI files:
+    - `AdminModuleHost`, `AdminModuleHostGroup`, `AdminModuleActionRenderer`
+    - old module registry/action/qualification/type helpers
+    - `resources/js/admin/modules/*`
+    - unused old integration files for entity actions, sections, and books
+    - CMS admin under `resources/js/admin/cms/*` was intentionally untouched
+    - `docs/admin/super-conscious-admin-cleanup-audit.md` classifies frontend
+      and backend leftovers
+    - `docs/admin/super-conscious-backend-organization.md` defines the target
+      backend structure and writing-capacity roadmap
 - Full route pages have not been migrated to `UniversalPageRenderer` yet, so the
   current public visuals and behavior are intentionally preserved.
 - Canonical scripture admin still attaches through semantic surfaces and module qualification.

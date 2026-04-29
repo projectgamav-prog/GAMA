@@ -76,6 +76,12 @@ foundation:
   files are source-tree quarantine only
 - old route-specific book/chapter/verse Full Edit GET routes now redirect to
   Conscious Full Edit instead of rendering deprecated page-specific React forms
+- dead legacy frontend module UI files have now been removed where safe:
+  module host/group, action renderer, module registry/action/type helpers, the
+  old `resources/js/admin/modules/*` tree, and unused old integration files
+- the future Super Conscious backend organization is documented, with new write
+  capability expected to move through schema field/action registries and
+  services rather than page-specific controllers
 - Conscious Full Edit saves still use the old route-specific update endpoints
   until the next migration slice
 - create/reorder/delete/manage controls remain outside awareness ownership for

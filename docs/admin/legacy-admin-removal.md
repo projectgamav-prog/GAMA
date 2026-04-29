@@ -21,14 +21,9 @@ The old public-page module UI is no longer rendered:
 - fallback local `AdminEditableSurface` controls when awareness ownership is not
   ready
 
-`AdminModuleHost` and `AdminModuleHostGroup` are now explicit no-op
-compatibility shims. They return `null` immediately and intentionally do not
-import the old module registry, action resolver, action renderer, inline editor
-panels, or current-control comparison hooks.
-
-Some old module files are not deleted yet because their contracts, routes, and
-write endpoints still help bridge existing data and protected maintenance
-tooling.
+The old frontend module host, group host, module action renderer, module
+registry/resolver/types, semantic label helper, and `resources/js/admin/modules`
+tree have been removed. They should not be reintroduced.
 
 The current frontend audit still finds imports/usages of the legacy host in
 some reusable scripture support components:
@@ -41,9 +36,8 @@ some reusable scripture support components:
 - book public media fallback components
 
 Phase 2 removed these host imports and JSX from public scripture pages and
-reusable scripture renderers. Any remaining old structured-editor seams or
-backend service dependencies are documented as legacy source files only; they
-must not render visible public controls in normal admin mode.
+reusable scripture renderers. The later cleanup removed the host files
+themselves and the old frontend module registry.
 
 The book library grid no longer imports or renders `AdminModuleHost` for the old
 book-card intro surface. Book card title and description now use the Conscious

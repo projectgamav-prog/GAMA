@@ -28,56 +28,39 @@ These areas are the active public-page admin path:
 Reusable public renderers should expose stored schema fields through these
 components and helpers, not through legacy module hosts.
 
-## Quarantined Legacy Visible UI
+## Removed Legacy Visible UI
 
-These old public-page module UI entry points are now no-op compatibility shims:
+These old public-page module UI files have been removed after the public
+scripture import graph no longer referenced them:
 
 - `resources/js/admin/core/AdminModuleHost.tsx`
 - `resources/js/admin/core/AdminModuleHostGroup.tsx`
-
-They intentionally return `null` immediately and do not import the old module
-registry, action resolver, action renderer, quick-edit adapter checks, current
-control registration, or inline editor panels.
-
-This means the old public-page module UI cannot render even if a reusable
-scripture renderer still imports the host temporarily.
-
-Phase 2 also removed `AdminModuleHost` / `AdminModuleHostGroup` imports and JSX
-from public scripture pages and reusable scripture renderers. The only remaining
-mentions of those names are the no-op shim files themselves.
-
-The legacy `resources/js/admin/core/module-registry.ts` file is also now an
-empty compatibility registry. It no longer imports scripture integrations or
-legacy module definitions, so importing a leftover module definition cannot pull
-the old public UI graph back into active chunks.
-
-## Legacy Files Still Present
-
-The following frontend files remain for migration context, old protected
-tooling, or future deletion after all imports and service dependencies are
-removed:
-
 - `resources/js/admin/core/AdminModuleActionRenderer.tsx`
 - `resources/js/admin/core/module-registry.ts`
 - `resources/js/admin/core/module-actions.ts`
-- `resources/js/admin/core/qualify-module.ts`
 - `resources/js/admin/core/module-types.ts`
-- `resources/js/admin/modules/books/*`
-- `resources/js/admin/modules/chapters/*`
-- `resources/js/admin/modules/sections/*`
-- `resources/js/admin/modules/verses/*`
-- `resources/js/admin/modules/entity-actions/*`
-- `resources/js/admin/modules/intros/*`
-- `resources/js/admin/integrations/scripture/*`
-- `resources/js/admin/integrations/sections.ts`
+- `resources/js/admin/core/qualify-module.ts`
+- `resources/js/admin/core/semantic-action-labels.ts`
+- `resources/js/admin/modules/*`
 - `resources/js/admin/integrations/entity-actions.ts`
+- `resources/js/admin/integrations/sections.ts`
+- `resources/js/admin/integrations/scripture/books.ts`
+
+This means the old public-page module UI no longer has an easy import path.
+
+## Legacy Files Still Present
+
+The following frontend files remain for transitional surface metadata:
+
+- `resources/js/admin/integrations/scripture/chapters.ts`
+- `resources/js/admin/integrations/scripture/verses.ts`
+- `resources/js/admin/integrations/scripture/identity-surface-context.ts`
 
 These are not the active public scripture admin UI. New public-page controls
 must not be added through these files.
 
-Scripture integration files may still build surface contracts for Conscious
-renderers, but their legacy module-registration exports are empty and should not
-be used for visible controls.
+These scripture integration files may still build surface contracts for
+Conscious renderers, but they must not import old module UI.
 
 ## CMS Admin Is Separate
 
@@ -136,13 +119,11 @@ family, or old module launcher.
 
 Before deleting legacy frontend module files entirely:
 
-1. Remove remaining `AdminModuleHost` / `AdminModuleHostGroup` imports from
-   shared scripture renderers.
-2. Confirm translations, commentaries, media, relation, add, delete, and reorder
+1. Confirm translations, commentaries, media, relation, add, delete, and reorder
    paths have Conscious Admin replacements or are intentionally unsupported.
-3. Confirm protected canonical maintenance screens no longer depend on old
+2. Confirm protected canonical maintenance screens no longer depend on old
    module editor components.
-4. Confirm Conscious Full Edit no longer depends on old route-specific form
+3. Confirm Conscious Full Edit no longer depends on old route-specific form
    logic.
-5. Run typecheck, build, and browser validation across active public scripture
+4. Run typecheck, build, and browser validation across active public scripture
    admin surfaces.
