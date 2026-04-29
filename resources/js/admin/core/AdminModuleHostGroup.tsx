@@ -1,4 +1,7 @@
-import { AdminModuleHost } from './AdminModuleHost';
+import {
+    AdminModuleHost,
+    isLegacyAdminModuleUiEnabled,
+} from './AdminModuleHost';
 import type { AdminSurfaceContract } from '../surfaces/core/surface-contracts';
 import { cn } from '@/lib/utils';
 
@@ -18,6 +21,10 @@ export function AdminModuleHostGroup({
     );
 
     if (activeSurfaces.length === 0) {
+        return null;
+    }
+
+    if (!isLegacyAdminModuleUiEnabled()) {
         return null;
     }
 

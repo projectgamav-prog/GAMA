@@ -9,6 +9,7 @@ import {
 import {
     createInlineEditorSurface,
 } from '@/admin/surfaces/core/surface-builders';
+import { adminSchemaFieldRegistry } from '@/admin/schema';
 import type { AdminSurfaceContract } from '@/admin/surfaces/core/surface-contracts';
 import type {
     ScriptureContentBlock,
@@ -117,6 +118,12 @@ export function createVerseTextFieldSurface({
     updateHref,
     fullEditHref,
 }: VerseTextFieldSurfaceArgs): AdminSurfaceContract {
+    const fieldDefinition = adminSchemaFieldRegistry.get({
+        schemaFamily: 'scripture',
+        entityType: 'verse',
+        fieldName: 'text',
+    });
+
     return createInlineEditorSurface({
         surfaceKey: 'verse.text_field',
         contractKey: null,
@@ -139,9 +146,12 @@ export function createVerseTextFieldSurface({
                   fields: [
                       {
                           name: 'text',
-                          label: 'Verse text',
+                          label: fieldDefinition?.label ?? 'Verse text',
                           value: verse.text,
                           input: 'textarea',
+                          fieldKind: fieldDefinition?.fieldKind ?? 'long_text',
+                          editorType:
+                              fieldDefinition?.preferredEditor ?? 'textarea',
                           payloadKey: 'text',
                           placeholder: 'Enter the canonical verse text.',
                       },

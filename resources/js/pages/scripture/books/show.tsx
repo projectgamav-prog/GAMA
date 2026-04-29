@@ -5,6 +5,10 @@ import { resolveBookHeaderSurfaces } from '@/admin/integrations/scripture/books'
 import { BookPublicMediaSection } from '@/components/scripture/book-public-media-section';
 import { ScriptureBookChapterList } from '@/components/scripture/scripture-book-chapter-list';
 import {
+    ScriptureBookDescriptionDisplay,
+    ScriptureBookTitleDisplay,
+} from '@/components/scripture/ScriptureSchemaFieldDisplays';
+import {
     ChronicleEditorialGrid,
     ChronicleOrnament,
     ChroniclePaperPanel,
@@ -61,14 +65,26 @@ export default function BookShow({
                         <div className="space-y-5">
                             <div className="space-y-3">
                                 <p className="chronicle-kicker">Book Feature</p>
-                                <h1 className="chronicle-feature-title">
-                                    {book.title}
-                                </h1>
+                                <ScriptureBookTitleDisplay
+                                    book={book}
+                                    admin={admin}
+                                    showAdminControls={showAdminControls}
+                                >
+                                    <h1 className="chronicle-feature-title">
+                                        {book.title}
+                                    </h1>
+                                </ScriptureBookTitleDisplay>
                                 <ChronicleOrnament />
                                 {book.description && (
-                                    <p className="max-w-3xl text-base leading-7 text-[color:var(--chronicle-ink)]">
-                                        {book.description}
-                                    </p>
+                                    <ScriptureBookDescriptionDisplay
+                                        book={book}
+                                        admin={admin}
+                                        showAdminControls={showAdminControls}
+                                    >
+                                        <p className="max-w-3xl text-base leading-7 text-[color:var(--chronicle-ink)]">
+                                            {book.description}
+                                        </p>
+                                    </ScriptureBookDescriptionDisplay>
                                 )}
                             </div>
 

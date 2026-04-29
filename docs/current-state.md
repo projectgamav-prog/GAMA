@@ -60,6 +60,10 @@ After completing a task:
     - controller/builder/mapper payload boundaries
     - registry use versus central switchboards
     - phased safe refactor sequencing
+- `docs/admin/legacy-admin-removal.md` records the current deprecation stance:
+  the old visible public scripture module layer is disabled by default, while
+  backend write endpoints remain available as transitional service seams for the
+  conscious admin layer.
 
 ### Cleanup wave status
 
@@ -236,7 +240,120 @@ After completing a task:
     - ownership diagnostics now treat `quick_edit` plus `full_edit` as a valid
       quick-edit overlay owner with fallback, while `quick_edit` plus
       `structured_editor` remains mixed and blocked
-- No behavior or visual changes are active from the awareness layer yet.
+- The first Conscious Admin Full Edit foundation now exists:
+    - awareness-owned schema field Full Edit controls can point to the new
+      `/admin/schema/{schemaFamily}/{entityType}/{id}/full-edit` route instead
+      of the fragile old route-specific full-edit pages
+    - the new shell renders through `resources/js/pages/admin/schema/full-edit.tsx`
+      and schema-aware components under `resources/js/admin/conscious-full-edit/`
+    - book, book section, chapter, chapter section, and verse records show field
+      categories such as Basic Content, Canonical Identity, Structure &
+      Parentage, Ordering, and Advanced / Technical
+    - safe book/book-section/chapter/chapter-section/verse fields reuse existing
+      update routes while slug, number, parentage, ordering, and technical
+      fields are visible as protected or read-only
+    - content blocks can reach the shell as a read-only first slice until
+      parent-aware save routes are connected safely
+    - old full-edit pages remain as deprecated fallback links from the shell, but
+      new awareness-owned schema field controls should not depend on them as the
+      primary path
+- The first admin-aware layout anchor structure now exists:
+    - `AdminAnchorBoundary` and `AdminControlAnchor` define passive anchor levels
+      and slots for page, region, section, card, block, and field controls
+    - `AdminControlPlacementResolver` now resolves both legacy overlay zones and
+      semantic anchor slots
+    - schema field controls expose field-level slots while keeping the existing
+      compact circular controls and same quick-edit behavior
+    - chronicle panels, editorial grids, side rails, section headings, universal
+      section renderers, and content blocks now expose passive anchor boundaries
+      from reusable components rather than route-page button placement
+    - `docs/admin/admin-layout-anchors.md` documents the anchor levels, slots,
+      and rule against page-specific control placement
+- Awareness-owned schema field controls now have a new Full Edit navigation
+  target when Conscious Full Edit supports the entity. Other awareness behavior
+  remains intentionally narrow and fallback-safe.
+- Conscious Admin Backend Phase 1 now exists as backend foundation only:
+    - `PATCH /admin/schema/{schemaFamily}/{entityType}/{id}/fields/{fieldName}`
+      is registered behind the admin schema middleware group
+    - backend scripture field definitions support safe updates for
+      `books.title`, `books.description`, `book_sections.title`,
+      `chapters.title`, `chapter_sections.title`, and `verses.text`
+    - protected fields such as slug, number, parent relation ids, and canonical
+      structure fields are registered as protected and blocked from generic
+      safe field updates
+    - old scripture write endpoints remain intact and are still used by the
+      frontend until the next migration phase points quick edit / Conscious Full
+      Edit field saves at the generic field route
+- Conscious Admin Backend Phase 2 has migrated schema-aware quick-edit saves for
+  the first safe scripture fields to the generic field route:
+    - `books.title`
+    - `books.description`
+    - `book_sections.title`
+    - `chapters.title`
+    - `chapter_sections.title`
+    - `verses.text`
+    - migrated quick-edit payloads now use `{ value }`
+    - hidden `slug`, `number`, and parent-context payload fields are no longer
+      sent for those safe quick-edit field saves
+    - old route-specific update endpoints remain in place for Conscious Full
+      Edit and non-migrated fallback/service flows
+- Conscious Admin Three-Dot Action Menu Phase 1 has replaced the always-visible
+  schema-field pencil/full-edit icon cluster with one local surface action menu:
+    - schema-aware fields now show one compact three-dot control at the local
+      field anchor
+    - `Edit` opens a compact Conscious field edit dialog that uses the existing
+      schema field editor adapter and generic quick-edit save flow
+    - `Full Edit` opens the Conscious Full Edit route when a supported href is
+      available
+    - delete, add, reorder, media, and relation actions remain absent until
+      their Conscious Admin paths are implemented
+    - the old black public-page module controls remain disabled and were not
+      reintroduced
+- `docs/admin/book-schema-conscious-controls.md` now catalogs the active book
+  schema action surface before more controls are exposed:
+    - books, book sections, chapters, chapter sections, verses, verse meta,
+      translations, commentaries, content blocks, and media assignments are
+      mapped by action family, control level, preferred UI, backend status,
+      risk, route/service need, and Full Edit category
+    - only safe field edit actions and Conscious Full Edit are marked ready for
+      the current three-dot menu
+    - create, reorder, delete, media, relation, support-entry, and protected
+      canonical actions remain documented but hidden until Conscious backend
+      services exist
+- Conscious Admin Action Registry Phase 1 now exists as an inert TypeScript
+  registry under `resources/js/admin/actions/`:
+    - action definitions model action keys, entity types, families, labels,
+      menu groups, control levels, UI modes, backend status, risk, capability,
+      backend action, Full Edit category, and disabled reasons
+    - current ready actions are registered for safe schema-field `Edit` and
+      Conscious `Full Edit`
+    - future add/delete/reorder/duplicate/media/verse-support actions are
+      registered as unavailable placeholders and remain hidden
+    - the schema-field three-dot menu now queries the registry before rendering
+      `Edit` or `Full Edit`
+- Conscious Admin Action Auto-Attachment Phase 1 now resolves enabled actions
+  through a shared surface-action resolver:
+    - schema-aware field surfaces pass schema family, entity type, field name,
+      control level, edit-handler availability, and Full Edit href availability
+      into the resolver
+    - the resolver filters by metadata, enabled/menu flags, backend readiness,
+      risk-ready runtime conditions, and field/entity control level
+    - enabled safe field `Edit` and Conscious `Full Edit` auto-attach to the
+      field three-dot menu
+    - unavailable placeholders for add/delete/reorder/duplicate/media/relation
+      and support actions remain hidden
+- Conscious Admin Renderer Awareness Contract Phase 1 now defines how rendered
+  schema content becomes admin-aware:
+    - reusable components that render stored database fields must emit
+      `AdminSchemaFieldDisplay` / `AdminSchemaFieldSurface`
+    - computed or presentation-only labels must remain explicitly non-editable
+      and cannot masquerade as schema fields
+    - shared helpers in `resources/js/admin/schema/fields/` distinguish stored
+      schema displays from computed/presentation-only displays
+    - `docs/admin/conscious-admin-field-coverage.md` audits the active
+      book-schema field coverage by field and reusable renderer, not URL
+    - the shared schema field edit dialog now keeps click handling modal-local
+      so cancel/close cannot accidentally trigger parent card/link navigation
 - Full route pages have not been migrated to `UniversalPageRenderer` yet, so the
   current public visuals and behavior are intentionally preserved.
 - Canonical scripture admin still attaches through semantic surfaces and module qualification.

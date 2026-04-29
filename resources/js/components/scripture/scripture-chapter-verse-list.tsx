@@ -10,6 +10,7 @@ import {
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScriptureIntroDropdown } from '@/components/scripture/scripture-intro-dropdown';
 import { SCRIPTURE_INLINE_ADMIN_PANEL_CLASS_NAME } from '@/components/scripture/scripture-section-group-wrapper';
+import { ScriptureChapterSectionTitleDisplay } from '@/components/scripture/ScriptureSchemaFieldDisplays';
 import { ScriptureVerseReaderRow } from '@/components/scripture/verse/ScriptureVerseReaderRow';
 import {
     ChroniclePaperPanel,
@@ -268,9 +269,17 @@ export function ScriptureChapterVerseList({
                             (sum, card) => sum + card.verses.length,
                             0,
                         );
-                        const sectionTitle = hidesGenericChapterSection
+                        const storedSectionTitle = section.title?.trim() ?? '';
+                        const fallbackSectionTitle = hidesGenericChapterSection
                             ? 'All Verses'
                             : sectionLabel(section.number, section.title);
+                        const sectionTitle =
+                            storedSectionTitle || fallbackSectionTitle;
+                        const sectionContextLabel = hidesGenericChapterSection
+                            ? 'All Verses'
+                            : section.number
+                              ? `Section ${section.number}`
+                              : 'Passage Section';
                         const sectionGroupSurface =
                             resolveChapterSectionVerseGroupSurface({
                                 chapterSection: section,
@@ -313,11 +322,21 @@ export function ScriptureChapterVerseList({
                                         </div>
                                         <div>
                                             <p className="chronicle-kicker">
-                                                Passage Section
+                                                {sectionContextLabel}
                                             </p>
-                                            <h3 className="chronicle-title text-3xl leading-tight">
-                                                {sectionTitle}
-                                            </h3>
+                                            <ScriptureChapterSectionTitleDisplay
+                                                section={section}
+                                                renderedTitle={sectionTitle}
+                                                isComputedDisplay={
+                                                    !storedSectionTitle ||
+                                                    sectionTitle !==
+                                                        storedSectionTitle
+                                                }
+                                            >
+                                                <h3 className="chronicle-title text-3xl leading-tight">
+                                                    {sectionTitle}
+                                                </h3>
+                                            </ScriptureChapterSectionTitleDisplay>
                                             <p className="text-sm text-[color:var(--chronicle-brown)]">
                                                 {section.cards.length} card
                                                 {section.cards.length === 1

@@ -13,6 +13,8 @@ import { AdminModuleActionRenderer } from './AdminModuleActionRenderer';
 import { getAdminQuickEditAdapter } from './AdminQuickEditRegistry';
 import {
     shouldDeferStructuredIdentityToQuickEditFields,
+    shouldDeferStructuredIntroToQuickEditFields,
+    shouldDeferStructuredSectionDetailsToQuickEditFields,
     useAdminResolvedControls,
     useRegisterCurrentAdminControls,
 } from '@/admin/awareness/core';
@@ -24,6 +26,17 @@ type Props = {
     modules?: readonly AdminModuleDefinition[];
     className?: string;
 };
+
+/**
+ * @deprecated Legacy public-page module UI is retired in favor of the
+ * schema-aware conscious admin layer. Keep this host available as a code seam
+ * while backend write endpoints and older protected tooling finish migrating.
+ */
+const ENABLE_LEGACY_ADMIN_MODULE_UI = false;
+
+export function isLegacyAdminModuleUiEnabled(): boolean {
+    return ENABLE_LEGACY_ADMIN_MODULE_UI;
+}
 
 /**
  * Shared host for capability-driven admin modules.
@@ -55,16 +68,41 @@ export function AdminModuleHost({
             }),
         [resolvedSurfaces, surface],
     );
+    const defersStructuredIntroToFieldQuickEdit = useMemo(
+        () =>
+            shouldDeferStructuredIntroToQuickEditFields({
+                surface,
+                resolvedSurfaces,
+            }),
+        [resolvedSurfaces, surface],
+    );
+    const defersStructuredSectionDetailsToFieldQuickEdit = useMemo(
+        () =>
+            shouldDeferStructuredSectionDetailsToQuickEditFields({
+                surface,
+                resolvedSurfaces,
+            }),
+        [resolvedSurfaces, surface],
+    );
     const visibleActions = useMemo(
         () =>
             resolvedActions.filter(
                 (action) =>
                     !(
-                        defersStructuredIdentityToFieldQuickEdit &&
-                        action.action.actionKey === 'edit_identity'
+                        (defersStructuredIdentityToFieldQuickEdit &&
+                            action.action.actionKey === 'edit_identity') ||
+                        (defersStructuredIntroToFieldQuickEdit &&
+                            action.action.actionKey === 'edit_intro') ||
+                        (defersStructuredSectionDetailsToFieldQuickEdit &&
+                            action.action.actionKey === 'edit_details')
                     ),
             ),
-        [defersStructuredIdentityToFieldQuickEdit, resolvedActions],
+        [
+            defersStructuredIdentityToFieldQuickEdit,
+            defersStructuredIntroToFieldQuickEdit,
+            defersStructuredSectionDetailsToFieldQuickEdit,
+            resolvedActions,
+        ],
     );
     const currentControlSummary = useMemo(
         () =>
@@ -127,6 +165,10 @@ export function AdminModuleHost({
     }
 
     if (getAdminQuickEditAdapter(surface) !== null) {
+        return null;
+    }
+
+    if (!ENABLE_LEGACY_ADMIN_MODULE_UI) {
         return null;
     }
 

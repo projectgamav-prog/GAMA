@@ -1,5 +1,9 @@
 import type { ScriptureEntityType } from '@/types';
 import type { AdminSurfaceKey } from './surface-keys';
+import type {
+    AdminSchemaFieldEditorType,
+    AdminSchemaFieldKind,
+} from '@/admin/schema/fields/schema-field-types';
 
 /**
  * Stable capability keys that a page surface can advertise to the shared
@@ -70,6 +74,8 @@ export type AdminQuickEditField = {
     label: string;
     value: string | null;
     input?: AdminQuickEditInput;
+    fieldKind?: AdminSchemaFieldKind;
+    editorType?: AdminSchemaFieldEditorType;
     payloadKey?: string;
     placeholder?: string | null;
 };

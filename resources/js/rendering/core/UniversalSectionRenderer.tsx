@@ -1,3 +1,4 @@
+import { AdminAnchorBoundary } from '@/admin/core/AdminLayoutAnchors';
 import type { UniversalSectionDescriptor } from './descriptor-types';
 import type { UniversalRenderContext } from './render-context';
 import { ensureCoreSectionRenderersRegistered } from './core-section-renderers';
@@ -37,13 +38,15 @@ export function UniversalSectionRenderer({
     }
 
     return (
-        <Renderer
-            section={section}
-            renderContext={renderContext}
-            surfaceContext={{
-                surface: section.surface ?? null,
-                owner: section.surface?.owner ?? null,
-            }}
-        />
+        <AdminAnchorBoundary level="section" anchorKey={section.id}>
+            <Renderer
+                section={section}
+                renderContext={renderContext}
+                surfaceContext={{
+                    surface: section.surface ?? null,
+                    owner: section.surface?.owner ?? null,
+                }}
+            />
+        </AdminAnchorBoundary>
     );
 }

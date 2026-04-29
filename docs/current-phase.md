@@ -22,27 +22,53 @@ current phase is:
 - continue selective validation of active editing paths as product-facing UI
   changes land
 
-Super Conscious Admin Layer Phase G1 is now the immediate foundation step:
+Super Conscious Admin Layer now includes the first Conscious Full Edit
+foundation:
 
-- stop the Phase 4B page-adapter/page-renderer migration direction
-- keep the Phase 4A adapters as temporary cleanup only
-- build from the Phase A universal admin awareness contracts and registry
-  shells
-- keep the Phase B `AdminControlResolver`, Phase C surface manifest
-  collection, Phase D resolver diagnostics, Phase E ordering/add-anchor
-  awareness, and Phase F comparison layer active as safety rails
-- transfer visible overlay ownership only for the narrow
-  `AdminEditableSurface` same-layout quick-edit family when the ownership gate
-  passes
-- validate and tighten this G1 ownership trial before expanding to any other
-  family
-- preserve the existing local `AdminEditableSurface` controls as fallback when
-  the gate fails
-- keep structured `AdminModuleHost` surfaces and all create/reorder/delete/manage
-  controls outside awareness ownership for now
-- do not change visuals or behavior
-- preserve the existing admin surface/module system while the awareness layer is
-  introduced underneath it
+- the visible legacy `AdminModuleHost` public-page UI is deprecated and disabled
+  by default so old black module launchers no longer compete with conscious
+  schema-aware controls
+- awareness-owned schema field Full Edit controls should prefer the new
+  `/admin/schema/{schemaFamily}/{entityType}/{id}/full-edit` route where a
+  supported schema entity exists
+- admin-aware layout anchors are now being introduced as the structural layer
+  for future clean control placement
+- reusable renderers should expose page/region/section/card/block/field anchor
+  levels and slots instead of placing buttons in route pages
+- the old route-specific Full Edit pages are deprecated fallback tooling, not
+  the primary path for new awareness-owned controls
+- the first Conscious Full Edit shell is schema-aware and field-category driven
+  for book, book section, chapter, chapter section, verse, and read-only
+  content-block records
+- inline quick edit remains the path for one safe field in place
+- Conscious Full Edit is the path for broader entity-record review and protected
+  canonical field visibility
+- old structured module components and backend write endpoints remain in the
+  codebase as transitional service/fallback seams, but they are not the active
+  visible public scripture admin layer
+- the first backend Conscious Admin field update foundation is now in place for
+  safe scripture fields, and schema-aware quick edit now sends `{ value }` to
+  the generic field route for those fields
+- schema-aware public field controls now use one local three-dot Conscious Admin
+  action menu instead of multiple always-visible icon buttons
+- the first menu actions are intentionally narrow: `Edit` opens a compact
+  schema-field dialog using the existing quick-edit save flow, and `Full Edit`
+  opens the Conscious Full Edit route when available
+- the book-schema Conscious Admin control catalog now defines which future
+  actions exist, which are ready, and which must stay hidden until their
+  Conscious backend service exists
+- the first inert Conscious Admin TypeScript action registry now backs the
+  schema-field three-dot menu for ready `Edit` and `Full Edit` actions while
+  keeping future placeholder actions unavailable and hidden
+- ready actions now auto-attach through a shared surface-action resolver instead
+  of page-specific JSX or direct menu hardcoding
+- renderer awareness is now an explicit contract: stored schema values must be
+  rendered through schema-aware field surfaces, while computed/presentation-only
+  labels must stay non-editable and separate
+- Conscious Full Edit saves still use the old route-specific update endpoints
+  until the next migration slice
+- create/reorder/delete/manage controls remain outside awareness ownership for
+  now
 
 ## Completed In This Cleanup Wave
 

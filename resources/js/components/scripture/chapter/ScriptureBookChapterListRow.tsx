@@ -3,6 +3,7 @@ import { BookOpenText, ChevronRight } from 'lucide-react';
 import { ScriptureBookChapterRowAdmin } from '@/components/scripture/scripture-book-chapter-row-admin';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScriptureIntroDropdown } from '@/components/scripture/scripture-intro-dropdown';
+import { ScriptureChapterTitleDisplay } from '@/components/scripture/ScriptureSchemaFieldDisplays';
 import { chapterLabel } from '@/lib/scripture';
 import { resolveScriptureNavigationAction } from '@/lib/scripture-navigation-actions';
 import type { ScriptureChapter } from '@/types';
@@ -46,9 +47,18 @@ export function ScriptureBookChapterListRow({
                             <BookOpenText className="size-4" />
                         </div>
                         <div className="min-w-0 flex-1 space-y-2">
-                            <p className="chronicle-title text-2xl leading-tight text-[color:var(--chronicle-ink)] group-hover:text-[color:var(--chronicle-brown)]">
-                                {chapterLabel(chapter.number, chapter.title)}
-                            </p>
+                            <ScriptureChapterTitleDisplay
+                                chapter={chapter}
+                                admin={chapter.admin ?? null}
+                                showAdminControls={showAdminControls}
+                            >
+                                <p className="chronicle-title text-2xl leading-tight text-[color:var(--chronicle-ink)] group-hover:text-[color:var(--chronicle-brown)]">
+                                    {chapterLabel(
+                                        chapter.number,
+                                        chapter.title,
+                                    )}
+                                </p>
+                            </ScriptureChapterTitleDisplay>
                             <p className="inline-flex items-center gap-1 text-xs font-semibold tracking-[0.16em] text-[color:var(--chronicle-brown)] uppercase">
                                 {chapterAction.label}
                                 <ChevronRight className="size-3.5" />

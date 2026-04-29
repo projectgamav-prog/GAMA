@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
+import { AdminSchemaFieldDisplay } from '@/admin/core/AdminSchemaFieldDisplay';
 import { AdminSurfaceBoundary } from '@/admin/core/AdminSurfaceBoundary';
+import { AdminAnchorBoundary } from '@/admin/core/AdminLayoutAnchors';
 import {
     AdminSurfaceEmitter,
     createEntityContextFromSurface,
@@ -7,6 +9,7 @@ import {
 } from '@/admin/awareness/core';
 import type { AdminOrderingContext } from '@/admin/awareness/core';
 import type { AdminSurfaceContract } from '@/admin/surfaces/core/surface-contracts';
+import type { AdminQuickEditPayloadField } from '@/admin/surfaces/core/surface-contracts';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { PublicContentBlock } from '@/types/content-blocks';
@@ -33,6 +36,48 @@ const getDataValue = (
     return typeof value === 'string' && value.length > 0 ? value : null;
 };
 
+const schemaFieldUpdateContext = (
+    adminSurface: AdminSurfaceContract | null,
+    fieldName: 'title' | 'body',
+): {
+    updateHref: string | null;
+    fullEditHref: string | null;
+    payloadKey: string | null;
+    hiddenPayloadFields: readonly AdminQuickEditPayloadField[];
+} => {
+    const quickEdit = adminSurface?.quickEdit ?? null;
+    const quickEditField = quickEdit?.fields.find(
+        (field) => field.name === fieldName || field.payloadKey === fieldName,
+    );
+
+    if (!quickEdit || !quickEditField) {
+        return {
+            updateHref: null,
+            fullEditHref: null,
+            payloadKey: null,
+            hiddenPayloadFields: [],
+        };
+    }
+
+    const siblingFields = quickEdit.fields
+        .filter((field) => field !== quickEditField)
+        .map((field) => ({
+            name: field.name,
+            payloadKey: field.payloadKey,
+            value: field.value,
+        }));
+
+    return {
+        updateHref: quickEdit.updateHref ?? null,
+        fullEditHref: quickEdit.fullEditHref ?? null,
+        payloadKey: quickEditField.payloadKey ?? null,
+        hiddenPayloadFields: [
+            ...(quickEdit.payloadFields ?? []),
+            ...siblingFields,
+        ],
+    };
+};
+
 export function ContentBlockRenderer({
     block,
     adminSurface = null,
@@ -44,6 +89,8 @@ export function ContentBlockRenderer({
     const altText = getDataValue(block.data_json, 'alt');
     const caption = getDataValue(block.data_json, 'caption');
     const poster = getDataValue(block.data_json, 'poster');
+    const titleUpdateContext = schemaFieldUpdateContext(adminSurface, 'title');
+    const bodyUpdateContext = schemaFieldUpdateContext(adminSurface, 'body');
     const entityMeta = {
         entityType: 'content_block' as const,
         entityId: block.id,
@@ -52,11 +99,23 @@ export function ContentBlockRenderer({
         capabilityHint: 'content_block',
     };
 
+    const hasSchemaFieldOwnedQuickEdit = Boolean(
+        titleUpdateContext.updateHref || bodyUpdateContext.updateHref,
+    );
     const renderCard = (card: ReactNode) => {
+        const anchoredCard = (
+            <AdminAnchorBoundary
+                level="block"
+                anchorKey={`content-block:${block.id}`}
+            >
+                {card}
+            </AdminAnchorBoundary>
+        );
+
         if (!adminSurface) {
             return (
                 <ScriptureEntityRegion meta={entityMeta} asChild>
-                    {card}
+                    {anchoredCard}
                 </ScriptureEntityRegion>
             );
         }
@@ -111,19 +170,62 @@ export function ContentBlockRenderer({
                             Boolean(adminSurface.quickEdit?.fullEditHref),
                     }}
                 />
-                <AdminSurfaceBoundary
-                    surface={adminSurface}
-                    emptyPlaceholder={
-                        <p className="text-sm leading-6 text-[color:var(--chronicle-brown)]">
-                            Add content here.
-                        </p>
-                    }
-                >
-                    {card}
-                </AdminSurfaceBoundary>
+                {hasSchemaFieldOwnedQuickEdit ? (
+                    anchoredCard
+                ) : (
+                    <AdminSurfaceBoundary
+                        surface={adminSurface}
+                        emptyPlaceholder={
+                            <p className="text-sm leading-6 text-[color:var(--chronicle-brown)]">
+                                Add content here.
+                            </p>
+                        }
+                    >
+                        {anchoredCard}
+                    </AdminSurfaceBoundary>
+                )}
             </ScriptureEntityRegion>
         );
     };
+
+    const renderTitle = (className?: string) =>
+        block.title ? (
+            <AdminSchemaFieldDisplay
+                entityType="content_block"
+                entityId={block.id}
+                fieldName="title"
+                value={block.title}
+                displayValue={block.title}
+                updateHref={titleUpdateContext.updateHref}
+                fullEditHref={titleUpdateContext.fullEditHref}
+                payloadKey={titleUpdateContext.payloadKey}
+                hiddenPayloadFields={titleUpdateContext.hiddenPayloadFields}
+            >
+                <CardTitle className={className}>{block.title}</CardTitle>
+            </AdminSchemaFieldDisplay>
+        ) : null;
+
+    const renderBody = (
+        children: ReactNode,
+        className?: string,
+        value = block.body,
+    ) =>
+        value ? (
+            <AdminSchemaFieldDisplay
+                entityType="content_block"
+                entityId={block.id}
+                fieldName="body"
+                value={value}
+                displayValue={value}
+                updateHref={bodyUpdateContext.updateHref}
+                fullEditHref={bodyUpdateContext.fullEditHref}
+                payloadKey={bodyUpdateContext.payloadKey}
+                hiddenPayloadFields={bodyUpdateContext.hiddenPayloadFields}
+                className={className}
+            >
+                {children}
+            </AdminSchemaFieldDisplay>
+        ) : null;
 
     if (block.block_type === 'quote') {
         return renderCard(
@@ -136,13 +238,15 @@ export function ContentBlockRenderer({
                         </div>
                         {headerAction}
                     </div>
-                    {block.title && <CardTitle>{block.title}</CardTitle>}
+                    {renderTitle()}
                 </CardHeader>
                 {block.body && (
                     <CardContent>
-                        <blockquote className="text-lg leading-8 italic">
-                            {block.body}
-                        </blockquote>
+                        {renderBody(
+                            <blockquote className="text-lg leading-8 italic">
+                                {block.body}
+                            </blockquote>,
+                        )}
                     </CardContent>
                 )}
             </Card>,
@@ -160,7 +264,7 @@ export function ContentBlockRenderer({
                         </div>
                         {headerAction}
                     </div>
-                    {block.title && <CardTitle>{block.title}</CardTitle>}
+                    {renderTitle()}
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {mediaUrl && (
@@ -171,9 +275,19 @@ export function ContentBlockRenderer({
                         />
                     )}
                     {(block.body ?? caption) && (
-                        <p className="text-sm leading-6 text-muted-foreground">
-                            {block.body ?? caption}
-                        </p>
+                        <>
+                            {block.body
+                                ? renderBody(
+                                      <p className="text-sm leading-6 text-muted-foreground">
+                                          {block.body}
+                                      </p>,
+                                  )
+                                : (
+                                      <p className="text-sm leading-6 text-muted-foreground">
+                                          {caption}
+                                      </p>
+                                  )}
+                        </>
                     )}
                 </CardContent>
             </Card>,
@@ -191,7 +305,7 @@ export function ContentBlockRenderer({
                         </div>
                         {headerAction}
                     </div>
-                    {block.title && <CardTitle>{block.title}</CardTitle>}
+                    {renderTitle()}
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {mediaUrl && (
@@ -202,11 +316,12 @@ export function ContentBlockRenderer({
                             src={mediaUrl}
                         />
                     )}
-                    {block.body && (
-                        <p className="text-sm leading-6 text-muted-foreground">
-                            {block.body}
-                        </p>
-                    )}
+                    {block.body &&
+                        renderBody(
+                            <p className="text-sm leading-6 text-muted-foreground">
+                                {block.body}
+                            </p>,
+                        )}
                 </CardContent>
             </Card>,
         );
@@ -222,9 +337,7 @@ export function ContentBlockRenderer({
                     </div>
                     {headerAction}
                 </div>
-                {!inlineEditor && block.title && (
-                    <CardTitle>{block.title}</CardTitle>
-                )}
+                {!inlineEditor && renderTitle()}
             </CardHeader>
             {inlineEditor ? (
                 <CardContent>
@@ -232,9 +345,11 @@ export function ContentBlockRenderer({
                 </CardContent>
             ) : block.body ? (
                 <CardContent>
-                    <p className="leading-7 text-muted-foreground">
-                        {block.body}
-                    </p>
+                    {renderBody(
+                        <p className="leading-7 text-muted-foreground">
+                            {block.body}
+                        </p>,
+                    )}
                 </CardContent>
             ) : null}
         </Card>,

@@ -6,8 +6,7 @@ import type {
     AdminSurfaceContract,
     AdminSurfaceQuickEdit,
 } from '@/admin/surfaces/core/surface-contracts';
-import { AdminEditableText } from './AdminEditableText';
-import { AdminEditableTextarea } from './AdminEditableTextarea';
+import { getAdminFieldEditorAdapter } from './AdminFieldEditorRegistry';
 
 export type AdminQuickEditValues = Record<string, string>;
 
@@ -70,34 +69,12 @@ const textAdapter: AdminQuickEditAdapter = {
     ],
     requiredCapabilities: ['edit'],
     renderField: ({ field, value, processing, onChange }) => {
-        const inputType =
-            field.input ??
-            (field.name.includes('body') || field.name.includes('description')
-                ? 'textarea'
-                : 'input');
-
-        if (inputType === 'textarea') {
-            return (
-                <AdminEditableTextarea
-                    value={value}
-                    onChange={(event) => onChange(event.target.value)}
-                    disabled={processing}
-                    placeholder={field.placeholder ?? undefined}
-                    aria-label={field.label}
-                    rows={4}
-                />
-            );
-        }
-
-        return (
-            <AdminEditableText
-                value={value}
-                onChange={(event) => onChange(event.target.value)}
-                disabled={processing}
-                placeholder={field.placeholder ?? undefined}
-                aria-label={field.label}
-            />
-        );
+        return getAdminFieldEditorAdapter(field)?.renderField({
+            field,
+            value,
+            processing,
+            onChange,
+        }) ?? null;
     },
     buildPayload: buildMappedPayload,
 };

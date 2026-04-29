@@ -8,6 +8,7 @@ import {
 import { ScriptureBookChapterListRow } from '@/components/scripture/chapter/ScriptureBookChapterListRow';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScriptureIntroDropdown } from '@/components/scripture/scripture-intro-dropdown';
+import { ScriptureBookSectionTitleDisplay } from '@/components/scripture/ScriptureSchemaFieldDisplays';
 import { SCRIPTURE_INLINE_ADMIN_PANEL_CLASS_NAME } from '@/components/scripture/scripture-section-group-wrapper';
 import {
     ChroniclePaperPanel,
@@ -94,9 +95,17 @@ export function ScriptureBookChapterList({
 
                 <div className="space-y-4">
                     {bookSections.map((section, index) => {
-                        const sectionTitle = hidesGenericSingleSection
+                        const storedSectionTitle = section.title?.trim() ?? '';
+                        const fallbackSectionTitle = hidesGenericSingleSection
                             ? 'Chapters'
                             : sectionLabel(section.number, section.title);
+                        const sectionTitle =
+                            storedSectionTitle || fallbackSectionTitle;
+                        const sectionContextLabel = hidesGenericSingleSection
+                            ? 'Chapters'
+                            : section.number
+                              ? `Section ${section.number}`
+                              : null;
                         const sectionGroupSurface =
                             resolveBookSectionChapterGroupSurface({
                                 bookSection: section,
@@ -131,9 +140,26 @@ export function ScriptureBookChapterList({
                                             {index + 1}
                                         </div>
                                         <div>
-                                            <h3 className="chronicle-title text-3xl leading-tight">
-                                                {sectionTitle}
-                                            </h3>
+                                            {sectionContextLabel &&
+                                                sectionContextLabel !==
+                                                    sectionTitle && (
+                                                    <p className="chronicle-kicker">
+                                                        {sectionContextLabel}
+                                                    </p>
+                                                )}
+                                            <ScriptureBookSectionTitleDisplay
+                                                section={section}
+                                                renderedTitle={sectionTitle}
+                                                isComputedDisplay={
+                                                    !storedSectionTitle ||
+                                                    sectionTitle !==
+                                                        storedSectionTitle
+                                                }
+                                            >
+                                                <h3 className="chronicle-title text-3xl leading-tight">
+                                                    {sectionTitle}
+                                                </h3>
+                                            </ScriptureBookSectionTitleDisplay>
                                             <p className="text-sm text-[color:var(--chronicle-brown)]">
                                                 {section.chapters.length}{' '}
                                                 chapter

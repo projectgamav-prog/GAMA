@@ -1,5 +1,4 @@
-import { AdminFieldQuickEditSurface } from '@/admin/core/AdminFieldQuickEditSurface';
-import { resolveVerseTextFieldSurface } from '@/admin/integrations/scripture/verses';
+import { AdminSchemaFieldDisplay } from '@/admin/core/AdminSchemaFieldDisplay';
 import { cn } from '@/lib/utils';
 import type {
     ScriptureReaderVerseAdmin,
@@ -29,35 +28,30 @@ export function ScriptureVerseTextDisplay({
     className,
     surfaceClassName,
 }: Props) {
-    const verseTextSurface = resolveVerseTextFieldSurface({
-        verse,
-        admin,
-        enabled: showAdminControls,
-    });
-
     return (
-        <AdminFieldQuickEditSurface
-            surface={verseTextSurface}
+        <AdminSchemaFieldDisplay
+            entityType="verse"
+            entityId={verse.id}
+            fieldName="text"
+            value={verse.text}
+            displayValue={verse.text}
+            updateHref={showAdminControls ? admin?.identity_update_href : null}
+            fullEditHref={admin?.full_edit_href ?? null}
+            hiddenPayloadFields={[
+                {
+                    name: 'slug',
+                    value: verse.slug,
+                },
+                {
+                    name: 'number',
+                    value: verse.number ?? '',
+                },
+            ]}
             className={surfaceClassName}
-            manifestKey={`verse-text:${verse.id}`}
-            block={{
-                blockType: 'text_field',
-                contentKind: 'long_text',
-                fieldKind: 'text',
-            }}
-            layout={{
-                layoutZone: 'inline_prose',
-                visualRole: 'field',
-                preferredPlacement: 'top-right',
-            }}
-            schemaConstraints={{
-                quickEditAllowedFields: ['text'],
-                structuredOnlyFields: ['slug', 'number'],
-            }}
         >
             <p className={cn('font-serif text-lg leading-8', className)}>
                 {verse.text}
             </p>
-        </AdminFieldQuickEditSurface>
+        </AdminSchemaFieldDisplay>
     );
 }

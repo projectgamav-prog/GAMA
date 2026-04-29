@@ -3,6 +3,7 @@ import { ChevronRight } from 'lucide-react';
 import { AdminModuleHostGroup } from '@/admin/core/AdminModuleHostGroup';
 import { resolveChapterHeaderSurfaces } from '@/admin/integrations/scripture/chapters';
 import { ScriptureChapterVerseList } from '@/components/scripture/scripture-chapter-verse-list';
+import { ScriptureChapterTitleDisplay } from '@/components/scripture/ScriptureSchemaFieldDisplays';
 import {
     ChronicleEditorialGrid,
     ChronicleOrnament,
@@ -74,9 +75,15 @@ export default function ChapterShow({
                                 <p className="chronicle-kicker">
                                     Chapter Reading
                                 </p>
-                                <h1 className="chronicle-feature-title">
-                                    {pageModel.chapterTitle}
-                                </h1>
+                                <ScriptureChapterTitleDisplay
+                                    chapter={chapter}
+                                    admin={admin}
+                                    showAdminControls={showAdminControls}
+                                >
+                                    <h1 className="chronicle-feature-title">
+                                        {pageModel.chapterTitle}
+                                    </h1>
+                                </ScriptureChapterTitleDisplay>
                                 <div className="flex flex-wrap items-center gap-2 text-sm text-[color:var(--chronicle-brown)]">
                                     <span>{book.title}</span>
                                     {!pageModel.hidesGenericBookSection && (

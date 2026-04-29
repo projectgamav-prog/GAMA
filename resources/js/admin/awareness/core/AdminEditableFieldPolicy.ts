@@ -1,4 +1,5 @@
 import type { AdminSurfaceContract } from '@/admin/surfaces/core/surface-contracts';
+import type { AdminSchemaFieldKind } from '@/admin/schema/fields';
 import type { AdminResolvedSurfaceControls } from './control-ownership-types';
 
 export type AdminEditableFieldCategory =
@@ -60,6 +61,25 @@ const STRUCTURED_IDENTITY_FIELDS = new Set([
     'status',
 ]);
 
+const QUICK_EDIT_FIELD_KINDS = new Set<AdminSchemaFieldKind>([
+    'description',
+    'long_text',
+    'name',
+    'rich_text_lite',
+    'short_text',
+    'title',
+]);
+
+const PROTECTED_FIELD_KINDS = new Set<AdminSchemaFieldKind>([
+    'canonical_identity',
+    'json',
+    'media',
+    'order',
+    'protected_metadata',
+    'relation',
+    'slug',
+]);
+
 function normalizeFieldName(fieldName: string): string {
     return fieldName.trim().toLowerCase();
 }
@@ -110,6 +130,18 @@ export function isQuickEditableTextField(fieldName: string): boolean {
     );
 }
 
+export function isQuickEditableSchemaFieldKind(
+    fieldKind: AdminSchemaFieldKind,
+): boolean {
+    return QUICK_EDIT_FIELD_KINDS.has(fieldKind);
+}
+
+export function isProtectedSchemaFieldKind(
+    fieldKind: AdminSchemaFieldKind,
+): boolean {
+    return PROTECTED_FIELD_KINDS.has(fieldKind) || fieldKind === 'number';
+}
+
 export function isExcludedFromQuickEdit(fieldName: string): boolean {
     return !isQuickEditableTextField(fieldName);
 }
@@ -125,7 +157,11 @@ export function isQuickEditableFieldSurface(
 
     return (
         quickEdit.fields.length > 0 &&
-        quickEdit.fields.every((field) => isQuickEditableTextField(field.name))
+        quickEdit.fields.every((field) =>
+            field.fieldKind
+                ? isQuickEditableSchemaFieldKind(field.fieldKind)
+                : isQuickEditableTextField(field.name),
+        )
     );
 }
 
@@ -136,11 +172,17 @@ function surfaceEntityKey(surface: AdminSurfaceContract): string {
 export function hasAwarenessOwnedQuickEditFieldForEntity({
     resolvedSurfaces,
     surface,
+    fieldNames = null,
 }: {
     surface: AdminSurfaceContract;
     resolvedSurfaces: readonly AdminResolvedSurfaceControls[];
+    fieldNames?: readonly string[] | null;
 }): boolean {
     const sourceEntityKey = surfaceEntityKey(surface);
+    const allowedFieldNames =
+        fieldNames === null
+            ? null
+            : new Set(fieldNames.map((fieldName) => normalizeFieldName(fieldName)));
 
     return resolvedSurfaces.some((resolvedSurface) => {
         const candidateSurface = resolvedSurface.input.surface?.surface;
@@ -154,6 +196,15 @@ export function hasAwarenessOwnedQuickEditFieldForEntity({
         }
 
         if (!isQuickEditableFieldSurface(candidateSurface)) {
+            return false;
+        }
+
+        if (
+            allowedFieldNames !== null &&
+            !candidateSurface.quickEdit?.fields.some((field) =>
+                allowedFieldNames.has(normalizeFieldName(field.name)),
+            )
+        ) {
             return false;
         }
 
@@ -180,6 +231,44 @@ export function shouldDeferStructuredIdentityToQuickEditFields({
 }): boolean {
     return (
         surface.contractKey === 'identity' &&
-        hasAwarenessOwnedQuickEditFieldForEntity({ resolvedSurfaces, surface })
+        hasAwarenessOwnedQuickEditFieldForEntity({
+            resolvedSurfaces,
+            surface,
+            fieldNames: ['name', 'text', 'title'],
+        })
+    );
+}
+
+export function shouldDeferStructuredIntroToQuickEditFields({
+    resolvedSurfaces,
+    surface,
+}: {
+    surface: AdminSurfaceContract;
+    resolvedSurfaces: readonly AdminResolvedSurfaceControls[];
+}): boolean {
+    return (
+        surface.contractKey === 'intro' &&
+        hasAwarenessOwnedQuickEditFieldForEntity({
+            resolvedSurfaces,
+            surface,
+            fieldNames: ['body', 'description', 'intro_text', 'text'],
+        })
+    );
+}
+
+export function shouldDeferStructuredSectionDetailsToQuickEditFields({
+    resolvedSurfaces,
+    surface,
+}: {
+    surface: AdminSurfaceContract;
+    resolvedSurfaces: readonly AdminResolvedSurfaceControls[];
+}): boolean {
+    return (
+        surface.contractKey === 'section_group' &&
+        hasAwarenessOwnedQuickEditFieldForEntity({
+            resolvedSurfaces,
+            surface,
+            fieldNames: ['title'],
+        })
     );
 }

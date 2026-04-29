@@ -7,8 +7,12 @@ export {
     hasAwarenessOwnedQuickEditFieldForEntity,
     isExcludedFromQuickEdit,
     isQuickEditableFieldSurface,
+    isProtectedSchemaFieldKind,
+    isQuickEditableSchemaFieldKind,
     isQuickEditableTextField,
     shouldDeferStructuredIdentityToQuickEditFields,
+    shouldDeferStructuredIntroToQuickEditFields,
+    shouldDeferStructuredSectionDetailsToQuickEditFields,
     type AdminEditableFieldCategory,
 } from './AdminEditableFieldPolicy';
 export {

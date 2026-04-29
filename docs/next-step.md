@@ -85,6 +85,31 @@ The shared public frame, structured header navigation, structured footer system,
   instead of page names
 - continue with awareness/resolver/overlay ownership work before any visible
   control replacement
+- do not revive the old visible `AdminModuleHost` public-page layer; it is now
+  deprecated/disabled, and future visible admin controls should come from the
+  conscious schema-aware layer
+- keep backend write endpoints that conscious quick edit or Conscious Full Edit
+  still use, but treat them as service endpoints rather than the old UI
+  architecture
+- schema-aware quick edit now uses the generic
+  `/admin/schema/{schemaFamily}/{entityType}/{id}/fields/{fieldName}` route for
+  the first safe scripture fields; next backend migration target is moving
+  Conscious Full Edit field saves to the same field route
+- schema-aware public fields now expose routine actions through one local
+  Conscious Admin three-dot menu; keep expanding that menu only with real
+  supported actions, not placeholder delete/add/reorder/media/relation entries
+- use `docs/admin/book-schema-conscious-controls.md` as the control/action
+  catalog before adding any new book-schema menu actions; actions marked
+  `needs_conscious_backend`, `old_endpoint_only`, or `future` must stay hidden
+  from the Conscious menu until their backend service and policy are real
+- use the inert TypeScript action registry in `resources/js/admin/actions/` as
+  the extension seam for future menu actions; do not hardcode new action buttons
+  into schema field components
+- attach visible actions through the shared surface-action resolver so controls
+  appear from schema/content/surface metadata, not from route-page placement
+- use `docs/admin/conscious-admin-field-coverage.md` before treating a missing
+  control as a bug; missing controls should usually be fixed by reusable
+  renderer coverage, not URL/page-specific controls
 - keep CMS exposure generic and supplementary on non-CMS pages
 - keep the active inline editors on the real page instead of detouring back into workspace-first habits
 - preserve the shared header/footer shell instead of reintroducing page-local public chrome
@@ -203,8 +228,15 @@ Safe direction:
 
 Recommended next universal admin awareness target:
 
-- Phase G2: browser-validate the `AdminEditableSurface` awareness-owned
-  quick-edit trial across representative same-layout surfaces and keep
+- Browser-validate the new Conscious Full Edit path from awareness-owned schema
+  field controls for book, book section, chapter, chapter section, verse, and
+  read-only content-block records.
+- Use the new admin-aware layout anchor structure for future control placement:
+  renderers expose page/region/section/card/block/field anchors, while resolver
+  and overlay ownership decide which controls attach to those slots.
+- Continue replacing old full-edit dependency with schema-aware field/category
+  modules rather than patching route-specific full-edit pages.
+- Keep inline quick edit stable for one safe field in place and keep
   structured/module, media, relation, ordering, and canonical controls outside
   awareness ownership until their metadata is complete.
 

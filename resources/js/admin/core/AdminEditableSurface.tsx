@@ -13,6 +13,9 @@ import { AdminOverlayActionButton } from './AdminOverlayActionButton';
 import { AdminOverlayControlStrip } from './AdminOverlayControlStrip';
 import { AdminOverlayEditFooter } from './AdminOverlayEditFooter';
 import { AdminOverlayFrame } from './AdminOverlayFrame';
+import { AdminSchemaFieldEditDialog } from './AdminSchemaFieldEditDialog';
+import { AdminSurfaceActionMenu } from './AdminSurfaceActionMenu';
+import { resolveAdminControlZone } from './AdminControlPlacementResolver';
 import {
     resolveAdminEditableSurfaceOwnershipGate,
     useAdminControlComparison,
@@ -124,50 +127,8 @@ function AwarenessOwnedControlStrip({
     );
 }
 
-function LocalControlStrip({
-    fullEditHref,
-    onQuickEdit,
-}: {
-    fullEditHref: string | null;
-    onQuickEdit: () => void;
-}) {
-    return (
-        <AdminOverlayControlStrip
-            data-admin-diagnostic-layer="old"
-            data-admin-diagnostic-label="fallback"
-        >
-            <AdminOverlayActionButton
-                icon={Pencil}
-                className="chronicle-admin-action-button-old"
-                title="fallback admin"
-                aria-label="Edit (fallback admin)"
-                data-admin-diagnostic-layer="old"
-                data-admin-diagnostic-label="fallback"
-                onClick={onQuickEdit}
-            >
-                Edit
-            </AdminOverlayActionButton>
-            {fullEditHref && (
-                <Button
-                    asChild
-                    variant="ghost"
-                    className="chronicle-admin-action-button chronicle-admin-action-button-old"
-                    title="fallback admin"
-                    aria-label="Full edit (fallback admin)"
-                    data-admin-diagnostic-layer="old"
-                    data-admin-diagnostic-label="fallback"
-                >
-                    <Link href={fullEditHref}>
-                        <ExternalLink
-                            className="size-3.5"
-                            aria-hidden="true"
-                        />
-                        Full edit
-                    </Link>
-                </Button>
-            )}
-        </AdminOverlayControlStrip>
-    );
+function isSchemaFieldSurface(surface: AdminSurfaceContract): boolean {
+    return surface.blockType === 'schema_field';
 }
 
 export function AdminEditableSurface({
@@ -177,6 +138,7 @@ export function AdminEditableSurface({
     emptyPlaceholder = null,
 }: Props) {
     const [isEditing, setIsEditing] = useState(false);
+    const [isFieldEditDialogOpen, setIsFieldEditDialogOpen] = useState(false);
     const quickEdit = surface.quickEdit ?? null;
     const adapter = getAdminQuickEditAdapter(surface);
     const initialValues = useMemo(
@@ -185,6 +147,13 @@ export function AdminEditableSurface({
     );
     const form = useForm<AdminQuickEditValues>(initialValues);
     const fullEditHref = quickEdit?.fullEditHref ?? null;
+    const usesSchemaActionMenu = isSchemaFieldSurface(surface);
+    const fieldControlZone = usesSchemaActionMenu
+        ? resolveAdminControlZone({
+              surfaceKind: 'schema_field',
+              family: 'quick_edit',
+          })
+        : 'top-right';
     const { resolvedSurfaces } = useAdminResolvedControls();
     const { comparisons } = useAdminControlComparison();
     const ownershipGate = useMemo(
@@ -251,6 +220,19 @@ export function AdminEditableSurface({
         form.clearErrors();
         setIsEditing(false);
     };
+    const saveChanges = () => {
+        if (!quickEdit || !adapter || !quickEdit.updateHref) {
+            return;
+        }
+
+        form.transform((values) => adapter.buildPayload(values, quickEdit));
+        submitForm(
+            form,
+            quickEdit.method ?? 'patch',
+            quickEdit.updateHref,
+            () => setIsEditing(false),
+        );
+    };
 
     if (!quickEdit) {
         return <>{children}</>;
@@ -260,34 +242,38 @@ export function AdminEditableSurface({
         return (
             <AdminOverlayFrame
                 className={className}
-                controls={
-                    fullEditHref ? (
-                        <AdminOverlayControlStrip
-                            data-admin-diagnostic-layer="old"
-                            data-admin-diagnostic-label="fallback"
-                        >
-                            <Button
-                                asChild
-                                variant="ghost"
-                                className="chronicle-admin-action-button chronicle-admin-action-button-old"
-                                title="fallback admin"
-                                aria-label="Full edit (fallback admin)"
-                                data-admin-diagnostic-layer="old"
-                                data-admin-diagnostic-label="fallback"
-                            >
-                                <Link href={fullEditHref}>
-                                    <ExternalLink
-                                        className="size-3.5"
-                                        aria-hidden="true"
-                                    />
-                                    Full edit
-                                </Link>
-                            </Button>
-                        </AdminOverlayControlStrip>
-                    ) : null
-                }
+                controls={null}
             >
                 {children}
+            </AdminOverlayFrame>
+        );
+    }
+
+    if (usesSchemaActionMenu) {
+        return (
+            <AdminOverlayFrame
+                anchorKey={surface.regionKey ?? null}
+                anchorLevel="field"
+                className={className}
+                placement={fieldControlZone}
+                controlsMode="raw"
+                controls={
+                    <AdminSurfaceActionMenu
+                        entityType={surface.entity}
+                        fieldName={quickEdit.fields[0]?.name ?? null}
+                        editLabel="Edit"
+                        fullEditHref={fullEditHref}
+                        zone={fieldControlZone}
+                        onEdit={() => setIsFieldEditDialogOpen(true)}
+                    />
+                }
+            >
+                {children || emptyPlaceholder}
+                <AdminSchemaFieldEditDialog
+                    surface={surface}
+                    open={isFieldEditDialogOpen}
+                    onOpenChange={setIsFieldEditDialogOpen}
+                />
             </AdminOverlayFrame>
         );
     }
@@ -299,12 +285,7 @@ export function AdminEditableSurface({
                 fullEditHref={fullEditHref}
                 onQuickEdit={() => setIsEditing(true)}
             />
-        ) : (
-            <LocalControlStrip
-                fullEditHref={fullEditHref}
-                onQuickEdit={() => setIsEditing(true)}
-            />
-        );
+        ) : null;
 
         return (
             <AdminOverlayFrame className={className} controls={controls}>
@@ -316,7 +297,12 @@ export function AdminEditableSurface({
     return (
         <AdminOverlayFrame
             active
+            anchorKey={surface.regionKey ?? null}
+            anchorLevel={null}
             className={cn('chronicle-admin-same-place-edit-frame', className)}
+            placement="top-right"
+            controlsMode="overlay"
+            controls={null}
         >
             <div className="chronicle-admin-same-place-edit-fields">
                 {quickEdit.fields.map((field) => (
@@ -354,17 +340,7 @@ export function AdminEditableSurface({
                 viewLabel="View"
                 onView={discardChanges}
                 onDiscard={discardChanges}
-                onSave={() => {
-                    form.transform((values) =>
-                        adapter.buildPayload(values, quickEdit),
-                    );
-                    submitForm(
-                        form,
-                        quickEdit.method ?? 'patch',
-                        quickEdit.updateHref!,
-                        () => setIsEditing(false),
-                    );
-                }}
+                onSave={saveChanges}
             />
         </AdminOverlayFrame>
     );

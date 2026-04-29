@@ -2,15 +2,20 @@ import { Link } from '@inertiajs/react';
 import { BookOpenText } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { ComponentProps, ReactNode } from 'react';
+import type { AdminAnchorLevel } from '@/admin/core/AdminLayoutAnchors';
 import { cn } from '@/lib/utils';
 
 type ChroniclePaperPanelProps = ComponentProps<'section'> & {
     children: ReactNode;
+    adminAnchorKey?: string | null;
+    adminAnchorLevel?: AdminAnchorLevel | null;
     variant?: 'paper' | 'panel' | 'feature';
 };
 
 export function ChroniclePaperPanel({
     children,
+    adminAnchorKey = null,
+    adminAnchorLevel = 'card',
     className,
     variant = 'paper',
     ...props
@@ -22,8 +27,11 @@ export function ChroniclePaperPanel({
                 variant === 'panel' && 'chronicle-panel rounded-sm',
                 variant === 'feature' &&
                     'chronicle-paper overflow-hidden rounded-sm',
+                adminAnchorLevel && 'chronicle-admin-anchor-boundary',
                 className,
             )}
+            data-admin-anchor-level={adminAnchorLevel ?? undefined}
+            data-admin-anchor-key={adminAnchorKey ?? undefined}
             {...props}
         >
             {children}
@@ -73,16 +81,21 @@ export function ChronicleMasthead({ className }: { className?: string }) {
 export function ChronicleEditorialGrid({
     children,
     className,
+    adminAnchorKey = null,
 }: {
     children: ReactNode;
     className?: string;
+    adminAnchorKey?: string | null;
 }) {
     return (
         <div
             className={cn(
+                'chronicle-admin-anchor-boundary',
                 'grid gap-5 lg:grid-cols-[minmax(0,1fr)_17rem] xl:grid-cols-[minmax(0,1fr)_19rem]',
                 className,
             )}
+            data-admin-anchor-level="region"
+            data-admin-anchor-key={adminAnchorKey ?? 'editorial-grid'}
         >
             {children}
         </div>
@@ -92,16 +105,21 @@ export function ChronicleEditorialGrid({
 export function ChronicleSideRail({
     children,
     className,
+    adminAnchorKey = null,
 }: {
     children: ReactNode;
     className?: string;
+    adminAnchorKey?: string | null;
 }) {
     return (
         <aside
             className={cn(
+                'chronicle-admin-anchor-boundary',
                 'space-y-4 lg:sticky lg:top-4 lg:self-start',
                 className,
             )}
+            data-admin-anchor-level="region"
+            data-admin-anchor-key={adminAnchorKey ?? 'side-rail'}
         >
             {children}
         </aside>
@@ -113,18 +131,23 @@ export function ChronicleSectionHeading({
     eyebrow,
     action,
     className,
+    adminAnchorKey = null,
 }: {
     title: ReactNode;
     eyebrow?: ReactNode;
     action?: ReactNode;
     className?: string;
+    adminAnchorKey?: string | null;
 }) {
     return (
         <div
             className={cn(
+                'chronicle-admin-anchor-boundary',
                 'flex flex-col gap-2 border-b border-[color:var(--chronicle-border)] pb-2 sm:flex-row sm:items-end sm:justify-between',
                 className,
             )}
+            data-admin-anchor-level="section"
+            data-admin-anchor-key={adminAnchorKey ?? undefined}
         >
             <div>
                 {eyebrow && <p className="chronicle-kicker">{eyebrow}</p>}
