@@ -36,6 +36,7 @@ export function ScriptureVerseTextDisplay({
             value={verse.text}
             displayValue={verse.text}
             updateHref={showAdminControls ? admin?.identity_update_href : null}
+            enableConsciousQuickEdit={showAdminControls}
             fullEditHref={admin?.full_edit_href ?? null}
             hiddenPayloadFields={[
                 {

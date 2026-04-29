@@ -65,6 +65,9 @@ foundation:
 - renderer awareness is now an explicit contract: stored schema values must be
   rendered through schema-aware field surfaces, while computed/presentation-only
   labels must stay non-editable and separate
+- the reusable book library card renderer now emits Conscious schema-aware
+  surfaces for stored book title and description values instead of relying on
+  the disabled legacy module host intro surface
 - Conscious Full Edit saves still use the old route-specific update endpoints
   until the next migration slice
 - create/reorder/delete/manage controls remain outside awareness ownership for

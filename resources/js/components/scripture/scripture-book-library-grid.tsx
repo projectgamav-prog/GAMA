@@ -1,10 +1,12 @@
 import { Link } from '@inertiajs/react';
 import { BookOpenText } from 'lucide-react';
-import { AdminModuleHost } from '@/admin/core/AdminModuleHost';
-import { resolveBookCardIntroSurface } from '@/admin/integrations/scripture/books';
 import { ScriptureEntityRegion } from '@/components/scripture/scripture-entity-region';
 import { ScriptureIntroDropdown } from '@/components/scripture/scripture-intro-dropdown';
 import { SCRIPTURE_INLINE_ADMIN_PANEL_CLASS_NAME } from '@/components/scripture/scripture-section-group-wrapper';
+import {
+    ScriptureBookDescriptionDisplay,
+    ScriptureBookTitleDisplay,
+} from '@/components/scripture/ScriptureSchemaFieldDisplays';
 import { resolveScriptureNavigationAction } from '@/lib/scripture-navigation-actions';
 import type { ScriptureBook } from '@/types';
 
@@ -19,16 +21,11 @@ type Props = {
 function ScriptureBookLibraryCard({
     book,
     showAdminControls,
-    panelClassName,
 }: {
     book: ScriptureBook;
     showAdminControls: boolean;
     panelClassName: string;
 }) {
-    const introSurface = resolveBookCardIntroSurface({
-        book,
-        enabled: showAdminControls,
-    });
     const bookAction = resolveScriptureNavigationAction({
         actionKey: 'open_book',
         href: book.href,
@@ -49,19 +46,29 @@ function ScriptureBookLibraryCard({
             <article className="chronicle-panel flex h-full flex-col rounded-sm p-4 text-center transition hover:-translate-y-0.5 hover:border-[color:var(--chronicle-gold)]">
                 <div className="space-y-3">
                     <BookOpenText className="mx-auto size-8 text-[color:var(--chronicle-gold)]" />
-                    <h3 className="chronicle-title text-xl leading-tight">
-                        {book.title}
-                    </h3>
+                    <ScriptureBookTitleDisplay
+                        book={book}
+                        admin={book.admin ?? null}
+                        showAdminControls={showAdminControls}
+                    >
+                        <h3 className="chronicle-title text-xl leading-tight">
+                            {book.title}
+                        </h3>
+                    </ScriptureBookTitleDisplay>
                 </div>
 
                 <div className="flex-1 space-y-3 py-4">
-                    {introSurface && (
-                        <AdminModuleHost
-                            surface={introSurface}
-                            className={panelClassName}
-                        />
-                    )}
-                    <ScriptureIntroDropdown textValue={book.description} />
+                    {book.description ? (
+                        <ScriptureBookDescriptionDisplay
+                            book={book}
+                            admin={book.admin ?? null}
+                            showAdminControls={showAdminControls}
+                        >
+                            <ScriptureIntroDropdown
+                                textValue={book.description}
+                            />
+                        </ScriptureBookDescriptionDisplay>
+                    ) : null}
                 </div>
 
                 <div className="flex flex-wrap items-center justify-center gap-3">
@@ -88,6 +95,8 @@ export function ScriptureBookLibraryGrid({
     showAdminControls,
     panelClassName = DEFAULT_PANEL_CLASS_NAME,
 }: Props) {
+    void panelClassName;
+
     return (
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
             {books.map((book) => (

@@ -354,6 +354,16 @@ After completing a task:
       book-schema field coverage by field and reusable renderer, not URL
     - the shared schema field edit dialog now keeps click handling modal-local
       so cancel/close cannot accidentally trigger parent card/link navigation
+- The latest legacy purge / renderer coverage pass removed the old
+  `AdminModuleHost` intro surface from the reusable book library card renderer:
+    - book library/card titles now render through `ScriptureBookTitleDisplay`
+      and emit `books.title` schema-aware surfaces
+    - visible book descriptions in book cards now render through
+      `ScriptureBookDescriptionDisplay` and emit `books.description`
+      schema-aware surfaces
+    - remaining public scripture `AdminModuleHost` imports are documented as
+      legacy visible UI traces that remain inert behind the disabled global
+      legacy gate
 - Full route pages have not been migrated to `UniversalPageRenderer` yet, so the
   current public visuals and behavior are intentionally preserved.
 - Canonical scripture admin still attaches through semantic surfaces and module qualification.

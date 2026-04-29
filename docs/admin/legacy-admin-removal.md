@@ -24,6 +24,26 @@ The old public-page module UI is no longer rendered by default:
 These pieces are not deleted yet because their contracts, routes, and write
 endpoints still help bridge existing data and protected maintenance tooling.
 
+The current frontend audit still finds imports/usages of the legacy host in
+some reusable scripture support components:
+
+- verse support sections for translations, commentaries, and study notes
+- scripture section/group wrappers
+- chapter/verse row admin helpers
+- book/chapter list helpers
+- protected full-edit pages
+- book public media fallback components
+
+These are classified as legacy visible UI traces that are disabled by the
+global `ENABLE_LEGACY_ADMIN_MODULE_UI = false` gate in `AdminModuleHost`. They
+may remain temporarily where they describe old structured-editor seams or
+backend service dependencies, but they must not render visible public controls
+in normal admin mode.
+
+The book library grid no longer imports or renders `AdminModuleHost` for the old
+book-card intro surface. Book card title and description now use the Conscious
+schema field display path instead.
+
 ## Endpoints Kept
 
 Backend update endpoints remain in place when the conscious admin layer still
@@ -37,7 +57,8 @@ Visible public scripture admin controls should now come from:
 
 - `AdminSchemaFieldSurface`
 - `AdminSchemaFieldDisplay`
-- `AdminFieldIconControls`
+- `AdminSurfaceActionMenu`
+- schema-field edit dialogs
 - Conscious Full Edit route:
   `/admin/schema/{schemaFamily}/{entityType}/{id}/full-edit`
 

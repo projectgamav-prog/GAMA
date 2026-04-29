@@ -33,8 +33,8 @@ whether a visible value may own a schema surface.
 
 | Field | Registry status | Displayed by reusable component | Emits schema-aware surface | Visible text equals stored value | Computed/presentation-only cases | Quick edit allowed | Full Edit available | Missing / notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `books.title` | registered, quick-edit safe | `ScriptureBookTitleDisplay` | yes, via `AdminSchemaFieldDisplay` | yes | none in this renderer | yes | yes when admin full edit href exists | Covered through reusable component; route pages should not render raw book title admin controls. |
-| `books.description` | registered, quick-edit safe | `ScriptureBookDescriptionDisplay` | yes, via `AdminSchemaFieldDisplay` | yes | empty/missing descriptions render normal public fallback outside the field value | yes | yes when admin full edit href exists | Covered for visible stored descriptions. |
+| `books.title` | registered, quick-edit safe | `ScriptureBookTitleDisplay`; used by book hero and book library cards | yes, via `AdminSchemaFieldDisplay` | yes | none in this renderer | yes | yes when admin full edit href exists | Covered through reusable component; route pages should not render raw book title admin controls. |
+| `books.description` | registered, quick-edit safe | `ScriptureBookDescriptionDisplay`; used by book hero and book library cards when description is visible | yes, via `AdminSchemaFieldDisplay` | yes | empty/missing descriptions render normal public fallback outside the field value | yes | yes when admin full edit href exists | Covered for visible stored descriptions. |
 | `book_sections.title` | registered, quick-edit safe | `ScriptureBookSectionTitleDisplay` | yes only when stored title is visibly rendered | yes when attached | presentation labels such as `Chapters` must stay outside this field surface | yes when stored title is shown | yes through Conscious Full Edit when available | Covered by guard; missing controls indicate renderer is showing presentation copy instead of the stored title. |
 | `chapters.title` | registered, quick-edit safe | `ScriptureChapterTitleDisplay` | yes, via `AdminSchemaFieldDisplay` | yes | none in this renderer | yes | yes when admin full edit href exists | Covered in reusable chapter title component. |
 | `chapter_sections.title` | registered, quick-edit safe | `ScriptureChapterSectionTitleDisplay` | yes only when stored title is visibly rendered | yes when attached | presentation labels such as `All Verses` or `Verse List` must stay outside this field surface | yes when stored title is shown | yes through Conscious Full Edit when available | Covered by guard; missing controls indicate renderer is showing presentation copy instead of the stored title. |
@@ -48,6 +48,8 @@ Covered reusable renderers:
 
 - `ScriptureBookTitleDisplay`
 - `ScriptureBookDescriptionDisplay`
+- `ScriptureBookLibraryGrid` / `ScriptureBookLibraryCard` through the shared
+  book title and description display components
 - `ScriptureChapterTitleDisplay`
 - `ScriptureBookSectionTitleDisplay`
 - `ScriptureChapterSectionTitleDisplay`
@@ -67,6 +69,9 @@ Presentation-only or computed labels must remain outside schema quick edit:
 
 ## Known Gaps
 
+- Some public scripture renderers still import legacy `AdminModuleHost`, but the
+  host is globally disabled for public visible UI and returns `null` unless the
+  compile-time legacy gate is changed.
 - Content block title/body fields have frontend renderer coverage but need a
   parent-aware Conscious backend route/action before they should be considered
   ready in the public three-dot menu.

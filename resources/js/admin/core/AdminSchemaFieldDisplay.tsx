@@ -28,6 +28,7 @@ type Props = {
     value: string | boolean | number | null;
     displayValue?: string | null;
     updateHref?: string | null;
+    enableConsciousQuickEdit?: boolean;
     method?: AdminQuickEditMethod;
     fullEditHref?: string | null;
     payloadKey?: string | null;
@@ -143,6 +144,7 @@ export function AdminSchemaFieldDisplay({
     value,
     displayValue,
     updateHref = null,
+    enableConsciousQuickEdit = false,
     method = 'patch',
     payloadKey = null,
     hiddenPayloadFields = [],
@@ -167,7 +169,7 @@ export function AdminSchemaFieldDisplay({
         entityId,
     });
     const consciousFieldUpdateHref =
-        updateHref !== null
+        updateHref !== null || enableConsciousQuickEdit
             ? resolveConsciousFieldUpdateHref({
                   schemaFamily,
                   entityType,

@@ -64,7 +64,12 @@ export function ScriptureBookTitleDisplay({
     className,
 }: FieldDisplayProps & {
     book: Pick<ScriptureBook, 'id' | 'slug' | 'number' | 'title'>;
-    admin?: Pick<ScriptureBookAdmin, 'identity_update_href' | 'full_edit_href'> | null;
+    admin?: Partial<
+        Pick<
+            ScriptureBookAdmin,
+            'identity_update_href' | 'details_update_href' | 'full_edit_href'
+        >
+    > | null;
     showAdminControls: boolean;
 }) {
     return (
@@ -74,7 +79,14 @@ export function ScriptureBookTitleDisplay({
             fieldName="title"
             value={book.title}
             displayValue={book.title}
-            updateHref={showAdminControls ? admin?.identity_update_href : null}
+            updateHref={
+                showAdminControls
+                    ? (admin?.identity_update_href ??
+                      admin?.details_update_href ??
+                      null)
+                    : null
+            }
+            enableConsciousQuickEdit={showAdminControls}
             fullEditHref={admin?.full_edit_href ?? null}
             hiddenPayloadFields={[
                 { name: 'slug', value: book.slug },
@@ -106,6 +118,7 @@ export function ScriptureBookDescriptionDisplay({
             value={book.description ?? ''}
             displayValue={book.description ?? ''}
             updateHref={showAdminControls ? admin?.details_update_href : null}
+            enableConsciousQuickEdit={showAdminControls}
             fullEditHref={admin?.full_edit_href ?? null}
             className={className}
         >
@@ -133,6 +146,7 @@ export function ScriptureChapterTitleDisplay({
             value={chapter.title ?? ''}
             displayValue={chapter.title ?? ''}
             updateHref={showAdminControls ? admin?.identity_update_href : null}
+            enableConsciousQuickEdit={showAdminControls}
             fullEditHref={admin?.full_edit_href ?? null}
             hiddenPayloadFields={[
                 { name: 'slug', value: chapter.slug },
@@ -174,6 +188,7 @@ export function ScriptureBookSectionTitleDisplay({
             value={section.title ?? ''}
             displayValue={section.title ?? ''}
             updateHref={section.admin?.details_update_href ?? null}
+            enableConsciousQuickEdit={Boolean(section.admin)}
             hiddenPayloadFields={[
                 { name: 'number', value: section.number ?? '' },
             ]}
@@ -213,6 +228,7 @@ export function ScriptureChapterSectionTitleDisplay({
             value={section.title ?? ''}
             displayValue={section.title ?? ''}
             updateHref={section.admin?.details_update_href ?? null}
+            enableConsciousQuickEdit={Boolean(section.admin)}
             hiddenPayloadFields={[
                 { name: 'number', value: section.number ?? '' },
             ]}
