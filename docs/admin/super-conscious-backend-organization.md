@@ -42,6 +42,49 @@ The current implementation already has the first schema field registry,
 definition, entity resolver, protected canonical field policy, Conscious Full
 Edit controller, and generic field update controller.
 
+## Current Backend Classification
+
+### `conscious_active`
+
+- `Admin\ConsciousFullEditController`
+- `Admin\ConsciousSchemaFieldUpdateController`
+- `app/Admin/Conscious/Schema/*`
+- `GET /admin/schema/{schemaFamily}/{entityType}/{id}/full-edit`
+- `PATCH /admin/schema/{schemaFamily}/{entityType}/{id}/fields/{fieldName}`
+
+### `transitional_write_endpoint`
+
+- scripture identity/details update controllers
+- scripture content-block controllers
+- verse meta, translation, and commentary controllers
+- book media-assignment controllers
+- matching `app/Http/Requests/Scripture/*Admin*` request classes
+
+These endpoints are intentionally kept until Conscious services/actions cover
+their behavior.
+
+### `redirect_only_old_full_edit`
+
+- `BookFullEditController`
+- `ChapterFullEditController`
+- `VerseFullEditController`
+
+These old GET controllers redirect to Conscious Full Edit and should not render
+route-specific React pages.
+
+### `replace_with_conscious_action`
+
+- canonical create/delete controllers
+- future add-child, delete, reorder, move/reparent, duplicate, media, relation,
+  and verse-support operations
+
+### `replace_with_conscious_service`
+
+- route-specific validation/request classes once their rules are represented by
+  field/action policies
+- route context helpers once response navigation is owned by Conscious actions
+- full-edit payload assembly currently centralized in the controller
+
 ## Target Routes
 
 Current:

@@ -86,6 +86,14 @@ foundation:
   components are removed; Conscious Full Edit is the active Full Edit frontend
 - the old awareness comparison layer for old-vs-new visible-control handoff is
   removed; resolver/ownership diagnostics remain the active awareness path
+- the remaining live scripture surface resolver helpers have moved from the old
+  `admin/integrations/scripture` path into the `admin/surfaces/scripture`
+  layer, and the dead circular `AdminFieldIconControls` cluster is removed now
+  that schema fields use the three-dot action menu
+- backend scripture admin controllers and requests are now classified as
+  Conscious active, transitional write endpoints, old full-edit redirect-only,
+  replace-with-Conscious-action, or replace-with-Conscious-service; no backend
+  endpoints were deleted in this phase
 - Conscious Full Edit saves still use the old route-specific update endpoints
   until the next migration slice
 - create/reorder/delete/manage controls remain outside awareness ownership for
@@ -129,8 +137,10 @@ Broad cleanup should now pause in these areas.
 
 These are pressure points to watch, not automatic next tasks:
 
-- `resources/js/pages/scripture/chapters/full-edit.tsx`
-- `resources/js/pages/scripture/chapters/verses/full-edit.tsx`
+- protected canonical edit workflow currently rendered by
+  `resources/js/pages/scripture/books/canonical-edit.tsx`
+- transitional backend write endpoints documented in
+  `docs/admin/conscious-admin-backend-migration-map.md`
 
 Treat them as reassess-later files only. Do not reopen them automatically just
 because they are large.

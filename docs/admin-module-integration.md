@@ -10,34 +10,43 @@ Read alongside:
 - `docs/admin/content-aware-positional-authoring.md` when the component edits a real list/tree on the live surface
 - `docs/admin/positional-authoring-implementation-guide.md` when the component needs local item insertion/reorder/delete behavior
 
-## 1. Two module systems
+## 1. Two admin systems
 
-The project now has two distinct module systems.
+The project now has two active admin/editing architectures.
 
-Canonical scripture admin modules:
-- live under `resources/js/admin/modules/`
-- qualify from canonical semantic surfaces
-- attach through `AdminModuleHost`
+Super Conscious Admin:
+- uses schema field surfaces, action registries, surface resolvers, and
+  Conscious Full Edit
+- lives under `resources/js/admin/actions/`,
+  `resources/js/admin/schema/`, `resources/js/admin/surfaces/`,
+  `resources/js/admin/awareness/`, and `resources/js/admin/conscious-full-edit/`
+- attaches public-page controls through schema-aware surfaces and
+  `AdminSurfaceActionMenu`
 
 CMS modules:
 - live under `resources/js/admin/cms/modules/<module>/`
 - register through the CMS manifest registry
 - render inside the CMS page/container/block system
 
-Do not mix those systems casually.
+The old public scripture `AdminModuleHost` / `resources/js/admin/modules/*`
+architecture has been removed. Do not recreate it.
 
 ## 2. Where outside React components should live
 
-### Canonical admin components
+### Super Conscious scripture admin components
 
-If an outside React component is becoming a canonical scripture editor:
-- place the reusable UI component near the owning module family under
-  `resources/js/admin/modules/<domain>/`
-- keep the adapter module file in the same domain folder
+If an outside React component is becoming a Super Conscious scripture editor:
+- expose schema fields through `AdminSchemaFieldDisplay` /
+  `AdminSchemaFieldSurface`
+- place surface builders/resolvers under `resources/js/admin/surfaces/`
+- register field/action metadata under `resources/js/admin/schema/` and
+  `resources/js/admin/actions/`
+- keep visible actions behind `AdminSurfaceActionMenu`
 
 Examples:
-- `resources/js/admin/modules/chapters/ChapterIdentityEditor.tsx`
-- `resources/js/admin/modules/verses/VerseMetaEditor.tsx`
+- `resources/js/admin/surfaces/scripture/chapters/surface-resolvers.ts`
+- `resources/js/admin/surfaces/scripture/verses/surface-resolvers.ts`
+- `resources/js/admin/schema/scripture/scripture-schema-fields.ts`
 
 ### CMS modules
 
@@ -53,51 +62,32 @@ Required stable CMS folder shape:
 - `defaults.ts`
 - `index.tsx`
 
-## 3. Canonical admin module shape
+## 3. Conscious admin shape
 
-A canonical admin module should stay small and predictable.
+A Conscious admin surface should stay small and predictable.
 
 Recommended shape:
-- metadata reader import
-- thin adapter component that reads the surface contract
-- `defineAdminModule(...)` export
-
-Shared family note:
-- intro-specific canonical helpers now live under
-  `resources/js/admin/modules/intros/`
-- do not place intro/surface helpers under a generic `blocks` family unless
-  they truly describe generic block infrastructure
-
-The module should receive only:
-- `surface`
-- `module`
-- `activation`
-
-from the shared host contract.
-
-The module should get its real data from a metadata reader such as:
-- `getIdentityContractMetadata`
-- `getIntroContractMetadata`
-- `getStructuredMetaContractMetadata`
-- `getRelationRowsContractMetadata`
-- section surface readers
+- schema field metadata
+- reusable surface/display component
+- action registry entry
+- field editor adapter where editing is safe
+- backend field/action service when mutation is supported
 
 Do not make an outside component depend directly on page props.
 
 ## 4. Canonical module registration
 
-Canonical admin modules register in two steps:
+Conscious Admin actions and fields register through schema/action registries.
+Do not register new public scripture editing behavior through the removed
+module-host system.
 
-1. Export the module from the relevant integration file:
-   - `resources/js/admin/integrations/scripture/books.ts`
-   - `resources/js/admin/integrations/scripture/chapters.ts`
-   - `resources/js/admin/integrations/scripture/verses.ts`
-   - `resources/js/admin/integrations/sections.ts`
+1. Register schema fields in the schema field registry.
+2. Register available actions in the Conscious action registry.
+3. Emit surface metadata from reusable renderers or surface resolvers.
+4. Let the shared action resolver decide what the three-dot menu can show.
 
-2. Let the central registry include that integration:
-   - `resources/js/admin/core/module-registry.ts`
-
-If a module only applies to one domain, keep it out of unrelated integrations.
+If an action only applies to one domain, keep it scoped to that schema/entity
+family in the registry.
 
 ## 5. Props and data boundaries
 
@@ -105,18 +95,18 @@ Outside components adapted into this system should receive:
 - semantic metadata
 - already-shaped hrefs/actions
 - already-shaped entity records
-- activation/open-close controls from the host
+- dialog/open-close controls from the Conscious surface/action components
 
 They should not receive:
 - whole Inertia page payloads
 - controller-specific assumptions
-- route-building logic that belongs in integrations/builders
+- route-building logic that belongs in schema/action/surface builders
 - page-local layout state
 
 Preferred boundary:
-- integrations/builders shape metadata
-- readers validate metadata
-- modules render and submit
+- schema/surface builders shape metadata
+- policies/registries validate what is editable
+- shared Conscious components render and submit
 
 If the adapted component is becoming a positional live editor:
 - keep the rendered item/list/tree as the main editing surface
@@ -126,13 +116,14 @@ If the adapted component is becoming a positional live editor:
 
 ## 6. Surface qualification expectations
 
-Modules should qualify by:
-- `contractKeys`
-- `entityScope`
-- `surfaceSlots`
-- `regionScope` when needed
-- required capabilities
-- optional `qualifies(surface)` checks
+Conscious actions should qualify by:
+- schema family
+- entity type
+- field name when field-level
+- control level
+- required capability
+- backend readiness
+- risk/policy status
 
 Do not rely on:
 - page component names
@@ -149,21 +140,21 @@ Examples:
   on the chapter page
 
 Preferred implementation pattern:
-- keep the page-level vs row-level semantic distinction in a shared integration
-  helper or typed context resolver
+- keep the page-level vs row-level semantic distinction in a shared surface
+  resolver or typed context resolver
 - let surface builders receive already-resolved semantic context metadata rather
-  than duplicating string branches in every integration file
+  than duplicating string branches in page files
 
 ## 7. How to adapt an outside component safely
 
 Recommended procedure:
 
 1. Keep the outside component mostly pure.
-2. Wrap it with a thin project adapter module.
-3. Read project metadata through a reader helper.
+2. Wrap it with a thin project adapter/surface component.
+3. Read project metadata through schema/surface helpers.
 4. Translate metadata into the props the outside component needs.
-5. Keep submission logic module-owned and surface-driven.
-6. Register the adapter in the proper integration.
+5. Keep submission logic registry/policy-owned and surface-driven.
+6. Register the field/action through the proper Conscious registry.
 
 This preserves reuse without letting a generic component dictate the page
 architecture.

@@ -6,14 +6,12 @@ import {
 import {
     resolveChapterIdentitySurfaceContext,
     type ChapterIdentitySurfaceContext,
-} from './identity-surface-context';
+} from '@/admin/surfaces/scripture/identity-surface-context';
 import type {
     ScriptureChapter,
     ScriptureChapterAdmin,
     ScriptureChapterRowAdmin,
 } from '@/types';
-
-export const chapterAdminModules = [] as const;
 
 export function resolveChapterHeaderSurfaces({
     chapter,

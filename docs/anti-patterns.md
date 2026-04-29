@@ -70,8 +70,8 @@ system.
 ### Current Examples Under Pressure
 
 - `resources/js/pages/scripture/chapters/verses/show.tsx`
-- `resources/js/pages/scripture/books/full-edit.tsx`
-- `resources/js/pages/scripture/chapters/verses/full-edit.tsx`
+- protected canonical edit paths until they move into Conscious protected
+  workflows
 
 ## Duplicated Editor Systems
 

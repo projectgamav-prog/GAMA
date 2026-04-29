@@ -59,9 +59,9 @@ Also tell Codex:
 - the broad cleanup/refactor wave is largely complete
 - do not resume broad cleanup by default
 - reopen cleanup only when a narrow seam is clearly justified
-- treat `resources/js/pages/scripture/chapters/full-edit.tsx` and
-  `resources/js/pages/scripture/chapters/verses/full-edit.tsx` as
-  reassess-later pressure points, not automatic next tasks
+- protected canonical edit and transitional backend write endpoints are the
+  remaining legacy pressure points; do not recreate deleted route-specific Full
+  Edit React pages
 
 ## Immediate focus
 
@@ -126,6 +126,12 @@ The shared public frame, structured header navigation, structured footer system,
 - old book/chapter/verse Full Edit React pages and their private editor/card
   components have been deleted; keep future Full Edit work in the Conscious
   schema-aware shell
+- the old `admin/integrations/scripture` frontend path has been removed; live
+  chapter/verse surface resolvers now live under `admin/surfaces/scripture`
+- the dead always-visible `AdminFieldIconControls` cluster has been removed;
+  schema-field actions should continue through the three-dot menu
+- backend scripture admin controllers are classified but intentionally kept
+  until Conscious services/actions replace them
 - protected canonical edit remains legacy until a Conscious protected-canonical
   workflow exists; do not delete its backend/frontend path blindly
 - keep CMS exposure generic and supplementary on non-CMS pages
@@ -163,9 +169,10 @@ universal rendering progress.
 
 Reassess-later pressure points only:
 
-- `resources/js/pages/scripture/chapters/full-edit.tsx`
-- `resources/js/pages/scripture/chapters/verses/full-edit.tsx`
-- revisit them only if a narrow, behavior-preserving seam becomes clearly worth taking
+- protected canonical edit workflow
+- transitional backend scripture write endpoints
+- revisit them only if a narrow, behavior-preserving Conscious replacement is
+  clearly worth taking
 
 ### 3. Extend live CMS interaction only where real product-facing need is now clear
 

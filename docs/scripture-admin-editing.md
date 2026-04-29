@@ -33,25 +33,26 @@ It does not cover:
 
 Canonical scripture pages stay thin.
 
-They expose semantic surfaces and mount shared hosts. Reusable editor behavior
-lives in the admin module system, not in the page file.
+They expose schema-aware surfaces through reusable renderers. Reusable editor
+behavior lives in the Super Conscious Admin schema/action system, not in the
+page file.
 
 The active live scripture editing model is:
-- page and row wrappers emit semantic `AdminSurfaceContract` values
-- integration helpers assemble the right surfaces for the current context
-- `AdminModuleHost` and `AdminModuleHostGroup` qualify reusable modules
-- inline editors save back to canonical routes and stay on the intended page
-- full-edit pages remain the protected fallback for deeper canonical/supporting work
+- reusable renderers emit schema-aware field surfaces
+- surface builders/resolvers assemble metadata for the current content context
+- `AdminSurfaceActionMenu` exposes enabled registry actions
+- safe quick edits save through the generic Conscious field update route
+- Conscious Full Edit is the protected fallback for deeper entity work
 
 ## Active infrastructure
 
 Core runtime:
-- `resources/js/admin/core/AdminModuleHost.tsx`
-- `resources/js/admin/core/AdminModuleHostGroup.tsx`
-- `resources/js/admin/core/module-registry.ts`
-- `resources/js/admin/core/module-types.ts`
-- `resources/js/admin/core/qualify-module.ts`
-- `resources/js/admin/core/module-actions.ts`
+- `resources/js/admin/core/AdminSchemaFieldDisplay.tsx`
+- `resources/js/admin/core/AdminSchemaFieldSurface.tsx`
+- `resources/js/admin/core/AdminSurfaceActionMenu.tsx`
+- `resources/js/admin/core/AdminSchemaFieldEditDialog.tsx`
+- `resources/js/admin/actions/*`
+- `resources/js/admin/conscious-full-edit/*`
 
 Surface contracts and builders:
 - `resources/js/admin/surfaces/core/surface-contracts.ts`
@@ -60,10 +61,9 @@ Surface contracts and builders:
 - `resources/js/admin/surfaces/core/contract-readers.ts`
 
 Canonical integrations:
-- `resources/js/admin/integrations/scripture/books.ts`
-- `resources/js/admin/integrations/scripture/chapters.ts`
-- `resources/js/admin/integrations/scripture/verses.ts`
-- `resources/js/admin/integrations/sections.ts`
+- `resources/js/admin/surfaces/scripture/chapters/surface-resolvers.ts`
+- `resources/js/admin/surfaces/scripture/verses/surface-resolvers.ts`
+- `resources/js/admin/surfaces/scripture/identity-surface-context.ts`
 
 ## Surface contract
 
@@ -83,27 +83,29 @@ Each active surface may expose:
 
 Important rule:
 - pages should emit semantic metadata
-- modules should read semantic metadata through readers
+- Conscious schema/action helpers should read semantic metadata through shared
+  contracts
 - page files should not manually choose concrete editor implementations
 
 ## Active slots and contracts
 
-Active slots:
-- `inline_editor`
-- `sheet_editor`
+Active levels:
+- field
+- card/block
+- section
+- region
+- page
 
 Active contract families:
-- `identity`
-- `intro`
-- `structured_meta`
-- `entity_actions`
-- `relation_rows`
-- `media_slots`
-- `section_collection`
-- `section_group`
+- schema fields
+- entity records
+- intro/content surfaces
+- relation/support surfaces
+- media surfaces
+- section/group surfaces
 
-The earlier public scripture block-region contracts were retired from the active
-public scripture path and are no longer part of the working module registry.
+The earlier public scripture module-host contracts were retired from the active
+public scripture path and are no longer part of the working admin UI.
 
 ## Semantics
 
@@ -180,39 +182,14 @@ Rules:
 
 This is especially important for chapter-row and verse-row identity editing.
 
-## Current active module families
+## Current active Conscious families
 
-Canonical book modules:
-- `BookIdentityEditor`
-- `BookIntroEditor`
-- `MediaSlotsEditor`
-
-Canonical chapter modules:
-- `ChapterIdentityEditor`
-- `ChapterIntroEditor`
-
-Canonical verse modules:
-- `VerseIdentityEditor`
-- `VerseIntroEditor`
-- `VerseMetaEditor`
-- `VerseTranslationsEditor`
-- `VerseCommentariesEditor`
-- `VerseRowActions`
-
-Shared section modules:
-- `SectionCollectionPanel`
-- `SectionGroupPanel`
-- `HierarchyCreateEditor`
-- `SectionIntroEditor`
-- `SectionRowDetailEditor`
-
-Shared entity action modules:
-- `EntityDeleteAction`
-
-Shared intro helpers used by active modules:
-- `resources/js/admin/modules/intros/`
-- `RegisteredEntityIntroEditor`
-- `RegisteredIntroBlockEditor`
+- schema-aware field display and edit dialog
+- three-dot surface action menu
+- Conscious action registry/resolver
+- Conscious Full Edit
+- scripture surface builders and surface resolvers
+- generic Conscious backend field update route
 
 ## What is retired from the active public scripture path
 
@@ -242,20 +219,22 @@ When adding or cleaning a future canonical page:
    - grouped/list
    - full-edit fallback
 4. Pass truthful route metadata such as `returnToHref`.
-5. Mount `AdminModuleHost` or `AdminModuleHostGroup`.
-6. Let modules qualify from the contract instead of hardcoding editor imports in
-   the page.
+5. Render schema-backed values through `AdminSchemaFieldDisplay` /
+   `AdminSchemaFieldSurface` when they are truly stored field values.
+6. Let the Conscious action resolver qualify actions from the contract instead
+   of hardcoding editor imports in the page.
 
 ## Guardrails
 
 Do:
-- keep canonical schema editing inside the canonical admin module system
+- keep canonical schema editing inside the Super Conscious Admin system
 - keep row semantics distinct from page semantics
 - keep same-page behavior explicit where intended
 - keep CMS exposure separate from canonical schema editing
 
 Do not:
 - reintroduce page-local editor hacks
+- reintroduce `AdminModuleHost` / `resources/js/admin/modules/*`
 - mount a child detail-page editor semantically unchanged inside a parent row
 - treat retired public block-authoring code as active architecture
 - let CMS supplementary regions mutate canonical scripture structure

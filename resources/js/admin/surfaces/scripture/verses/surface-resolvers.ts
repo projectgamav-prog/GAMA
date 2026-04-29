@@ -10,7 +10,7 @@ import {
 import {
     resolveVerseIdentitySurfaceContext,
     type VerseIdentitySurfaceContext,
-} from './identity-surface-context';
+} from '@/admin/surfaces/scripture/identity-surface-context';
 import type {
     ScriptureChapterVerseSharedAdmin,
     ScriptureReaderVerseAdmin,
@@ -21,8 +21,6 @@ import type {
     ScriptureVerseMeta,
     ScriptureVerseTranslationsAdmin,
 } from '@/types';
-
-export const verseAdminModules = [] as const;
 
 export function resolveVerseHeaderSurfaces({
     verse,

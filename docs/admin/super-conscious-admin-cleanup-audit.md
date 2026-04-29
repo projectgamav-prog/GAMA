@@ -25,6 +25,7 @@ is not a third admin architecture.
 - `resources/js/admin/core/AdminFieldEditorRegistry.tsx`
 - `resources/js/admin/core/AdminLayoutAnchors.tsx`
 - `resources/js/admin/core/AdminControlPlacementResolver.ts`
+- `resources/js/admin/surfaces/scripture/*/surface-resolvers.ts`
 - schema-aware scripture display components under
   `resources/js/components/scripture/*`
 
@@ -38,16 +39,39 @@ renderers are not old scripture admin. They remain active and separate.
 ### `transitional_type_or_metadata`
 
 - `resources/js/admin/surfaces/*`
-- `resources/js/admin/integrations/scripture/chapters.ts`
-- `resources/js/admin/integrations/scripture/verses.ts`
-- `resources/js/admin/integrations/scripture/identity-surface-context.ts`
+- `resources/js/admin/surfaces/scripture/chapters/surface-resolvers.ts`
+- `resources/js/admin/surfaces/scripture/verses/surface-resolvers.ts`
+- `resources/js/admin/surfaces/scripture/identity-surface-context.ts`
 
 These files still build admin surface contracts used by intro/header descriptor
 flows. They must not render controls or import legacy module UI.
 
-Phase 2B retained the chapter and verse integration helpers because current
-chapter/verse pages still pass intro surfaces into universal intro descriptor
-flows. They are transitional metadata helpers, not visible admin UI.
+Phase 3 moved the remaining chapter/verse integration helpers into the
+scripture surface layer and removed their empty `*AdminModules` exports. They
+are transitional metadata helpers, not visible admin UI.
+
+### `obsolete_after_three_dot_menu`
+
+- `resources/js/admin/core/AdminFieldIconControls.tsx`
+
+This component belonged to the always-visible circular field icon cluster era.
+The active schema-field control path now uses `AdminSurfaceActionMenu` and
+`AdminSchemaFieldEditDialog`, so the unreferenced icon cluster was deleted.
+
+### Import Graph Audit Notes
+
+- `AdminEditableSurface` remains active as the same-layout quick-edit
+  compatibility boundary for non-schema intro/content surfaces and as the
+  wrapper used by `AdminSurfaceBoundary`.
+- `AdminSurfaceBoundary` remains active for reusable intro/content-block
+  renderers that receive surface contracts.
+- `AdminQuickEditRegistry` remains active because both the schema field dialog
+  and awareness diagnostics use the quick-edit adapter registry.
+- `AdminControlPlacementResolver` remains active for the three-dot menu and
+  field anchor placement.
+- `AdminOverlayActionButton`, `AdminOverlayControlStrip`, and
+  `AdminOverlayEditFooter` remain transitional for non-schema same-layout
+  quick-edit surfaces. They should not be expanded for new schema-field UI.
 
 ### `legacy_visible_admin_ui`
 
@@ -75,6 +99,9 @@ Removed in Phase 2B:
 - old row-admin no-op components
 - old inline admin sheet/region editor components
 - old awareness current-control comparison provider/hooks/types
+- `resources/js/admin/core/AdminFieldIconControls.tsx`
+- `resources/js/admin/integrations/scripture/*` after the remaining live
+  helpers were moved into `resources/js/admin/surfaces/scripture/*`
 
 ### `dead_safe_to_remove`
 
@@ -128,6 +155,10 @@ Keep until Conscious actions replace them:
 - `VerseAdminContentBlockController`
 - matching request classes under `app/Http/Requests/Scripture/*Admin*`
 
+These remain as backend service endpoints only. They should migrate into
+`FieldUpdateService`, `EntityWriteService`, or registered Conscious actions
+before deletion.
+
 ### `old_full_edit_redirect_only`
 
 - `BookFullEditController`
@@ -153,6 +184,16 @@ for the mapped schema entity.
 Create/delete/reparent/reorder work should move to registered Conscious actions
 with protected canonical policy.
 
+### `replace_with_conscious_service`
+
+- route-specific identity/details request classes that validate multi-field
+  payloads
+- route context helpers under `App\Support\Scripture\Admin`
+- content-block move/duplicate helpers currently owned by legacy controllers
+
+These are still useful behavior, but their final home should be Conscious
+services and policies rather than page-family controllers.
+
 ### `uncertain`
 
 - topic and character postponed admin routes/controllers
@@ -170,8 +211,8 @@ actual architecture.
 
 ## Remaining Cleanup List
 
-1. Remove old route-specific full-edit React pages once old route names are no
-   longer needed for redirects or protected maintenance.
+1. Move Conscious Full Edit saves to the generic field route where field policy
+   permits it.
 2. Replace route-specific write controllers with Conscious field/action
    services.
 3. Move content block, media, relation, translation, and commentary writes into

@@ -52,6 +52,12 @@ components used only by those pages have now been removed. The protected book
 canonical edit page remains until a Conscious protected-canonical workflow
 replaces it.
 
+The remaining live scripture surface helper files have been moved out of the
+old `admin/integrations/scripture` path and into
+`admin/surfaces/scripture/*/surface-resolvers`. The old always-visible
+schema-field icon cluster component has also been removed; schema fields now
+use the Conscious three-dot action menu.
+
 ## Endpoints Kept
 
 Backend update endpoints remain in place when the conscious admin layer still

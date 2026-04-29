@@ -80,9 +80,8 @@ After completing a task:
 - Remaining cleanup is now selective only:
     - reopen only when a narrow, behavior-preserving seam is clearly justified
     - do not resume broad cleanup for purity
-    - treat `resources/js/pages/scripture/chapters/full-edit.tsx` and
-      `resources/js/pages/scripture/chapters/verses/full-edit.tsx` as
-      reassess-later pressure points, not automatic next tasks
+    - protected canonical edit and transitional backend write endpoints are the
+      remaining legacy pressure points, not the deleted old Full Edit pages
 
 ### Architecture
 
@@ -157,8 +156,7 @@ After completing a task:
     - the shared public site layout mounts the awareness provider once so
       public renderers can register facts without page-specific wiring
 - Phase C is observational only: it does not render controls, submit forms,
-  resolve visible actions, or replace `AdminSurfaceBoundary` /
-  `AdminModuleHost`.
+  resolve visible actions, or replace `AdminSurfaceBoundary`.
 - Super Conscious Admin Layer Phase D has connected emitted awareness manifest
   entries to the shadow resolver:
     - `AdminResolvedControlsProvider` reads in-memory manifest entries and
@@ -172,9 +170,9 @@ After completing a task:
       overlap risk with the current visible admin host
     - `useAdminResolvedControls()` exposes resolver output, ownership, and
       diagnostics for future tooling without rendering public UI
-- Phase D is still shadow-only: current visible admin controls, quick-edit
-  behavior, structured editor panels, and full-edit fallbacks remain owned by
-  the existing admin module/surface system.
+- Phase D was shadow-only at the time. The later cleanup removed the old visible
+  module UI, so current visible public scripture controls now come from the
+  Conscious schema-aware path.
 - Super Conscious Admin Layer Phase E has added universal ordering and
   add-anchor awareness in shadow mode:
     - `AdminOrderingManifestProvider` tracks order groups, item positions, and
@@ -195,38 +193,26 @@ After completing a task:
 - Phase E is still shadow-only: no add buttons, reorder handles, delete
   controls, drag/drop, backend routes, schema changes, or public/admin visual
   changes were introduced.
-- Super Conscious Admin Layer Phase F has added resolver-to-overlay shadow
-  comparison:
-    - `AdminControlComparisonProvider` compares resolver-decided controls with
-      current visible admin control summaries per emitted surface
-    - current visible summaries are emitted neutrally from `AdminModuleHost` and
-      `AdminEditableSurface` without changing their rendering or behavior
-    - comparison results classify matched, resolver-missing, current-missing,
-      placement mismatch, mode mismatch, duplicate risk, missing metadata,
-      ready-for-awareness-ownership, and not-ready states
-    - readiness requires resolver controls, known placement, known edit mode,
-      fallback/ownership clarity, no duplicate risk, no blocking schema
-      constraints, and no page-specific logic
-    - comparison diagnostics are queryable through
-      `useAdminControlComparison()` and are not rendered as public UI
-- Phase F is still shadow-only: no visible control ownership has transferred
-  from the existing admin module/surface system to the awareness layer.
+- Super Conscious Admin Layer Phase F previously added old-vs-new visible
+  control comparison during the handoff from the legacy visible module layer.
+  That comparison layer has now been removed because the old visible module
+  layer is gone; resolver ownership diagnostics remain the active awareness
+  path.
 - Super Conscious Admin Layer Phase G1 has started the first narrow
   awareness-owned overlay trial:
     - only `AdminEditableSurface` same-layout quick-edit surfaces can pass the
       ownership gate
     - the gate requires adapter-backed `same_layout` quick edit, resolver
-      controls, current/resolver comparison readiness, known placement/mode,
-      no duplicate risk, no blocking schema constraint, and quick/full-edit
-      scope only
+      controls, known placement/mode, no duplicate risk, no blocking schema
+      constraint, and quick/full-edit scope only
     - when the gate passes, the visible quick-edit and optional Full Edit
       controls come from resolver-decided controls
     - the same `AdminEditableSurface` component still owns edit mode, save,
       discard, adapter payload building, and fallback behavior
     - when the gate fails, `AdminEditableSurface` renders the previous local
       hardcoded controls exactly as before
-    - structured `AdminModuleHost` surfaces remain unchanged and are still not
-      owned by the awareness overlay layer
+    - structured module-host surfaces were not transferred; they were later
+      removed from the active public-page admin UI
 - Phase G1 does not transfer create, reorder, delete, manage media, manage
   relations, structured editor, ordering, add-anchor, or canonical hierarchy
   controls.
@@ -254,16 +240,15 @@ After completing a task:
       fields are visible as protected or read-only
     - content blocks can reach the shell as a read-only first slice until
       parent-aware save routes are connected safely
-    - old full-edit pages remain as deprecated fallback links from the shell, but
-      new awareness-owned schema field controls should not depend on them as the
-      primary path
+    - old route-specific Full Edit GET routes redirect to Conscious Full Edit;
+      the old book/chapter/verse React Full Edit pages have been deleted
 - The first admin-aware layout anchor structure now exists:
     - `AdminAnchorBoundary` and `AdminControlAnchor` define passive anchor levels
       and slots for page, region, section, card, block, and field controls
     - `AdminControlPlacementResolver` now resolves both legacy overlay zones and
       semantic anchor slots
-    - schema field controls expose field-level slots while keeping the existing
-      compact circular controls and same quick-edit behavior
+    - schema field controls expose field-level slots for the local three-dot
+      Conscious action menu and same quick-edit behavior
     - chronicle panels, editorial grids, side rails, section headings, universal
       section renderers, and content blocks now expose passive anchor boundaries
       from reusable components rather than route-page button placement
@@ -354,22 +339,17 @@ After completing a task:
       book-schema field coverage by field and reusable renderer, not URL
     - the shared schema field edit dialog now keeps click handling modal-local
       so cancel/close cannot accidentally trigger parent card/link navigation
-- The latest legacy purge / renderer coverage pass removed the old
+- The legacy purge / renderer coverage pass removed the old
   `AdminModuleHost` intro surface from the reusable book library card renderer:
     - book library/card titles now render through `ScriptureBookTitleDisplay`
       and emit `books.title` schema-aware surfaces
     - visible book descriptions in book cards now render through
       `ScriptureBookDescriptionDisplay` and emit `books.description`
       schema-aware surfaces
-    - remaining public scripture `AdminModuleHost` imports are documented as
-      legacy visible UI traces
-- Conscious Admin Legacy Frontend Quarantine Phase 1 has converted
-  `AdminModuleHost` and `AdminModuleHostGroup` into explicit no-op
-  compatibility shims:
-    - the shims return `null` immediately
-    - they no longer import the legacy module registry, module-action resolver,
-      action renderer, inline editor panels, quick-edit adapter checks, or
-      current-control comparison hooks
+    - public scripture `AdminModuleHost` imports were later removed entirely
+- Conscious Admin Legacy Frontend Quarantine Phase 1 first converted
+  `AdminModuleHost` and `AdminModuleHostGroup` into no-op compatibility shims,
+  and the later cleanup removed those old host files entirely:
     - old black/fallback module controls and inline structured panels cannot
       render through the public-page host path
     - `docs/admin/legacy-frontend-admin-quarantine.md` now records active
@@ -382,8 +362,6 @@ After completing a task:
       `AdminModuleHost` / `AdminModuleHostGroup`
     - old scripture integration files no longer export legacy module arrays
       backed by old module imports
-    - the legacy module registry is now an empty compatibility registry instead
-      of a graph that imports every old module definition
     - old book/chapter/verse route-specific Full Edit controllers now redirect
       to Conscious Full Edit for `scripture.book`, `scripture.chapter`, and
       `scripture.verse`
@@ -410,6 +388,16 @@ After completing a task:
     - `resources/js/pages/scripture/books/canonical-edit.tsx` remains as a
       protected legacy workflow until a Conscious protected-canonical workflow
       replaces it
+- Super Conscious Admin Cleanup Phase 3 completed the next import/backend audit:
+    - remaining chapter/verse surface helper files moved from
+      `resources/js/admin/integrations/scripture/*` into
+      `resources/js/admin/surfaces/scripture/*/surface-resolvers`
+    - the empty `*AdminModules` compatibility exports were removed
+    - the dead always-visible `AdminFieldIconControls` cluster was deleted
+      because schema fields now use `AdminSurfaceActionMenu`
+    - backend scripture admin controllers/requests/routes are classified for
+      migration into Conscious field services and registered actions, with no
+      backend endpoints removed in this phase
 - Full route pages have not been migrated to `UniversalPageRenderer` yet, so the
   current public visuals and behavior are intentionally preserved.
 - Canonical scripture admin still attaches through semantic surfaces and module qualification.
@@ -513,9 +501,11 @@ After completing a task:
     - the dead retired public scripture block-module registry branch was removed from the active admin module registry
     - the dead retired public scripture block surface builders and inline block-create helpers were removed
     - the old `CmsEligibleRegionExperiment` component was removed because exposed regions now resolve through the real shared region system
-    - the active canonical registry now reflects the real working module families instead of carrying dead public-block compatibility files
+    - the active canonical registry cleanup is historical; the later Conscious
+      cleanup removed the old public module registry entirely
     - book media slot editor defaults no longer hardcode the retired overview-video role as the create default in the active editor helpers
-    - the remaining shared intro helpers were re-homed from `resources/js/admin/modules/blocks/` into `resources/js/admin/modules/intros/` so the active module families read more honestly
+    - the shared intro helper re-home was a transitional step before the old
+      module tree was removed
     - chapter/verse row-vs-page identity semantics now resolve through a shared typed integration helper instead of duplicated string branches
     - the remaining canonical full-edit content-block controllers and route-context helpers are now explicitly marked as transitional fallback seams in code/docs instead of looking like the active public authoring path
     - the legacy `overview_video` media role is now treated as explicit compatibility-only metadata in the active editor helpers instead of a normal create-path slot
@@ -915,10 +905,9 @@ Do not drift into fake abstractions detached from either the canonical schema or
     - extend browser validation across the remaining grouped/full-edit canonical surfaces as needed
     - preserve the new narrow smoke layer for the active inline editors
     - keep row/page semantics and same-page behavior honest
-5. Treat the remaining larger canonical full-edit files as watch / reassess later only:
-    - `resources/js/pages/scripture/chapters/full-edit.tsx`
-    - `resources/js/pages/scripture/chapters/verses/full-edit.tsx`
-    - do not treat them as automatic next tasks
+5. Treat protected canonical edit and transitional backend write endpoints as
+   watch / reassess later only; do not recreate the deleted route-specific
+   Full Edit React pages.
 6. Extend the live CMS interaction model only where the real composition pass showed clear need:
     - keep published CMS pages interactive for permitted users
     - preserve the locked same-layout public-page-first authoring rule as live composition expands

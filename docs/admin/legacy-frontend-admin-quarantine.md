@@ -50,16 +50,17 @@ This means the old public-page module UI no longer has an easy import path.
 
 ## Legacy Files Still Present
 
-The following frontend files remain for transitional surface metadata:
+The following frontend files remain for transitional surface metadata, now under
+the scripture surface layer rather than the removed old integration folder:
 
-- `resources/js/admin/integrations/scripture/chapters.ts`
-- `resources/js/admin/integrations/scripture/verses.ts`
-- `resources/js/admin/integrations/scripture/identity-surface-context.ts`
+- `resources/js/admin/surfaces/scripture/chapters/surface-resolvers.ts`
+- `resources/js/admin/surfaces/scripture/verses/surface-resolvers.ts`
+- `resources/js/admin/surfaces/scripture/identity-surface-context.ts`
 
 These are not the active public scripture admin UI. New public-page controls
 must not be added through these files.
 
-These scripture integration files may still build surface contracts for
+These scripture surface resolver files may still build surface contracts for
 Conscious renderers, but they must not import old module UI.
 
 ## CMS Admin Is Separate
@@ -109,6 +110,11 @@ Old editor/card components used only by the removed Full Edit pages were also
 deleted. This includes old content-block/media editor cards, old row-admin
 shims, old verse identity/meta cards, and old inline admin sheet/region editor
 components.
+
+Phase 3 removed the dead `AdminFieldIconControls` circular icon cluster because
+schema-field controls now use the three-dot action menu. The remaining
+`AdminOverlay*` helpers are transitional support for non-schema same-layout
+quick-edit surfaces and should not be used for new schema-field controls.
 
 ## Guardrail
 

@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { ChevronRight } from 'lucide-react';
-import { resolveChapterHeaderSurfaces } from '@/admin/integrations/scripture/chapters';
+import { resolveChapterHeaderSurfaces } from '@/admin/surfaces/scripture/chapters/surface-resolvers';
 import { ScriptureChapterVerseList } from '@/components/scripture/scripture-chapter-verse-list';
 import { ScriptureChapterTitleDisplay } from '@/components/scripture/ScriptureSchemaFieldDisplays';
 import {

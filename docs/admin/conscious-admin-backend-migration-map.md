@@ -219,14 +219,16 @@ them as protected or route them to an advanced structured action later.
    generic field update route now exist for the first safe scripture fields.
 2. Schema-aware quick edit now uses the generic field route for the first safe
    scripture fields and sends `{ value }`.
-3. Move Conscious Full Edit field saves to the generic field route.
-4. Extract Conscious Full Edit payload building out of
+3. Phase 3 import/backend audit keeps all old write endpoints but classifies
+   them as transitional until Conscious services/actions replace them.
+4. Move Conscious Full Edit field saves to the generic field route.
+5. Extract Conscious Full Edit payload building out of
    `ConsciousFullEditController` into schema payload builders.
-5. Migrate content block title/body updates to parent-aware schema action
+6. Migrate content block title/body updates to parent-aware schema action
    services.
-6. Add Conscious structured services for verse meta, translations,
+7. Add Conscious structured services for verse meta, translations,
    commentaries, and media assignments.
-7. Add canonical create/delete/reorder action services with protected policy
+8. Add canonical create/delete/reorder action services with protected policy
    gates.
-8. Re-audit old route-specific controllers and remove or redirect only after
+9. Re-audit old route-specific controllers and remove or redirect only after
    no frontend payloads reference them.
