@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\ConsciousFullEditController;
+use App\Http\Controllers\Admin\ConsciousSchemaActionController;
 use App\Http\Controllers\Admin\ConsciousSchemaFieldUpdateController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
@@ -26,6 +27,11 @@ Route::middleware(['auth', EnsureCanAccessAdminContext::class])
             '{schemaFamily}/{entityType}/{id}/fields/{fieldName}',
             ConsciousSchemaFieldUpdateController::class,
         )->whereNumber('id')->name('fields.update');
+
+        Route::post(
+            '{schemaFamily}/{entityType}/{id}/actions/{actionKey}',
+            ConsciousSchemaActionController::class,
+        )->whereNumber('id')->name('actions.run');
     });
 
 require __DIR__.'/cms.php';

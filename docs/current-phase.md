@@ -94,8 +94,29 @@ foundation:
   Conscious active, transitional write endpoints, old full-edit redirect-only,
   replace-with-Conscious-action, or replace-with-Conscious-service; no backend
   endpoints were deleted in this phase
+- `docs/admin/super-conscious-awareness-automation.md` now locks the next
+  automation direction: schema/model/field/relation/renderer/CMS discovery may
+  produce awareness and diagnostics, while action enablement stays explicit and
+  policy-gated
+- Super Conscious Backend Awareness Foundation Phase 1 has started replacing
+  old route-specific backend responsibility:
+    - `ConsciousFullEditPayloadBuilder` now owns schema-aware Full Edit payload
+      assembly outside the controller
+    - `ConsciousFieldUpdateService` now owns generic safe field validation and
+      writes
+    - `ConsciousActionRegistry` and `ConsciousRelationshipRegistry` provide
+      inert metadata foundations for future action and relationship awareness
+    - `POST /admin/schema/{schemaFamily}/{entityType}/{id}/actions/{actionKey}`
+      exists as the disabled final action route shape
+- Super Conscious Backend Consolidation Big Patch 1 makes the action route an
+  active safe dispatcher:
+    - unknown action keys return 404
+    - disabled/unavailable actions reject before execution
+    - enabled actions resolve their entity and registered handler
+    - `protected_identity.update` can save `slug` and `number` for supported
+      scripture entities after explicit policy and validation
 - Conscious Full Edit saves still use the old route-specific update endpoints
-  until the next migration slice
+  only where no safe generic field replacement exists
 - create/reorder/delete/manage controls remain outside awareness ownership for
   now
 
@@ -163,6 +184,15 @@ The next real focus is the Super Conscious Admin Layer from the cleaned base:
 - do not continue page-family adapter extraction as the main architecture path
 - make admin behavior content/block/layout/schema/action aware rather than
   page-aware
+- build automation from metadata, renderer/CMS contracts, coverage reports, and
+  explicit policies; do not treat model/table/route existence as permission to
+  create controls or enable actions
+- continue replacing old backend controllers with Conscious services/actions;
+  preserve old endpoints only as temporary behavior providers until replacement
+  and usage audits are complete
+- keep all create/delete/reorder/reparent/media/content-block/verse-support
+  action definitions disabled until explicit services, policies, and
+  diagnostics exist
 - continue with awareness, resolver, diagnostics, and overlay ownership before
   visible control replacement
 - keep route pages thin and data-adapter oriented

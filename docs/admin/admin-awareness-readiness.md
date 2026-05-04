@@ -1,5 +1,12 @@
 # Admin Awareness Readiness
 
+Historical note: this was the Phase G0 readiness audit for the old
+resolver-to-legacy-control handoff. The old visible `AdminModuleHost` layer and
+current-control comparison layer have since been removed. Treat this document
+as historical context only; current implementation work should follow
+`docs/admin/super-conscious-admin-layer.md`, `docs/admin/garbage.md`, and the
+Conscious Admin schema/action docs.
+
 ## Purpose
 
 This note audits the current Super Conscious Admin Layer readiness before any

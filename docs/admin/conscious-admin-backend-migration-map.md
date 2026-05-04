@@ -16,13 +16,19 @@ without a separate implementation task and fresh usage check.
 
 | Route | Controller | Classification | Notes |
 | --- | --- | --- | --- |
-| `GET /admin/schema/{schemaFamily}/{entityType}/{id}/full-edit` | `Admin\ConsciousFullEditController@show` | keep | New schema-aware Full Edit shell for `book`, `book_section`, `chapter`, `chapter_section`, `verse`, and read-only `content_block`. |
+| `GET /admin/schema/{schemaFamily}/{entityType}/{id}/full-edit` | `Admin\ConsciousFullEditController@show` -> `ConsciousFullEditPayloadBuilder` | keep | New schema-aware Full Edit shell for `book`, `book_section`, `chapter`, `chapter_section`, `verse`, and read-only `content_block`. Controller orchestrates only. |
 
 ## Active Conscious Admin Field Update Foundation
 
 | Route | Controller | Classification | Notes |
 | --- | --- | --- | --- |
-| `PATCH /admin/schema/{schemaFamily}/{entityType}/{id}/fields/{fieldName}` | `Admin\ConsciousSchemaFieldUpdateController` | keep | Generic safe field update route. Schema-aware quick edit now uses this route for the first safe scripture fields. |
+| `PATCH /admin/schema/{schemaFamily}/{entityType}/{id}/fields/{fieldName}` | `Admin\ConsciousSchemaFieldUpdateController` -> `ConsciousFieldUpdateService` | keep | Generic safe field update route. Schema-aware quick edit and the first Conscious Full Edit safe fields use this route. |
+
+## Active Conscious Admin Action Route Foundation
+
+| Route | Controller | Classification | Notes |
+| --- | --- | --- | --- |
+| `POST /admin/schema/{schemaFamily}/{entityType}/{id}/actions/{actionKey}` | `Admin\ConsciousSchemaActionController` -> `ConsciousActionDispatcher` | keep | Final action route shape exists. Unknown or unavailable actions reject safely. `protected_identity.update` is enabled for supported scripture entities; create/delete/reorder/reparent placeholders remain disabled. |
 
 Phase 1 backend services:
 
@@ -31,6 +37,18 @@ Phase 1 backend services:
 - `ScriptureConsciousSchemaFields`
 - `ConsciousSchemaEntityResolver`
 - `ConsciousProtectedCanonicalFieldPolicy`
+- `ConsciousFieldUpdateService`
+- `ConsciousFullEditPayloadBuilder`
+- `ConsciousActionRegistry`
+- `ConsciousActionDefinition`
+- `ConsciousActionDispatcher`
+- `ConsciousActionHandler`
+- `ScriptureConsciousActionDefinitions`
+- `Scripture\ProtectedIdentityAction`
+- `ConsciousProtectedIdentityPolicy`
+- `ConsciousRelationshipRegistry`
+- `ConsciousRelationshipDefinition`
+- `ScriptureConsciousRelationshipDefinitions`
 
 Supported safe fields:
 
@@ -48,11 +66,33 @@ Protected fields are registered but blocked from the generic field route:
 - parent relation ids
 - canonical relation/path fields
 
-Schema-aware quick edit now submits `{ value: ... }` to this route for the safe
-fields above. Hidden `slug`, `number`, and parent-context payload fields are no
-longer required for these migrated quick-edit saves. The backend still tolerates
-the field name as a transitional payload key, but `value` is the active frontend
-contract. It updates only the registry-approved column.
+Schema-aware quick edit and Conscious Full Edit safe fields now submit
+`{ value: ... }` to this route for the safe fields above. Hidden `slug`,
+`number`, and parent-context payload fields are no longer required for these
+migrated safe field saves. The backend still tolerates the field name as a
+transitional payload key, but `value` is the active frontend contract. It
+updates only the registry-approved column.
+
+Protected identity fields now save through:
+
+- `POST /admin/schema/{schemaFamily}/{entityType}/{id}/actions/protected_identity.update`
+
+Supported protected identity fields:
+
+- `slug`
+- `number`
+
+Supported scripture entities:
+
+- `book`
+- `book_section`
+- `chapter`
+- `chapter_section`
+- `verse`
+
+The action rejects unknown payload keys and accepts no parent/reparent/order,
+create, delete, media, content-block, verse-meta, translation, or commentary
+mutation.
 
 ## Scripture Entity Field Writes
 
@@ -65,10 +105,11 @@ contract. It updates only the registry-approved column.
 | `scripture.chapter-sections.admin.details.update` | `PATCH books/{book}/sections/{bookSection}/chapters/{chapter}/sections/{chapterSection}/admin/details` | `ChapterSectionAdminDetailsController@update` | keep | `chapter_sections.title` quick edit and Conscious Full Edit. Hidden payload still carries `number`. | Replace with field update for `chapter_sections.title`; protect `number`. |
 | `scripture.chapters.verses.admin.identity.update` | `PATCH books/{book}/sections/{bookSection}/chapters/{chapter}/sections/{chapterSection}/verses/{verse}/admin/identity` | `VerseAdminIdentityController@update` | keep | `verses.text` quick edit and Conscious Full Edit. Hidden payload still carries `slug` and `number`. | Replace with field update for `verses.text`; protect `slug` and `number`. |
 
-These routes remain in the codebase as fallback/service endpoints. Schema-aware
-quick edit no longer depends on them for the safe fields listed above, but
-Conscious Full Edit and non-migrated structured flows may still reference old
-route-specific endpoints until later phases.
+These routes remain in the codebase as temporary behavior providers.
+Schema-aware quick edit, the first Conscious Full Edit safe field saves, and
+Conscious Full Edit slug/number saves no longer need these old identity/details
+endpoints for those fields. Non-migrated structured flows may still reference
+old route-specific endpoints until Conscious actions replace them.
 
 ## Deprecated Full Edit / Canonical Screens
 
@@ -154,15 +195,14 @@ The schema-aware field write namespace now exists for safe fields:
 
 - `PATCH /admin/schema/{schemaFamily}/{entityType}/{id}/fields/{fieldName}`
 
-The remaining schema action routes are future work:
+The final schema action route shape now exists:
 
 - `POST /admin/schema/{schemaFamily}/{entityType}/{id}/actions/{actionKey}`
-- `POST /admin/schema/{schemaFamily}/{entityType}/{id}/children/{childType}`
-- `PATCH /admin/schema/{schemaFamily}/{entityType}/{id}/order`
 
-The field route should replace single-field quick edit and Conscious Full Edit
-field saves in the next frontend migration phase. The action/children/order
-routes come later for add/reorder/delete and structured operations.
+Dedicated children/order routes should not be added for new behavior. Add,
+reorder, delete, reparent, media, relation, verse-support, import, and export
+work should register action keys and pass through the generic action route once
+explicit policy and services exist.
 
 ### Core Services
 
@@ -189,11 +229,19 @@ Suggested service layer:
 - `AdminProtectedCanonicalPolicy`
   - centralizes canonical mutation protection and warning reasons
 - `ConsciousFullEditPayloadBuilder`
-  - builds Full Edit categories from schema field definitions instead of
-    hardcoding entity arrays in the controller
-- `AdminSchemaActionRegistry`
-  - later: create child, delete, reorder, duplicate, manage media, manage
-    relations
+  - builds Full Edit categories outside controllers and points safe editable
+    fields at the generic field route
+- `ConsciousActionRegistry`
+  - describes possible create child, delete, reorder, duplicate, manage media,
+    manage relations, and support actions without enabling them
+- `ConsciousActionDispatcher`
+  - resolves action definition and entity, rejects disabled actions, and calls
+    the registered action handler
+- `ProtectedIdentityAction`
+  - policy-gated `slug` and `number` updates for supported scripture entities
+- `ConsciousRelationshipRegistry`
+  - describes protected parent/child metadata for diagnostics and future
+    policy checks
 
 ### Protected Canonical Handling
 
@@ -221,14 +269,18 @@ them as protected or route them to an advanced structured action later.
    scripture fields and sends `{ value }`.
 3. Phase 3 import/backend audit keeps all old write endpoints but classifies
    them as transitional until Conscious services/actions replace them.
-4. Move Conscious Full Edit field saves to the generic field route.
-5. Extract Conscious Full Edit payload building out of
-   `ConsciousFullEditController` into schema payload builders.
-6. Migrate content block title/body updates to parent-aware schema action
+4. Conscious Full Edit safe field saves now use the generic field route.
+5. Conscious Full Edit payload building is now outside
+   `ConsciousFullEditController`.
+6. The final action route, dispatcher, and initial action/relationship
+   registries now exist.
+7. Protected identity action now handles `slug` and `number` for supported
+   scripture entities.
+8. Migrate content block title/body updates to parent-aware schema action
    services.
-7. Add Conscious structured services for verse meta, translations,
+9. Add Conscious structured services for verse meta, translations,
    commentaries, and media assignments.
-8. Add canonical create/delete/reorder action services with protected policy
+10. Add canonical create/delete/reorder action services with protected policy
    gates.
-9. Re-audit old route-specific controllers and remove or redirect only after
+11. Re-audit old route-specific controllers and remove or redirect only after
    no frontend payloads reference them.

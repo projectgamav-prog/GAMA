@@ -3,13 +3,14 @@ Scripture platform + independent CMS composition context, rules, and guardrails
 
 Use this document as the source-of-truth brief in a fresh Codex window.
 
-Purpose: preserve the locked semantic-surface admin architecture for canonical scripture while the independent universal CMS page system grows beside it.
+Purpose: preserve the locked Super Conscious Admin architecture for canonical
+scripture while the independent universal CMS page system grows beside it.
 
 Current priority: keep canonical scripture pages thin and schema-driven, and build CMS pages through their own page/container/block composition system with a dedicated CMS module registry.
 
 Implementation companions:
-- `docs/scripture-admin-editing.md` for the active canonical public/admin surface system
-- `docs/admin-module-integration.md` for adapting outside React components into the admin module architecture
+- `docs/scripture-admin-editing.md` for the active canonical public/admin Conscious Admin system
+- `docs/admin-module-integration.md` for adapting outside React components into Super Conscious Admin or CMS modules
 - `docs/public-admin-page-authoring.md` for the locked same-layout public/admin authoring rules on eligible pages
 - `docs/admin/content-aware-positional-authoring.md` for the reusable live structured authoring pattern
 - `docs/admin/positional-authoring-implementation-guide.md` for implementation-facing positional authoring rules
@@ -21,9 +22,9 @@ Treat the admin docs as one maintained set instead of isolated notes.
 - `docs/admin-architecture.md`
   Top-level source of truth for canonical admin and CMS boundaries.
 - `docs/scripture-admin-editing.md`
-  Practical guide for the active canonical scripture surface/module path.
+  Practical guide for the active canonical scripture Conscious Admin path.
 - `docs/admin-module-integration.md`
-  Implementation guide for adapting inside-project or outside React components into the canonical admin and CMS module systems.
+  Implementation guide for adapting inside-project or outside React components into Super Conscious Admin or CMS modules.
 - `docs/public-admin-page-authoring.md`
   Same-layout and in-place authoring rules for public/admin page behavior.
 - `docs/admin/content-aware-positional-authoring.md`
@@ -43,12 +44,18 @@ When touching canonical scripture admin work:
 This project is not greenfield. The admin system already has a locked direction, and Codex must work inside it rather than improvising page-specific patterns.
 
 - Pages are render shells and should stay thin.
-- Admin attaches through semantic surfaces.
-- Modules qualify by semantic identity plus capabilities.
-- Reusable canonical editor behavior lives in `resources/js/admin/modules`.
+- Admin attaches through schema/content/layout/action-aware surfaces.
+- Conscious actions qualify by schema family, entity type, field name, control
+  level, capability, backend readiness, and risk policy.
+- Reusable canonical editor behavior lives in `resources/js/admin/schema/`,
+  `resources/js/admin/actions/`, `resources/js/admin/surfaces/`,
+  `resources/js/admin/conscious-full-edit/`, and focused shared components
+  such as `AdminSchemaFieldDisplay`, `AdminSchemaFieldSurface`, and
+  `AdminSurfaceActionMenu`.
 - Semantic attachment specs, builders, and contracts live in `resources/js/admin/surfaces`.
-- Schema-family assembly lives in `resources/js/admin/integrations`.
-- Runtime host and qualification engine live in `resources/js/admin/core`.
+- Schema-family field definitions live in `resources/js/admin/schema`.
+- Runtime action resolution lives in `resources/js/admin/actions` and focused
+  shared components under `resources/js/admin/core`.
 - Do not reintroduce local page hooks, bridge/session behavior, or page-fragile wrappers.
 
 ## 2. Domain boundary
@@ -143,10 +150,11 @@ CMS integration policy:
 
 ## 5. Canonical admin philosophy
 - Canonical pages expose semantic facts.
-- Canonical integrations normalize schema context.
-- Canonical modules define qualification and actions.
-- Canonical hosts resolve placement and render buttons/actions.
-- Canonical shared intro helpers live in the intro module family, not in a generic block family.
+- Schema/surface helpers normalize schema context.
+- Conscious action definitions declare qualification, risk, UI mode, and backend readiness.
+- `AdminSurfaceActionMenu` renders available actions; unavailable actions remain hidden.
+- `AdminSchemaFieldDisplay` and `AdminSchemaFieldSurface` own schema-backed field exposure.
+- Conscious Full Edit is the whole-record review/edit path.
 - Button labels should not be page-hardcoded where avoidable.
 - Closed-state launchers should stay compact and grouped.
 - Open editor forms may remain larger.
@@ -182,7 +190,7 @@ CMS:
 Do not bring back old chapter-section gateway pages or similar canonical detours.
 
 ## 8. Active admin flows
-Canonical scripture admin remains contextual and surface-attached on the canonical pages.
+Canonical scripture admin remains contextual and surface-attached on canonical pages through Super Conscious Admin.
 
 CMS admin now has two interaction layers:
 - live CMS page composition on published CMS pages for permitted users
@@ -192,7 +200,8 @@ The dedicated CMS workspace remains:
 - `cms.pages.index`
 - `cms.pages.show`
 
-This does not replace the canonical page-local host system. It is the universal CMS direction for non-canonical pages only.
+This does not replace Super Conscious Admin. It is the universal CMS direction
+for non-canonical pages only.
 
 The public-page-first CMS rule is now locked:
 - content-managed pages must use the same core layout for public users and admins
@@ -213,12 +222,13 @@ direction for structured live editing:
 
 ## 9. What Codex must preserve
 - Canonical scripture pages remain thin and surface-driven.
-- Verse/book/chapter admin behavior stays inside the canonical admin module system.
+- Verse/book/chapter admin behavior stays inside Super Conscious Admin.
 - CMS pages remain generic and page-record-driven.
 - CMS composition stays page -> container -> block.
 - CMS modules stay in the dedicated CMS registry structure.
 - CMS module manifests and folder shape stay stable unless a deliberate architecture change is required.
-- Future canonical pages should expose semantic surfaces and let reusable modules qualify rather than importing editor implementations directly.
+- Future canonical pages should expose schema-aware surfaces and let the
+  Conscious action resolver qualify actions rather than importing editor implementations directly.
 - New CMS work should extend the universal page system, not create isolated one-off features.
 
 ## 10. What Codex must not do
@@ -232,7 +242,7 @@ direction for structured live editing:
 - Do not silently drift the architecture.
 
 ## 11. Practical guardrails for the next passes
-- If work touches canonical scripture pages, keep using semantic surfaces and module qualification.
+- If work touches canonical scripture pages, keep using schema-aware surfaces and Conscious action qualification.
 - If work touches manual pages, route it through the CMS page/container/block model and the live page first, with the CMS workspace as support tooling.
 - Prefer exposing CMS composition on the real page layout; use the workspace as a support surface, not the routine authoring path.
 - If a workflow needs new CMS content in the same card, add a block inside the container.

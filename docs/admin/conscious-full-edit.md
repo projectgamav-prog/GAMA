@@ -53,7 +53,13 @@ These fields should route to explicit advanced identity workflows later. They sh
 
 ## Old Full Edit Deprecation
 
-Old route-specific Full Edit pages remain in the codebase as deprecated fallback tooling. New awareness-owned schema field controls should prefer Conscious Full Edit when a supported schema entity is available. If Conscious Full Edit is unavailable, the control should hide or disable rather than sending editors into a fragile old path.
+Old route-specific book/chapter/verse Full Edit React pages have been deleted.
+Their old GET routes are redirect-only legacy compatibility paths that point to
+Conscious Full Edit where the schema/entity mapping is known. New
+awareness-owned schema field controls must prefer Conscious Full Edit when a
+supported schema entity is available. If Conscious Full Edit is unavailable, the
+control should hide or disable rather than sending editors into a fragile old
+path.
 
 ## Roadmap
 
@@ -61,4 +67,5 @@ Old route-specific Full Edit pages remain in the codebase as deprecated fallback
 2. Expand Conscious Full Edit schema modules by entity, not by page.
 3. Move protected identity editing into explicit schema-aware advanced sections.
 4. Connect parent-aware content-block save routes safely.
-5. Keep old Full Edit pages as fallback until each entity family is replaced.
+5. Remove redirect-only legacy routes after old links no longer need route-name
+   compatibility.

@@ -7,6 +7,11 @@ Old route-specific scripture controllers may remain temporarily as write
 services, but new admin capabilities should not grow through page-specific
 controllers.
 
+Automation direction is locked in
+`docs/admin/super-conscious-awareness-automation.md`: backend discovery may
+suggest schema/entity/field/relationship awareness, but protected field edits
+and dangerous actions remain explicit policy decisions.
+
 ## Target Structure
 
 ```text
@@ -40,7 +45,61 @@ app/Admin/Conscious/
 
 The current implementation already has the first schema field registry,
 definition, entity resolver, protected canonical field policy, Conscious Full
-Edit controller, and generic field update controller.
+Edit controller, generic field update controller, field update service, Full
+Edit payload builder, inert action registry, inert relationship registry, and
+disabled final action route.
+
+## Phase 1 Backend Awareness Foundation
+
+Phase 1 moves backend responsibility away from route-specific controllers and
+into Conscious backend contracts:
+
+- `ConsciousFullEditPayloadBuilder` builds the schema-aware Full Edit payload
+  outside the controller.
+- `ConsciousFieldUpdateService` validates and writes registered safe fields for
+  the generic field route.
+- `ConsciousActionDispatcher` resolves action definitions, rejects unknown or
+  unavailable actions, resolves the entity, and calls the registered handler.
+- `ConsciousActionRegistry` and `ConsciousActionDefinition` describe actions
+  and their handler/policy metadata.
+- `ProtectedIdentityAction` is the first enabled protected action, limited to
+  `slug` and `number` for scripture book, book section, chapter, chapter
+  section, and verse entities.
+- `ConsciousRelationshipRegistry` and `ConsciousRelationshipDefinition`
+  describe protected scripture parent/child relationships without enabling
+  create, reorder, reparent, or delete.
+- `POST /admin/schema/{schemaFamily}/{entityType}/{id}/actions/{actionKey}` now
+  exists as the final action route shape and safely dispatches enabled actions.
+  Registered create/delete/reorder/reparent placeholders remain disabled until
+  explicit policy and services exist.
+
+Old route-specific controllers are no longer treated as architecture. They are
+temporary behavior providers only and must move toward one of three outcomes:
+
+- replaced by the Conscious field route
+- replaced by the Conscious action route
+- deleted when no frontend or fallback behavior references them
+
+## Future Awareness Automation Helpers
+
+The backend may grow read-only or policy-bound helpers for automation, but these
+helpers must stay separated by responsibility:
+
+- `SchemaDiscoveryService`
+- `ModelFieldIntrospector`
+- `ConsciousEntityDefinitionRegistry`
+- `ConsciousRelationshipRegistry`
+- `ConsciousActionCapabilityRegistry`
+- `ConsciousCoverageReporter`
+
+Discovery helpers can identify candidate schema metadata such as
+`schemaFamily`, `entityType`, `modelClass`, `tableName`, field kinds, labels,
+relationships, validation hints, Full Edit categories, and import/export
+boundaries. Explicit schema definitions override discovered conventions.
+
+Create, reorder, reparent, delete, media, relation, import, export, and
+protected canonical field edits must never become enabled only because a model,
+table, route, or relation exists.
 
 ## Current Backend Classification
 
@@ -48,9 +107,14 @@ Edit controller, and generic field update controller.
 
 - `Admin\ConsciousFullEditController`
 - `Admin\ConsciousSchemaFieldUpdateController`
+- `Admin\ConsciousSchemaActionController`
 - `app/Admin/Conscious/Schema/*`
+- `app/Admin/Conscious/Services/*`
+- `app/Admin/Conscious/Actions/*`
+- `app/Admin/Conscious/Relationships/*`
 - `GET /admin/schema/{schemaFamily}/{entityType}/{id}/full-edit`
 - `PATCH /admin/schema/{schemaFamily}/{entityType}/{id}/fields/{fieldName}`
+- `POST /admin/schema/{schemaFamily}/{entityType}/{id}/actions/{actionKey}`
 
 ### `transitional_write_endpoint`
 
@@ -87,17 +151,19 @@ route-specific React pages.
 
 ## Target Routes
 
-Current:
+Current final route shapes:
 
 - `GET /admin/schema/{schemaFamily}/{entityType}/{id}/full-edit`
 - `PATCH /admin/schema/{schemaFamily}/{entityType}/{id}/fields/{fieldName}`
-
-Future:
-
 - `POST /admin/schema/{schemaFamily}/{entityType}/{id}/actions/{actionKey}`
 
 Action keys should be registered, policy checked, and schema constrained. Do
 not create one route per page family for new admin behavior.
+
+The action route is present as an inert foundation. It rejects unavailable
+registered actions. It currently executes only the policy-gated protected
+identity action. It does not execute create, delete, reorder, reparent, media,
+relation, import, or export behavior yet.
 
 ## Writing Capacity Roadmap
 
@@ -109,7 +175,9 @@ registered quick-edit-safe fields.
 ### Full entity update
 
 Conscious Full Edit should submit grouped field changes through field/action
-services, not old route-specific identity/details controllers.
+services, not old route-specific identity/details controllers. The first safe
+Full Edit fields now point at the generic Conscious field route and submit
+`value` instead of old hidden route-specific payloads.
 
 ### Create child
 
@@ -171,7 +239,9 @@ Protected canonical fields include:
 - JSON/meta blobs unless explicitly made safe
 
 These fields may appear in Conscious Full Edit with warnings, but they should
-not be casual quick-edit fields.
+not be casual quick-edit fields. `slug` and `number` may save only through the
+`protected_identity.update` Conscious action. Parent/reparent fields and
+canonical order fields remain read-only in this patch.
 
 ## Migration Order
 
@@ -179,9 +249,12 @@ not be casual quick-edit fields.
 2. Move Conscious Full Edit field saves to the generic field route.
 3. Extract Full Edit payload building into schema payload builders.
 4. Add a backend Conscious action registry.
-5. Move content block writes into owner-aware action services.
-6. Move media, relation, translation, commentary, and verse meta writes into
+5. Add backend relationship metadata for protected parent/child awareness.
+6. Move remaining protected identity fallback usage to the Conscious action
+   route where safe.
+7. Move content block writes into owner-aware action services.
+8. Move media, relation, translation, commentary, and verse meta writes into
    structured Conscious actions.
-7. Add create/delete/reorder actions only after policy and diagnostics exist.
-8. Delete old route-specific write controllers only when no frontend or
+9. Add create/delete/reorder actions only after policy and diagnostics exist.
+10. Delete old route-specific write controllers only when no frontend or
    fallback service path references them.

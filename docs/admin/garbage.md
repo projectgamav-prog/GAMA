@@ -14,6 +14,21 @@ code is platform code, not a third admin architecture.
 Do not delete anything from this list without a focused cleanup task, a fresh
 import/reference audit, and verification.
 
+Automation note: `docs/admin/super-conscious-awareness-automation.md` now locks
+the rule that discovery and coverage reports may identify cleanup or awareness
+gaps, but must not remove endpoints, add controls, or enable protected actions.
+
+Backend foundation note: old route-specific admin controllers are temporary
+behavior providers only. New architecture should replace them through
+Conscious field services or policy-gated action services, then delete them only
+after usage audits prove they are unused.
+
+Big Patch 1 note: the Conscious action dispatcher and
+`protected_identity.update` action now cover protected `slug`/`number` updates
+for book, book section, chapter, chapter section, and verse Full Edit paths.
+Old identity/details endpoints remain temporarily for fallback and
+non-migrated flows, but are now partially replaceable later.
+
 ## Status Legend
 
 - `active_conscious_keep`: active Super Conscious Admin code.
@@ -35,7 +50,13 @@ import/reference audit, and verification.
 
 | Path | Layer | Status | Reason | Current imports/references | Deletion condition | Recommended cleanup phase | Risk if deleted now | Replacement target |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `resources/js/components/scripture/verse/VerseFullEditIntroCard.tsx` | frontend | `dead_safe_to_delete` | Old route-specific verse Full Edit intro card; old verse Full Edit React page was removed. | None found by `rg VerseFullEditIntroCard`. | Delete after confirming no pending branch reintroduces old verse Full Edit page. | Phase 4 frontend dead-file purge. | Low. | Conscious Full Edit shell intro/summary components. |
+| None currently. | frontend | `dead_safe_to_delete` | Phase 1 deleted the only file previously listed here. | N/A | Re-run import/reference audit before adding anything here. | Future garbage cleanup pass. | N/A | N/A |
+
+### Deleted In Garbage Cleanup Phase 1
+
+| Path | Layer | Previous status | Reason | Replacement target |
+| --- | --- | --- | --- | --- |
+| `resources/js/components/scripture/verse/VerseFullEditIntroCard.tsx` | frontend | `dead_safe_to_delete` | Old route-specific verse Full Edit intro card; no imports/references remained. | Conscious Full Edit shell intro/summary components. |
 
 ### 2. Keep Until Conscious Replacement Exists
 
@@ -102,16 +123,21 @@ import/reference audit, and verification.
 
 | Path | Layer | Status | Reason | Current imports/references | Deletion condition | Recommended cleanup phase | Risk if deleted now | Replacement target |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `docs/admin-architecture.md` | docs | `stale_doc_update_needed` | Still says reusable canonical editor behavior lives in `resources/js/admin/modules`. | Documentation only. | Update to Super Conscious Admin + CMS split. | Docs cleanup phase. | Medium confusion if left stale. | `docs/admin/super-conscious-admin-layer.md`. |
-| `docs/admin-surface-design.md` | docs | `stale_doc_update_needed` | Still teaches `AdminModuleHost`, `AdminModuleHostGroup`, and `qualify-module`. | Documentation only. | Rewrite or archive as historical surface-design doc. | Docs cleanup phase. | High confusion for future Codex. | Conscious schema surface/action menu docs. |
-| `docs/architecture-guardrails.md` | docs | `stale_doc_update_needed` | Still warns about bypassing the admin module host as default architecture. | Documentation only. | Update guardrail to schema surfaces/action resolver. | Docs cleanup phase. | Medium confusion. | Conscious renderer awareness contract. |
-| `docs/admin/admin-awareness-readiness.md` | docs | `stale_doc_update_needed` | Historical G0 audit still describes `AdminModuleHost` structured surfaces and old comparison readiness as active. | Documentation only. | Mark historical or update with legacy removal note. | Docs cleanup phase. | Medium confusion. | Current cleanup/backend docs. |
-| `docs/admin/conscious-full-edit.md` | docs | `stale_doc_update_needed` | Says old route-specific Full Edit pages remain in codebase; they have been deleted. | Documentation only. | Update to redirect-only legacy routes and deleted React pages. | Docs cleanup phase. | Low/medium confusion. | Conscious Full Edit docs. |
 | `docs/current-state.md` | docs | `stale_doc_update_needed` | Still contains some historical references to removed `AdminModuleHost` phases; mostly current but noisy. | Documentation only. | Trim or mark historical sections. | Docs hygiene phase. | Low. | Current cleanup docs. |
 | `docs/current-phase.md` | docs | `stale_doc_update_needed` | Still contains historical module-host quarantine wording; mostly current but noisy. | Documentation only. | Trim old phase narrative. | Docs hygiene phase. | Low. | Current cleanup docs. |
 | `docs/next-step.md` | docs | `stale_doc_update_needed` | Mostly current, still mentions old `AdminModuleHost` as a warning. | Documentation only. | Optional wording cleanup after garbage phase. | Docs hygiene phase. | Low. | Current Conscious Admin instructions. |
 | `docs/admin-module-integration.md` | docs | `stale_doc_update_needed` | Recently updated, but should be reviewed once the garbage inventory is accepted. | Documentation only. | Confirm no old module registration instructions remain. | Docs hygiene phase. | Low. | Conscious action/surface integration guide. |
 | `docs/scripture-admin-editing.md` | docs | `stale_doc_update_needed` | Recently updated, but should be reviewed once the garbage inventory is accepted. | Documentation only. | Confirm active scripture editing path only teaches Conscious Admin. | Docs hygiene phase. | Low. | Conscious scripture editing guide. |
+
+### Docs Cleaned In Garbage Cleanup Phase 1
+
+| Path | Previous status | Cleanup |
+| --- | --- | --- |
+| `docs/admin-architecture.md` | `stale_doc_update_needed` | Replaced removed `admin/modules` / host architecture with Super Conscious Admin schema/action/surface path. |
+| `docs/admin-surface-design.md` | `stale_doc_update_needed` | Replaced `AdminModuleHost` / `qualify-module` attachment instructions with Conscious action resolver and `AdminSurfaceActionMenu`. |
+| `docs/architecture-guardrails.md` | `stale_doc_update_needed` | Replaced admin module host guardrail with Super Conscious schema surface/action resolution guardrail. |
+| `docs/admin/admin-awareness-readiness.md` | `stale_doc_update_needed` | Marked as historical Phase G0 audit for the old resolver-to-legacy-control handoff. |
+| `docs/admin/conscious-full-edit.md` | `stale_doc_update_needed` | Updated old Full Edit section to say book/chapter/verse React pages were deleted and old GET routes are redirect-only compatibility paths. |
 
 ### 5. Postponed Extension Placeholders
 
@@ -203,21 +229,20 @@ import/reference audit, and verification.
 
 ## Recommended Cleanup Order
 
-1. Delete `VerseFullEditIntroCard.tsx` after one final import check.
-2. Update stale docs that still teach `AdminModuleHost`, `admin/modules`, or old
+1. Update stale docs that still teach `AdminModuleHost`, `admin/modules`, or old
    Full Edit pages as active architecture.
-3. Move Conscious Full Edit saves to the generic field route for safe fields.
-4. Extract Conscious Full Edit payload building into backend services.
-5. Replace old identity/details controllers and requests with field policies
+2. Move Conscious Full Edit saves to the generic field route for safe fields.
+3. Extract Conscious Full Edit payload building into backend services.
+4. Replace old identity/details controllers and requests with field policies
    plus protected identity actions.
-6. Build Conscious action services for content blocks, media assignments, verse
+5. Build Conscious action services for content blocks, media assignments, verse
    meta, translations, and commentaries.
-7. Build protected create/delete/reorder actions with policy gates.
-8. Remove old redirect-only Full Edit controllers/routes after old links no
+6. Build protected create/delete/reorder actions with policy gates.
+7. Remove old redirect-only Full Edit controllers/routes after old links no
    longer need route-name compatibility.
-9. Replace protected canonical edit with a Conscious protected-canonical
+8. Replace protected canonical edit with a Conscious protected-canonical
    workflow.
-10. Decide whether topic/character postponed admin placeholders become real
+9. Decide whether topic/character postponed admin placeholders become real
     Conscious schemas or are removed.
 
 ## Count By Status
@@ -231,8 +256,8 @@ These counts are inventory rows/patterns, not a full line-by-line file count.
 | `transitional_keep_until_replaced` | 42 |
 | `redirect_only_legacy` | 3 |
 | `protected_legacy_workflow` | 4 |
-| `dead_safe_to_delete` | 1 |
-| `stale_doc_update_needed` | 10 |
+| `dead_safe_to_delete` | 0 |
+| `stale_doc_update_needed` | 5 |
 | `postponed_extension_placeholder` | 6 |
 | `uncertain_needs_manual_review` | 4 |
 

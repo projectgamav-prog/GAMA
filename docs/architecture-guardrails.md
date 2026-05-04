@@ -7,7 +7,8 @@
 - Canonical scripture pages are schema-driven exceptions, not generic CMS pages.
 - Admin remains hybrid: inline-first where safe, full-edit fallback where
   needed.
-- Reusable editing behavior belongs in modules, not primarily in pages.
+- Reusable editing behavior belongs in Super Conscious Admin schema/action
+  surfaces or CMS modules, not primarily in pages.
 - Pages and controllers should trend thinner over time.
 - Prefer distributed definitions over growing central switchboards.
 - Canonical scripture specialness is intentional and must not be abstracted away
@@ -18,8 +19,8 @@
 - Do not move canonical scripture hierarchy into CMS page/container/block
   composition.
 - Do not let CMS become the source of canonical routes, identity, or structure.
-- Do not bypass the admin module host with page-local editor imports as the
-  default pattern.
+- Do not bypass Super Conscious Admin schema surfaces/action resolution with
+  page-local editor imports as the default pattern.
 - Do not centralize more behavior into already-large registries.
 - Do not build new god controllers, god pages, or god editor components.
 - Do not duplicate editor systems for the same semantic responsibility.
@@ -30,7 +31,7 @@
 - Builder responsibility: assemble page/admin payloads.
 - Mapper responsibility: normalize model data.
 - Surface responsibility: expose semantic editing seams.
-- Module responsibility: attach reusable editing behavior.
+- Conscious action responsibility: attach reusable scripture editing behavior.
 - CMS responsibility: compose supplemental and generic page content.
 - Canonical responsibility: preserve protected scripture truth.
 - Cleanup responsibility: remove dead code safely inside the touched scope.
@@ -39,7 +40,8 @@
 
 - Canonical truth boundary: owned by scripture schema.
 - CMS composition boundary: owned by page/container/block system.
-- Admin attachment boundary: owned by surfaces and modules.
+- Admin attachment boundary: owned by surfaces, schema metadata, action
+  registries, and CMS modules where CMS is the architecture.
 - Payload assembly boundary: owned by builders and mappers, not thick
   controllers.
 

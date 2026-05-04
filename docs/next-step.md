@@ -91,10 +91,16 @@ The shared public frame, structured header navigation, structured footer system,
 - keep backend write endpoints that conscious quick edit or Conscious Full Edit
   still use, but treat them as service endpoints rather than the old UI
   architecture
+- use `docs/admin/super-conscious-awareness-automation.md` as the blueprint for
+  the next automation layer: discovery can suggest schema/content/UI awareness,
+  but protected and destructive action enablement must stay policy-gated
+- build backend migration through Conscious services and registries:
+  controllers orchestrate, registries describe, policies decide safety,
+  services execute writes, and diagnostics report missing coverage
 - schema-aware quick edit now uses the generic
   `/admin/schema/{schemaFamily}/{entityType}/{id}/fields/{fieldName}` route for
   the first safe scripture fields; next backend migration target is moving
-  Conscious Full Edit field saves to the same field route
+  remaining Conscious Full Edit and structured writes away from old endpoints
 - schema-aware public fields now expose routine actions through one local
   Conscious Admin three-dot menu; keep expanding that menu only with real
   supported actions, not placeholder delete/add/reorder/media/relation entries
@@ -107,6 +113,16 @@ The shared public frame, structured header navigation, structured footer system,
   into schema field components
 - attach visible actions through the shared surface-action resolver so controls
   appear from schema/content/surface metadata, not from route-page placement
+- do not auto-enable create, reorder, reparent, delete, media, relation,
+  import, export, or protected canonical edits from discovered model/table/UI
+  surfaces alone
+- use the active dispatcher-backed
+  `POST /admin/schema/{schemaFamily}/{entityType}/{id}/actions/{actionKey}`
+  route shape for future action services instead of adding page-family backend
+  routes
+- `protected_identity.update` is the first enabled action; keep it limited to
+  `slug` and `number`, and do not let parent/reparent/order/create/delete
+  payloads pass through it
 - use `docs/admin/conscious-admin-field-coverage.md` before treating a missing
   control as a bug; missing controls should usually be fixed by reusable
   renderer coverage, not URL/page-specific controls

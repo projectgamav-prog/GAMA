@@ -4,8 +4,9 @@
 
 This document defines the admin surface system used by the project.
 
-It explains what a surface is, what it exposes, how modules attach, and how
-pages should participate in the admin architecture without owning editor logic.
+It explains what a surface is, what it exposes, how Conscious Admin actions
+attach, and how pages should participate in the admin architecture without
+owning editor logic.
 
 ## What A Surface Is
 
@@ -23,14 +24,14 @@ A surface is:
 - a description of what is editable
 - a description of where it lives
 - a description of what capabilities are allowed there
-- a stable contract that reusable modules can qualify against
+- a stable contract that reusable Conscious actions can qualify against
 
 ## Why Surfaces Exist
 
 Surfaces exist so that:
 
 - pages can stay thin
-- modules can stay reusable
+- action definitions and renderers can stay reusable
 - editor behavior can attach by semantics instead of fragile page wiring
 - the same editor family can work across page and row contexts
 
@@ -43,7 +44,7 @@ A surface should define:
 - contract kind
 - placement/slot hints
 - allowed capabilities
-- metadata required by qualifying modules
+- metadata required by qualifying actions, schema field displays, or protected workflows
 
 A surface should not define:
 
@@ -133,12 +134,13 @@ reason. Prefer builders so surface shape stays predictable.
 Pages should:
 
 - resolve the relevant domain data
-- call integration helpers or builders
-- pass resulting surfaces to `AdminModuleHost` or `AdminModuleHostGroup`
+- call surface builders/resolvers or render schema-aware field components
+- pass resulting schema/content surface metadata to `AdminSchemaFieldDisplay`,
+  `AdminSchemaFieldSurface`, `AdminSurfaceActionMenu`, or Conscious Full Edit flows
 
 Pages should not:
 
-- import many concrete editor modules directly
+- import many concrete editor components directly
 - contain large qualification branches
 - own editor lifecycle behavior as page logic
 
@@ -147,31 +149,32 @@ Good current examples:
 - `resources/js/pages/scripture/books/show.tsx`
 - `resources/js/pages/scripture/chapters/show.tsx`
 
-## How Modules Attach To Surfaces
+## How Actions Attach To Surfaces
 
-Modules qualify against surfaces through shared metadata-driven rules.
+Conscious actions qualify against surfaces through shared metadata-driven rules.
 
-The qualification host lives in:
+The active qualification/action path lives in:
 
-- `resources/js/admin/core/AdminModuleHost.tsx`
-- `resources/js/admin/core/qualify-module.ts`
+- `resources/js/admin/actions/conscious-action-registry.ts`
+- `resources/js/admin/actions/conscious-surface-action-resolver.ts`
+- `resources/js/admin/core/AdminSurfaceActionMenu.tsx`
 
 Qualification can depend on:
 
-- surface key
-- contract key
-- entity scope
-- slot
-- region scope
-- presentation metadata
-- required capabilities
-- an optional custom predicate
+- schema family
+- entity type
+- field name when field-level
+- control level
+- required capability
+- backend status
+- risk level
+- runtime availability such as edit handler or Full Edit href
 
-Modules must qualify from surface truth, not from page component identity.
+Actions must qualify from surface truth, not from page component identity.
 
-## Relationship Between Surfaces And Modules
+## Relationship Between Surfaces And Actions
 
-Surfaces and modules have distinct roles.
+Surfaces and actions have distinct roles.
 
 ### Surface Role
 
@@ -181,26 +184,28 @@ Surfaces say:
 - what can happen here
 - what metadata is available
 
-### Module Role
+### Action Role
 
-Modules say:
+Actions say:
 
 - which surfaces they can attach to
-- what editing behavior they provide
-- what actions they expose
-- how they render and submit
+- what action family they represent
+- whether they are available now or hidden until backend support exists
+- what UI mode they use
+- what backend route/action service they require
 
-Pages expose surfaces. Modules attach to surfaces. The host resolves the match.
+Pages and renderers expose surfaces. The Conscious action resolver decides what
+can appear. `AdminSurfaceActionMenu` renders only enabled actions.
 
 ## Surface Design Rules
 
 - Surfaces must be semantic, not cosmetic.
 - Surfaces must be truthful to the domain.
 - Pages should expose surfaces rather than concrete editors.
-- Reusable module behavior should not move into pages.
+- Reusable action/editor behavior should not move into pages.
 - If two contexts are semantically different, reflect that in surface metadata
   or in separate surfaces.
-- Keep surface metadata focused on what modules need.
+- Keep surface metadata focused on what actions need.
 
 ## Surface Boundaries
 
@@ -209,7 +214,8 @@ Do not use surfaces to:
 - disguise page-local hacks as architecture
 - pass giant page payloads into modules
 - leak unrelated view state into editor contracts
-- bypass the module host with one-off direct editor mounting as the default
+- bypass schema surfaces/action resolution with one-off direct editor mounting
+  as the default
 
 ## Future Direction
 
@@ -217,7 +223,7 @@ The surface system should evolve by:
 
 - adding clearer distributed builders
 - reducing large page-specific surface assembly code
-- tightening oversized metadata contracts where modules consume only slices
+- tightening oversized metadata contracts where actions consume only slices
 
 It should not evolve toward:
 

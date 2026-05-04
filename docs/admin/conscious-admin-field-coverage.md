@@ -3,6 +3,10 @@
 This audit tracks schema-backed content by reusable renderer/component, not by
 route or URL.
 
+Automation guardrail: this coverage may drive diagnostics and safe suggestions,
+but it must not auto-enable edits or actions. The broader automation blueprint
+lives in `docs/admin/super-conscious-awareness-automation.md`.
+
 ## Renderer Awareness Contract
 
 When a reusable component renders database-backed schema content, it must choose
@@ -28,6 +32,11 @@ one explicit contract:
 Silent ambiguity is not allowed. Reusable renderers should use the shared
 rendered-field helpers in `resources/js/admin/schema/fields/` when deciding
 whether a visible value may own a schema surface.
+
+Future automation should treat these renderer contracts as the source of UI
+awareness. Stored values need schema-aware surfaces; computed and
+presentation-only values must stay explicitly non-editable unless a safe,
+policy-backed field mapping exists.
 
 ## Active Field Coverage
 

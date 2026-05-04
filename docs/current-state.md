@@ -339,6 +339,47 @@ After completing a task:
       book-schema field coverage by field and reusable renderer, not URL
     - the shared schema field edit dialog now keeps click handling modal-local
       so cancel/close cannot accidentally trigger parent card/link navigation
+- `docs/admin/super-conscious-awareness-automation.md` now locks the next
+  Super Conscious Admin automation blueprint:
+    - backend awareness should grow from schema metadata, model/entity
+      definitions, field definitions, relationship definitions, action
+      capability definitions, validation rules, Full Edit categories, and
+      explicit import/export boundaries
+    - frontend and CMS awareness should grow from renderer surfaces, CMS
+      component contracts, admin anchor slots, action capability detection, and
+      stored/computed/presentation-only display distinctions
+    - discovery may produce safe suggestions, diagnostics, and coverage reports,
+      but protected/canonical fields and destructive or structural actions must
+      remain explicitly policy-gated
+    - no controls, routes, schema/migrations, CMS behavior, or UI behavior were
+      changed by the automation blueprint pass
+- Super Conscious Backend Awareness Foundation Phase 1 is now active:
+    - `ConsciousFullEditController` delegates payload construction to
+      `ConsciousFullEditPayloadBuilder`
+    - `ConsciousSchemaFieldUpdateController` delegates validation/write
+      execution to `ConsciousFieldUpdateService` after registry lookup and
+      protected-field policy checks
+    - safe Conscious Full Edit fields now target the generic Conscious field
+      route and submit the `value` payload contract instead of old hidden
+      route-specific payloads
+    - the final schema action route shape exists, backed by an inert
+      `ConsciousActionRegistry` whose scripture create/delete/reorder/reparent
+      placeholders are disabled
+    - `ConsciousRelationshipRegistry` describes protected scripture
+      parent/child relationships for awareness and future diagnostics without
+      enabling structural mutations
+- Super Conscious Backend Consolidation Big Patch 1 is now active:
+    - `ConsciousSchemaActionController` delegates to
+      `ConsciousActionDispatcher`
+    - `protected_identity.update` is registered and enabled only for scripture
+      book, book section, chapter, chapter section, and verse entities
+    - `ProtectedIdentityAction` updates only `slug` and `number` after explicit
+      protected identity policy and validation
+    - Conscious Full Edit protected slug/number rows now save through the
+      Conscious action route
+    - parent/reparent, canonical order/reorder, create, delete, media,
+      content-block, verse-support, translation, and commentary actions remain
+      blocked
 - The legacy purge / renderer coverage pass removed the old
   `AdminModuleHost` intro surface from the reusable book library card renderer:
     - book library/card titles now render through `ScriptureBookTitleDisplay`
