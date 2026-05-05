@@ -59,7 +59,7 @@ final class ConsciousFullEditPayloadBuilder
             'label' => $book->title,
             'description' => 'Schema-aware full edit for the book record.',
             'public_href' => route('scripture.books.show', $book),
-            'old_full_edit_href' => route('scripture.books.admin.full-edit', $book),
+            'old_full_edit_href' => null,
             'fields' => [
                 $this->field('book', $book->id, 'title', 'Book title', 'Basic Content', 'title', $book->title, true, 'books.title'),
                 $this->field('book', $book->id, 'description', 'Book description', 'Basic Content', 'description', $book->description, false, 'books.description', editorType: 'textarea'),
@@ -116,7 +116,7 @@ final class ConsciousFullEditPayloadBuilder
             'label' => $chapter->title ?: 'Chapter '.$chapter->number,
             'description' => 'Schema-aware full edit for the chapter record.',
             'public_href' => route('scripture.chapters.show', [$book, $bookSection, $chapter]),
-            'old_full_edit_href' => route('scripture.chapters.admin.full-edit', [$book, $bookSection, $chapter]),
+            'old_full_edit_href' => null,
             'fields' => [
                 $this->field('chapter', $chapter->id, 'title', 'Chapter title', 'Basic Content', 'title', $chapter->title, false, 'chapters.title'),
                 $this->protectedIdentityField('chapter', $chapter->id, 'slug', 'URL slug', 'slug', $chapter->slug, 'chapters.slug'),
@@ -177,7 +177,7 @@ final class ConsciousFullEditPayloadBuilder
             'label' => 'Verse '.($verse->number ?: $verse->id),
             'description' => 'Schema-aware full edit for the verse record.',
             'public_href' => route('scripture.chapters.verses.show', [$book, $bookSection, $chapter, $chapterSection, $verse]),
-            'old_full_edit_href' => route('scripture.chapters.verses.admin.full-edit', [$book, $bookSection, $chapter, $chapterSection, $verse]),
+            'old_full_edit_href' => null,
             'fields' => [
                 $this->field('verse', $verse->id, 'text', 'Verse text', 'Basic Content', 'long_text', $verse->text, true, 'verses.text', editorType: 'textarea'),
                 $this->protectedIdentityField('verse', $verse->id, 'slug', 'URL slug', 'slug', $verse->slug, 'verses.slug'),

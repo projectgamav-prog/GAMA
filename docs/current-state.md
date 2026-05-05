@@ -235,13 +235,13 @@ After completing a task:
     - book, book section, chapter, chapter section, and verse records show field
       categories such as Basic Content, Canonical Identity, Structure &
       Parentage, Ordering, and Advanced / Technical
-    - safe book/book-section/chapter/chapter-section/verse fields reuse existing
-      update routes while slug, number, parentage, ordering, and technical
-      fields are visible as protected or read-only
+    - safe book/book-section/chapter/chapter-section/verse fields use the
+      Conscious field route while slug, number, parentage, ordering, and
+      technical fields are visible as protected or read-only
     - content blocks can reach the shell as a read-only first slice until
       parent-aware save routes are connected safely
-    - old route-specific Full Edit GET routes redirect to Conscious Full Edit;
-      the old book/chapter/verse React Full Edit pages have been deleted
+    - old route-specific Full Edit GET routes for book/chapter/verse have now
+      been deleted after app links moved directly to Conscious Full Edit
 - The first admin-aware layout anchor structure now exists:
     - `AdminAnchorBoundary` and `AdminControlAnchor` define passive anchor levels
       and slots for page, region, section, card, block, and field controls
@@ -266,9 +266,9 @@ After completing a task:
     - protected fields such as slug, number, parent relation ids, and canonical
       structure fields are registered as protected and blocked from generic
       safe field updates
-    - old scripture write endpoints remain intact and are still used by the
-      frontend until the next migration phase points quick edit / Conscious Full
-      Edit field saves at the generic field route
+    - canonical create/delete and structured legacy endpoints remain where no
+      fully migrated Conscious submit path is proven; identity/details routes
+      were later removed after metadata moved to Conscious routes
 - Conscious Admin Backend Phase 2 has migrated schema-aware quick-edit saves for
   the first safe scripture fields to the generic field route:
     - `books.title`
@@ -280,8 +280,8 @@ After completing a task:
     - migrated quick-edit payloads now use `{ value }`
     - hidden `slug`, `number`, and parent-context payload fields are no longer
       sent for those safe quick-edit field saves
-    - old route-specific update endpoints remain in place for Conscious Full
-      Edit and non-migrated fallback/service flows
+    - old identity/details update endpoints were later deleted after route
+      metadata moved to Conscious field routes
 - Conscious Admin Three-Dot Action Menu Phase 1 has replaced the always-visible
   schema-field pencil/full-edit icon cluster with one local surface action menu:
     - schema-aware fields now show one compact three-dot control at the local
@@ -380,6 +380,56 @@ After completing a task:
     - parent/reparent, canonical order/reorder, create, delete, media,
       content-block, verse-support, translation, and commentary actions remain
       blocked
+- Super Conscious Backend Consolidation Big Patch 2 is now active:
+    - `content_block.create`, `content_block.update`, and
+      `content_block.delete` are registered and enabled for scripture book,
+      book section, chapter, chapter section, and verse owners
+    - `ContentBlockAction` executes owner-scoped content block writes through
+      the Conscious action dispatcher
+    - `ConsciousContentBlockPolicy` enforces supported owners, owned-block
+      mutation, allowed block types, stable region keys, rejected ownership
+      payloads, and no canonical hierarchy mutation
+    - `content_block.duplicate` and `content_block.reorder` are registered but
+      disabled placeholders
+    - old route-specific scripture content-block controllers remained in place
+      at that stage and were later deleted in Big Patch 5
+- Super Conscious Backend Consolidation Big Patch 3 is now active:
+    - content-block `duplicate` and `reorder` actions are enabled for supported
+      scripture owner entities, with reorder limited to the same owner and
+      region
+    - book media assignment `attach`, `replace`, `update`, and `detach` actions
+      are enabled; media assignment reorder remains disabled
+    - verse support actions now cover meta update, translation
+      create/update/delete, and commentary create/update/delete
+    - translation/commentary reorder remain disabled placeholders
+    - old content-block, media assignment, verse meta, translation, and
+      commentary controllers remained temporary behavior providers until the
+      Big Patch 5 submit-path migration and usage audit deleted them
+- Super Conscious Backend Consolidation Big Patch 4 is now active:
+    - scripture route metadata now emits Conscious field routes for safe
+      identity/details saves
+    - book/chapter/verse Full Edit links now emit Conscious Full Edit directly
+    - content-block, book media-assignment, verse meta, translation, and
+      commentary metadata now points at Conscious action routes where backend
+      replacements exist
+    - old identity/details controllers, old identity/details request classes,
+      and old redirect-only book/chapter/verse Full Edit controllers/routes
+      were deleted after reference audit
+    - canonical create/delete/reorder/reparent actions were not implemented
+    - content-block, media-assignment, and verse-support old controllers/routes
+      remain only as compatibility/non-migrated submit-method fallbacks
+- Super Conscious Backend Consolidation Big Patch 5 is now active:
+    - remaining content-block move-up/move-down metadata now submits to
+      `content_block.reorder` with `direction=up/down` while owner context
+      still comes from the schema action route
+    - old content-block, book media-assignment, verse meta, translation, and
+      commentary controllers/routes/request classes were deleted after a
+      reference audit found no app/runtime references
+    - the retained old scripture backend is now limited to canonical
+      create/delete, protected book canonical edit, admin-context visibility,
+      and postponed topic/character placeholder routes
+    - CMS was untouched and canonical create/delete/reparent/reorder actions
+      were not implemented
 - The legacy purge / renderer coverage pass removed the old
   `AdminModuleHost` intro surface from the reusable book library card renderer:
     - book library/card titles now render through `ScriptureBookTitleDisplay`

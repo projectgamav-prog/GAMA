@@ -32,31 +32,33 @@ class BookSectionAdminRouteContext
         return route('scripture.book-sections.admin.destroy', $this->routeParameters());
     }
 
+    public function detailsUpdateHref(): string
+    {
+        return ConsciousAdminRouteUrls::fieldUpdate('book_section', $this->bookSection, 'title');
+    }
+
     public function contentBlockStoreHref(): string
     {
-        return route(
-            'scripture.book-sections.admin.content-blocks.store',
-            $this->routeParameters(),
-        );
+        return ConsciousAdminRouteUrls::action('book_section', $this->bookSection, 'content_block.create');
     }
 
     public function contentBlockUpdateHref(ContentBlock $contentBlock): string
     {
-        return route(
-            'scripture.book-sections.admin.content-blocks.update',
-            $this->routeParameters([
-                'contentBlock' => $contentBlock,
-            ]),
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'book_section',
+            $this->bookSection,
+            'content_block.update',
+            ['content_block_id' => $contentBlock->getKey()],
         );
     }
 
     public function contentBlockDestroyHref(ContentBlock $contentBlock): string
     {
-        return route(
-            'scripture.book-sections.admin.content-blocks.destroy',
-            $this->routeParameters([
-                'contentBlock' => $contentBlock,
-            ]),
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'book_section',
+            $this->bookSection,
+            'content_block.delete',
+            ['content_block_id' => $contentBlock->getKey()],
         );
     }
 

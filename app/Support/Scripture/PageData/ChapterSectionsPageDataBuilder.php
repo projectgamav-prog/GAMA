@@ -304,15 +304,7 @@ class ChapterSectionsPageDataBuilder
         );
 
         return [
-            'details_update_href' => route(
-                'scripture.chapter-sections.admin.details.update',
-                [
-                    'book' => $book,
-                    'bookSection' => $bookSection,
-                    'chapter' => $chapter,
-                    'chapterSection' => $chapterSection,
-                ],
-            ),
+            'details_update_href' => $adminRouteContext->detailsUpdateHref(),
             'destroy_href' => $adminRouteContext->destroyHref(),
             'intro_store_href' => $adminRouteContext->contentBlockStoreHref(),
             'primary_intro_block' => $primaryIntroBlock

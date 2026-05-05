@@ -30,12 +30,12 @@ class BookAdminRouteContext
 
     public function detailsUpdateHref(): string
     {
-        return route('scripture.books.admin.details.update', $this->routeParameters());
+        return ConsciousAdminRouteUrls::fieldUpdate('book', $this->book, 'description');
     }
 
     public function identityUpdateHref(): string
     {
-        return route('scripture.books.admin.identity.update', $this->routeParameters());
+        return ConsciousAdminRouteUrls::fieldUpdate('book', $this->book, 'title');
     }
 
     public function destroyHref(): string
@@ -45,7 +45,7 @@ class BookAdminRouteContext
 
     public function fullEditHref(): string
     {
-        return route('scripture.books.admin.full-edit', $this->routeParameters());
+        return ConsciousAdminRouteUrls::fullEdit('book', $this->book);
     }
 
     public function canonicalEditHref(): string
@@ -55,51 +55,67 @@ class BookAdminRouteContext
 
     public function contentBlockStoreHref(): string
     {
-        // Fallback-only path for protected full-edit maintenance of legacy
-        // registered editorial blocks.
-        return route('scripture.books.admin.content-blocks.store', $this->routeParameters());
+        return ConsciousAdminRouteUrls::action('book', $this->book, 'content_block.create');
     }
 
     public function contentBlockUpdateHref(ContentBlock $contentBlock): string
     {
-        return route('scripture.books.admin.content-blocks.update', $this->routeParameters([
-            'contentBlock' => $contentBlock,
-        ]));
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'book',
+            $this->book,
+            'content_block.update',
+            ['content_block_id' => $contentBlock->getKey()],
+        );
     }
 
     public function contentBlockMoveUpHref(ContentBlock $contentBlock): string
     {
-        return route('scripture.books.admin.content-blocks.move-up', $this->routeParameters([
-            'contentBlock' => $contentBlock,
-        ]));
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'book',
+            $this->book,
+            'content_block.reorder',
+            ['content_block_id' => $contentBlock->getKey(), 'direction' => 'up'],
+        );
     }
 
     public function contentBlockMoveDownHref(ContentBlock $contentBlock): string
     {
-        return route('scripture.books.admin.content-blocks.move-down', $this->routeParameters([
-            'contentBlock' => $contentBlock,
-        ]));
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'book',
+            $this->book,
+            'content_block.reorder',
+            ['content_block_id' => $contentBlock->getKey(), 'direction' => 'down'],
+        );
     }
 
     public function contentBlockReorderHref(ContentBlock $contentBlock): string
     {
-        return route('scripture.books.admin.content-blocks.move', $this->routeParameters([
-            'contentBlock' => $contentBlock,
-        ]));
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'book',
+            $this->book,
+            'content_block.reorder',
+            ['content_block_id' => $contentBlock->getKey()],
+        );
     }
 
     public function contentBlockDuplicateHref(ContentBlock $contentBlock): string
     {
-        return route('scripture.books.admin.content-blocks.duplicate', $this->routeParameters([
-            'contentBlock' => $contentBlock,
-        ]));
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'book',
+            $this->book,
+            'content_block.duplicate',
+            ['content_block_id' => $contentBlock->getKey()],
+        );
     }
 
     public function contentBlockDestroyHref(ContentBlock $contentBlock): string
     {
-        return route('scripture.books.admin.content-blocks.destroy', $this->routeParameters([
-            'contentBlock' => $contentBlock,
-        ]));
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'book',
+            $this->book,
+            'content_block.delete',
+            ['content_block_id' => $contentBlock->getKey()],
+        );
     }
 
     /**
@@ -128,33 +144,42 @@ class BookAdminRouteContext
 
     public function mediaAssignmentStoreHref(): string
     {
-        return route('scripture.books.admin.media-assignments.store', $this->routeParameters());
+        return ConsciousAdminRouteUrls::action('book', $this->book, 'media_assignment.attach');
     }
 
     public function mediaAssignmentAttachHref(): string
     {
-        return route('scripture.books.admin.media-assignments.attach', $this->routeParameters());
+        return ConsciousAdminRouteUrls::action('book', $this->book, 'media_assignment.attach');
     }
 
     public function mediaAssignmentUpdateHref(MediaAssignment $mediaAssignment): string
     {
-        return route('scripture.books.admin.media-assignments.update', $this->routeParameters([
-            'mediaAssignment' => $mediaAssignment,
-        ]));
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'book',
+            $this->book,
+            'media_assignment.update',
+            ['media_assignment_id' => $mediaAssignment->getKey()],
+        );
     }
 
     public function mediaAssignmentReplaceMediaHref(MediaAssignment $mediaAssignment): string
     {
-        return route('scripture.books.admin.media-assignments.replace-media', $this->routeParameters([
-            'mediaAssignment' => $mediaAssignment,
-        ]));
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'book',
+            $this->book,
+            'media_assignment.replace',
+            ['media_assignment_id' => $mediaAssignment->getKey()],
+        );
     }
 
     public function mediaAssignmentDestroyHref(MediaAssignment $mediaAssignment): string
     {
-        return route('scripture.books.admin.media-assignments.destroy', $this->routeParameters([
-            'mediaAssignment' => $mediaAssignment,
-        ]));
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'book',
+            $this->book,
+            'media_assignment.detach',
+            ['media_assignment_id' => $mediaAssignment->getKey()],
+        );
     }
 
     public function ownsContentBlock(ContentBlock $contentBlock): bool

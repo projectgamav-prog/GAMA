@@ -99,8 +99,8 @@ The shared public frame, structured header navigation, structured footer system,
   services execute writes, and diagnostics report missing coverage
 - schema-aware quick edit now uses the generic
   `/admin/schema/{schemaFamily}/{entityType}/{id}/fields/{fieldName}` route for
-  the first safe scripture fields; next backend migration target is moving
-  remaining Conscious Full Edit and structured writes away from old endpoints
+  the first safe scripture fields; old identity/details routes have been
+  deleted after metadata moved to Conscious field routes
 - schema-aware public fields now expose routine actions through one local
   Conscious Admin three-dot menu; keep expanding that menu only with real
   supported actions, not placeholder delete/add/reorder/media/relation entries
@@ -123,6 +123,18 @@ The shared public frame, structured header navigation, structured footer system,
 - `protected_identity.update` is the first enabled action; keep it limited to
   `slug` and `number`, and do not let parent/reparent/order/create/delete
   payloads pass through it
+- content-block create/update/delete now have Conscious owner-scoped actions for
+  book, book section, chapter, chapter section, and verse; use those action
+  contracts for future migration instead of extending old route-specific
+  content-block controllers
+- content-block duplicate/reorder now have Conscious owner-scoped actions, and
+  route metadata points at those actions where safe; keep compatibility
+  endpoints for move-up/move-down and submit-method fallbacks until frontend
+  migration is complete
+- media assignment attach/replace/update/detach and verse support
+  meta/translation/commentary actions now have Conscious backend paths and route
+  metadata; migrate frontend submit methods fully before deleting old
+  controllers
 - use `docs/admin/conscious-admin-field-coverage.md` before treating a missing
   control as a bug; missing controls should usually be fixed by reusable
   renderer coverage, not URL/page-specific controls
@@ -134,11 +146,12 @@ The shared public frame, structured header navigation, structured footer system,
   part of scripture legacy module cleanup
 - use `docs/admin/super-conscious-admin-cleanup-audit.md` and
   `docs/admin/super-conscious-backend-organization.md` before deleting backend
-  admin code; many old controllers remain transitional write endpoints until
-  Conscious services replace them
-- old book/chapter/verse route-specific Full Edit GET routes now redirect to
-  Conscious Full Edit; do not reintroduce old page-specific full-edit React
-  pages as primary admin surfaces
+  admin code; retained old canonical/postponed controllers remain transitional
+  endpoints until Conscious services replace them and usage audits prove
+  deletion safety
+- old book/chapter/verse route-specific Full Edit GET routes are deleted; do
+  not reintroduce old page-specific full-edit React pages as primary admin
+  surfaces
 - old book/chapter/verse Full Edit React pages and their private editor/card
   components have been deleted; keep future Full Edit work in the Conscious
   schema-aware shell
@@ -146,8 +159,12 @@ The shared public frame, structured header navigation, structured footer system,
   chapter/verse surface resolvers now live under `admin/surfaces/scripture`
 - the dead always-visible `AdminFieldIconControls` cluster has been removed;
   schema-field actions should continue through the three-dot menu
-- backend scripture admin controllers are classified but intentionally kept
-  until Conscious services/actions replace them
+- backend scripture admin controllers are classified; old identity/details and
+  redirect-only Full Edit controllers are already deleted; old content-block,
+  media-assignment, verse meta, translation, and commentary controllers/routes
+  are also deleted after Conscious action migration and reference audit; only
+  canonical create/delete, protected canonical, admin-context visibility, and
+  postponed controllers remain
 - protected canonical edit remains legacy until a Conscious protected-canonical
   workflow exists; do not delete its backend/frontend path blindly
 - keep CMS exposure generic and supplementary on non-CMS pages

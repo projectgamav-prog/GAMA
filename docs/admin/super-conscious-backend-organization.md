@@ -46,8 +46,9 @@ app/Admin/Conscious/
 The current implementation already has the first schema field registry,
 definition, entity resolver, protected canonical field policy, Conscious Full
 Edit controller, generic field update controller, field update service, Full
-Edit payload builder, inert action registry, inert relationship registry, and
-disabled final action route.
+Edit payload builder, action dispatcher/registry, relationship registry, and
+policy-gated action services for protected identity, content blocks, book media
+assignments, and verse support.
 
 ## Phase 1 Backend Awareness Foundation
 
@@ -65,13 +66,16 @@ into Conscious backend contracts:
 - `ProtectedIdentityAction` is the first enabled protected action, limited to
   `slug` and `number` for scripture book, book section, chapter, chapter
   section, and verse entities.
+- `ContentBlockAction` implements the first Conscious content-block action
+  family for scripture owner entities: `content_block.create`,
+  `content_block.update`, and `content_block.delete`.
 - `ConsciousRelationshipRegistry` and `ConsciousRelationshipDefinition`
   describe protected scripture parent/child relationships without enabling
   create, reorder, reparent, or delete.
 - `POST /admin/schema/{schemaFamily}/{entityType}/{id}/actions/{actionKey}` now
   exists as the final action route shape and safely dispatches enabled actions.
-  Registered create/delete/reorder/reparent placeholders remain disabled until
-  explicit policy and services exist.
+  Registered canonical create/delete/reorder/reparent placeholders remain
+  disabled until explicit policy and services exist.
 
 Old route-specific controllers are no longer treated as architecture. They are
 temporary behavior providers only and must move toward one of three outcomes:
@@ -79,6 +83,15 @@ temporary behavior providers only and must move toward one of three outcomes:
 - replaced by the Conscious field route
 - replaced by the Conscious action route
 - deleted when no frontend or fallback behavior references them
+
+Big Patch 4 deleted the old identity/details write controllers, their request
+classes, and the redirect-only book/chapter/verse Full Edit controllers/routes
+after route metadata moved to Conscious field/full-edit/action URLs.
+
+Big Patch 5 deleted the old content-block, book media-assignment, verse meta,
+verse translation, and verse commentary controllers/routes/request classes after
+the remaining submit metadata moved to Conscious action URLs and a reference
+audit found no app/runtime references.
 
 ## Future Awareness Automation Helpers
 
@@ -118,29 +131,27 @@ table, route, or relation exists.
 
 ### `transitional_write_endpoint`
 
-- scripture identity/details update controllers
-- scripture content-block controllers
-- verse meta, translation, and commentary controllers
-- book media-assignment controllers
-- matching `app/Http/Requests/Scripture/*Admin*` request classes
+- canonical scripture create/delete controllers and their request classes
 
-These endpoints are intentionally kept until Conscious services/actions cover
-their behavior.
+These endpoints are intentionally kept where no Conscious canonical action
+exists yet. Identity/details endpoints were deleted in Big Patch 4.
+Content-block, media-assignment, and verse-support endpoints were deleted in
+Big Patch 5.
 
-### `redirect_only_old_full_edit`
+### `deleted_old_full_edit`
 
 - `BookFullEditController`
 - `ChapterFullEditController`
 - `VerseFullEditController`
 
-These old GET controllers redirect to Conscious Full Edit and should not render
-route-specific React pages.
+These old GET controllers/routes were removed in Big Patch 4. App links now
+point directly to `admin.schema.full-edit`.
 
 ### `replace_with_conscious_action`
 
 - canonical create/delete controllers
 - future add-child, delete, reorder, move/reparent, duplicate, media, relation,
-  and verse-support operations
+  operations
 
 ### `replace_with_conscious_service`
 
@@ -160,10 +171,11 @@ Current final route shapes:
 Action keys should be registered, policy checked, and schema constrained. Do
 not create one route per page family for new admin behavior.
 
-The action route is present as an inert foundation. It rejects unavailable
-registered actions. It currently executes only the policy-gated protected
-identity action. It does not execute create, delete, reorder, reparent, media,
-relation, import, or export behavior yet.
+The action route rejects unavailable registered actions. It currently executes
+policy-gated protected identity, owner-scoped content-block actions, book media
+assignment actions, and verse support actions. It does not execute canonical
+create, canonical delete, canonical reorder, reparent, relation, import, or
+export behavior yet.
 
 ## Writing Capacity Roadmap
 
@@ -178,6 +190,10 @@ Conscious Full Edit should submit grouped field changes through field/action
 services, not old route-specific identity/details controllers. The first safe
 Full Edit fields now point at the generic Conscious field route and submit
 `value` instead of old hidden route-specific payloads.
+
+Public scripture admin metadata now emits Conscious field URLs for safe
+identity/details saves and Conscious Full Edit URLs for book, chapter, and
+verse Full Edit navigation.
 
 ### Create child
 
@@ -205,9 +221,43 @@ field quick edit.
 Use action services for content blocks or CMS-like objects only when ownership,
 new keys, and ordering are explicit.
 
+### Content blocks
+
+Content-block behavior now has a Conscious action foundation:
+
+- `content_block.create`
+- `content_block.update`
+- `content_block.delete`
+- `content_block.duplicate`
+- `content_block.reorder`
+
+Owner route metadata now points at these action URLs for supported owners, with
+existing block ids carried as action payload/query metadata. Legacy
+content-block routes/controllers/request classes were deleted in Big Patch 5.
+Move-up/move-down submit metadata is represented as `content_block.reorder`
+with a route-owner-scoped `direction` payload.
+
+These actions operate on content blocks owned by the current schema entity only.
+The owner is inferred from the schema action route. Payloads must not provide
+`parent_type`, `parent_id`, `owner_type`, or `owner_id`, and these actions must
+not mutate canonical hierarchy.
+
 ### Manage media
 
 Use media actions/pickers. Media assignment structure is not a quick-edit field.
+
+Book media assignments now have a Conscious action foundation:
+
+- `media_assignment.attach`
+- `media_assignment.replace`
+- `media_assignment.update`
+- `media_assignment.detach`
+- `media_assignment.reorder` registered but disabled
+
+The owner is inferred from the route entity. This patch supports book-owned
+media assignments only. Assignment ids must belong to the route book, media ids
+must reference existing media records, and reorder remains disabled until
+same-owner/same-role ordering policy and UI contracts are ready.
 
 ### Manage relations
 
@@ -218,6 +268,21 @@ edit.
 
 Use structured Conscious actions or future schema groups. They should not
 revive the old public module host.
+
+Verse support now has Conscious action coverage:
+
+- `verse_support.meta.update`
+- `verse_support.translation.create`
+- `verse_support.translation.update`
+- `verse_support.translation.delete`
+- `verse_support.translation.reorder` registered but disabled
+- `verse_support.commentary.create`
+- `verse_support.commentary.update`
+- `verse_support.commentary.delete`
+- `verse_support.commentary.reorder` registered but disabled
+
+All verse-support actions require the route entity to be `verse`. Translation
+and commentary updates/deletes must target rows owned by that verse.
 
 ### Audit / activity
 
@@ -252,9 +317,11 @@ canonical order fields remain read-only in this patch.
 5. Add backend relationship metadata for protected parent/child awareness.
 6. Move remaining protected identity fallback usage to the Conscious action
    route where safe.
-7. Move content block writes into owner-aware action services.
-8. Move media, relation, translation, commentary, and verse meta writes into
-   structured Conscious actions.
+7. Done in Big Patch 5: frontend/backend submit metadata for
+   content-block/media/verse-support replacements now uses Conscious actions,
+   and the old route-specific endpoint families were deleted after audit.
+8. Add media and verse-support reorder only after ordering policy and
+   diagnostics are ready.
 9. Add create/delete/reorder actions only after policy and diagnostics exist.
 10. Delete old route-specific write controllers only when no frontend or
    fallback service path references them.

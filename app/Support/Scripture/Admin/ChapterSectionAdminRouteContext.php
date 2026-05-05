@@ -38,31 +38,33 @@ class ChapterSectionAdminRouteContext
         return route('scripture.chapter-sections.admin.destroy', $this->routeParameters());
     }
 
+    public function detailsUpdateHref(): string
+    {
+        return ConsciousAdminRouteUrls::fieldUpdate('chapter_section', $this->chapterSection, 'title');
+    }
+
     public function contentBlockStoreHref(): string
     {
-        return route(
-            'scripture.chapter-sections.admin.content-blocks.store',
-            $this->routeParameters(),
-        );
+        return ConsciousAdminRouteUrls::action('chapter_section', $this->chapterSection, 'content_block.create');
     }
 
     public function contentBlockUpdateHref(ContentBlock $contentBlock): string
     {
-        return route(
-            'scripture.chapter-sections.admin.content-blocks.update',
-            $this->routeParameters([
-                'contentBlock' => $contentBlock,
-            ]),
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'chapter_section',
+            $this->chapterSection,
+            'content_block.update',
+            ['content_block_id' => $contentBlock->getKey()],
         );
     }
 
     public function contentBlockDestroyHref(ContentBlock $contentBlock): string
     {
-        return route(
-            'scripture.chapter-sections.admin.content-blocks.destroy',
-            $this->routeParameters([
-                'contentBlock' => $contentBlock,
-            ]),
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'chapter_section',
+            $this->chapterSection,
+            'content_block.delete',
+            ['content_block_id' => $contentBlock->getKey()],
         );
     }
 

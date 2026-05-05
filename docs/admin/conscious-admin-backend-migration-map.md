@@ -10,6 +10,8 @@ without a separate implementation task and fresh usage check.
 - `legacy UI only`: tied to old visible admin modules or route-specific screens.
 - `replace soon`: still useful behavior, but should move behind Conscious Admin
   schema/field/action services.
+- `deleted`: removed after a reference audit proved Conscious replacements are
+  the active route metadata.
 - `unknown`: keep until a runtime/product usage pass proves the owner.
 
 ## Active Conscious Admin Read Path
@@ -94,31 +96,137 @@ The action rejects unknown payload keys and accepts no parent/reparent/order,
 create, delete, media, content-block, verse-meta, translation, or commentary
 mutation.
 
+## Active Conscious Admin Content Block Action Foundation
+
+| Route/action key | Classification | Notes |
+| --- | --- | --- |
+| `POST /admin/schema/{schemaFamily}/{entityType}/{id}/actions/content_block.create` | keep | Creates a content block owned by the current scripture schema entity. Owner is inferred from the route. |
+| `POST /admin/schema/{schemaFamily}/{entityType}/{id}/actions/content_block.update` | keep | Updates an owned block by `content_block_id`. Rejects ownership payloads and `sort_order`. |
+| `POST /admin/schema/{schemaFamily}/{entityType}/{id}/actions/content_block.delete` | keep | Deletes only a block owned by the current scripture schema entity and normalizes owner ordering. |
+| `POST /admin/schema/{schemaFamily}/{entityType}/{id}/actions/content_block.duplicate` | keep | Duplicates only a block owned by the current scripture schema entity. |
+| `POST /admin/schema/{schemaFamily}/{entityType}/{id}/actions/content_block.reorder` | keep | Reorders only within the same owner and region. |
+
+Supported owner entities:
+
+- `book`
+- `book_section`
+- `chapter`
+- `chapter_section`
+- `verse`
+
+Policy rules:
+
+- owner entity must be one of the supported scripture entities
+- content block owner must match the route entity for update/delete
+- `block_type` is limited to `text`, `quote`, and `image`
+- `region` must be a stable region key
+- payload must not provide `parent_type`, `parent_id`, `owner_type`,
+  `owner_id`, `schema_family`, `entity_type`, or `entity_id`
+- update does not accept `sort_order`
+- no canonical hierarchy mutation is performed
+
+## Active Conscious Admin Media Assignment Action Foundation
+
+| Route/action key | Classification | Notes |
+| --- | --- | --- |
+| `media_assignment.attach` | keep | Book-only media assignment creation. Owner is inferred from route. |
+| `media_assignment.replace` | keep | Replaces `media_id` on an assignment owned by the route book. |
+| `media_assignment.update` | keep | Updates book-owned assignment metadata. |
+| `media_assignment.detach` | keep | Deletes only an assignment owned by the route book. |
+| `media_assignment.reorder` | disabled_placeholder | Registered for awareness only until same-owner/same-role ordering policy is ready. |
+
+## Active Conscious Admin Verse Support Action Foundation
+
+| Route/action key | Classification | Notes |
+| --- | --- | --- |
+| `verse_support.meta.update` | keep | Updates or creates the `verse_meta` row for the route verse. |
+| `verse_support.translation.create` | keep | Creates a translation owned by the route verse. |
+| `verse_support.translation.update` | keep | Updates a translation owned by the route verse. |
+| `verse_support.translation.delete` | keep | Deletes a translation owned by the route verse. |
+| `verse_support.translation.reorder` | disabled_placeholder | Registered for awareness only until ordering policy is ready. |
+| `verse_support.commentary.create` | keep | Creates a commentary owned by the route verse. |
+| `verse_support.commentary.update` | keep | Updates a commentary owned by the route verse. |
+| `verse_support.commentary.delete` | keep | Deletes a commentary owned by the route verse. |
+| `verse_support.commentary.reorder` | disabled_placeholder | Registered for awareness only until ordering policy is ready. |
+
+## Route Usage Migration Big Patch 4
+
+Scripture admin route metadata now emits Conscious URLs for replacement-backed
+field, Full Edit, content-block, media-assignment, and verse-support actions.
+
+- Safe field metadata emits
+  `PATCH /admin/schema/{schemaFamily}/{entityType}/{id}/fields/{fieldName}`.
+- Full Edit metadata emits
+  `GET /admin/schema/{schemaFamily}/{entityType}/{id}/full-edit`.
+- Content-block, book media-assignment, verse meta, translation, and commentary
+  metadata emits
+  `POST /admin/schema/{schemaFamily}/{entityType}/{id}/actions/{actionKey}`.
+- Existing item action URLs include the item id as query metadata, such as
+  `content_block_id`, `media_assignment_id`, `translation_id`, or
+  `commentary_id`, while owner identity still comes only from the schema route.
+
+Deleted after audit:
+
+- old identity/details routes and controllers for book, book section, chapter,
+  chapter section, and verse
+- old redirect-only book/chapter/verse Full Edit routes and controllers
+- old identity/details request classes for those deleted controllers
+
+Retained:
+
+- canonical create/delete routes because Conscious canonical actions do not
+  exist yet
+- protected book canonical edit workflow
+- topic/character postponed admin routes
+
+## Editorial / Support Route Migration Big Patch 5
+
+Remaining content-block move-up/move-down metadata now submits to
+`content_block.reorder` with `direction=up|down`, while owner context still
+comes only from the schema action route. A follow-up reference audit found no
+app/runtime references to the old content-block, book media-assignment, verse
+meta, translation, or commentary route names once generated route helper output
+was excluded.
+
+Deleted after audit:
+
+- old content-block routes/controllers/request classes for book, book section,
+  chapter, chapter section, and verse owners
+- old book media-assignment routes/controller/request classes
+- old verse meta, translation, and commentary routes/controllers/request
+  classes
+
+Retained:
+
+- canonical create/delete routes because Conscious canonical actions do not
+  exist yet
+- protected book canonical edit workflow
+- admin-context visibility route
+- topic/character postponed admin routes
+
 ## Scripture Entity Field Writes
 
 | Route name | Method/path | Controller | Classification | Current Conscious usage | Future target |
 | --- | --- | --- | --- | --- | --- |
-| `scripture.books.admin.identity.update` | `PATCH books/{book}/admin/identity` | `BookAdminIdentityController@update` | keep | `books.title` quick edit and Conscious Full Edit. Hidden payload still carries `slug` and `number`. | Replace with field update for `books.title`; protect `slug` and `number` behind canonical identity policy. |
-| `scripture.books.admin.details.update` | `PATCH books/{book}/admin/details` | `BookAdminDetailsController@update` | keep | `books.description` quick edit and Conscious Full Edit. | Replace with generic field update for `books.description`. |
-| `scripture.book-sections.admin.details.update` | `PATCH books/{book}/sections/{bookSection}/admin/details` | `BookSectionAdminDetailsController@update` | keep | `book_sections.title` quick edit and Conscious Full Edit. Hidden payload still carries `number`. | Replace with field update for `book_sections.title`; protect `number`. |
-| `scripture.chapters.admin.identity.update` | `PATCH books/{book}/sections/{bookSection}/chapters/{chapter}/admin/identity` | `ChapterAdminIdentityController@update` | keep | `chapters.title` quick edit and Conscious Full Edit. Hidden payload still carries `slug` and `number`. | Replace with field update for `chapters.title`; protect `slug` and `number`. |
-| `scripture.chapter-sections.admin.details.update` | `PATCH books/{book}/sections/{bookSection}/chapters/{chapter}/sections/{chapterSection}/admin/details` | `ChapterSectionAdminDetailsController@update` | keep | `chapter_sections.title` quick edit and Conscious Full Edit. Hidden payload still carries `number`. | Replace with field update for `chapter_sections.title`; protect `number`. |
-| `scripture.chapters.verses.admin.identity.update` | `PATCH books/{book}/sections/{bookSection}/chapters/{chapter}/sections/{chapterSection}/verses/{verse}/admin/identity` | `VerseAdminIdentityController@update` | keep | `verses.text` quick edit and Conscious Full Edit. Hidden payload still carries `slug` and `number`. | Replace with field update for `verses.text`; protect `slug` and `number`. |
+| `scripture.books.admin.identity.update` | `PATCH books/{book}/admin/identity` | deleted | deleted | Book title metadata now uses the Conscious field route; slug/number use `protected_identity.update`. | Done. |
+| `scripture.books.admin.details.update` | `PATCH books/{book}/admin/details` | deleted | deleted | Book description metadata now uses the Conscious field route. | Done. |
+| `scripture.book-sections.admin.details.update` | `PATCH books/{book}/sections/{bookSection}/admin/details` | deleted | deleted | Book section title metadata now uses the Conscious field route. | Done. |
+| `scripture.chapters.admin.identity.update` | `PATCH books/{book}/sections/{bookSection}/chapters/{chapter}/admin/identity` | deleted | deleted | Chapter title metadata now uses the Conscious field route; slug/number use `protected_identity.update`. | Done. |
+| `scripture.chapter-sections.admin.details.update` | `PATCH books/{book}/sections/{bookSection}/chapters/{chapter}/sections/{chapterSection}/admin/details` | deleted | deleted | Chapter section title metadata now uses the Conscious field route. | Done. |
+| `scripture.chapters.verses.admin.identity.update` | `PATCH books/{book}/sections/{bookSection}/chapters/{chapter}/sections/{chapterSection}/verses/{verse}/admin/identity` | deleted | deleted | Verse text metadata now uses the Conscious field route; slug/number use `protected_identity.update`. | Done. |
 
-These routes remain in the codebase as temporary behavior providers.
-Schema-aware quick edit, the first Conscious Full Edit safe field saves, and
-Conscious Full Edit slug/number saves no longer need these old identity/details
-endpoints for those fields. Non-migrated structured flows may still reference
-old route-specific endpoints until Conscious actions replace them.
+These old identity/details routes were removed in Big Patch 4. Schema-aware
+quick edit and Conscious Full Edit safe field saves use the generic Conscious
+field route; protected slug/number saves remain action-gated.
 
 ## Deprecated Full Edit / Canonical Screens
 
 | Route name | Method/path | Controller | Classification | Notes |
 | --- | --- | --- | --- | --- |
-| `scripture.books.admin.full-edit` | `GET books/{book}/admin/full-edit` | `BookFullEditController@show` | old_full_edit_redirect_only | Redirects to Conscious Full Edit for `scripture.book`. |
+| `scripture.books.admin.full-edit` | `GET books/{book}/admin/full-edit` | deleted | deleted | App links now use Conscious Full Edit directly. |
 | `scripture.books.admin.canonical-edit` | `GET books/{book}/admin/canonical-edit` | `BookCanonicalEditController@show` | replace soon | Canonical identity behavior should become a protected Conscious Admin workflow. |
-| `scripture.chapters.admin.full-edit` | `GET .../chapters/{chapter}/admin/full-edit` | `ChapterFullEditController@show` | old_full_edit_redirect_only | Redirects to Conscious Full Edit for `scripture.chapter`. |
-| `scripture.chapters.verses.admin.full-edit` | `GET .../verses/{verse}/admin/full-edit` | `VerseFullEditController@show` | old_full_edit_redirect_only | Redirects to Conscious Full Edit for `scripture.verse`. |
+| `scripture.chapters.admin.full-edit` | `GET .../chapters/{chapter}/admin/full-edit` | deleted | deleted | App links now use Conscious Full Edit directly. |
+| `scripture.chapters.verses.admin.full-edit` | `GET .../verses/{verse}/admin/full-edit` | deleted | deleted | App links now use Conscious Full Edit directly. |
 | `scripture.characters.admin.full-edit` | `GET characters/{character}/admin/full-edit` | `PostponedAdminSurfaceController` | unknown | Postponed proof surface. No active Conscious schema module yet. |
 | `scripture.topics.admin.full-edit` | `GET topics/{topic}/admin/full-edit` | `PostponedAdminSurfaceController` | unknown | Postponed proof surface. No active Conscious schema module yet. |
 
@@ -141,28 +249,31 @@ old route-specific endpoints until Conscious actions replace them.
 
 | Route family | Controllers | Classification | Notes |
 | --- | --- | --- | --- |
-| Book content blocks | `BookAdminContentBlockController` | replace soon | Transitional fallback for already-saved book editorial blocks. Move to schema action services plus ordering/add-anchor policies. |
-| Book section content blocks | `BookSectionAdminContentBlockController` | replace soon | Intro block create/update/delete behavior should become owner-aware block services. |
-| Chapter content blocks | `ChapterAdminContentBlockController` | replace soon | Transitional fallback for chapter note blocks; includes move/duplicate/delete. |
-| Chapter section content blocks | `ChapterSectionAdminContentBlockController` | replace soon | Intro block create/update/delete behavior should become owner-aware block services. |
-| Verse content blocks | `VerseAdminContentBlockController` | replace soon | Transitional fallback for verse note blocks; includes move/duplicate/delete. |
+| Book content blocks | deleted | deleted | Metadata uses `content_block.*` Conscious actions. |
+| Book section content blocks | deleted | deleted | Metadata uses `content_block.*` Conscious actions. |
+| Chapter content blocks | deleted | deleted | Metadata uses `content_block.*` Conscious actions. |
+| Chapter section content blocks | deleted | deleted | Metadata uses `content_block.*` Conscious actions. |
+| Verse content blocks | deleted | deleted | Metadata uses `content_block.*` Conscious actions. |
 
-The Conscious Full Edit shell currently displays `content_block` records as
-read-only because a generic parent-aware save route is not available yet.
+The Conscious Full Edit shell currently displays direct `content_block` records
+as read-only, but owner-level route metadata now points at Conscious action
+routes for creating, updating, deleting, duplicating, and reordering content
+blocks from supported scripture owner entities. Old controllers/routes/request
+classes were deleted in Big Patch 5 after reference audit.
 
 ## Verse Support Data
 
 | Route family | Controller | Classification | Notes |
 | --- | --- | --- | --- |
-| `scripture.chapters.verses.admin.meta.update` | `VerseAdminMetaController@update` | replace soon | Useful data, but should move to schema field groups and field policy before visible controls return. |
-| `scripture.chapters.verses.admin.translations.*` | `VerseAdminTranslationController` | replace soon | Structured list editor behavior; not a field quick-edit target yet. |
-| `scripture.chapters.verses.admin.commentaries.*` | `VerseAdminCommentaryController` | replace soon | Structured list editor behavior; not a field quick-edit target yet. |
+| `scripture.chapters.verses.admin.meta.update` | deleted | deleted | Metadata uses `verse_support.meta.update`. |
+| `scripture.chapters.verses.admin.translations.*` | deleted | deleted | Metadata uses `verse_support.translation.create/update/delete`; reorder remains disabled. |
+| `scripture.chapters.verses.admin.commentaries.*` | deleted | deleted | Metadata uses `verse_support.commentary.create/update/delete`; reorder remains disabled. |
 
 ## Media Assignment Writes
 
 | Route family | Controller | Classification | Notes |
 | --- | --- | --- | --- |
-| `scripture.books.admin.media-assignments.*` | `BookAdminMediaAssignmentController` | replace soon | Media assignment management should move to a structured Conscious media service/picker. Keep endpoints for existing protected fallback use. |
+| `scripture.books.admin.media-assignments.*` | deleted | deleted | Metadata uses `media_assignment.attach/replace/update/detach`; reorder remains disabled. |
 
 ## Admin Context / Postponed Surfaces
 
@@ -239,6 +350,24 @@ Suggested service layer:
     the registered action handler
 - `ProtectedIdentityAction`
   - policy-gated `slug` and `number` updates for supported scripture entities
+- `ContentBlockAction`
+  - policy-gated owner-scoped create/update/delete/duplicate/reorder for
+    scripture content blocks
+- `ConsciousContentBlockPolicy`
+  - validates supported owners, owned block mutation, allowed block types,
+    region keys, and rejected ownership payloads
+- `MediaAssignmentAction`
+  - policy-gated book-owned attach/replace/update/detach for media assignments
+- `ConsciousMediaAssignmentPolicy`
+  - validates book ownership, media assignment ownership, and allowed roles
+- `VerseMetaAction`
+  - policy-gated verse-only metadata update/create
+- `VerseTranslationAction`
+  - policy-gated verse-owned translation create/update/delete
+- `VerseCommentaryAction`
+  - policy-gated verse-owned commentary create/update/delete
+- `ConsciousVerseSupportPolicy`
+  - validates verse ownership for support rows
 - `ConsciousRelationshipRegistry`
   - describes protected parent/child metadata for diagnostics and future
     policy checks
@@ -276,11 +405,15 @@ them as protected or route them to an advanced structured action later.
    registries now exist.
 7. Protected identity action now handles `slug` and `number` for supported
    scripture entities.
-8. Migrate content block title/body updates to parent-aware schema action
-   services.
-9. Add Conscious structured services for verse meta, translations,
-   commentaries, and media assignments.
-10. Add canonical create/delete/reorder action services with protected policy
+8. Content-block create/update/delete/duplicate/reorder now have Conscious
+   owner-scoped action services.
+9. Media assignment attach/replace/update/detach now have Conscious book-owned
+   action services; media reorder remains disabled.
+10. Verse meta, translation, and commentary create/update/delete support now
+   have Conscious verse-owned action services; support reorder remains disabled.
+11. Done in Big Patch 5: remove old content-block/media/verse-support
+   routes/controllers/requests after submit metadata migration and audit.
+12. Add canonical create/delete/reorder action services with protected policy
    gates.
-11. Re-audit old route-specific controllers and remove or redirect only after
+13. Re-audit old route-specific controllers and remove or redirect only after
    no frontend payloads reference them.

@@ -234,13 +234,7 @@ class BookShowPageDataBuilder
         $adminRouteContext = new BookSectionAdminRouteContext($book, $bookSection);
 
         return [
-            'details_update_href' => route(
-                'scripture.book-sections.admin.details.update',
-                [
-                    'book' => $book,
-                    'bookSection' => $bookSection,
-                ],
-            ),
+            'details_update_href' => $adminRouteContext->detailsUpdateHref(),
             'destroy_href' => $adminRouteContext->destroyHref(),
             'intro_store_href' => $adminRouteContext->contentBlockStoreHref(),
             'primary_intro_block' => $primaryIntroBlock

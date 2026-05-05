@@ -46,12 +46,12 @@ class VerseAdminRouteContext
 
     public function fullEditHref(): string
     {
-        return route('scripture.chapters.verses.admin.full-edit', $this->routeParameters());
+        return ConsciousAdminRouteUrls::fullEdit('verse', $this->verse);
     }
 
     public function identityUpdateHref(): string
     {
-        return route('scripture.chapters.verses.admin.identity.update', $this->routeParameters());
+        return ConsciousAdminRouteUrls::fieldUpdate('verse', $this->verse, 'text');
     }
 
     public function destroyHref(): string
@@ -61,45 +61,57 @@ class VerseAdminRouteContext
 
     public function metaUpdateHref(): string
     {
-        return route('scripture.chapters.verses.admin.meta.update', $this->routeParameters());
+        return ConsciousAdminRouteUrls::action('verse', $this->verse, 'verse_support.meta.update');
     }
 
     public function translationStoreHref(): string
     {
-        return route('scripture.chapters.verses.admin.translations.store', $this->routeParameters());
+        return ConsciousAdminRouteUrls::action('verse', $this->verse, 'verse_support.translation.create');
     }
 
     public function translationUpdateHref(VerseTranslation $translation): string
     {
-        return route('scripture.chapters.verses.admin.translations.update', $this->routeParameters([
-            'translation' => $translation,
-        ]));
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'verse',
+            $this->verse,
+            'verse_support.translation.update',
+            ['translation_id' => $translation->getKey()],
+        );
     }
 
     public function translationDestroyHref(VerseTranslation $translation): string
     {
-        return route('scripture.chapters.verses.admin.translations.destroy', $this->routeParameters([
-            'translation' => $translation,
-        ]));
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'verse',
+            $this->verse,
+            'verse_support.translation.delete',
+            ['translation_id' => $translation->getKey()],
+        );
     }
 
     public function commentaryStoreHref(): string
     {
-        return route('scripture.chapters.verses.admin.commentaries.store', $this->routeParameters());
+        return ConsciousAdminRouteUrls::action('verse', $this->verse, 'verse_support.commentary.create');
     }
 
     public function commentaryUpdateHref(VerseCommentary $commentary): string
     {
-        return route('scripture.chapters.verses.admin.commentaries.update', $this->routeParameters([
-            'commentary' => $commentary,
-        ]));
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'verse',
+            $this->verse,
+            'verse_support.commentary.update',
+            ['commentary_id' => $commentary->getKey()],
+        );
     }
 
     public function commentaryDestroyHref(VerseCommentary $commentary): string
     {
-        return route('scripture.chapters.verses.admin.commentaries.destroy', $this->routeParameters([
-            'commentary' => $commentary,
-        ]));
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'verse',
+            $this->verse,
+            'verse_support.commentary.delete',
+            ['commentary_id' => $commentary->getKey()],
+        );
     }
 
     /**
@@ -108,49 +120,67 @@ class VerseAdminRouteContext
      */
     public function contentBlockStoreHref(): string
     {
-        return route('scripture.chapters.verses.admin.content-blocks.store', $this->routeParameters());
+        return ConsciousAdminRouteUrls::action('verse', $this->verse, 'content_block.create');
     }
 
     public function contentBlockUpdateHref(ContentBlock $contentBlock): string
     {
-        return route('scripture.chapters.verses.admin.content-blocks.update', $this->routeParameters([
-            'contentBlock' => $contentBlock,
-        ]));
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'verse',
+            $this->verse,
+            'content_block.update',
+            ['content_block_id' => $contentBlock->getKey()],
+        );
     }
 
     public function contentBlockMoveUpHref(ContentBlock $contentBlock): string
     {
-        return route('scripture.chapters.verses.admin.content-blocks.move-up', $this->routeParameters([
-            'contentBlock' => $contentBlock,
-        ]));
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'verse',
+            $this->verse,
+            'content_block.reorder',
+            ['content_block_id' => $contentBlock->getKey(), 'direction' => 'up'],
+        );
     }
 
     public function contentBlockMoveDownHref(ContentBlock $contentBlock): string
     {
-        return route('scripture.chapters.verses.admin.content-blocks.move-down', $this->routeParameters([
-            'contentBlock' => $contentBlock,
-        ]));
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'verse',
+            $this->verse,
+            'content_block.reorder',
+            ['content_block_id' => $contentBlock->getKey(), 'direction' => 'down'],
+        );
     }
 
     public function contentBlockReorderHref(ContentBlock $contentBlock): string
     {
-        return route('scripture.chapters.verses.admin.content-blocks.move', $this->routeParameters([
-            'contentBlock' => $contentBlock,
-        ]));
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'verse',
+            $this->verse,
+            'content_block.reorder',
+            ['content_block_id' => $contentBlock->getKey()],
+        );
     }
 
     public function contentBlockDuplicateHref(ContentBlock $contentBlock): string
     {
-        return route('scripture.chapters.verses.admin.content-blocks.duplicate', $this->routeParameters([
-            'contentBlock' => $contentBlock,
-        ]));
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'verse',
+            $this->verse,
+            'content_block.duplicate',
+            ['content_block_id' => $contentBlock->getKey()],
+        );
     }
 
     public function contentBlockDestroyHref(ContentBlock $contentBlock): string
     {
-        return route('scripture.chapters.verses.admin.content-blocks.destroy', $this->routeParameters([
-            'contentBlock' => $contentBlock,
-        ]));
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'verse',
+            $this->verse,
+            'content_block.delete',
+            ['content_block_id' => $contentBlock->getKey()],
+        );
     }
 
     /**

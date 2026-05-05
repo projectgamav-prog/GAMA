@@ -29,6 +29,36 @@ for book, book section, chapter, chapter section, and verse Full Edit paths.
 Old identity/details endpoints remain temporarily for fallback and
 non-migrated flows, but are now partially replaceable later.
 
+Big Patch 2 note: Conscious content-block actions now cover owner-scoped
+`content_block.create`, `content_block.update`, and `content_block.delete` for
+book, book section, chapter, chapter section, and verse owners. Old
+content-block controllers remained temporarily for fallback, duplicate/reorder,
+and non-migrated flows at that point; they were later deleted in Big Patch 5.
+
+Big Patch 3 note: Conscious actions now cover content-block duplicate/reorder,
+book media assignment attach/replace/update/detach, verse meta update,
+translation create/update/delete, and commentary create/update/delete. Old
+content-block, media assignment, verse meta, translation, and commentary
+controllers remained temporarily for non-migrated flows at that point; they
+were later deleted in Big Patch 5. Media/translation/commentary reorder remain
+disabled placeholders.
+
+Big Patch 4 note: visible Full Edit links and scripture admin save/action
+metadata now prefer the Conscious route family where replacements exist.
+Old identity/details update routes, redirect-only book/chapter/verse Full Edit
+routes, and their controller/request classes were deleted after a reference
+audit showed app payloads no longer needed them. Content-block, media,
+verse-support, canonical create/delete, protected canonical edit, and
+topic/character postponed routes remain.
+
+Big Patch 5 note: remaining content-block move metadata now uses the Conscious
+`content_block.reorder` action with route-owner context. A fresh reference audit
+found no app/runtime references to the old content-block, book media assignment,
+or verse-support submit routes after generated helper exclusions. Those old
+route groups, controllers, and route-specific request classes were deleted.
+Canonical create/delete, protected book canonical edit, admin-context
+visibility, and postponed topic/character placeholder routes remain.
+
 ## Status Legend
 
 - `active_conscious_keep`: active Super Conscious Admin code.
@@ -57,6 +87,38 @@ non-migrated flows, but are now partially replaceable later.
 | Path | Layer | Previous status | Reason | Replacement target |
 | --- | --- | --- | --- | --- |
 | `resources/js/components/scripture/verse/VerseFullEditIntroCard.tsx` | frontend | `dead_safe_to_delete` | Old route-specific verse Full Edit intro card; no imports/references remained. | Conscious Full Edit shell intro/summary components. |
+
+### Deleted In Backend Consolidation Big Patch 4
+
+| Path/route | Layer | Previous status | Reason | Replacement target |
+| --- | --- | --- | --- | --- |
+| `app/Http/Controllers/Scripture/BookAdminIdentityController.php` | backend | `transitional_keep_until_replaced` | Book title saves now emit the Conscious field route; slug/number are policy-gated by `protected_identity.update`. | `PATCH /admin/schema/scripture/book/{id}/fields/title`; `protected_identity.update`. |
+| `app/Http/Controllers/Scripture/BookAdminDetailsController.php` | backend | `transitional_keep_until_replaced` | Book description saves now emit the Conscious field route. | `PATCH /admin/schema/scripture/book/{id}/fields/description`. |
+| `app/Http/Controllers/Scripture/BookSectionAdminDetailsController.php` | backend | `transitional_keep_until_replaced` | Book section title saves now emit the Conscious field route. | `PATCH /admin/schema/scripture/book_section/{id}/fields/title`. |
+| `app/Http/Controllers/Scripture/ChapterAdminIdentityController.php` | backend | `transitional_keep_until_replaced` | Chapter title saves now emit the Conscious field route; slug/number are policy-gated by `protected_identity.update`. | `PATCH /admin/schema/scripture/chapter/{id}/fields/title`; `protected_identity.update`. |
+| `app/Http/Controllers/Scripture/ChapterSectionAdminDetailsController.php` | backend | `transitional_keep_until_replaced` | Chapter section title saves now emit the Conscious field route. | `PATCH /admin/schema/scripture/chapter_section/{id}/fields/title`. |
+| `app/Http/Controllers/Scripture/VerseAdminIdentityController.php` | backend | `transitional_keep_until_replaced` | Verse text saves now emit the Conscious field route; slug/number are policy-gated by `protected_identity.update`. | `PATCH /admin/schema/scripture/verse/{id}/fields/text`; `protected_identity.update`. |
+| `app/Http/Controllers/Scripture/BookFullEditController.php` | backend | `redirect_only_legacy` | App payloads now link directly to Conscious Full Edit. | `GET /admin/schema/scripture/book/{id}/full-edit`. |
+| `app/Http/Controllers/Scripture/ChapterFullEditController.php` | backend | `redirect_only_legacy` | App payloads now link directly to Conscious Full Edit. | `GET /admin/schema/scripture/chapter/{id}/full-edit`. |
+| `app/Http/Controllers/Scripture/VerseFullEditController.php` | backend | `redirect_only_legacy` | App payloads now link directly to Conscious Full Edit. | `GET /admin/schema/scripture/verse/{id}/full-edit`. |
+| `app/Http/Requests/Scripture/*IdentityUpdateRequest.php` / `*DetailsUpdateRequest.php` for the deleted controllers | requests | `transitional_keep_until_replaced` | Old route-specific validation moved to Conscious field/action policies. | Conscious field registry, `ConsciousFieldUpdateService`, `ConsciousProtectedIdentityPolicy`. |
+| `scripture.*.admin.identity.update`, `scripture.*.admin.details.update`, old book/chapter/verse `*.admin.full-edit` routes | routes | `transitional_keep_until_replaced` / `redirect_only_legacy` | Route metadata no longer emits these names and replacements exist. | Conscious field/full-edit/action route family. |
+
+### Deleted In Backend Consolidation Big Patch 5
+
+| Path/route | Layer | Previous status | Reason | Replacement target |
+| --- | --- | --- | --- | --- |
+| `app/Http/Controllers/Scripture/*AdminContentBlockController.php` | backend | `transitional_keep_until_replaced` | Content-block create/update/delete/duplicate/reorder submit metadata now uses the Conscious action route. | `content_block.*` Conscious actions. |
+| `app/Http/Controllers/Scripture/BookAdminMediaAssignmentController.php` | backend | `transitional_keep_until_replaced` | Book media attach/replace/update/detach metadata now uses Conscious actions. | `media_assignment.attach/replace/update/detach`. |
+| `app/Http/Controllers/Scripture/VerseAdminMetaController.php` | backend | `transitional_keep_until_replaced` | Verse meta save metadata now uses the Conscious action route. | `verse_support.meta.update`. |
+| `app/Http/Controllers/Scripture/VerseAdminTranslationController.php` | backend | `transitional_keep_until_replaced` | Verse translation create/update/delete metadata now uses Conscious actions. | `verse_support.translation.create/update/delete`. |
+| `app/Http/Controllers/Scripture/VerseAdminCommentaryController.php` | backend | `transitional_keep_until_replaced` | Verse commentary create/update/delete metadata now uses Conscious actions. | `verse_support.commentary.create/update/delete`. |
+| `app/Http/Requests/Scripture/*ContentBlock*Request.php` old content-block request family | requests | `transitional_keep_until_replaced` / `uncertain_needs_manual_review` | Only referenced by deleted content-block controllers after audit. | `ContentBlockAction` validation and `ConsciousContentBlockPolicy`. |
+| `app/Http/Requests/Scripture/BookAdminMediaAssignment*Request.php` | requests | `transitional_keep_until_replaced` | Only referenced by deleted media controller after audit. | `MediaAssignmentAction` validation and `ConsciousMediaAssignmentPolicy`. |
+| `app/Http/Requests/Scripture/VerseAdminMetaUpdateRequest.php` | requests | `transitional_keep_until_replaced` | Only referenced by deleted verse meta controller after audit. | `VerseMetaAction` validation and `ConsciousVerseSupportPolicy`. |
+| `app/Http/Requests/Scripture/VerseTranslation*Request.php` | requests | `transitional_keep_until_replaced` | Only referenced by deleted translation controller after audit. | `VerseTranslationAction` validation and `ConsciousVerseSupportPolicy`. |
+| `app/Http/Requests/Scripture/VerseCommentary*Request.php` | requests | `transitional_keep_until_replaced` | Only referenced by deleted commentary controller after audit. | `VerseCommentaryAction` validation and `ConsciousVerseSupportPolicy`. |
+| `scripture.*.admin.content-blocks.*`, `scripture.books.admin.media-assignments.*`, `scripture.chapters.verses.admin.meta.update`, `scripture.chapters.verses.admin.translations.*`, `scripture.chapters.verses.admin.commentaries.*` | routes | `transitional_keep_until_replaced` | No app/runtime references remained and Conscious replacements exist. | Final schema action route family. |
 
 ### 2. Keep Until Conscious Replacement Exists
 
@@ -89,17 +151,6 @@ non-migrated flows, but are now partially replaceable later.
 | `app/Http/Controllers/Admin/ConsciousSchemaFieldUpdateController.php` | backend | `active_conscious_keep` | Active generic safe field update route. | `routes/web.php`. | Not deletion target. | None. | High. | Keep; delegate to service later. |
 | `app/Admin/Conscious/Schema/*` | backend | `active_conscious_keep` | Active backend schema field registry, resolver, and protected policy. | Conscious controllers. | Not deletion target. | None. | High. | Keep; expand into final structure. |
 | `routes/web.php` admin schema group | routes | `active_conscious_keep` | Owns active Conscious Full Edit and field update routes. | Runtime routes. | Not deletion target. | None. | High. | Keep. |
-| `app/Http/Controllers/Scripture/BookAdminIdentityController.php` | backend | `transitional_keep_until_replaced` | Old multi-field identity write endpoint. | `routes/scripture.php`; old fallback/full edit references. | Remove after book identity writes are Conscious field/action services. | Field/full-edit save migration. | Medium/high. | Field route for title; protected identity action for slug/number. |
-| `app/Http/Controllers/Scripture/BookAdminDetailsController.php` | backend | `transitional_keep_until_replaced` | Old book details write endpoint. | `routes/scripture.php`; fallback/full edit references. | Remove after description saves use generic field route everywhere. | Field/full-edit save migration. | Medium. | `PATCH /admin/schema/.../fields/description`. |
-| `app/Http/Controllers/Scripture/BookSectionAdminDetailsController.php` | backend | `transitional_keep_until_replaced` | Old book section title/details write endpoint. | `routes/scripture.php`. | Remove after Full Edit and fallback flows use Conscious field route/action. | Field/full-edit save migration. | Medium. | `PATCH /admin/schema/.../fields/title`. |
-| `app/Http/Controllers/Scripture/ChapterAdminIdentityController.php` | backend | `transitional_keep_until_replaced` | Old chapter title/slug/number write endpoint. | `routes/scripture.php`; has old full-edit referer handling. | Remove after title uses field route and slug/number use protected action. | Protected identity migration. | Medium/high. | Field route plus protected identity action. |
-| `app/Http/Controllers/Scripture/ChapterSectionAdminDetailsController.php` | backend | `transitional_keep_until_replaced` | Old chapter section title/details write endpoint. | `routes/scripture.php`. | Remove after Full Edit/fallback flows use Conscious field route/action. | Field/full-edit save migration. | Medium. | Field route plus protected identity action. |
-| `app/Http/Controllers/Scripture/VerseAdminIdentityController.php` | backend | `transitional_keep_until_replaced` | Old verse text/slug/number write endpoint. | `routes/scripture.php`. | Remove after verse text uses field route everywhere and slug/number use protected action. | Protected identity migration. | Medium/high. | Field route plus protected identity action. |
-| `app/Http/Controllers/Scripture/*AdminContentBlockController.php` | backend | `transitional_keep_until_replaced` | Old owner-specific content-block write/move/duplicate/delete endpoints. | `routes/scripture.php`; transitional full-edit/backoffice flows. | Remove after parent-aware Conscious content-block actions exist. | Content block action migration. | High. | `POST /admin/schema/.../actions/{actionKey}` content block services. |
-| `app/Http/Controllers/Scripture/BookAdminMediaAssignmentController.php` | backend | `transitional_keep_until_replaced` | Old book media assignment attach/replace/update/delete endpoints. | `routes/scripture.php`. | Remove after Conscious media assignment action/picker exists. | Media action migration. | High if media management still needed. | Conscious `MediaAction`. |
-| `app/Http/Controllers/Scripture/VerseAdminMetaController.php` | backend | `transitional_keep_until_replaced` | Old verse meta write endpoint. | `routes/scripture.php`. | Remove after verse meta becomes Conscious structured field/action group. | Verse support migration. | High for verse meta editing. | `VerseSupportAction` / schema group service. |
-| `app/Http/Controllers/Scripture/VerseAdminTranslationController.php` | backend | `transitional_keep_until_replaced` | Old verse translations CRUD endpoint. | `routes/scripture.php`. | Remove after Conscious translation support action exists. | Verse support migration. | High for translation editing. | `VerseSupportAction`. |
-| `app/Http/Controllers/Scripture/VerseAdminCommentaryController.php` | backend | `transitional_keep_until_replaced` | Old verse commentaries CRUD endpoint. | `routes/scripture.php`. | Remove after Conscious commentary support action exists. | Verse support migration. | High for commentary editing. | `VerseSupportAction`. |
 | `app/Http/Controllers/Scripture/BookAdminCreateController.php` | backend | `transitional_keep_until_replaced` | Old canonical create endpoint. | `routes/scripture.php`. | Remove after Conscious create action exists. | Create action migration. | Medium/high. | `CreateChildAction`. |
 | `app/Http/Controllers/Scripture/BookAdminDeleteController.php` | backend | `transitional_keep_until_replaced` | Old destructive delete endpoint. | `routes/scripture.php`. | Remove after Conscious delete action with policy/confirmation exists. | Delete action migration. | Medium/high. | `DeleteEntityAction`. |
 | `app/Http/Controllers/Scripture/BookSectionAdminCreateController.php` | backend | `transitional_keep_until_replaced` | Old add book section endpoint. | `routes/scripture.php`. | Remove after Conscious add-child action exists. | Create action migration. | Medium. | `CreateChildAction`. |
@@ -111,9 +162,6 @@ non-migrated flows, but are now partially replaceable later.
 | `app/Http/Controllers/Scripture/VerseAdminCreateController.php` | backend | `transitional_keep_until_replaced` | Old add verse endpoint. | `routes/scripture.php`. | Remove after Conscious add-child verse action exists. | Create action migration. | Medium. | `CreateChildAction`. |
 | `app/Http/Controllers/Scripture/VerseAdminDeleteController.php` | backend | `transitional_keep_until_replaced` | Old delete verse endpoint. | `routes/scripture.php`. | Remove after Conscious delete policy exists. | Delete action migration. | Medium/high. | `DeleteEntityAction`. |
 | `app/Http/Controllers/Scripture/AdminContextVisibilityController.php` | backend | `active_conscious_keep` | Admin visibility/session toggle, not old content editing. | `routes/scripture.php`. | Not deletion target unless visibility system changes. | None. | Medium. | Keep or move under Conscious admin context later. |
-| `app/Http/Controllers/Scripture/BookFullEditController.php` | backend | `redirect_only_legacy` | Old GET full edit route redirects to Conscious Full Edit. | `routes/scripture.php`; old route names may still be linked. | Delete route/controller after all old links are removed or route aliases are no longer needed. | Redirect cleanup phase. | Low/medium; old links may 404. | Conscious Full Edit route. |
-| `app/Http/Controllers/Scripture/ChapterFullEditController.php` | backend | `redirect_only_legacy` | Old GET full edit route redirects to Conscious Full Edit. | `routes/scripture.php`; old route names may still be linked. | Delete route/controller after old route links are gone. | Redirect cleanup phase. | Low/medium. | Conscious Full Edit route. |
-| `app/Http/Controllers/Scripture/VerseFullEditController.php` | backend | `redirect_only_legacy` | Old GET full edit route redirects to Conscious Full Edit. | `routes/scripture.php`; old route names may still be linked. | Delete route/controller after old route links are gone. | Redirect cleanup phase. | Low/medium. | Conscious Full Edit route. |
 | `app/Http/Controllers/Scripture/BookCanonicalEditController.php` | backend | `protected_legacy_workflow` | Still renders protected book canonical edit page. | `routes/scripture.php`; `BookAdminRouteContext`. | Delete after Conscious protected canonical workflow replaces it. | Protected canonical migration. | High. | Conscious protected canonical action/full edit category. |
 | `app/Http/Controllers/Scripture/PostponedAdminSurfaceController.php` | backend | `postponed_extension_placeholder` | Topic/character admin routes abort 404 but preserve route names. | topic/character postponed admin routes. | Remove after topic/character Conscious schema decisions are made. | Topic/character schema planning. | Low/medium; route-name compatibility may break. | Future Conscious schema/action modules or route removal. |
 | `app/Http/Controllers/Scripture/TopicAdminDetailsController.php` | backend | `postponed_extension_placeholder` | Old/postponed topic detail controller exists, but postponed routes use placeholder. | No active route found in current scan. | Delete or migrate when topic schema work begins after fresh route/reference audit. | Topic schema planning. | Low/uncertain. | Future topic schema field route. |
@@ -152,9 +200,6 @@ non-migrated flows, but are now partially replaceable later.
 
 | Path | Layer | Status | Reason | Current imports/references | Deletion condition | Recommended cleanup phase | Risk if deleted now | Replacement target |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `app/Http/Requests/Scripture/*ContentBlock*` non-admin base requests | requests | `uncertain_needs_manual_review` | Some are shared bases for admin content-block controllers; not all carry `Admin` in the name. | Content-block controllers/request inheritance. | Remove only after content-block action migration and fresh class-reference audit. | Content block backend migration. | High if removed casually. | Conscious content block action validation policies. |
-| `app/Http/Requests/Scripture/*Translation*` | requests | `uncertain_needs_manual_review` | Needed by old translation controllers until Conscious translation actions exist. | `VerseAdminTranslationController`. | Remove after verse translation action service. | Verse support migration. | High. | `VerseSupportAction` validation policy. |
-| `app/Http/Requests/Scripture/*Commentary*` | requests | `uncertain_needs_manual_review` | Needed by old commentary controllers until Conscious commentary actions exist. | `VerseAdminCommentaryController`. | Remove after verse commentary action service. | Verse support migration. | High. | `VerseSupportAction` validation policy. |
 | `app/Support/Scripture/Admin/*RouteContext.php` | backend | `uncertain_needs_manual_review` | Route-context helpers are used by old controllers and possibly public payload builders. | Multiple old controllers and page payloads. | Remove after backend action services own redirects/return targets. | Backend service migration. | Medium/high. | Conscious action response/navigation helpers. |
 
 ## Route Group Audit
@@ -164,34 +209,34 @@ non-migrated flows, but are now partially replaceable later.
 | `routes/web.php` `admin.schema.full-edit` | `active_conscious_keep` | Yes. | Already final read route. | Do not delete. |
 | `routes/web.php` `admin.schema.fields.update` | `active_conscious_keep` | Yes. | Already final safe field route. | Do not delete. |
 | `scripture.books.admin.store` | `transitional_keep_until_replaced` | Possibly for legacy/protected create paths. | `CreateChildAction`. | Conscious create-book action exists or route intentionally retired. |
-| `scripture.books.admin.full-edit` | `redirect_only_legacy` | Only for old links. | Conscious Full Edit GET. | No old links need route name. |
+| `scripture.books.admin.full-edit` | `deleted_big_patch_4` | No. | Conscious Full Edit GET. | Deleted after payloads moved to `admin.schema.full-edit`. |
 | `scripture.books.admin.canonical-edit` | `protected_legacy_workflow` | Yes until replacement. | Protected canonical workflow/action. | Conscious protected-canonical flow exists. |
-| `scripture.books.admin.identity.update` | `transitional_keep_until_replaced` | Yes for old fallback/full edit. | Field route plus protected identity action. | Full Edit and fallback no longer post here. |
-| `scripture.books.admin.details.update` | `transitional_keep_until_replaced` | Yes for old fallback/full edit. | Field route. | Full Edit and fallback no longer post here. |
+| `scripture.books.admin.identity.update` | `deleted_big_patch_4` | No. | Field route plus protected identity action. | Deleted after route metadata moved to Conscious routes. |
+| `scripture.books.admin.details.update` | `deleted_big_patch_4` | No. | Field route. | Deleted after route metadata moved to Conscious routes. |
 | `scripture.books.admin.destroy` | `transitional_keep_until_replaced` | Possibly. | `DeleteEntityAction`. | Conscious delete action exists or delete retired. |
-| `scripture.books.admin.content-blocks.*` | `transitional_keep_until_replaced` | Yes for transitional protected content-block maintenance. | Content block action services. | Parent-aware content-block actions exist. |
-| `scripture.books.admin.media-assignments.*` | `transitional_keep_until_replaced` | Yes for old media assignment flows. | `MediaAction`. | Conscious media action/picker exists. |
+| `scripture.books.admin.content-blocks.*` | `deleted_big_patch_5` | No. | Content block action services. | Deleted after metadata moved to Conscious actions. |
+| `scripture.books.admin.media-assignments.*` | `deleted_big_patch_5` | No. | `MediaAssignmentAction`. | Deleted after metadata moved to Conscious actions. |
 | `scripture.book-sections.admin.store` | `transitional_keep_until_replaced` | Possibly. | `CreateChildAction`. | Conscious add book-section action exists. |
-| `scripture.book-sections.admin.details.update` | `transitional_keep_until_replaced` | Yes for old fallback/full edit. | Field route. | Full Edit/fallback no longer posts here. |
+| `scripture.book-sections.admin.details.update` | `deleted_big_patch_4` | No. | Field route. | Deleted after route metadata moved to Conscious routes. |
 | `scripture.book-sections.admin.destroy` | `transitional_keep_until_replaced` | Possibly. | `DeleteEntityAction`. | Conscious delete action exists. |
-| `scripture.book-sections.admin.content-blocks.*` | `transitional_keep_until_replaced` | Possibly for intro/content-block fallback. | Content block action services. | Parent-aware content-block actions exist. |
+| `scripture.book-sections.admin.content-blocks.*` | `deleted_big_patch_5` | No. | Content block action services. | Deleted after metadata moved to Conscious actions. |
 | `scripture.chapters.admin.store` | `transitional_keep_until_replaced` | Possibly. | `CreateChildAction`. | Conscious add chapter action exists. |
-| `scripture.chapters.admin.full-edit` | `redirect_only_legacy` | Only for old links. | Conscious Full Edit GET. | No old links need route name. |
-| `scripture.chapters.admin.identity.update` | `transitional_keep_until_replaced` | Yes for old fallback/full edit. | Field route plus protected identity action. | Full Edit/fallback no longer posts here. |
+| `scripture.chapters.admin.full-edit` | `deleted_big_patch_4` | No. | Conscious Full Edit GET. | Deleted after payloads moved to `admin.schema.full-edit`. |
+| `scripture.chapters.admin.identity.update` | `deleted_big_patch_4` | No. | Field route plus protected identity action. | Deleted after route metadata moved to Conscious routes. |
 | `scripture.chapters.admin.destroy` | `transitional_keep_until_replaced` | Possibly. | `DeleteEntityAction`. | Conscious delete action exists. |
-| `scripture.chapters.admin.content-blocks.*` | `transitional_keep_until_replaced` | Yes for transitional protected content-block maintenance. | Content block action services. | Parent-aware content-block actions exist. |
+| `scripture.chapters.admin.content-blocks.*` | `deleted_big_patch_5` | No. | Content block action services. | Deleted after metadata moved to Conscious actions. |
 | `scripture.chapter-sections.admin.store` | `transitional_keep_until_replaced` | Possibly. | `CreateChildAction`. | Conscious add chapter-section action exists. |
-| `scripture.chapter-sections.admin.details.update` | `transitional_keep_until_replaced` | Yes for old fallback/full edit. | Field route. | Full Edit/fallback no longer posts here. |
+| `scripture.chapter-sections.admin.details.update` | `deleted_big_patch_4` | No. | Field route. | Deleted after route metadata moved to Conscious routes. |
 | `scripture.chapter-sections.admin.destroy` | `transitional_keep_until_replaced` | Possibly. | `DeleteEntityAction`. | Conscious delete action exists. |
-| `scripture.chapter-sections.admin.content-blocks.*` | `transitional_keep_until_replaced` | Possibly for intro/content-block fallback. | Content block action services. | Parent-aware content-block actions exist. |
+| `scripture.chapter-sections.admin.content-blocks.*` | `deleted_big_patch_5` | No. | Content block action services. | Deleted after metadata moved to Conscious actions. |
 | `scripture.chapters.verses.admin.store` | `transitional_keep_until_replaced` | Possibly. | `CreateChildAction`. | Conscious add verse action exists. |
-| `scripture.chapters.verses.admin.full-edit` | `redirect_only_legacy` | Only for old links. | Conscious Full Edit GET. | No old links need route name. |
-| `scripture.chapters.verses.admin.identity.update` | `transitional_keep_until_replaced` | Yes for old fallback/full edit. | Field route plus protected identity action. | Full Edit/fallback no longer posts here. |
+| `scripture.chapters.verses.admin.full-edit` | `deleted_big_patch_4` | No. | Conscious Full Edit GET. | Deleted after payloads moved to `admin.schema.full-edit`. |
+| `scripture.chapters.verses.admin.identity.update` | `deleted_big_patch_4` | No. | Field route plus protected identity action. | Deleted after route metadata moved to Conscious routes. |
 | `scripture.chapters.verses.admin.destroy` | `transitional_keep_until_replaced` | Possibly. | `DeleteEntityAction`. | Conscious delete action exists. |
-| `scripture.chapters.verses.admin.meta.update` | `transitional_keep_until_replaced` | Yes for verse support editing. | `VerseSupportAction`. | Conscious verse meta action exists. |
-| `scripture.chapters.verses.admin.translations.*` | `transitional_keep_until_replaced` | Yes for translation editing. | `VerseSupportAction`. | Conscious translation action exists. |
-| `scripture.chapters.verses.admin.commentaries.*` | `transitional_keep_until_replaced` | Yes for commentary editing. | `VerseSupportAction`. | Conscious commentary action exists. |
-| `scripture.chapters.verses.admin.content-blocks.*` | `transitional_keep_until_replaced` | Yes for transitional protected content-block maintenance. | Content block action services. | Parent-aware content-block actions exist. |
+| `scripture.chapters.verses.admin.meta.update` | `deleted_big_patch_5` | No. | `VerseSupportAction`. | Deleted after metadata moved to Conscious actions. |
+| `scripture.chapters.verses.admin.translations.*` | `deleted_big_patch_5` | No. | `VerseSupportAction`. | Deleted after metadata moved to Conscious actions. |
+| `scripture.chapters.verses.admin.commentaries.*` | `deleted_big_patch_5` | No. | `VerseSupportAction`. | Deleted after metadata moved to Conscious actions. |
+| `scripture.chapters.verses.admin.content-blocks.*` | `deleted_big_patch_5` | No. | Content block action services. | Deleted after metadata moved to Conscious actions. |
 | `scripture.topics.admin.*` | `postponed_extension_placeholder` | No active behavior; returns 404. | Future topic Conscious schema or removal. | Topic admin decision made. |
 | `scripture.characters.admin.*` | `postponed_extension_placeholder` | No active behavior; returns 404. | Future character Conscious schema or removal. | Character admin decision made. |
 
@@ -199,18 +244,9 @@ non-migrated flows, but are now partially replaceable later.
 
 | Path/pattern | Layer | Status | Reason | Current imports/references | Deletion condition | Replacement target |
 | --- | --- | --- | --- | --- | --- | --- |
-| `app/Http/Requests/Scripture/BookAdminIdentityUpdateRequest.php` | requests | `transitional_keep_until_replaced` | Old identity validation. | `BookAdminIdentityController`. | Protected identity action exists. | Field policy + protected identity action validation. |
-| `app/Http/Requests/Scripture/BookAdminDetailsUpdateRequest.php` | requests | `transitional_keep_until_replaced` | Old details validation. | `BookAdminDetailsController`. | Full Edit/fallback saves use field route. | Field policy. |
-| `app/Http/Requests/Scripture/BookSectionAdminDetailsUpdateRequest.php` | requests | `transitional_keep_until_replaced` | Old section title/details validation. | `BookSectionAdminDetailsController`. | Field/full edit migration complete. | Field policy. |
-| `app/Http/Requests/Scripture/ChapterAdminIdentityUpdateRequest.php` | requests | `transitional_keep_until_replaced` | Old chapter identity validation. | `ChapterAdminIdentityController`. | Protected identity action exists. | Field policy + protected identity action validation. |
-| `app/Http/Requests/Scripture/ChapterSectionAdminDetailsUpdateRequest.php` | requests | `transitional_keep_until_replaced` | Old section title/details validation. | `ChapterSectionAdminDetailsController`. | Field/full edit migration complete. | Field policy. |
-| `app/Http/Requests/Scripture/VerseAdminIdentityUpdateRequest.php` | requests | `transitional_keep_until_replaced` | Old verse identity/text validation. | `VerseAdminIdentityController`. | Verse text fully uses field route and identity action exists. | Field policy + protected identity action validation. |
+| Deleted Big Patch 4 identity/details requests | requests | `deleted_big_patch_4` | Old route-specific identity/details validation. | None after route/controller deletion. | Already deleted. | Conscious field policy + protected identity action validation. |
 | `app/Http/Requests/Scripture/*AdminStoreRequest.php` | requests | `transitional_keep_until_replaced` | Old create validation. | create controllers. | Conscious create actions exist. | `CreateChildAction` policy/request. |
-| `app/Http/Requests/Scripture/*AdminContentBlock*Request.php` and `*ContentBlock*Request.php` | requests | `transitional_keep_until_replaced` | Old content block validation. | content-block controllers. | Conscious content-block actions exist. | Content block action validation. |
-| `app/Http/Requests/Scripture/BookAdminMediaAssignment*Request.php` | requests | `transitional_keep_until_replaced` | Old media assignment validation. | `BookAdminMediaAssignmentController`. | Conscious media action exists. | Media action validation. |
-| `app/Http/Requests/Scripture/VerseAdminMetaUpdateRequest.php` | requests | `transitional_keep_until_replaced` | Old verse meta validation. | `VerseAdminMetaController`. | Verse meta action exists. | Verse support policy. |
-| `app/Http/Requests/Scripture/VerseTranslation*Request.php` | requests | `transitional_keep_until_replaced` | Old translation validation. | `VerseAdminTranslationController`. | Translation action exists. | Verse support policy. |
-| `app/Http/Requests/Scripture/VerseCommentary*Request.php` | requests | `transitional_keep_until_replaced` | Old commentary validation. | `VerseAdminCommentaryController`. | Commentary action exists. | Verse support policy. |
+| Deleted Big Patch 5 content-block/media/verse-support requests | requests | `deleted_big_patch_5` | Old route-specific validation moved into Conscious action validation and policies. | None after route/controller deletion. | Already deleted. | Conscious action policies. |
 
 ## Replacement Target Map
 
@@ -233,13 +269,14 @@ non-migrated flows, but are now partially replaceable later.
    Full Edit pages as active architecture.
 2. Move Conscious Full Edit saves to the generic field route for safe fields.
 3. Extract Conscious Full Edit payload building into backend services.
-4. Replace old identity/details controllers and requests with field policies
-   plus protected identity actions.
-5. Build Conscious action services for content blocks, media assignments, verse
-   meta, translations, and commentaries.
+4. Deleted in Big Patch 4: old identity/details controllers and requests after
+   route metadata moved to Conscious field routes and protected identity actions.
+5. Done in Big Patches 2-5: Conscious action services now own content blocks,
+   media assignments, verse meta, translations, and commentaries, and old
+   route-specific controllers/routes/requests were deleted after audit.
 6. Build protected create/delete/reorder actions with policy gates.
-7. Remove old redirect-only Full Edit controllers/routes after old links no
-   longer need route-name compatibility.
+7. Deleted in Big Patch 4: old redirect-only book/chapter/verse Full Edit
+   controllers/routes after links moved to Conscious Full Edit.
 8. Replace protected canonical edit with a Conscious protected-canonical
    workflow.
 9. Decide whether topic/character postponed admin placeholders become real
@@ -253,13 +290,13 @@ These counts are inventory rows/patterns, not a full line-by-line file count.
 | --- | ---: |
 | `active_conscious_keep` | 8 |
 | `active_cms_keep` | 1 |
-| `transitional_keep_until_replaced` | 42 |
+| `transitional_keep_until_replaced` | 23 |
 | `redirect_only_legacy` | 3 |
 | `protected_legacy_workflow` | 4 |
 | `dead_safe_to_delete` | 0 |
 | `stale_doc_update_needed` | 5 |
 | `postponed_extension_placeholder` | 6 |
-| `uncertain_needs_manual_review` | 4 |
+| `uncertain_needs_manual_review` | 1 |
 
 ## CMS Note
 

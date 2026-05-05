@@ -115,8 +115,42 @@ foundation:
     - enabled actions resolve their entity and registered handler
     - `protected_identity.update` can save `slug` and `number` for supported
       scripture entities after explicit policy and validation
-- Conscious Full Edit saves still use the old route-specific update endpoints
-  only where no safe generic field replacement exists
+- Super Conscious Backend Consolidation Big Patch 2 adds owner-scoped
+  content-block actions:
+    - `content_block.create`, `content_block.update`, and
+      `content_block.delete` are enabled for supported scripture owner entities
+    - `content_block.duplicate` and `content_block.reorder` remain disabled
+      placeholders
+    - old content-block controllers remained temporary fallback behavior at
+      that point and were later deleted in Big Patch 5
+- Super Conscious Backend Consolidation Big Patch 3 completes the
+  non-canonical/editorial/support backend action families:
+    - content-block duplicate/reorder are now enabled with owner/region policy
+    - book media assignment attach/replace/update/detach are enabled, while
+      media reorder remains disabled
+    - verse meta update and translation/commentary create/update/delete are
+      enabled, while support reorder remains disabled
+- Super Conscious Backend Consolidation Big Patch 4 migrates route metadata and
+  begins deletion readiness cleanup:
+    - safe identity/details save metadata now emits the Conscious field route
+    - book/chapter/verse Full Edit links now emit Conscious Full Edit directly
+    - content-block, book media-assignment, verse meta, translation, and
+      commentary metadata now points at Conscious action routes where backend
+      replacements exist
+    - old identity/details controllers, their request classes, and old
+      redirect-only book/chapter/verse Full Edit controllers/routes were deleted
+    - old content-block/media/verse-support controllers remained temporarily
+      for compatibility and were later deleted in Big Patch 5
+- Super Conscious Backend Consolidation Big Patch 5 completes editorial/support
+  route migration and legacy endpoint deletion:
+    - remaining content-block move metadata now targets
+      `content_block.reorder` with route-owner-scoped direction payloads
+    - old content-block, book media-assignment, verse meta, translation, and
+      commentary routes/controllers/request classes were deleted after a
+      reference audit found no app/runtime references
+    - canonical create/delete/reparent/reorder actions were not implemented
+    - protected book canonical edit, admin-context visibility, and postponed
+      topic/character placeholders remain
 - create/reorder/delete/manage controls remain outside awareness ownership for
   now
 
@@ -160,8 +194,9 @@ These are pressure points to watch, not automatic next tasks:
 
 - protected canonical edit workflow currently rendered by
   `resources/js/pages/scripture/books/canonical-edit.tsx`
-- transitional backend write endpoints documented in
-  `docs/admin/conscious-admin-backend-migration-map.md`
+- retained transitional backend write endpoints documented in
+  `docs/admin/conscious-admin-backend-migration-map.md`, especially canonical
+  create/delete and protected canonical edit
 
 Treat them as reassess-later files only. Do not reopen them automatically just
 because they are large.
@@ -190,9 +225,12 @@ The next real focus is the Super Conscious Admin Layer from the cleaned base:
 - continue replacing old backend controllers with Conscious services/actions;
   preserve old endpoints only as temporary behavior providers until replacement
   and usage audits are complete
-- keep all create/delete/reorder/reparent/media/content-block/verse-support
-  action definitions disabled until explicit services, policies, and
-  diagnostics exist
+- keep all canonical create/delete/reorder/reparent action definitions disabled
+  until explicit services, policies, and diagnostics exist
+- keep media assignment and verse-support reorder disabled until ordering
+  policy and diagnostics are ready
+- old non-canonical editorial/support controllers, old identity/details
+  controllers, and old redirect-only full-edit controllers are removed
 - continue with awareness, resolver, diagnostics, and overlay ownership before
   visible control replacement
 - keep route pages thin and data-adapter oriented

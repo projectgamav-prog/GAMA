@@ -38,12 +38,12 @@ class ChapterAdminRouteContext
 
     public function fullEditHref(): string
     {
-        return route('scripture.chapters.admin.full-edit', $this->routeParameters());
+        return ConsciousAdminRouteUrls::fullEdit('chapter', $this->chapter);
     }
 
     public function identityUpdateHref(): string
     {
-        return route('scripture.chapters.admin.identity.update', $this->routeParameters());
+        return ConsciousAdminRouteUrls::fieldUpdate('chapter', $this->chapter, 'title');
     }
 
     public function destroyHref(): string
@@ -53,51 +53,67 @@ class ChapterAdminRouteContext
 
     public function contentBlockStoreHref(): string
     {
-        // Fallback-only path for protected full-edit maintenance of chapter
-        // editorial blocks.
-        return route('scripture.chapters.admin.content-blocks.store', $this->routeParameters());
+        return ConsciousAdminRouteUrls::action('chapter', $this->chapter, 'content_block.create');
     }
 
     public function contentBlockUpdateHref(ContentBlock $contentBlock): string
     {
-        return route('scripture.chapters.admin.content-blocks.update', $this->routeParameters([
-            'contentBlock' => $contentBlock,
-        ]));
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'chapter',
+            $this->chapter,
+            'content_block.update',
+            ['content_block_id' => $contentBlock->getKey()],
+        );
     }
 
     public function contentBlockMoveUpHref(ContentBlock $contentBlock): string
     {
-        return route('scripture.chapters.admin.content-blocks.move-up', $this->routeParameters([
-            'contentBlock' => $contentBlock,
-        ]));
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'chapter',
+            $this->chapter,
+            'content_block.reorder',
+            ['content_block_id' => $contentBlock->getKey(), 'direction' => 'up'],
+        );
     }
 
     public function contentBlockMoveDownHref(ContentBlock $contentBlock): string
     {
-        return route('scripture.chapters.admin.content-blocks.move-down', $this->routeParameters([
-            'contentBlock' => $contentBlock,
-        ]));
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'chapter',
+            $this->chapter,
+            'content_block.reorder',
+            ['content_block_id' => $contentBlock->getKey(), 'direction' => 'down'],
+        );
     }
 
     public function contentBlockReorderHref(ContentBlock $contentBlock): string
     {
-        return route('scripture.chapters.admin.content-blocks.move', $this->routeParameters([
-            'contentBlock' => $contentBlock,
-        ]));
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'chapter',
+            $this->chapter,
+            'content_block.reorder',
+            ['content_block_id' => $contentBlock->getKey()],
+        );
     }
 
     public function contentBlockDuplicateHref(ContentBlock $contentBlock): string
     {
-        return route('scripture.chapters.admin.content-blocks.duplicate', $this->routeParameters([
-            'contentBlock' => $contentBlock,
-        ]));
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'chapter',
+            $this->chapter,
+            'content_block.duplicate',
+            ['content_block_id' => $contentBlock->getKey()],
+        );
     }
 
     public function contentBlockDestroyHref(ContentBlock $contentBlock): string
     {
-        return route('scripture.chapters.admin.content-blocks.destroy', $this->routeParameters([
-            'contentBlock' => $contentBlock,
-        ]));
+        return ConsciousAdminRouteUrls::actionWithQuery(
+            'chapter',
+            $this->chapter,
+            'content_block.delete',
+            ['content_block_id' => $contentBlock->getKey()],
+        );
     }
 
     /**
