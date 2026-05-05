@@ -7,6 +7,7 @@ use App\Admin\Conscious\Actions\ConsciousActionHandler;
 use App\Admin\Conscious\Policies\ConsciousVerseSupportPolicy;
 use App\Models\Verse;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -16,7 +17,7 @@ final class VerseMetaAction implements ConsciousActionHandler
         private readonly ConsciousVerseSupportPolicy $policy,
     ) {}
 
-    public function handle(Request $request, ConsciousActionDefinition $action, Model $entity): void
+    public function handle(Request $request, ConsciousActionDefinition $action, Model $entity): ?RedirectResponse
     {
         abort_unless($action->actionKey === 'verse_support.meta.update', 422);
         $this->policy->assertVerseOwner($entity);
@@ -41,6 +42,8 @@ final class VerseMetaAction implements ConsciousActionHandler
         ])->validate();
 
         $entity->verseMeta()->updateOrCreate([], $this->attributes($validated));
+
+        return null;
     }
 
     /**

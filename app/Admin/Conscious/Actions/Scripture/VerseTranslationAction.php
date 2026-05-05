@@ -8,6 +8,7 @@ use App\Admin\Conscious\Policies\ConsciousVerseSupportPolicy;
 use App\Models\Verse;
 use App\Models\VerseTranslation;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -18,7 +19,7 @@ final class VerseTranslationAction implements ConsciousActionHandler
         private readonly ConsciousVerseSupportPolicy $policy,
     ) {}
 
-    public function handle(Request $request, ConsciousActionDefinition $action, Model $entity): void
+    public function handle(Request $request, ConsciousActionDefinition $action, Model $entity): ?RedirectResponse
     {
         $this->policy->assertVerseOwner($entity);
         abort_unless($entity instanceof Verse, 422);
@@ -29,6 +30,8 @@ final class VerseTranslationAction implements ConsciousActionHandler
             'verse_support.translation.delete' => $this->delete($request, $entity),
             default => abort(422, 'This translation action is not implemented.'),
         };
+
+        return null;
     }
 
     private function create(Request $request, Verse $verse): void

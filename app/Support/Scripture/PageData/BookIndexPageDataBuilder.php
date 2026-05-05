@@ -4,6 +4,7 @@ namespace App\Support\Scripture\PageData;
 
 use App\Models\Book;
 use App\Support\Scripture\Admin\BookAdminRouteContext;
+use App\Support\Scripture\Admin\ConsciousAdminRouteUrls;
 use App\Support\Scripture\PublicScriptureData;
 use Illuminate\Support\Collection;
 
@@ -33,7 +34,7 @@ class BookIndexPageDataBuilder
     public function adminPayload(): array
     {
         return [
-            'store_href' => route('scripture.books.admin.store'),
+            'store_href' => ConsciousAdminRouteUrls::action('book', 0, 'canonical.create_book'),
         ];
     }
 

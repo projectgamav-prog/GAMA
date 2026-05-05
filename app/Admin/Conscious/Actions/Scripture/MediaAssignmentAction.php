@@ -7,6 +7,7 @@ use App\Admin\Conscious\Actions\ConsciousActionHandler;
 use App\Admin\Conscious\Policies\ConsciousMediaAssignmentPolicy;
 use App\Models\MediaAssignment;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -17,7 +18,7 @@ final class MediaAssignmentAction implements ConsciousActionHandler
         private readonly ConsciousMediaAssignmentPolicy $policy,
     ) {}
 
-    public function handle(Request $request, ConsciousActionDefinition $action, Model $entity): void
+    public function handle(Request $request, ConsciousActionDefinition $action, Model $entity): ?RedirectResponse
     {
         match ($action->actionKey) {
             'media_assignment.attach' => $this->attach($request, $entity),
@@ -26,6 +27,8 @@ final class MediaAssignmentAction implements ConsciousActionHandler
             'media_assignment.detach' => $this->detach($request, $entity),
             default => abort(422, 'This media assignment action is not implemented.'),
         };
+
+        return null;
     }
 
     private function attach(Request $request, Model $owner): void

@@ -3,6 +3,7 @@
 namespace App\Admin\Conscious\Actions;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 interface ConsciousActionHandler
@@ -11,5 +12,5 @@ interface ConsciousActionHandler
         Request $request,
         ConsciousActionDefinition $action,
         Model $entity,
-    ): void;
+    ): ?RedirectResponse;
 }

@@ -38,10 +38,7 @@ class ChapterPageAdminDataBuilder
             'full_edit_href' => $adminRouteContext->fullEditHref(),
             'identity_update_href' => $adminRouteContext->identityUpdateHref(),
             'destroy_href' => $adminRouteContext->destroyHref(),
-            'chapter_section_store_href' => route(
-                'scripture.chapter-sections.admin.store',
-                $adminRouteContext->routeParameters(),
-            ),
+            'chapter_section_store_href' => $adminRouteContext->chapterSectionStoreHref(),
             'intro_store_href' => $adminRouteContext->contentBlockStoreHref(),
             'primary_intro_block' => $primaryIntroBlock
                 ? $publicScriptureData->contentBlock($primaryIntroBlock)

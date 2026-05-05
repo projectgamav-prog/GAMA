@@ -17,8 +17,8 @@ class ConsciousSchemaActionController extends Controller
         int $id,
         string $actionKey,
     ): RedirectResponse {
-        $dispatcher->dispatch($request, $schemaFamily, $entityType, $id, $actionKey);
+        $response = $dispatcher->dispatch($request, $schemaFamily, $entityType, $id, $actionKey);
 
-        return redirect()->back(status: 303);
+        return $response ?? redirect()->back(status: 303);
     }
 }

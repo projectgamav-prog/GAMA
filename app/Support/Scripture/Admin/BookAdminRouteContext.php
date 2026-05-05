@@ -40,7 +40,12 @@ class BookAdminRouteContext
 
     public function destroyHref(): string
     {
-        return route('scripture.books.admin.destroy', $this->routeParameters());
+        return ConsciousAdminRouteUrls::action('book', $this->book, 'canonical.delete');
+    }
+
+    public function bookSectionStoreHref(): string
+    {
+        return ConsciousAdminRouteUrls::action('book', $this->book, 'canonical.create_book_section');
     }
 
     public function fullEditHref(): string

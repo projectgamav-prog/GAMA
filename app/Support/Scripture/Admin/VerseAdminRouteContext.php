@@ -56,7 +56,7 @@ class VerseAdminRouteContext
 
     public function destroyHref(): string
     {
-        return route('scripture.chapters.verses.admin.destroy', $this->routeParameters());
+        return ConsciousAdminRouteUrls::action('verse', $this->verse, 'canonical.delete');
     }
 
     public function metaUpdateHref(): string

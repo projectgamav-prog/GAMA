@@ -93,6 +93,11 @@ verse translation, and verse commentary controllers/routes/request classes after
 the remaining submit metadata moved to Conscious action URLs and a reference
 audit found no app/runtime references.
 
+Big Patch 6 moved canonical hierarchy create/delete into policy-gated
+Conscious actions and deleted the old canonical create/delete
+controllers/routes/request classes after metadata migration and reference
+audit. Protected book canonical edit remains a separate legacy workflow.
+
 ## Future Awareness Automation Helpers
 
 The backend may grow read-only or policy-bound helpers for automation, but these
@@ -131,12 +136,12 @@ table, route, or relation exists.
 
 ### `transitional_write_endpoint`
 
-- canonical scripture create/delete controllers and their request classes
+- none for active scripture write families; old route-specific write endpoints
+  have been deleted where Conscious replacements exist
 
-These endpoints are intentionally kept where no Conscious canonical action
-exists yet. Identity/details endpoints were deleted in Big Patch 4.
-Content-block, media-assignment, and verse-support endpoints were deleted in
-Big Patch 5.
+Identity/details endpoints were deleted in Big Patch 4. Content-block,
+media-assignment, and verse-support endpoints were deleted in Big Patch 5.
+Canonical create/delete endpoints were deleted in Big Patch 6.
 
 ### `deleted_old_full_edit`
 
@@ -149,9 +154,7 @@ point directly to `admin.schema.full-edit`.
 
 ### `replace_with_conscious_action`
 
-- canonical create/delete controllers
-- future add-child, delete, reorder, move/reparent, duplicate, media, relation,
-  operations
+- future reorder, move/reparent, relation, import, and export operations
 
 ### `replace_with_conscious_service`
 
@@ -173,8 +176,8 @@ not create one route per page family for new admin behavior.
 
 The action route rejects unavailable registered actions. It currently executes
 policy-gated protected identity, owner-scoped content-block actions, book media
-assignment actions, and verse support actions. It does not execute canonical
-create, canonical delete, canonical reorder, reparent, relation, import, or
+assignment actions, verse support actions, and canonical create/delete actions.
+It does not execute canonical reorder, move/reparent, relation, import, or
 export behavior yet.
 
 ## Writing Capacity Roadmap
@@ -197,14 +200,23 @@ verse Full Edit navigation.
 
 ### Create child
 
-Use registered actions such as `add_book_section`, `add_chapter`,
-`add_chapter_section`, and `add_verse`. These must pass protected canonical
-policy and parent/child schema checks.
+Canonical create now uses registered Conscious actions:
+
+- `canonical.create_book`
+- `canonical.create_book_section`
+- `canonical.create_chapter`
+- `canonical.create_chapter_section`
+- `canonical.create_verse`
+
+Parent context comes from the route entity for every child create action, and
+payload parent overrides are prohibited.
 
 ### Delete entity
 
-Use registered dangerous actions with confirmation, dependency checks, and
-protected canonical policy. Do not expose casual delete from field menus.
+Canonical delete now uses `canonical.delete` for book, book section, chapter,
+chapter section, and verse entities. It is explicitly policy-gated and delegates
+cascade behavior to `ConsciousCanonicalDeleteService`, which preserves the old
+redirect destinations.
 
 ### Reorder
 
@@ -322,6 +334,7 @@ canonical order fields remain read-only in this patch.
    and the old route-specific endpoint families were deleted after audit.
 8. Add media and verse-support reorder only after ordering policy and
    diagnostics are ready.
-9. Add create/delete/reorder actions only after policy and diagnostics exist.
+9. Done in Big Patch 6: add canonical create/delete actions after policy and
+   service boundaries existed.
 10. Delete old route-specific write controllers only when no frontend or
    fallback service path references them.

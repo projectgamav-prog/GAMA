@@ -11,6 +11,7 @@ use App\Models\Chapter;
 use App\Models\ChapterSection;
 use App\Models\Verse;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -26,7 +27,7 @@ final class ProtectedIdentityAction implements ConsciousActionHandler
         Request $request,
         ConsciousActionDefinition $action,
         Model $entity,
-    ): void {
+    ): ?RedirectResponse {
         $this->policy->assertCanUpdate($action, $entity);
 
         $payload = $request->except(['_token']);
@@ -64,6 +65,8 @@ final class ProtectedIdentityAction implements ConsciousActionHandler
         }
 
         $entity->forceFill($updates)->save();
+
+        return null;
     }
 
     /**

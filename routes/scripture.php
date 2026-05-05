@@ -1,23 +1,13 @@
 <?php
 
 use App\Http\Controllers\Scripture\AdminContextVisibilityController;
-use App\Http\Controllers\Scripture\BookAdminCreateController;
-use App\Http\Controllers\Scripture\BookAdminDeleteController;
 use App\Http\Controllers\Scripture\BookCanonicalEditController;
 use App\Http\Controllers\Scripture\BookController;
-use App\Http\Controllers\Scripture\BookSectionAdminCreateController;
-use App\Http\Controllers\Scripture\BookSectionAdminDeleteController;
-use App\Http\Controllers\Scripture\ChapterAdminCreateController;
-use App\Http\Controllers\Scripture\ChapterAdminDeleteController;
-use App\Http\Controllers\Scripture\ChapterSectionAdminCreateController;
-use App\Http\Controllers\Scripture\ChapterSectionAdminDeleteController;
 use App\Http\Controllers\Scripture\ChapterController;
 use App\Http\Controllers\Scripture\CharacterController;
 use App\Http\Controllers\Scripture\DictionaryEntryController;
 use App\Http\Controllers\Scripture\PostponedAdminSurfaceController;
 use App\Http\Controllers\Scripture\TopicController;
-use App\Http\Controllers\Scripture\VerseAdminCreateController;
-use App\Http\Controllers\Scripture\VerseAdminDeleteController;
 use App\Http\Controllers\Scripture\VerseController;
 use App\Http\Middleware\EnsureCanAccessAdminContext;
 use Illuminate\Support\Facades\Route;
@@ -101,30 +91,11 @@ Route::prefix('books')
             ->name('books.show');
 
         Route::middleware(['auth', EnsureCanAccessAdminContext::class])
-            ->prefix('admin')
-            ->name('books.admin.')
-            ->group(function () {
-                Route::post('/', [BookAdminCreateController::class, 'store'])
-                    ->name('store');
-            });
-
-        Route::middleware(['auth', EnsureCanAccessAdminContext::class])
             ->prefix('{book:slug}/admin')
             ->name('books.admin.')
             ->group(function () {
                 Route::get('canonical-edit', [BookCanonicalEditController::class, 'show'])
                     ->name('canonical-edit');
-
-                Route::delete('', [BookAdminDeleteController::class, 'destroy'])
-                    ->name('destroy');
-            });
-
-        Route::middleware(['auth', EnsureCanAccessAdminContext::class])
-            ->prefix('{book:slug}/sections/admin')
-            ->name('book-sections.admin.')
-            ->group(function () {
-                Route::post('/', [BookSectionAdminCreateController::class, 'store'])
-                    ->name('store');
             });
 
         Route::get(
@@ -132,72 +103,8 @@ Route::prefix('books')
             [ChapterController::class, 'show'],
         )->name('chapters.show');
 
-        Route::middleware(['auth', EnsureCanAccessAdminContext::class])
-            ->prefix('{book:slug}/sections/{bookSection:slug}/admin')
-            ->name('book-sections.admin.')
-            ->group(function () {
-                Route::delete('', [BookSectionAdminDeleteController::class, 'destroy'])
-                    ->name('destroy');
-            });
-
-        Route::middleware(['auth', EnsureCanAccessAdminContext::class])
-            ->prefix('{book:slug}/sections/{bookSection:slug}/chapters/admin')
-            ->name('chapters.admin.')
-            ->group(function () {
-                Route::post('/', [ChapterAdminCreateController::class, 'store'])
-                    ->name('store');
-            });
-
-        Route::middleware(['auth', EnsureCanAccessAdminContext::class])
-            ->prefix('{book:slug}/sections/{bookSection:slug}/chapters/{chapter:slug}/admin')
-            ->name('chapters.admin.')
-            ->group(function () {
-                Route::delete('', [ChapterAdminDeleteController::class, 'destroy'])
-                    ->name('destroy');
-            });
-
-        Route::middleware(['auth', EnsureCanAccessAdminContext::class])
-            ->prefix(
-                '{book:slug}/sections/{bookSection:slug}/chapters/{chapter:slug}/sections/admin',
-            )
-            ->name('chapter-sections.admin.')
-            ->group(function () {
-                Route::post('/', [ChapterSectionAdminCreateController::class, 'store'])
-                    ->name('store');
-            });
-
-        Route::middleware(['auth', EnsureCanAccessAdminContext::class])
-            ->prefix(
-                '{book:slug}/sections/{bookSection:slug}/chapters/{chapter:slug}/sections/{chapterSection:slug}/admin',
-            )
-            ->name('chapter-sections.admin.')
-            ->group(function () {
-                Route::delete('', [ChapterSectionAdminDeleteController::class, 'destroy'])
-                    ->name('destroy');
-            });
-
         Route::get(
             '{book:slug}/sections/{bookSection:slug}/chapters/{chapter:slug}/sections/{chapterSection:slug}/verses/{verse:slug}',
             [VerseController::class, 'show'],
         )->name('chapters.verses.show');
-
-        Route::middleware(['auth', EnsureCanAccessAdminContext::class])
-            ->prefix(
-                '{book:slug}/sections/{bookSection:slug}/chapters/{chapter:slug}/sections/{chapterSection:slug}/verses/admin',
-            )
-            ->name('chapters.verses.admin.')
-            ->group(function () {
-                Route::post('/', [VerseAdminCreateController::class, 'store'])
-                    ->name('store');
-            });
-
-        Route::middleware(['auth', EnsureCanAccessAdminContext::class])
-            ->prefix(
-                '{book:slug}/sections/{bookSection:slug}/chapters/{chapter:slug}/sections/{chapterSection:slug}/verses/{verse:slug}/admin',
-            )
-            ->name('chapters.verses.admin.')
-            ->group(function () {
-                Route::delete('', [VerseAdminDeleteController::class, 'destroy'])
-                    ->name('destroy');
-            });
     });

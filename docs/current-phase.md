@@ -148,9 +148,21 @@ foundation:
     - old content-block, book media-assignment, verse meta, translation, and
       commentary routes/controllers/request classes were deleted after a
       reference audit found no app/runtime references
-    - canonical create/delete/reparent/reorder actions were not implemented
+    - canonical create/delete/reparent/reorder actions were not implemented at
+      that point; create/delete were later added in Big Patch 6
     - protected book canonical edit, admin-context visibility, and postponed
       topic/character placeholders remain
+- Super Conscious Backend Consolidation Big Patch 6 migrates canonical
+  create/delete to Conscious actions:
+    - canonical create actions are enabled for book, book section, chapter,
+      chapter section, and verse creation
+    - `canonical.delete` is enabled for book, book section, chapter, chapter
+      section, and verse deletion
+    - old canonical create/delete routes, controllers, and request classes were
+      deleted after metadata migration and reference audit
+    - protected book canonical edit, admin-context visibility, and postponed
+      topic/character placeholders remain
+    - canonical reorder, move, and reparent were not implemented
 - create/reorder/delete/manage controls remain outside awareness ownership for
   now
 
@@ -194,9 +206,9 @@ These are pressure points to watch, not automatic next tasks:
 
 - protected canonical edit workflow currently rendered by
   `resources/js/pages/scripture/books/canonical-edit.tsx`
-- retained transitional backend write endpoints documented in
-  `docs/admin/conscious-admin-backend-migration-map.md`, especially canonical
-  create/delete and protected canonical edit
+- retained backend legacy/postponed endpoints documented in
+  `docs/admin/conscious-admin-backend-migration-map.md`, especially protected
+  canonical edit and topic/character placeholders
 
 Treat them as reassess-later files only. Do not reopen them automatically just
 because they are large.
@@ -225,8 +237,8 @@ The next real focus is the Super Conscious Admin Layer from the cleaned base:
 - continue replacing old backend controllers with Conscious services/actions;
   preserve old endpoints only as temporary behavior providers until replacement
   and usage audits are complete
-- keep all canonical create/delete/reorder/reparent action definitions disabled
-  until explicit services, policies, and diagnostics exist
+- keep canonical reorder/move/reparent action definitions disabled until
+  explicit services, policies, and diagnostics exist
 - keep media assignment and verse-support reorder disabled until ordering
   policy and diagnostics are ready
 - old non-canonical editorial/support controllers, old identity/details

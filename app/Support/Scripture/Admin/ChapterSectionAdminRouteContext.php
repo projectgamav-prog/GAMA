@@ -35,7 +35,7 @@ class ChapterSectionAdminRouteContext
 
     public function destroyHref(): string
     {
-        return route('scripture.chapter-sections.admin.destroy', $this->routeParameters());
+        return ConsciousAdminRouteUrls::action('chapter_section', $this->chapterSection, 'canonical.delete');
     }
 
     public function detailsUpdateHref(): string
@@ -46,6 +46,11 @@ class ChapterSectionAdminRouteContext
     public function contentBlockStoreHref(): string
     {
         return ConsciousAdminRouteUrls::action('chapter_section', $this->chapterSection, 'content_block.create');
+    }
+
+    public function verseStoreHref(): string
+    {
+        return ConsciousAdminRouteUrls::action('chapter_section', $this->chapterSection, 'canonical.create_verse');
     }
 
     public function contentBlockUpdateHref(ContentBlock $contentBlock): string

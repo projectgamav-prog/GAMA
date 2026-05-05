@@ -3,6 +3,8 @@
 namespace App\Admin\Conscious\Actions;
 
 use App\Admin\Conscious\Actions\Scripture\ContentBlockAction;
+use App\Admin\Conscious\Actions\Scripture\CanonicalCreateAction;
+use App\Admin\Conscious\Actions\Scripture\CanonicalDeleteAction;
 use App\Admin\Conscious\Actions\Scripture\MediaAssignmentAction;
 use App\Admin\Conscious\Actions\Scripture\ProtectedIdentityAction;
 use App\Admin\Conscious\Actions\Scripture\VerseCommentaryAction;
@@ -35,6 +37,10 @@ final class ScriptureConsciousActionDefinitions
         foreach ($entityTypes as $entityType => $modelClass) {
             if ($entityType !== 'content_block') {
                 $actions[] = self::protectedIdentity($entityType, $modelClass);
+                $actions = [
+                    ...$actions,
+                    ...self::canonicalActions($entityType, $modelClass),
+                ];
                 $actions[] = self::contentBlock($entityType, $modelClass, 'content_block.create', 'Create content block', 'create', true);
                 $actions[] = self::contentBlock($entityType, $modelClass, 'content_block.update', 'Update content block', 'update', true);
                 $actions[] = self::contentBlock($entityType, $modelClass, 'content_block.delete', 'Delete content block', 'delete', true);
@@ -62,13 +68,89 @@ final class ScriptureConsciousActionDefinitions
                 $actions[] = self::verseSupport($entityType, $modelClass, 'verse_support.commentary.reorder', 'Reorder verse commentaries', 'commentary_reorder', VerseCommentaryAction::class, false);
             }
 
-            $actions[] = self::unavailable($entityType, $modelClass, 'create_child', 'Create child', 'create');
-            $actions[] = self::unavailable($entityType, $modelClass, 'delete', 'Delete', 'delete');
-            $actions[] = self::unavailable($entityType, $modelClass, 'reorder', 'Reorder', 'reorder');
-            $actions[] = self::unavailable($entityType, $modelClass, 'reparent', 'Reparent', 'reparent');
+            $actions[] = self::unavailable($entityType, $modelClass, 'canonical.reorder', 'Reorder canonical hierarchy', 'reorder');
+            $actions[] = self::unavailable($entityType, $modelClass, 'canonical.move', 'Move canonical entity', 'move');
+            $actions[] = self::unavailable($entityType, $modelClass, 'canonical.reparent', 'Reparent canonical entity', 'reparent');
         }
 
         return $actions;
+    }
+
+    /**
+     * @param  class-string<\Illuminate\Database\Eloquent\Model>  $modelClass
+     * @return list<ConsciousActionDefinition>
+     */
+    private static function canonicalActions(
+        string $entityType,
+        string $modelClass,
+    ): array {
+        $actions = [];
+
+        $createAction = match ($entityType) {
+            'book' => 'canonical.create_book_section',
+            'book_section' => 'canonical.create_chapter',
+            'chapter' => 'canonical.create_chapter_section',
+            'chapter_section' => 'canonical.create_verse',
+            default => null,
+        };
+
+        if ($entityType === 'book') {
+            $actions[] = self::canonicalCreate(
+                $entityType,
+                $modelClass,
+                'canonical.create_book',
+                'Create book',
+            );
+        }
+
+        if ($createAction !== null) {
+            $actions[] = self::canonicalCreate(
+                $entityType,
+                $modelClass,
+                $createAction,
+                'Create canonical child',
+            );
+        }
+
+        $actions[] = new ConsciousActionDefinition(
+            schemaFamily: 'scripture',
+            entityType: $entityType,
+            modelClass: $modelClass,
+            actionKey: 'canonical.delete',
+            label: 'Delete canonical entity',
+            actionKind: 'delete',
+            riskLevel: 'dangerous',
+            enabled: true,
+            requiresExplicitPolicy: true,
+            policyKey: 'canonical_hierarchy_policy',
+            handlerClass: CanonicalDeleteAction::class,
+        );
+
+        return $actions;
+    }
+
+    /**
+     * @param  class-string<\Illuminate\Database\Eloquent\Model>  $modelClass
+     */
+    private static function canonicalCreate(
+        string $entityType,
+        string $modelClass,
+        string $actionKey,
+        string $label,
+    ): ConsciousActionDefinition {
+        return new ConsciousActionDefinition(
+            schemaFamily: 'scripture',
+            entityType: $entityType,
+            modelClass: $modelClass,
+            actionKey: $actionKey,
+            label: $label,
+            actionKind: 'create',
+            riskLevel: 'protected',
+            enabled: true,
+            requiresExplicitPolicy: true,
+            policyKey: 'canonical_hierarchy_policy',
+            handlerClass: CanonicalCreateAction::class,
+        );
     }
 
     /**

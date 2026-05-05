@@ -31,10 +31,7 @@ class BookShowPageDataBuilder
             'full_edit_href' => $adminRouteContext->fullEditHref(),
             'canonical_edit_href' => $adminRouteContext->canonicalEditHref(),
             'destroy_href' => $adminRouteContext->destroyHref(),
-            'book_section_store_href' => route(
-                'scripture.book-sections.admin.store',
-                ['book' => $book],
-            ),
+            'book_section_store_href' => $adminRouteContext->bookSectionStoreHref(),
         ];
 
         if (! $includeMediaManagement) {
@@ -248,13 +245,7 @@ class BookShowPageDataBuilder
                 : null,
             'intro_block_types' => $adminRouteContext->contentBlockTypes(),
             'intro_default_region' => $adminRouteContext->defaultContentBlockRegion(),
-            'child_store_href' => route(
-                'scripture.chapters.admin.store',
-                [
-                    'book' => $book,
-                    'bookSection' => $bookSection,
-                ],
-            ),
+            'child_store_href' => $adminRouteContext->chapterStoreHref(),
         ];
     }
 }

@@ -146,9 +146,8 @@ The shared public frame, structured header navigation, structured footer system,
   part of scripture legacy module cleanup
 - use `docs/admin/super-conscious-admin-cleanup-audit.md` and
   `docs/admin/super-conscious-backend-organization.md` before deleting backend
-  admin code; retained old canonical/postponed controllers remain transitional
-  endpoints until Conscious services replace them and usage audits prove
-  deletion safety
+  admin code; retained protected-canonical/postponed controllers remain until
+  Conscious services replace them and usage audits prove deletion safety
 - old book/chapter/verse route-specific Full Edit GET routes are deleted; do
   not reintroduce old page-specific full-edit React pages as primary admin
   surfaces
@@ -162,9 +161,9 @@ The shared public frame, structured header navigation, structured footer system,
 - backend scripture admin controllers are classified; old identity/details and
   redirect-only Full Edit controllers are already deleted; old content-block,
   media-assignment, verse meta, translation, and commentary controllers/routes
-  are also deleted after Conscious action migration and reference audit; only
-  canonical create/delete, protected canonical, admin-context visibility, and
-  postponed controllers remain
+  are also deleted after Conscious action migration and reference audit; old
+  canonical create/delete controllers/routes are deleted after Big Patch 6; only
+  protected canonical, admin-context visibility, and postponed controllers remain
 - protected canonical edit remains legacy until a Conscious protected-canonical
   workflow exists; do not delete its backend/frontend path blindly
 - keep CMS exposure generic and supplementary on non-CMS pages

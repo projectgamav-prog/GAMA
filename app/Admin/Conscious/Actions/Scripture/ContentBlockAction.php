@@ -8,6 +8,7 @@ use App\Admin\Conscious\Policies\ConsciousContentBlockPolicy;
 use App\Models\ContentBlock;
 use App\Support\Scripture\Admin\RegisteredContentBlockOrdering;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -24,7 +25,7 @@ final class ContentBlockAction implements ConsciousActionHandler
         Request $request,
         ConsciousActionDefinition $action,
         Model $entity,
-    ): void {
+    ): ?RedirectResponse {
         match ($action->actionKey) {
             'content_block.create' => $this->create($request, $entity),
             'content_block.update' => $this->update($request, $entity),
@@ -33,6 +34,8 @@ final class ContentBlockAction implements ConsciousActionHandler
             'content_block.reorder' => $this->reorder($request, $entity),
             default => abort(422, 'This content block action is not implemented.'),
         };
+
+        return null;
     }
 
     private function create(Request $request, Model $owner): void

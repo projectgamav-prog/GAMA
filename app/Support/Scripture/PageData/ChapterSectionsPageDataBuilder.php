@@ -229,15 +229,12 @@ class ChapterSectionsPageDataBuilder
             'meta_update_href' => $adminRouteContext->metaUpdateHref(),
             'full_edit_href' => $adminRouteContext->fullEditHref(),
             'destroy_href' => $adminRouteContext->destroyHref(),
-            'nearby_create_href' => route(
-                'scripture.chapters.verses.admin.store',
-                [
-                    'book' => $book,
-                    'bookSection' => $bookSection,
-                    'chapter' => $chapter,
-                    'chapterSection' => $chapterSection,
-                ],
-            ),
+            'nearby_create_href' => (new ChapterSectionAdminRouteContext(
+                $book,
+                $bookSection,
+                $chapter,
+                $chapterSection,
+            ))->verseStoreHref(),
             'intro_store_href' => $adminRouteContext->contentBlockStoreHref(),
             'primary_intro_block' => $primaryIntroBlock
                 ? $publicScriptureData->contentBlock($primaryIntroBlock)
@@ -318,15 +315,7 @@ class ChapterSectionsPageDataBuilder
                 : null,
             'intro_block_types' => $adminRouteContext->contentBlockTypes(),
             'intro_default_region' => $adminRouteContext->defaultContentBlockRegion(),
-            'child_store_href' => route(
-                'scripture.chapters.verses.admin.store',
-                [
-                    'book' => $book,
-                    'bookSection' => $bookSection,
-                    'chapter' => $chapter,
-                    'chapterSection' => $chapterSection,
-                ],
-            ),
+            'child_store_href' => $adminRouteContext->verseStoreHref(),
         ];
     }
 }

@@ -48,7 +48,12 @@ class ChapterAdminRouteContext
 
     public function destroyHref(): string
     {
-        return route('scripture.chapters.admin.destroy', $this->routeParameters());
+        return ConsciousAdminRouteUrls::action('chapter', $this->chapter, 'canonical.delete');
+    }
+
+    public function chapterSectionStoreHref(): string
+    {
+        return ConsciousAdminRouteUrls::action('chapter', $this->chapter, 'canonical.create_chapter_section');
     }
 
     public function contentBlockStoreHref(): string

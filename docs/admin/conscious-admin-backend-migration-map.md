@@ -30,7 +30,7 @@ without a separate implementation task and fresh usage check.
 
 | Route | Controller | Classification | Notes |
 | --- | --- | --- | --- |
-| `POST /admin/schema/{schemaFamily}/{entityType}/{id}/actions/{actionKey}` | `Admin\ConsciousSchemaActionController` -> `ConsciousActionDispatcher` | keep | Final action route shape exists. Unknown or unavailable actions reject safely. `protected_identity.update` is enabled for supported scripture entities; create/delete/reorder/reparent placeholders remain disabled. |
+| `POST /admin/schema/{schemaFamily}/{entityType}/{id}/actions/{actionKey}` | `Admin\ConsciousSchemaActionController` -> `ConsciousActionDispatcher` | keep | Final action route shape exists. Unknown or unavailable actions reject safely. Protected identity, editorial/support, and canonical create/delete actions are enabled only through explicit policy; reorder/move/reparent placeholders remain disabled. |
 
 Phase 1 backend services:
 
@@ -174,8 +174,6 @@ Deleted after audit:
 
 Retained:
 
-- canonical create/delete routes because Conscious canonical actions do not
-  exist yet
 - protected book canonical edit workflow
 - topic/character postponed admin routes
 
@@ -198,8 +196,36 @@ Deleted after audit:
 
 Retained:
 
-- canonical create/delete routes because Conscious canonical actions do not
-  exist yet
+- protected book canonical edit workflow
+- admin-context visibility route
+- topic/character postponed admin routes
+
+## Canonical Hierarchy Action Migration Big Patch 6
+
+Canonical create/delete metadata now emits Conscious action URLs:
+
+- `canonical.create_book`
+- `canonical.create_book_section`
+- `canonical.create_chapter`
+- `canonical.create_chapter_section`
+- `canonical.create_verse`
+- `canonical.delete`
+
+Parent context comes from the route entity. Payloads cannot provide canonical
+parent ids or owner/entity override keys. `canonical.delete` delegates cascade
+behavior to `ConsciousCanonicalDeleteService` and preserves old redirect
+targets: book delete returns to the book index; book section and chapter delete
+return to the book page; chapter section and verse delete return to the chapter
+page.
+
+Deleted after audit:
+
+- old canonical create/delete routes
+- old canonical create/delete controllers
+- old canonical create request classes
+
+Retained:
+
 - protected book canonical edit workflow
 - admin-context visibility route
 - topic/character postponed admin routes
@@ -234,16 +260,16 @@ field route; protected slug/number saves remain action-gated.
 
 | Route name | Controller | Classification | Notes |
 | --- | --- | --- | --- |
-| `scripture.books.admin.store` | `BookAdminCreateController@store` | replace soon | Canonical create flow should become a schema action with protected hierarchy rules. |
-| `scripture.books.admin.destroy` | `BookAdminDeleteController@destroy` | replace soon | Destructive canonical action; keep disabled from public inline controls until resolver/action policy is complete. |
-| `scripture.book-sections.admin.store` | `BookSectionAdminCreateController@store` | replace soon | Future Conscious add-child action with canonical constraints. |
-| `scripture.book-sections.admin.destroy` | `BookSectionAdminDeleteController@destroy` | replace soon | Protected destructive structure action. |
-| `scripture.chapters.admin.store` | `ChapterAdminCreateController@store` | replace soon | Future Conscious add-child action. |
-| `scripture.chapters.admin.destroy` | `ChapterAdminDeleteController@destroy` | replace soon | Protected destructive structure action. |
-| `scripture.chapter-sections.admin.store` | `ChapterSectionAdminCreateController@store` | replace soon | Future Conscious add-child action. |
-| `scripture.chapter-sections.admin.destroy` | `ChapterSectionAdminDeleteController@destroy` | replace soon | Protected destructive structure action. |
-| `scripture.chapters.verses.admin.store` | `VerseAdminCreateController@store` | replace soon | Future Conscious add-child action. |
-| `scripture.chapters.verses.admin.destroy` | `VerseAdminDeleteController@destroy` | replace soon | Protected destructive structure action. |
+| `scripture.books.admin.store` | deleted | deleted | Metadata uses `canonical.create_book`. |
+| `scripture.books.admin.destroy` | deleted | deleted | Metadata uses `canonical.delete`. |
+| `scripture.book-sections.admin.store` | deleted | deleted | Metadata uses `canonical.create_book_section`. |
+| `scripture.book-sections.admin.destroy` | deleted | deleted | Metadata uses `canonical.delete`. |
+| `scripture.chapters.admin.store` | deleted | deleted | Metadata uses `canonical.create_chapter`. |
+| `scripture.chapters.admin.destroy` | deleted | deleted | Metadata uses `canonical.delete`. |
+| `scripture.chapter-sections.admin.store` | deleted | deleted | Metadata uses `canonical.create_chapter_section`. |
+| `scripture.chapter-sections.admin.destroy` | deleted | deleted | Metadata uses `canonical.delete`. |
+| `scripture.chapters.verses.admin.store` | deleted | deleted | Metadata uses `canonical.create_verse`. |
+| `scripture.chapters.verses.admin.destroy` | deleted | deleted | Metadata uses `canonical.delete`. |
 
 ## Content Block Writes
 
@@ -413,7 +439,9 @@ them as protected or route them to an advanced structured action later.
    have Conscious verse-owned action services; support reorder remains disabled.
 11. Done in Big Patch 5: remove old content-block/media/verse-support
    routes/controllers/requests after submit metadata migration and audit.
-12. Add canonical create/delete/reorder action services with protected policy
-   gates.
-13. Re-audit old route-specific controllers and remove or redirect only after
+12. Done in Big Patch 6: add canonical create/delete action services with
+   protected policy gates and delete old canonical route-specific endpoints.
+13. Add canonical reorder/move/reparent only after explicit policies,
+   diagnostics, and UI contracts exist.
+14. Re-audit old route-specific controllers and remove or redirect only after
    no frontend payloads reference them.

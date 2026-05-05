@@ -415,7 +415,8 @@ After completing a task:
     - old identity/details controllers, old identity/details request classes,
       and old redirect-only book/chapter/verse Full Edit controllers/routes
       were deleted after reference audit
-    - canonical create/delete/reorder/reparent actions were not implemented
+    - canonical create/delete/reorder/reparent actions were not implemented at
+      that point; create/delete were later added in Big Patch 6
     - content-block, media-assignment, and verse-support old controllers/routes
       remain only as compatibility/non-migrated submit-method fallbacks
 - Super Conscious Backend Consolidation Big Patch 5 is now active:
@@ -430,6 +431,20 @@ After completing a task:
       and postponed topic/character placeholder routes
     - CMS was untouched and canonical create/delete/reparent/reorder actions
       were not implemented
+- Super Conscious Backend Consolidation Big Patch 6 is now active:
+    - canonical create actions now cover book, book section, chapter, chapter
+      section, and verse creation through the Conscious action route
+    - `canonical.delete` now covers book, book section, chapter, chapter
+      section, and verse deletion through a focused delete service that
+      preserves old redirect targets
+    - parent context is inferred from the route entity and payload parent/owner
+      overrides are prohibited
+    - old canonical create/delete routes, controllers, and request classes were
+      deleted after reference audit
+    - protected book canonical edit, admin-context visibility, and postponed
+      topic/character placeholder routes remain
+    - CMS was untouched and canonical reorder/move/reparent actions were not
+      implemented
 - The legacy purge / renderer coverage pass removed the old
   `AdminModuleHost` intro surface from the reusable book library card renderer:
     - book library/card titles now render through `ScriptureBookTitleDisplay`
