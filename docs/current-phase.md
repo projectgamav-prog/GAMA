@@ -150,8 +150,9 @@ foundation:
       reference audit found no app/runtime references
     - canonical create/delete/reparent/reorder actions were not implemented at
       that point; create/delete were later added in Big Patch 6
-    - protected book canonical edit, admin-context visibility, and postponed
-      topic/character placeholders remain
+    - at that point protected book canonical edit, admin-context visibility,
+      and postponed topic/character placeholders remained; protected canonical
+      edit was later removed in Big Patch 7
 - Super Conscious Backend Consolidation Big Patch 6 migrates canonical
   create/delete to Conscious actions:
     - canonical create actions are enabled for book, book section, chapter,
@@ -160,9 +161,21 @@ foundation:
       section, and verse deletion
     - old canonical create/delete routes, controllers, and request classes were
       deleted after metadata migration and reference audit
-    - protected book canonical edit, admin-context visibility, and postponed
-      topic/character placeholders remain
+    - at that point protected book canonical edit, admin-context visibility,
+      and postponed topic/character placeholders remained; protected canonical
+      edit was later removed in Big Patch 7
     - canonical reorder, move, and reparent were not implemented
+- Super Conscious Backend/UI Alignment Big Patch 7 retires protected book
+  canonical edit and syncs action metadata:
+    - `BookCanonicalEditController`, the `scripture.books.admin.canonical-edit`
+      route, the old canonical edit React page, and canonical-edit-only helper
+      components were deleted after reference audit
+    - Conscious Full Edit is now the book protected identity path:
+      `title`/`description` save through the generic field route and
+      `slug`/`number` save through `protected_identity.update`
+    - the frontend action registry now reflects backend availability while
+      keeping actions hidden from surface menus until safe UI workflows exist
+    - CMS was untouched and no visible destructive controls were added
 - create/reorder/delete/manage controls remain outside awareness ownership for
   now
 
@@ -204,11 +217,11 @@ Broad cleanup should now pause in these areas.
 
 These are pressure points to watch, not automatic next tasks:
 
-- protected canonical edit workflow currently rendered by
-  `resources/js/pages/scripture/books/canonical-edit.tsx`
 - retained backend legacy/postponed endpoints documented in
-  `docs/admin/conscious-admin-backend-migration-map.md`, especially protected
-  canonical edit and topic/character placeholders
+  `docs/admin/conscious-admin-backend-migration-map.md`, especially
+  topic/character placeholders and admin-context visibility
+- frontend awareness helper drift where renderer-owned surfaces can eventually
+  replace transitional page-family adapters
 
 Treat them as reassess-later files only. Do not reopen them automatically just
 because they are large.

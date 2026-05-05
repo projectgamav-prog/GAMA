@@ -174,7 +174,8 @@ Deleted after audit:
 
 Retained:
 
-- protected book canonical edit workflow
+- protected book canonical edit workflow at that point; later removed in Big
+  Patch 7
 - topic/character postponed admin routes
 
 ## Editorial / Support Route Migration Big Patch 5
@@ -196,7 +197,34 @@ Deleted after audit:
 
 Retained:
 
-- protected book canonical edit workflow
+- protected book canonical edit workflow at that point; later removed in Big
+  Patch 7
+- admin-context visibility route
+- topic/character postponed admin routes
+
+## Backend/UI Alignment Big Patch 7
+
+The protected book canonical edit workflow was removed after audit instead of
+patched. Active book protected identity editing now goes through Conscious Full
+Edit:
+
+- `books.title` and `books.description` save through the generic field route.
+- `books.slug` and `books.number` save through `protected_identity.update`.
+- `canonical_edit_href` / `admin_canonical_edit_href` payload fields were
+  removed.
+- `resources/js/admin/actions/book-schema-actions.ts` now lists the backend
+  action families that exist, while keeping action menu exposure separate from
+  backend availability.
+
+Deleted after audit:
+
+- `BookCanonicalEditController`
+- `resources/js/pages/scripture/books/canonical-edit.tsx`
+- canonical-edit-only helper components
+- `scripture.books.admin.canonical-edit`
+
+Retained:
+
 - admin-context visibility route
 - topic/character postponed admin routes
 
@@ -226,7 +254,8 @@ Deleted after audit:
 
 Retained:
 
-- protected book canonical edit workflow
+- protected book canonical edit workflow at that point; later removed in Big
+  Patch 7
 - admin-context visibility route
 - topic/character postponed admin routes
 
@@ -250,7 +279,7 @@ field route; protected slug/number saves remain action-gated.
 | Route name | Method/path | Controller | Classification | Notes |
 | --- | --- | --- | --- | --- |
 | `scripture.books.admin.full-edit` | `GET books/{book}/admin/full-edit` | deleted | deleted | App links now use Conscious Full Edit directly. |
-| `scripture.books.admin.canonical-edit` | `GET books/{book}/admin/canonical-edit` | `BookCanonicalEditController@show` | replace soon | Canonical identity behavior should become a protected Conscious Admin workflow. |
+| `scripture.books.admin.canonical-edit` | `GET books/{book}/admin/canonical-edit` | deleted | deleted | Book protected identity now uses Conscious Full Edit plus `protected_identity.update`. |
 | `scripture.chapters.admin.full-edit` | `GET .../chapters/{chapter}/admin/full-edit` | deleted | deleted | App links now use Conscious Full Edit directly. |
 | `scripture.chapters.verses.admin.full-edit` | `GET .../verses/{verse}/admin/full-edit` | deleted | deleted | App links now use Conscious Full Edit directly. |
 | `scripture.characters.admin.full-edit` | `GET characters/{character}/admin/full-edit` | `PostponedAdminSurfaceController` | unknown | Postponed proof surface. No active Conscious schema module yet. |
@@ -441,7 +470,10 @@ them as protected or route them to an advanced structured action later.
    routes/controllers/requests after submit metadata migration and audit.
 12. Done in Big Patch 6: add canonical create/delete action services with
    protected policy gates and delete old canonical route-specific endpoints.
-13. Add canonical reorder/move/reparent only after explicit policies,
+13. Done in Big Patch 7: delete protected book canonical edit after Conscious
+   Full Edit became the protected identity path and sync frontend action
+   metadata with backend action availability.
+14. Add canonical reorder/move/reparent only after explicit policies,
    diagnostics, and UI contracts exist.
-14. Re-audit old route-specific controllers and remove or redirect only after
+15. Re-audit old route-specific controllers and remove or redirect only after
    no frontend payloads reference them.

@@ -59,9 +59,10 @@ Also tell Codex:
 - the broad cleanup/refactor wave is largely complete
 - do not resume broad cleanup by default
 - reopen cleanup only when a narrow seam is clearly justified
-- protected canonical edit and transitional backend write endpoints are the
-  remaining legacy pressure points; do not recreate deleted route-specific Full
-  Edit React pages
+- postponed topic/character placeholders, admin visibility, and transitional
+  frontend awareness helpers are the remaining legacy pressure points; do not
+  recreate deleted route-specific Full Edit or protected canonical edit React
+  pages
 
 ## Immediate focus
 
@@ -104,10 +105,11 @@ The shared public frame, structured header navigation, structured footer system,
 - schema-aware public fields now expose routine actions through one local
   Conscious Admin three-dot menu; keep expanding that menu only with real
   supported actions, not placeholder delete/add/reorder/media/relation entries
-- use `docs/admin/book-schema-conscious-controls.md` as the control/action
-  catalog before adding any new book-schema menu actions; actions marked
-  `needs_conscious_backend`, `old_endpoint_only`, or `future` must stay hidden
-  from the Conscious menu until their backend service and policy are real
+- use `docs/admin/book-schema-conscious-controls.md` and
+  `resources/js/admin/actions/book-schema-actions.ts` as the control/action
+  catalog before adding any new book-schema menu actions; backend-available
+  actions can stay `showInSurfaceMenu: false` until a safe frontend workflow
+  exists
 - use the inert TypeScript action registry in `resources/js/admin/actions/` as
   the extension seam for future menu actions; do not hardcode new action buttons
   into schema field components
@@ -146,8 +148,8 @@ The shared public frame, structured header navigation, structured footer system,
   part of scripture legacy module cleanup
 - use `docs/admin/super-conscious-admin-cleanup-audit.md` and
   `docs/admin/super-conscious-backend-organization.md` before deleting backend
-  admin code; retained protected-canonical/postponed controllers remain until
-  Conscious services replace them and usage audits prove deletion safety
+  admin code; retained postponed controllers remain until Conscious services
+  replace them and usage audits prove deletion safety
 - old book/chapter/verse route-specific Full Edit GET routes are deleted; do
   not reintroduce old page-specific full-edit React pages as primary admin
   surfaces
@@ -162,10 +164,9 @@ The shared public frame, structured header navigation, structured footer system,
   redirect-only Full Edit controllers are already deleted; old content-block,
   media-assignment, verse meta, translation, and commentary controllers/routes
   are also deleted after Conscious action migration and reference audit; old
-  canonical create/delete controllers/routes are deleted after Big Patch 6; only
-  protected canonical, admin-context visibility, and postponed controllers remain
-- protected canonical edit remains legacy until a Conscious protected-canonical
-  workflow exists; do not delete its backend/frontend path blindly
+  canonical create/delete controllers/routes are deleted after Big Patch 6; the
+  protected canonical edit path was deleted in Big Patch 7; only admin-context
+  visibility and postponed controllers remain
 - keep CMS exposure generic and supplementary on non-CMS pages
 - keep the active inline editors on the real page instead of detouring back into workspace-first habits
 - preserve the shared header/footer shell instead of reintroducing page-local public chrome
@@ -197,12 +198,13 @@ universal rendering progress.
     - `scripts/scripture-admin-inline-smoke.mjs`
 - extend it only where it materially protects the active public/admin editing path
 - keep ignoring retired public scripture block-authoring paths while auditing edit behavior
-- leave canonical full-edit and protected schema editing intact where no safe replacement exists yet
+- leave Conscious Full Edit and protected schema editing intact where no safe replacement exists yet
 
 Reassess-later pressure points only:
 
-- protected canonical edit workflow
-- transitional backend scripture write endpoints
+- postponed topic/character placeholders
+- admin-context visibility placement
+- transitional frontend awareness helpers
 - revisit them only if a narrow, behavior-preserving Conscious replacement is
   clearly worth taking
 

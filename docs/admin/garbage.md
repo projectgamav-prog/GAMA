@@ -49,7 +49,8 @@ Old identity/details update routes, redirect-only book/chapter/verse Full Edit
 routes, and their controller/request classes were deleted after a reference
 audit showed app payloads no longer needed them. Content-block, media,
 verse-support, canonical create/delete, protected canonical edit, and
-topic/character postponed routes remain.
+topic/character postponed routes remained at that point; later patches removed
+those scripture write/protected canonical paths.
 
 Big Patch 5 note: remaining content-block move metadata now uses the Conscious
 `content_block.reorder` action with route-owner context. A fresh reference audit
@@ -57,13 +58,21 @@ found no app/runtime references to the old content-block, book media assignment,
 or verse-support submit routes after generated helper exclusions. Those old
 route groups, controllers, and route-specific request classes were deleted.
 Canonical create/delete, protected book canonical edit, admin-context
-visibility, and postponed topic/character placeholder routes remain.
+visibility, and postponed topic/character placeholder routes remained at that
+point; canonical create/delete and protected canonical edit were later removed.
 
 Big Patch 6 note: canonical create/delete behavior now runs through
 policy-gated Conscious actions. Create parent context comes from the route
 entity, payload parent overrides are prohibited, and delete redirects preserve
 the old destinations. Old canonical create/delete routes, controllers, and
 request classes were deleted after reference audit.
+
+Big Patch 7 note: the protected book canonical edit workflow was retired
+instead of patched. Conscious Full Edit is now the protected canonical identity
+path: book `title` and `description` save through the generic field route, while
+book `slug` and `number` save through `protected_identity.update`. The frontend
+action registry now reflects backend action availability while keeping backend
+actions hidden from visible menus until safe workflows exist.
 
 ## Status Legend
 
@@ -136,6 +145,17 @@ request classes were deleted after reference audit.
 | `scripture.*.admin.store` canonical create routes | routes | `transitional_keep_until_replaced` | No app/runtime references remained after metadata migration. | Conscious canonical create action keys. |
 | `scripture.*.admin.destroy` canonical delete routes | routes | `transitional_keep_until_replaced` | No app/runtime references remained after metadata migration. | `canonical.delete`. |
 
+### Deleted In Backend/UI Alignment Big Patch 7
+
+| Path/route/payload | Layer | Previous status | Reason | Replacement target |
+| --- | --- | --- | --- | --- |
+| `app/Http/Controllers/Scripture/BookCanonicalEditController.php` | backend | `protected_legacy_workflow` | The old page no longer had a correct protected `slug`/`number` save path and Conscious Full Edit already carries the protected identity workflow. | `GET /admin/schema/scripture/book/{id}/full-edit`; `protected_identity.update`. |
+| `resources/js/pages/scripture/books/canonical-edit.tsx` | frontend | `protected_legacy_workflow` | Retired rather than patched; Conscious Full Edit is the canonical identity editing path. | Conscious Full Edit shell. |
+| `resources/js/components/scripture/scripture-admin-field-meta.tsx` | frontend | `protected_legacy_workflow` | Used only by the deleted canonical edit page. | Conscious Full Edit field metadata. |
+| `resources/js/components/scripture/scripture-admin-method-family-grid.tsx` | frontend | `protected_legacy_workflow` | Used only by the deleted canonical edit page. | Conscious Full Edit/action metadata. |
+| `scripture.books.admin.canonical-edit` | routes | `protected_legacy_workflow` | No active runtime references remained after book payload fields were removed. | `admin.schema.full-edit` for `scripture/book`. |
+| `canonical_edit_href` / `admin_canonical_edit_href` payload fields | payload | `protected_legacy_workflow` | Old payload links pointed at the retired workflow. | `full_edit_href` / Conscious Full Edit URL. |
+
 ### 2. Keep Until Conscious Replacement Exists
 
 | Path | Layer | Status | Reason | Current imports/references | Deletion condition | Recommended cleanup phase | Risk if deleted now | Replacement target |
@@ -155,9 +175,6 @@ request classes were deleted after reference audit.
 | `resources/js/admin/surfaces/scripture/chapters/surface-resolvers.ts` | frontend | `transitional_keep_until_replaced` | Builds chapter header/intro/action surfaces; moved out of old integration path. | `resources/js/pages/scripture/chapters/show.tsx`. | Replace with renderer-owned schema/content surface emission. | Renderer surface coverage phase. | Medium; chapter intro/header metadata may disappear. | Renderer-level schema/content surface contracts. |
 | `resources/js/admin/surfaces/scripture/verses/surface-resolvers.ts` | frontend | `transitional_keep_until_replaced` | Builds verse header/intro/meta/relation/text surfaces; moved out of old integration path. | `resources/js/pages/scripture/chapters/verses/show.tsx`; verse row helpers may use exported functions later. | Replace with renderer-owned schema/content/relation surface emission. | Renderer surface coverage phase. | Medium/high; verse text/support surfaces may lose metadata. | Renderer-level schema/content/relation surface contracts. |
 | `resources/js/admin/surfaces/scripture/identity-surface-context.ts` | frontend | `transitional_keep_until_replaced` | Typed row/page context metadata for chapter/verse identity surfaces. | Chapter/verse surface resolvers. | Remove after identity/advanced workflows move to schema action metadata. | Protected identity workflow phase. | Medium. | Conscious protected identity action metadata. |
-| `resources/js/pages/scripture/books/canonical-edit.tsx` | frontend | `protected_legacy_workflow` | Still rendered by protected canonical edit controller. | `BookCanonicalEditController`; route `scripture.books.admin.canonical-edit`. | Delete after a Conscious protected-canonical workflow replaces it. | Protected canonical migration. | High; current protected book canonical workflow would break. | Conscious protected canonical workflow/full edit category. |
-| `resources/js/components/scripture/scripture-admin-field-meta.tsx` | frontend | `protected_legacy_workflow` | Helper used by canonical edit page. | `books/canonical-edit.tsx`. | Delete with canonical edit page. | Protected canonical migration. | Medium. | Conscious Full Edit protected field metadata component. |
-| `resources/js/components/scripture/scripture-admin-method-family-grid.tsx` | frontend | `protected_legacy_workflow` | Helper used by canonical edit page. | `books/canonical-edit.tsx`. | Delete with canonical edit page. | Protected canonical migration. | Medium. | Conscious Full Edit protected workflow explanation. |
 
 ### 3. Backend Endpoints Still Used Or Kept
 
@@ -168,7 +185,6 @@ request classes were deleted after reference audit.
 | `app/Admin/Conscious/Schema/*` | backend | `active_conscious_keep` | Active backend schema field registry, resolver, and protected policy. | Conscious controllers. | Not deletion target. | None. | High. | Keep; expand into final structure. |
 | `routes/web.php` admin schema group | routes | `active_conscious_keep` | Owns active Conscious Full Edit and field update routes. | Runtime routes. | Not deletion target. | None. | High. | Keep. |
 | `app/Http/Controllers/Scripture/AdminContextVisibilityController.php` | backend | `active_conscious_keep` | Admin visibility/session toggle, not old content editing. | `routes/scripture.php`. | Not deletion target unless visibility system changes. | None. | Medium. | Keep or move under Conscious admin context later. |
-| `app/Http/Controllers/Scripture/BookCanonicalEditController.php` | backend | `protected_legacy_workflow` | Still renders protected book canonical edit page. | `routes/scripture.php`; `BookAdminRouteContext`. | Delete after Conscious protected canonical workflow replaces it. | Protected canonical migration. | High. | Conscious protected canonical action/full edit category. |
 | `app/Http/Controllers/Scripture/PostponedAdminSurfaceController.php` | backend | `postponed_extension_placeholder` | Topic/character admin routes abort 404 but preserve route names. | topic/character postponed admin routes. | Remove after topic/character Conscious schema decisions are made. | Topic/character schema planning. | Low/medium; route-name compatibility may break. | Future Conscious schema/action modules or route removal. |
 | `app/Http/Controllers/Scripture/TopicAdminDetailsController.php` | backend | `postponed_extension_placeholder` | Old/postponed topic detail controller exists, but postponed routes use placeholder. | No active route found in current scan. | Delete or migrate when topic schema work begins after fresh route/reference audit. | Topic schema planning. | Low/uncertain. | Future topic schema field route. |
 | `app/Http/Controllers/Scripture/CharacterAdminDetailsController.php` | backend | `postponed_extension_placeholder` | Old/postponed character detail controller exists, but postponed routes use placeholder. | No active route found in current scan. | Delete or migrate when character schema work begins after fresh route/reference audit. | Character schema planning. | Low/uncertain. | Future character schema field route. |
@@ -216,7 +232,7 @@ request classes were deleted after reference audit.
 | `routes/web.php` `admin.schema.fields.update` | `active_conscious_keep` | Yes. | Already final safe field route. | Do not delete. |
 | `scripture.books.admin.store` | `deleted_big_patch_6` | No. | `canonical.create_book`. | Deleted after metadata moved to Conscious action. |
 | `scripture.books.admin.full-edit` | `deleted_big_patch_4` | No. | Conscious Full Edit GET. | Deleted after payloads moved to `admin.schema.full-edit`. |
-| `scripture.books.admin.canonical-edit` | `protected_legacy_workflow` | Yes until replacement. | Protected canonical workflow/action. | Conscious protected-canonical flow exists. |
+| `scripture.books.admin.canonical-edit` | `deleted_big_patch_7` | No. | Conscious Full Edit plus `protected_identity.update`. | Deleted after canonical-edit references were removed. |
 | `scripture.books.admin.identity.update` | `deleted_big_patch_4` | No. | Field route plus protected identity action. | Deleted after route metadata moved to Conscious routes. |
 | `scripture.books.admin.details.update` | `deleted_big_patch_4` | No. | Field route. | Deleted after route metadata moved to Conscious routes. |
 | `scripture.books.admin.destroy` | `deleted_big_patch_6` | No. | `canonical.delete`. | Deleted after metadata moved to Conscious action. |
@@ -266,7 +282,7 @@ request classes were deleted after reference audit.
 | Old content-block controllers | Conscious content block action services |
 | Old media assignment controllers | Conscious `MediaAction` and media picker/service |
 | Old verse meta/translation/commentary controllers | Conscious `VerseSupportAction` family |
-| Old protected canonical edit page | Conscious protected canonical workflow/action |
+| Old protected canonical edit page | Conscious Full Edit plus `protected_identity.update` |
 | Old public module-host/module-registry UI | `AdminSchemaFieldDisplay`, `AdminSchemaFieldSurface`, `AdminSurfaceActionMenu`, Conscious action registry/resolver |
 
 ## Recommended Cleanup Order
@@ -284,8 +300,8 @@ request classes were deleted after reference audit.
    and delete old canonical create/delete routes/controllers/requests.
 7. Deleted in Big Patch 4: old redirect-only book/chapter/verse Full Edit
    controllers/routes after links moved to Conscious Full Edit.
-8. Replace protected canonical edit with a Conscious protected-canonical
-   workflow.
+8. Done in Big Patch 7: replace protected canonical edit with Conscious Full
+   Edit plus `protected_identity.update`, then delete the old page/controller.
 9. Decide whether topic/character postponed admin placeholders become real
     Conscious schemas or are removed.
 
@@ -297,9 +313,9 @@ These counts are inventory rows/patterns, not a full line-by-line file count.
 | --- | ---: |
 | `active_conscious_keep` | 10 |
 | `active_cms_keep` | 1 |
-| `transitional_keep_until_replaced` | 14 |
+| `transitional_keep_until_replaced` | 11 |
 | `redirect_only_legacy` | 0 |
-| `protected_legacy_workflow` | 4 |
+| `protected_legacy_workflow` | 0 |
 | `dead_safe_to_delete` | 0 |
 | `stale_doc_update_needed` | 5 |
 | `postponed_extension_placeholder` | 6 |

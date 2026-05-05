@@ -53,11 +53,6 @@ class BookAdminRouteContext
         return ConsciousAdminRouteUrls::fullEdit('book', $this->book);
     }
 
-    public function canonicalEditHref(): string
-    {
-        return route('scripture.books.admin.canonical-edit', $this->routeParameters());
-    }
-
     public function contentBlockStoreHref(): string
     {
         return ConsciousAdminRouteUrls::action('book', $this->book, 'content_block.create');

@@ -80,8 +80,9 @@ After completing a task:
 - Remaining cleanup is now selective only:
     - reopen only when a narrow, behavior-preserving seam is clearly justified
     - do not resume broad cleanup for purity
-    - protected canonical edit and transitional backend write endpoints are the
-      remaining legacy pressure points, not the deleted old Full Edit pages
+    - postponed topic/character placeholders, admin visibility, and frontend
+      awareness-helper drift are the remaining pressure points, not the deleted
+      old Full Edit or protected canonical edit pages
 
 ### Architecture
 
@@ -426,9 +427,10 @@ After completing a task:
     - old content-block, book media-assignment, verse meta, translation, and
       commentary controllers/routes/request classes were deleted after a
       reference audit found no app/runtime references
-    - the retained old scripture backend is now limited to canonical
+    - at that point the retained old scripture backend was limited to canonical
       create/delete, protected book canonical edit, admin-context visibility,
-      and postponed topic/character placeholder routes
+      and postponed topic/character placeholder routes; canonical create/delete
+      and protected canonical edit were later removed in Big Patches 6 and 7
     - CMS was untouched and canonical create/delete/reparent/reorder actions
       were not implemented
 - Super Conscious Backend Consolidation Big Patch 6 is now active:
@@ -441,10 +443,23 @@ After completing a task:
       overrides are prohibited
     - old canonical create/delete routes, controllers, and request classes were
       deleted after reference audit
-    - protected book canonical edit, admin-context visibility, and postponed
-      topic/character placeholder routes remain
+    - at that point protected book canonical edit, admin-context visibility,
+      and postponed topic/character placeholder routes remained; protected
+      canonical edit was later removed in Big Patch 7
     - CMS was untouched and canonical reorder/move/reparent actions were not
       implemented
+- Super Conscious Backend/UI Alignment Big Patch 7 is now active:
+    - the old protected book canonical edit controller, route, React page, and
+      canonical-edit-only helper components were deleted
+    - book protected identity now goes through Conscious Full Edit:
+      `title`/`description` use the generic field route and `slug`/`number`
+      use `protected_identity.update`
+    - `canonical_edit_href` / `admin_canonical_edit_href` payload fields were
+      removed
+    - the frontend action registry now mirrors backend action availability,
+      while backend-available actions without safe UI workflows remain hidden
+      from surface menus
+    - CMS was untouched and no new visible destructive controls were added
 - The legacy purge / renderer coverage pass removed the old
   `AdminModuleHost` intro surface from the reusable book library card renderer:
     - book library/card titles now render through `ScriptureBookTitleDisplay`
@@ -491,9 +506,9 @@ After completing a task:
     - old editor/card components used only by those pages were deleted
     - old current-visible-control comparison/shadow handoff files were deleted
       now that the old visible module layer is gone
-    - `resources/js/pages/scripture/books/canonical-edit.tsx` remains as a
-      protected legacy workflow until a Conscious protected-canonical workflow
-      replaces it
+    - `resources/js/pages/scripture/books/canonical-edit.tsx` was later
+      deleted in Big Patch 7 after Conscious Full Edit became the protected
+      book identity path
 - Super Conscious Admin Cleanup Phase 3 completed the next import/backend audit:
     - remaining chapter/verse surface helper files moved from
       `resources/js/admin/integrations/scripture/*` into
@@ -1011,9 +1026,9 @@ Do not drift into fake abstractions detached from either the canonical schema or
     - extend browser validation across the remaining grouped/full-edit canonical surfaces as needed
     - preserve the new narrow smoke layer for the active inline editors
     - keep row/page semantics and same-page behavior honest
-5. Treat protected canonical edit and transitional backend write endpoints as
-   watch / reassess later only; do not recreate the deleted route-specific
-   Full Edit React pages.
+5. Treat postponed topic/character placeholders, admin visibility, and frontend
+   awareness-helper drift as watch / reassess later only; do not recreate the
+   deleted route-specific Full Edit or protected canonical edit React pages.
 6. Extend the live CMS interaction model only where the real composition pass showed clear need:
     - keep published CMS pages interactive for permitted users
     - preserve the locked same-layout public-page-first authoring rule as live composition expands

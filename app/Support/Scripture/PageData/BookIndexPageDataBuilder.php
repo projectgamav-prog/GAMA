@@ -54,7 +54,6 @@ class BookIndexPageDataBuilder
         return [
             'details_update_href' => $adminRouteContext->detailsUpdateHref(),
             'full_edit_href' => $adminRouteContext->fullEditHref(),
-            'canonical_edit_href' => $adminRouteContext->canonicalEditHref(),
         ];
     }
 }

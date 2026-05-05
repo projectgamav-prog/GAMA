@@ -29,7 +29,6 @@ class BookShowPageDataBuilder
             'identity_update_href' => $adminRouteContext->identityUpdateHref(),
             'details_update_href' => $adminRouteContext->detailsUpdateHref(),
             'full_edit_href' => $adminRouteContext->fullEditHref(),
-            'canonical_edit_href' => $adminRouteContext->canonicalEditHref(),
             'destroy_href' => $adminRouteContext->destroyHref(),
             'book_section_store_href' => $adminRouteContext->bookSectionStoreHref(),
         ];

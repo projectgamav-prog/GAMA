@@ -123,7 +123,6 @@ export type ScriptureBookAdmin = {
     identity_update_href: string;
     details_update_href: string;
     full_edit_href: string;
-    canonical_edit_href: string;
     destroy_href: string;
     book_section_store_href: string;
     media_assignment_attach_href?: string;
@@ -163,7 +162,6 @@ export type ScriptureBookCardAdmin = Pick<
     ScriptureBookAdmin,
     | 'details_update_href'
     | 'full_edit_href'
-    | 'canonical_edit_href'
 >;
 
 export type ScriptureBooksIndexAdmin = {
@@ -772,7 +770,6 @@ export type ChapterFullEditProps = {
 export type BookFullEditProps = {
     book: ScriptureBook & {
         admin_full_edit_href: string;
-        admin_canonical_edit_href: string;
     };
     admin_entity: ScriptureRegisteredAdminEntity;
     admin_details_update_href: string;
@@ -785,13 +782,4 @@ export type BookFullEditProps = {
     protected_content_blocks: ScriptureProtectedAdminContentBlock[];
     admin_media_assignments: ScriptureAdminMediaAssignment[];
     available_media: ScriptureAdminMediaSummary[];
-};
-
-export type BookCanonicalEditProps = {
-    book: ScriptureBook & {
-        admin_full_edit_href: string;
-        admin_canonical_edit_href: string;
-    };
-    admin_identity_update_href: string;
-    admin_entity: ScriptureRegisteredAdminEntity;
 };

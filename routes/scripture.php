@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Scripture\AdminContextVisibilityController;
-use App\Http\Controllers\Scripture\BookCanonicalEditController;
 use App\Http\Controllers\Scripture\BookController;
 use App\Http\Controllers\Scripture\ChapterController;
 use App\Http\Controllers\Scripture\CharacterController;
@@ -89,14 +88,6 @@ Route::prefix('books')
 
         Route::get('{book:slug}', [BookController::class, 'show'])
             ->name('books.show');
-
-        Route::middleware(['auth', EnsureCanAccessAdminContext::class])
-            ->prefix('{book:slug}/admin')
-            ->name('books.admin.')
-            ->group(function () {
-                Route::get('canonical-edit', [BookCanonicalEditController::class, 'show'])
-                    ->name('canonical-edit');
-            });
 
         Route::get(
             '{book:slug}/sections/{bookSection:slug}/chapters/{chapter:slug}',

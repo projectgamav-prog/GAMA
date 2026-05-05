@@ -96,7 +96,14 @@ audit found no app/runtime references.
 Big Patch 6 moved canonical hierarchy create/delete into policy-gated
 Conscious actions and deleted the old canonical create/delete
 controllers/routes/request classes after metadata migration and reference
-audit. Protected book canonical edit remains a separate legacy workflow.
+audit.
+
+Big Patch 7 retired the protected book canonical edit workflow. Book protected
+identity editing now uses Conscious Full Edit: safe `title` and `description`
+fields save through the generic field route, while `slug` and `number` save
+through the `protected_identity.update` action. The frontend action registry was
+also synced to backend action availability without exposing newly available
+dangerous actions in visible menus.
 
 ## Future Awareness Automation Helpers
 
@@ -141,7 +148,8 @@ table, route, or relation exists.
 
 Identity/details endpoints were deleted in Big Patch 4. Content-block,
 media-assignment, and verse-support endpoints were deleted in Big Patch 5.
-Canonical create/delete endpoints were deleted in Big Patch 6.
+Canonical create/delete endpoints were deleted in Big Patch 6. The protected
+book canonical edit endpoint was deleted in Big Patch 7.
 
 ### `deleted_old_full_edit`
 
@@ -177,8 +185,9 @@ not create one route per page family for new admin behavior.
 The action route rejects unavailable registered actions. It currently executes
 policy-gated protected identity, owner-scoped content-block actions, book media
 assignment actions, verse support actions, and canonical create/delete actions.
-It does not execute canonical reorder, move/reparent, relation, import, or
-export behavior yet.
+It does not execute canonical reorder, move/reparent, media reorder,
+translation/commentary reorder, topic/character, relation, import, or export
+behavior yet.
 
 ## Writing Capacity Roadmap
 
@@ -197,6 +206,11 @@ Full Edit fields now point at the generic Conscious field route and submit
 Public scripture admin metadata now emits Conscious field URLs for safe
 identity/details saves and Conscious Full Edit URLs for book, chapter, and
 verse Full Edit navigation.
+
+The old protected book canonical edit page has been deleted. Book Full Edit now
+owns the active protected canonical identity path: `books.title` and
+`books.description` are field-route saves, while `books.slug` and
+`books.number` are routed to `protected_identity.update`.
 
 ### Create child
 
@@ -336,5 +350,8 @@ canonical order fields remain read-only in this patch.
    diagnostics are ready.
 9. Done in Big Patch 6: add canonical create/delete actions after policy and
    service boundaries existed.
-10. Delete old route-specific write controllers only when no frontend or
+10. Done in Big Patch 7: remove the protected book canonical edit
+   controller/page/route and sync frontend action metadata with backend
+   registered capabilities while keeping unsafe actions hidden from menus.
+11. Delete old route-specific write controllers only when no frontend or
    fallback service path references them.
